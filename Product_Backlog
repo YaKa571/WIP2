@@ -1,1 +1,15 @@
 Product_Backlog
+
+backlog und projektplan erstellen
+
+webbasiertes Dashboard zur Analyse und Visualisierung von Finanztransaktionen mit dem Ziel Betrugsfälle besser zu erkennen, analysieren und zu verstehen
+
+Funktionen:
+Visualisierungen anzeigen: (Zeitverlauf der Transaktionen, Häufigkeit von Betrugsfällen, Verteilung der Transaktionen nach Händlertyp (MCC-Code) Beträge, Karten- oder Nutzerverhalten im Zusammenhang mit Fraud)
+Filter & Interaktionen ermöglichen: (Zeitraum eingrenzen (z. B. Kalender oder Slider), Nach Kartentyp oder Benutzer-ID filtern ,Nur Betrugsfälle oder bestimmte MCC-Kategorien anzeigen)
+Echtzeit-Datenreaktion interaktiv: (Wenn ein Filter geändert wird, sollen sich die Visualisierungen automatisch anpassen)
+Übersichtlich & responsiv sein: (Gute Lesbarkeit, sinnvolle Farbcodes (z. B. rot = Fraud), klare Achsen, evtl. Tooltips)
+Benutzerfreundlich
+
+Wer soll es nutzen können?
+Datenanalysten bzw "Daten Agenturen" oder Finanzunternehmen um Betrugsfälle besser zu erkennen
