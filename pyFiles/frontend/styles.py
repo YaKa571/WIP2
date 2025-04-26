@@ -31,15 +31,54 @@ class Style(Enum):
     Enumeration of supported UI presentation styles.
     """
 
-    DROPDOWN = "dropdown"
-    CARD = "card"
-    TABLE = "table"
+    APP_TITLE = "app_title"
+    BODY = "body"
     BUTTON = "button"
+    CARD = "card"
+    DROPDOWN = "dropdown"
+    TABLE = "table"
+    TAB = "tab"
 
 
 STYLES = {
-    Style.DROPDOWN: {"borderRadius": "9px", "height": "39px"},
-    Style.CARD: {"borderRadius": "19px", "boxShadow": "0 4px 10px rgba(0,0,0,0.12)"},
-    Style.TABLE: {"overflowX": "auto"},
-    Style.BUTTON: {"borderRadius": "9px", "height": "39px", "border": "0"},
+
+    Style.APP_TITLE: {
+        "color": "#2c3e50",
+        "fontWeight": "bold"
+    },
+
+    Style.BODY: {
+        "backgroundColor": "#EBEBEB"
+    },
+
+    Style.BUTTON: {
+        "borderRadius": "9px",
+        "height": "39px",
+        "border": "none"
+    },
+
+    Style.CARD: {
+        "borderRadius": "19px",
+        "boxShadow": "0 4px 10px rgba(0,0,0,0.12)",
+        "border": "none",
+        "backgroundColor": "white",
+        "padding": "0",
+        "margin": "0"
+    },
+
+    Style.DROPDOWN: {
+        "borderRadius": "9px",
+        "height": "39px"
+    },
+
+    Style.TABLE: {
+        "overflowX": "auto"
+    },
+
+    Style.TAB: {
+        "borderRadius": "9px",
+        "border": "none",
+        "backgroundColor": "rgba(0,0,0,0)"
+    },
+
 }
