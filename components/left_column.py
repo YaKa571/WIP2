@@ -1,15 +1,15 @@
 import dash_bootstrap_components as dbc
 
-from pyFiles.frontend.component_ids import IDs
-from pyFiles.frontend.styles import STYLES, Style
+from frontend.component_ids import IDs
+from frontend.styles import STYLES, Style
 
 
 def create_kpi_card(card_id: IDs, card_title: str = ""):
     return dbc.Card(
         dbc.CardBody(card_title),
-        style=STYLES[Style.CARD] | {"height": "12.5vh"},
+        style=STYLES[Style.CARD],
         id=card_id.value,  # Enum value is used as ID
-        className="w-100"
+        className="w-100 kpi-card"
     )
 
 
@@ -19,21 +19,21 @@ def create_kpi_cards():
             # Separate column for each KPI card
             dbc.Col(
                 create_kpi_card(IDs.KPI_CARD_AMT_TRANSACTIONS, "Amount of Transactions"),
-                width=4,
+                md=4,
                 className="d-flex text-center"
             ),
             dbc.Col(
                 create_kpi_card(IDs.KPI_CARD_SUM_OF_TRANSACTIONS, "Sum of Transactions"),
-                width=4,
+                md=4,
                 className="d-flex text-center"
             ),
             dbc.Col(
                 create_kpi_card(IDs.KPI_CARD_AVG_TRANSACTION_AMOUNT, "Average Transaction Amount"),
-                width=4,
+                md=4,
                 className="d-flex text-center"
             )
         ],
-        className="gx-3 mb-3"
+        className="gx-3 mb-3 kpi-cards-row"
     )
 
 

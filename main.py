@@ -3,11 +3,12 @@ from dash import Dash, html
 
 from components.left_column import create_left_column
 from components.right_column import create_right_column
-from pyFiles.frontend.styles import STYLES, Style
+from frontend.styles import STYLES, Style
 
 
 def create_app():
-    app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+    external_style = [dbc.themes.BOOTSTRAP]
+    app = Dash(__name__, external_stylesheets=external_style)
 
     app.layout = dbc.Container(
         [
@@ -16,7 +17,7 @@ def create_app():
                 dbc.Col(
                     html.H1(
                         "Financial Transactions Dashboard",
-                        className="text-center m-0 py-2",
+                        className="text-center m-0 pb-3",
                         style=STYLES[Style.APP_TITLE]
                     )
                 )

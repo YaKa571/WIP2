@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 
-from pyFiles.frontend.component_ids import IDs
-from pyFiles.frontend.styles import STYLES, Style
+from frontend.component_ids import IDs
+from frontend.styles import STYLES, Style
 
 
 def create_tabs():
