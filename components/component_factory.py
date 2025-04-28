@@ -5,7 +5,7 @@ from dash import dash_table
 from frontend.styles import STYLES, Style
 
 
-def create_data_table(dataset: pd.DataFrame, visible: bool = True, page_size: int = 10) -> dbc.Card:
+def create_data_table(idName, dataset: pd.DataFrame, visible: bool = True, page_size: int = 10) -> dbc.Card:
     """
     Creates a data table wrapped inside a Dash Bootstrap Card component.
 
@@ -26,7 +26,7 @@ def create_data_table(dataset: pd.DataFrame, visible: bool = True, page_size: in
     return dbc.Card(
         dbc.CardBody(
             dash_table.DataTable(
-                id="table",
+                id=idName,
                 data=dataset.to_dict("records"),
                 page_size=page_size,
                 page_current=0,
