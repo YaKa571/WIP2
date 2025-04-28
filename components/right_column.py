@@ -12,6 +12,7 @@ def create_tabs():
             dbc.Tab(label="Cluster", tab_id=IDs.TAB_CLUSTER.value),
             dbc.Tab(label="User", tab_id=IDs.TAB_USER.value),
             dbc.Tab(label="Merchant", tab_id=IDs.TAB_MERCHANT.value),
+            dbc.Tab(label="Test", tab_id=IDs.TAB_TEST.value),
         ],
         id=IDs.TABS_BAR.value,
         active_tab=IDs.TAB_DEFAULT.value,  # Setting the default tab

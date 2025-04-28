@@ -10,3 +10,4 @@ class IDs(str, Enum):
     TAB_CLUSTER = "tab-cluster"
     TAB_USER = "tab-user"
     TAB_MERCHANT = "tab-merchant"
+    TAB_TEST = "tab-test"
