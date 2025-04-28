@@ -1,9 +1,9 @@
 # Custom files
-data/assets/cards_data.csv
-data/assets/mcc_codes.json
-data/assets/train_fraud_labels.json
-data/assets/transactions_data.csv
-data/assets/users_data.csv
+assets/data/cards_data.csv
+assets/data/mcc_codes.json
+assets/data/train_fraud_labels.json
+assets/data/transactions_data.csv
+assets/data/users_data.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
