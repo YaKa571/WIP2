@@ -1,9 +1,13 @@
 import dash_bootstrap_components as dbc
 from dash import Dash, html
 
+import backend.data_manager as data_manager
+import components.component_factory as comp_factory
 from components.left_column import create_left_column
 from components.right_column import create_right_column
 from frontend.styles import STYLES, Style
+
+data_frame_users = data_manager.read_csv_data("users_data.csv", sort_alphabetically=True)
 
 
 def create_app():
@@ -15,11 +19,17 @@ def create_app():
             # Row with Title
             dbc.Row(
                 dbc.Col(
-                    html.H1(
-                        "Financial Transactions Dashboard",
-                        className="text-center m-0 pb-3",
-                        style=STYLES[Style.APP_TITLE]
-                    )
+                    [
+                        html.H1(
+                            "Financial Transactions Dashboard",
+                            className="text-center m-0 pb-3",
+                            style=STYLES[Style.APP_TITLE]
+                        ),
+
+                        # To have a look at a certain data table, add it here and set visible=True
+                        comp_factory.create_data_table(data_frame_users, visible=False)
+
+                    ]
                 )
             ),
 
