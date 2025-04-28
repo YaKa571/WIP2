@@ -35,7 +35,7 @@ def create_app():
                         dash_table.DataTable(
                             id='table',
                             columns=[{"name": i, "id": i} for i in data_frame_transactions.columns],
-                            data=data_frame_transactions.head(100000).to_dict('records'),  # Lade erst mal nur einen Teil!
+                            data=data_frame_transactions.head(100000).to_dict('records'),
                             page_size=20
                         )
                     ]
