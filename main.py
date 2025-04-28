@@ -8,7 +8,8 @@ from components.right_column import create_right_column
 from frontend.styles import STYLES, Style
 
 data_frame_users = data_manager.read_csv_data("users_data.csv", sort_alphabetically=True)
-
+# data_frame_transactions = data_manager.read_csv_data("transactions_data.csv", sort_alphabetically=True)
+data_frame_cards = data_manager.read_csv_data("cards_data.csv", sort_alphabetically=True)
 
 def create_app():
     external_style = [dbc.themes.BOOTSTRAP]
@@ -27,8 +28,8 @@ def create_app():
                         ),
 
                         # To have a look at a certain data table, add it here and set visible=True
-                        comp_factory.create_data_table(data_frame_users, visible=False)
-
+                        comp_factory.create_data_table("table1",data_frame_users , visible=False ),
+                        comp_factory.create_data_table("table3", data_frame_cards, visible=False)
                     ]
                 )
             ),
