@@ -37,6 +37,10 @@ class Style(Enum):
     CARD = "card"
     DROPDOWN = "dropdown"
     TABLE = "table"
+    TABLE_CELL = "table_cell"
+    TABLE_HEADER = "table_header"
+    TABLE_DATA = "table_data"
+    TABLE_CONDITIONAL = "table_conditional"
     TAB = "tab"
 
 
@@ -71,14 +75,43 @@ STYLES = {
         "height": "39px"
     },
 
-    Style.TABLE: {
-        "overflowX": "auto"
-    },
-
     Style.TAB: {
         "borderRadius": "9px",
         "border": "none",
         "backgroundColor": "rgba(0,0,0,0)"
     },
+
+    Style.TABLE: {
+        "overflowX": "auto"
+    },
+
+    Style.TABLE_CELL: {
+        "padding": "8px",
+        "textAlign": "center"
+    },
+
+    Style.TABLE_HEADER: {
+        "backgroundColor": "#0d6efd",
+        "color": "white",
+        "fontWeight": "bold"
+    },
+
+    Style.TABLE_DATA: {
+        "backgroundColor": "#ffffff",
+        "border": "1px solid #ddd"
+    },
+
+    Style.TABLE_CONDITIONAL: [
+        # Odd rows (Index 1, 3, 5 ...)
+        {
+            "if": {"row_index": "odd"},
+            "backgroundColor": "#f2f2f2"  # Light gray
+        },
+        # Even rows (Index 0, 2, 4 ...)
+        {
+            "if": {"row_index": "even"},
+            "backgroundColor": "#ffffff"  # White
+        }
+    ]
 
 }
