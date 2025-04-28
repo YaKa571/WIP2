@@ -1,0 +1,31 @@
+.kpi-card {
+    height: 12.5vh;
+    min-height: 60px;
+}
+
+@media (max-width: 1200px) {
+
+    /* Margin only for columns that are not the last one */
+    .kpi-cards-row > [class*='col-']:not(:last-child) {
+        width: 50%;
+        margin-bottom: 1rem;
+    }
+
+    .kpi-cards-row > [class*='col-']:last-child {
+        width: 100%;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    /* Margin only for columns that are not the last one */
+    .kpi-cards-row > [class*='col-']:not(:last-child) {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .kpi-cards-row > [class*='col-']:last-child {
+        width: 100%;
+    }
+}
