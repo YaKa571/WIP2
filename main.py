@@ -2,6 +2,7 @@ import dash_bootstrap_components as dbc
 from dash import Dash, html
 
 import backend.data_manager as data_manager
+import backend.data_handler as data_handler
 import components.component_factory as comp_factory
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401 (don't remove this comment!)
 from components.left_column import create_left_column
@@ -9,9 +10,11 @@ from components.right_column import create_right_column
 from frontend.component_ids import IDs
 from frontend.styles import STYLES, Style
 
+
 data_frame_users = data_manager.read_csv_data("users_data.csv", sort_alphabetically=False)
 data_frame_transactions = data_manager.read_csv_data("transactions_data.csv", sort_alphabetically=False)
 data_frame_cards = data_manager.read_csv_data("cards_data.csv", sort_alphabetically=False)
+
 
 
 # JSON files, normalized to fit format
@@ -42,10 +45,12 @@ def create_app():
                         ),
 
                         # To have a look at a certain data table, add it here and set visible=True
+
                         comp_factory.create_data_table(IDs.TABLE_USERS, data_frame_users, visible=False),
                         comp_factory.create_data_table(IDs.TABLE_TRANSACTIONS, data_frame_transactions, visible=False),
                         comp_factory.create_data_table(IDs.TABLE_CARDS, data_frame_cards, visible=False),
                         # comp_factory.create_data_table("table3", data_frame_mcc, visible=False),
+
 
                     ]
                 )
