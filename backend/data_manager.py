@@ -2,36 +2,34 @@ from pathlib import Path
 
 import pandas as pd
 
+from backend.data_handler import optimize_data
+
 DATA_DIRECTORY = Path("assets/data/")
 
 
-def read_csv_data(file_name: str, sort_alphabetically: bool = True, separator: str = ",",
-                  encoding: str = "utf8") -> pd.DataFrame:
+def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.DataFrame:
     """
-    Reads a CSV file and returns its content as a pandas DataFrame.
-    
-    Args:
-        file_name: Name of the CSV file to read
-        sort_alphabetically: If True, sorts DataFrame columns alphabetically
-        separator: CSV field separator character
-        encoding: File encoding to use
-        
+    Reads a Parquet file and loads it into a Pandas DataFrame. Optionally sorts the columns
+    alphabetically if specified.
+
+    Arguments:
+        file_name (str): The name of the Parquet file to be read. The file must exist
+            in the predefined data directory.
+        sort_alphabetically (bool): Optional; whether to sort the DataFrame's columns
+            alphabetically. Defaults to False.
+
     Returns:
-        pandas DataFrame containing the CSV data
-        
+        pd.DataFrame: The loaded data in a Pandas DataFrame format.
+
     Raises:
-        FileNotFoundError: If the specified file doesn't exist
+        FileNotFoundError: If the specified file does not exist in the data directory.
     """
     file_path = DATA_DIRECTORY / file_name
 
     if not file_path.exists():
-        raise FileNotFoundError(f"CSV file not found: {file_path}")
+        raise FileNotFoundError(f"Parquet file not found: {file_path}")
 
-    data_frame = pd.read_csv(
-        file_path,
-        sep=separator,
-        encoding=encoding
-    )
+    data_frame = pd.read_parquet(file_path)
 
     if sort_alphabetically:
         data_frame = data_frame[sorted(data_frame.columns.tolist())]
@@ -74,10 +72,13 @@ def clean_units(df: pd.DataFrame) -> (pd.DataFrame, dict):
     return new_df, unit_to_columns
 
 
-data_frame_users, units_users = clean_units(read_csv_data("users_data.csv", sort_alphabetically=False))
+# Converts CSV files to parquet files if they don't exist yet and load them as DataFrames
+optimize_data("users_data.csv", "transactions_data.csv", "cards_data.csv")
+
+data_frame_users, units_users = clean_units(read_parquet_data("users_data.parquet", sort_alphabetically=False))
 data_frame_transactions, units_transactions = clean_units(
-    read_csv_data("transactions_data.csv", sort_alphabetically=False))
-data_frame_cards, units_cards = clean_units(read_csv_data("cards_data.csv", sort_alphabetically=False))
+    read_parquet_data("transactions_data.parquet", sort_alphabetically=False))
+data_frame_cards, units_cards = clean_units(read_parquet_data("cards_data.parquet", sort_alphabetically=False))
 
 print("\nℹ️ Information")
 print(f"Users: {units_users}")
