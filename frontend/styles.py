@@ -36,6 +36,9 @@ class Style(Enum):
     BUTTON = "button"
     CARD = "card"
     DROPDOWN = "dropdown"
+    ICON = "icon"
+    KPI_CARD = "kpi_card"
+    KPI_CARD_BODY = "kpi_card_body"
     TABLE = "table"
     TABLE_CELL = "table_cell"
     TABLE_HEADER = "table_header"
@@ -73,6 +76,33 @@ STYLES = {
     Style.DROPDOWN: {
         "borderRadius": "9px",
         "height": "39px"
+    },
+
+    Style.ICON: {
+        "height": "32px",
+        "marginBottom": "10px",
+        "draggable": "false",
+        "cursor": "pointer"
+    },
+
+    Style.KPI_CARD: {
+        "borderRadius": "19px",
+        "boxShadow": "0 4px 10px rgba(0,0,0,0.12)",
+        "border": "none",
+        "backgroundColor": "white",
+        "padding": "0",
+        "margin": "0",
+        "textAlign": "center",
+        "justifyContent": "center"
+    },
+
+    Style.KPI_CARD_BODY: {
+        "display": "flex",
+        "flexDirection": "column",
+        "justifyContent": "center",
+        "alignItems": "center",
+        "textAlign": "center",
+        "height": "100%"
     },
 
     Style.TAB: {
