@@ -5,6 +5,8 @@ assets/data/train_fraud_labels.json
 assets/data/transactions_data.csv
 assets/data/users_data.csv
 assets/data/transactions_data.parquet
+assets/data/cards_data.parquet
+assets/data/users_data.parquet
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
