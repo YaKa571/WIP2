@@ -2,6 +2,7 @@ import dash_bootstrap_components as dbc
 from dash import Dash, html, dash_table
 
 import backend.data_manager as data_manager
+import backend.data_handler as data_handler
 import components.component_factory as comp_factory
 from components.left_column import create_left_column
 from components.right_column import create_right_column
@@ -10,8 +11,9 @@ import pandas as pd
 import json
 
 data_frame_users = data_manager.read_csv_data("users_data.csv", sort_alphabetically=True)
-data_frame_transactions = data_manager.read_csv_data("transactions_data.csv", sort_alphabetically=True)
 data_frame_cards = data_manager.read_csv_data("cards_data.csv", sort_alphabetically=True)
+# pip install pyarrow
+data_frame_transactions = data_handler.optimize_data("transactions_data.csv")
 
 #json files, normalized to fit format
 with open(r'assets\data\mcc_codes.json', 'r', encoding='utf-8') as f:
@@ -42,6 +44,7 @@ def create_app():
                         comp_factory.create_data_table("table1",data_frame_users , visible=False),
                         comp_factory.create_data_table("table2", data_frame_cards, visible=False),
                         comp_factory.create_data_table("table3", data_frame_mcc, visible=False),
+                        # comp_factory.create_data_table("table4", data_frame_transactions, visible=False),
 
                         # first 1000 rows of transactions_data as table, uncomment to display
                         # dash_table.DataTable(
