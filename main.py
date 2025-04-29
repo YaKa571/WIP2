@@ -1,17 +1,17 @@
+import time
+
+start_time = time.perf_counter()
+
 import dash_bootstrap_components as dbc
 from dash import Dash, html
 
-import backend.data_manager as data_manager
 import components.component_factory as comp_factory
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401 (don't remove this comment!)
+from backend.data_manager import data_frame_users, data_frame_transactions, data_frame_cards
 from components.left_column import create_left_column
 from components.right_column import create_right_column
 from frontend.component_ids import IDs
 from frontend.styles import STYLES, Style
-
-data_frame_users = data_manager.read_csv_data("users_data.csv", sort_alphabetically=False)
-data_frame_transactions = data_manager.read_csv_data("transactions_data.csv", sort_alphabetically=False)
-data_frame_cards = data_manager.read_csv_data("cards_data.csv", sort_alphabetically=False)
 
 
 # JSON files, normalized to fit format
@@ -71,4 +71,6 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
+    startup_time = time.perf_counter() - start_time
+    print(f"🚀 Dash App ready in {startup_time:.2f} seconds.")
     app.run(debug=True)
