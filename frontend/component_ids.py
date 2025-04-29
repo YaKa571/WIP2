@@ -16,3 +16,4 @@ class IDs(str, Enum):
     TABLE_CARDS = "table-cards"
     TABLE_TRANSACTIONS = "table-transactions"
     TABLE_USERS = "table-users"
+    TABLE_MCC = "table-mcc"
