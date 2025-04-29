@@ -9,6 +9,8 @@ from components.left_column import create_left_column
 from components.right_column import create_right_column
 from frontend.component_ids import IDs
 from frontend.styles import STYLES, Style
+import json
+import pandas as pd
 
 
 data_frame_users = data_manager.read_csv_data("users_data.csv", sort_alphabetically=False)
@@ -18,9 +20,9 @@ data_frame_cards = data_manager.read_csv_data("cards_data.csv", sort_alphabetica
 
 
 # JSON files, normalized to fit format
-# with open(r'assets\data\mcc_codes.json', 'r', encoding='utf-8') as f:
-#    data_mcc = json.load(f)
-#    data_frame_mcc = pd.json_normalize(data_mcc)
+with open(r'assets\data\mcc_codes.json', 'r', encoding='utf-8') as f:
+   data_mcc = json.load(f)
+   data_frame_mcc = pd.json_normalize(data_mcc)
 
 
 # TODO: Too much loading time
@@ -49,7 +51,7 @@ def create_app():
                         comp_factory.create_data_table(IDs.TABLE_USERS, data_frame_users, visible=False),
                         comp_factory.create_data_table(IDs.TABLE_TRANSACTIONS, data_frame_transactions, visible=False),
                         comp_factory.create_data_table(IDs.TABLE_CARDS, data_frame_cards, visible=False),
-                        # comp_factory.create_data_table("table3", data_frame_mcc, visible=False),
+                        comp_factory.create_data_table(IDs.TABLE_MCC, data_frame_mcc, visible=False),
 
 
                     ]
