@@ -7,28 +7,16 @@ from dash import Dash, html
 
 import components.component_factory as comp_factory
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401 (don't remove this comment!)
-from backend.data_manager import data_frame_users, data_frame_transactions, data_frame_cards
+from backend.data_manager import DataManager
 from components.left_column import create_left_column
 from components.right_column import create_right_column
 from frontend.component_ids import IDs
 from frontend.styles import STYLES, Style
-import json
-import pandas as pd
-
-# JSON files, normalized to fit format
-with open(r'assets\data\mcc_codes.json', 'r', encoding='utf-8') as f:
-    data_mcc = json.load(f)
-    data_frame_mcc = pd.json_normalize(data_mcc)
 
 
-# TODO: Too much loading time
-# with open(r'assets\data\train_fraud_labels.json', 'r', encoding='utf-8') as f:
-#     data_train_fraud = json.load(f)
-#     data_frame_train_fraud = pd.json_normalize(data_train_fraud)
-
-def create_app():
-    external_style = [dbc.themes.BOOTSTRAP]
-    app = Dash(__name__, external_stylesheets=external_style)
+def create_app(data_manager: DataManager):
+    app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+    app.title = "Financial Transactions Dashboard"
 
     app.layout = dbc.Container(
         [
@@ -43,11 +31,11 @@ def create_app():
                         ),
 
                         # To have a look at a certain data table, add it here and set visible=True
-
-                        comp_factory.create_data_table(IDs.TABLE_USERS, data_frame_users, visible=False),
-                        comp_factory.create_data_table(IDs.TABLE_TRANSACTIONS, data_frame_transactions, visible=False),
-                        comp_factory.create_data_table(IDs.TABLE_CARDS, data_frame_cards, visible=False),
-                        comp_factory.create_data_table(IDs.TABLE_MCC, data_frame_mcc, visible=False),
+                        comp_factory.create_data_table(IDs.TABLE_USERS, data_manager.df_users, visible=False),
+                        comp_factory.create_data_table(IDs.TABLE_TRANSACTIONS, data_manager.df_transactions,
+                                                       visible=False),
+                        comp_factory.create_data_table(IDs.TABLE_CARDS, data_manager.df_cards, visible=False),
+                        comp_factory.create_data_table(IDs.TABLE_MCC, data_manager.df_mcc, visible=False),
 
                     ]
                 )
@@ -56,7 +44,7 @@ def create_app():
             # Row with Left and Right Column
             dbc.Row(
                 [
-                    create_left_column(),
+                    create_left_column(data_manager),
                     create_right_column()
                 ],
                 className="gx-3",
@@ -72,7 +60,15 @@ def create_app():
 
 
 if __name__ == '__main__':
-    app = create_app()
+    # Initialize and load DataManager
+    dm = DataManager()
+    dm.load_all()
+
+    # Create and run Dash App
+    app = create_app(dm)
+
+    # Print startup time
     startup_time = time.perf_counter() - start_time
     print(f"🚀 Dash App ready in {startup_time:.2f} seconds.")
+
     app.run(debug=True)
