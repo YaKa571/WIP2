@@ -3,6 +3,7 @@ from typing import TypedDict, Callable, Any, Dict
 import dash_bootstrap_components as dbc
 from dash import html
 
+import components.component_factory as comp_factory
 from backend.data_manager import DataManager
 from frontend.component_ids import IDs
 from frontend.icon_manager import Icons, IconID
@@ -11,6 +12,13 @@ from frontend.styles import STYLES, Style
 
 # Define a TypedDict for KPI configuration
 class KPIConfig(TypedDict):
+    """
+    Represents a TypedDict for configuration of a KPI.
+
+    KPIConfig defines the structure for configuring KPI data, including its title,
+    icon representation, value computation function, and formatting function.
+    It is used to organize and manage KPI-related configurations in a structured way.
+    """
     title: str
     icon: IconID
     value_fn: Callable[[DataManager], Any]
@@ -104,7 +112,7 @@ def create_kpi_cards(data_manager: DataManager) -> dbc.Row:
     return dbc.Row(cols, className="gx-3 mb-3 kpi-cards-row")
 
 
-def create_map_card() -> dbc.Card:
+def create_map_card(data_manager: DataManager) -> dbc.Card:
     """
     Creates and returns a styled Dash Bootstrap Card containing a placeholder text
     for a map. This card serves as a visual placeholder that can be extended to
@@ -114,9 +122,20 @@ def create_map_card() -> dbc.Card:
         dbc.Card: A Dash Bootstrap Card object with a placeholder content for a map.
     """
     return dbc.Card(
-        dbc.CardBody(html.P("Map placeholder...")),
-        style=STYLES[Style.CARD],
-        className="flex-fill"
+        dbc.CardBody([
+
+            html.H3("Map", className="card-title text-center"),
+
+            html.Div(
+                comp_factory.create_usa_map(data_manager),
+                className="d-flex flex-fill",
+                style={"minHeight": 0, "borderRadius": "19px"}
+            )],
+            className="d-flex flex-column flex-fill",
+            style={"minHeight": 0, "borderRadius": "19px"}
+        ),
+        className="d-flex flex-column",
+        style=STYLES[Style.CARD] | {"height": "100%"}
     )
 
 
@@ -137,7 +156,7 @@ def create_left_column(data_manager: DataManager) -> dbc.Col:
     return dbc.Col(
         [
             create_kpi_cards(data_manager),
-            create_map_card()
+            create_map_card(data_manager),
         ],
         width=6,
         className="d-flex flex-column"
