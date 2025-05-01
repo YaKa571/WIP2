@@ -1,11 +1,36 @@
+import json
+import urllib.request
+
 import dash_bootstrap_components as dbc
 import pandas as pd
-from dash import dash_table, html
+import plotly.express as px
+import plotly.graph_objects as go
+import us
+from dash import dash_table, html, dcc
+from shapely.geometry import shape
 
+from backend.data_manager import DataManager
+from frontend.component_ids import IDs
 from frontend.styles import STYLES, Style
 
 # GLOBAL DICT that holds all DataFrames
 DATASETS: dict[str, pd.DataFrame] = {}
+
+# → Load GeoJSON of US states (only once at app startup)
+with urllib.request.urlopen(
+        "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
+) as response:
+    states_geo = json.load(response)
+
+# Calculate centroids (lon, lat) and mapping full-name -> abbreviation
+state_centroids = {}
+full_to_abbr = {}
+for feat in states_geo["features"]:
+    name = feat["properties"]["name"]
+    geom = shape(feat["geometry"])
+    lon, lat = geom.centroid.coords[0]
+    state_centroids[name] = (lat, lon)
+full_to_abbr = {s.name: s.abbr for s in us.states.STATES}
 
 
 def create_data_table(id_name: str, dataset: pd.DataFrame, visible: bool = True, page_size: int = 10) -> dbc.Card:
@@ -56,4 +81,73 @@ def create_data_table(id_name: str, dataset: pd.DataFrame, visible: bool = True,
         ),
         className="mb-3",
         style=STYLES[Style.CARD] if visible else STYLES[Style.CARD] | {"display": "none"}
+    )
+
+
+def create_usa_map(data_manager: DataManager) -> dcc.Graph:
+    """
+    Creates a choropleth map of the United States illustrating transaction count
+    per state. The map is built using Plotly Mapbox and shows states colored by
+    transaction density on a red color scale. State abbreviations are overlaid as
+    text annotations.
+
+    Parameters
+    ----------
+    data_manager : DataManager
+        An instance of the DataManager class containing the transaction data
+        required for generating the map.
+
+    Returns
+    -------
+    dash_core_components.Graph
+        A Dash Graph component representing the map.
+    """
+    state_counts = (
+        data_manager.df_transactions
+        .dropna(subset=["state_name"])
+        .groupby("state_name", as_index=False)
+        .size()
+        .rename(columns={"size": "transaction_count"})
+    )
+
+    # Choropleth Mapbox
+    fig = px.choropleth_mapbox(
+        state_counts,
+        geojson=states_geo,
+        locations="state_name",
+        featureidkey="properties.name",
+        color="transaction_count",
+        color_continuous_scale="Reds",
+        labels={"transaction_count": "Transactions"},
+    )
+
+    # Text with state abbreviations
+    fig.add_trace(go.Scattermapbox(
+        lat=[state_centroids[n][0] for n in state_counts["state_name"]],
+        lon=[state_centroids[n][1] for n in state_counts["state_name"]],
+        mode="text",
+        text=[full_to_abbr[n] for n in state_counts["state_name"]],
+        textfont=dict(size=12, color="black"),
+        showlegend=False,
+        hoverinfo="none"
+    ))
+
+    # Update layout
+    fig.update_layout(
+        mapbox=dict(
+            style="open-street-map",
+            center={"lat": 37.8, "lon": -96.9},
+            zoom=3,
+        ),
+        margin={"l": 0, "r": 0, "t": 0, "b": 0})
+
+    # Remove color scale
+    fig.update_coloraxes(showscale=False)
+
+    return dcc.Graph(
+        id=str(IDs.MAP.value),
+        figure=fig,
+        config={"displayModeBar": False, "scrollZoom": True},
+        style=STYLES[Style.MAP],
+        className="flex-fill"
     )
