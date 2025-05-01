@@ -39,6 +39,7 @@ class Style(Enum):
     ICON = "icon"
     KPI_CARD = "kpi_card"
     KPI_CARD_BODY = "kpi_card_body"
+    MAP = "map"
     TABLE = "table"
     TABLE_CELL = "table_cell"
     TABLE_HEADER = "table_header"
@@ -55,7 +56,8 @@ STYLES = {
     },
 
     Style.BODY: {
-        "backgroundColor": "#EBEBEB"
+        "backgroundColor": "#EBEBEB",
+        "height": "100vh"
     },
 
     Style.BUTTON: {
@@ -83,6 +85,14 @@ STYLES = {
         "marginBottom": "10px",
         "draggable": "false",
         "cursor": "pointer"
+    },
+
+    Style.MAP: {
+        "margin": "0",
+        "borderRadius": "15px",
+        "width": "100%",
+        "height": "100%",
+        "overflow": "hidden"
     },
 
     Style.KPI_CARD: {
