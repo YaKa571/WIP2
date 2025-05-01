@@ -17,3 +17,5 @@ class IDs(str, Enum):
     TABLE_TRANSACTIONS = "table-transactions"
     TABLE_USERS = "table-users"
     TABLE_MCC = "table-mcc"
+
+    MAP = "map"
