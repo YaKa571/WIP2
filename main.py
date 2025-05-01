@@ -1,6 +1,6 @@
-import time
+from utils.benchmark import Benchmark
 
-start_time = time.perf_counter()
+benchmark_startup_time = Benchmark("Dash App Startup")
 
 import dash_bootstrap_components as dbc
 from dash import Dash, html
@@ -38,7 +38,8 @@ def create_app(data_manager: DataManager):
                         comp_factory.create_data_table(IDs.TABLE_MCC, data_manager.df_mcc, visible=False),
 
                     ]
-                )
+                ),
+                className="g-0 flex-shrink-0"
             ),
 
             # Row with Left and Right Column
@@ -47,12 +48,12 @@ def create_app(data_manager: DataManager):
                     create_left_column(data_manager),
                     create_right_column()
                 ],
-                className="gx-3",
-                style={"height": "calc(100vh - 6rem)"}
+                className="gx-3 flex-grow-1",
+                style={"minHeight": "0"}
             )
         ],
         fluid=True,
-        className="p-3 m-0",
+        className="p-3 m-0 d-flex flex-column",
         style=STYLES[Style.BODY]
     )
 
@@ -60,15 +61,13 @@ def create_app(data_manager: DataManager):
 
 
 if __name__ == '__main__':
-    # Initialize and load DataManager
+    # Initialize DataManager
     dm = DataManager()
-    dm.load_all()
 
     # Create and run Dash App
     app = create_app(dm)
 
     # Print startup time
-    startup_time = time.perf_counter() - start_time
-    print(f"🚀 Dash App ready in {startup_time:.2f} seconds.")
+    benchmark_startup_time.print_time(add_empty_line=True)
 
     app.run(debug=True)
