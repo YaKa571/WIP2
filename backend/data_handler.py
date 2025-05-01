@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import pandas as pd
+import utils.logger as logger
 
 DATA_DIRECTORY = Path("assets/data/")
 
@@ -28,9 +29,9 @@ def optimize_data(*file_names: str):
 
         # Only convert if Parquet missing or outdated
         if parquet_path.exists() and parquet_path.stat().st_mtime >= csv_mtime:
-            print(f"ℹ️ Loading from Parquet: {parquet_path}")
+            logger.log(f"ℹ️ Loading from Parquet: {parquet_path}", 1)
         else:
-            print(f"🔄 Converting CSV to Parquet: {csv_path}")
+            logger.log(f"🔄 Converting CSV to Parquet: {csv_path}", 1)
             # Read CSV into DataFrame
             df = pd.read_csv(csv_path)
             # Write Parquet with fast encoding
@@ -39,8 +40,7 @@ def optimize_data(*file_names: str):
                 engine='pyarrow',
                 compression='snappy',
             )
-            print(f"✅ Saved Parquet: {parquet_path}")
-
+            logger.log(f"✅ Saved Parquet: {parquet_path}", 1)
 
 def clean_units(df: pd.DataFrame) -> (pd.DataFrame, dict):
     """
@@ -102,7 +102,7 @@ def json_to_data_frame(file_name: str) -> pd.DataFrame:
     if not json_path.exists():
         raise FileNotFoundError(f"⚠️ JSON file not found: {json_path}")
 
-    print(f"ℹ️ Converting JSON to DataFrame: {json_path}")
+    logger.log(f"🔄 Converting JSON to DataFrame: {json_path}", 1)
     with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
