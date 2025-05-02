@@ -1,6 +1,7 @@
 .kpi-card {
-    height: 12.5vh;
-    min-height: 60px;
+    height: auto;
+    min-height: 12vh;
+    max-height: 14vh;
 }
 
 .kpi-card:hover {
@@ -9,13 +10,26 @@
     transition: all 0.2s ease-in-out;
 }
 
+.kpi-card-icon {
+    height: auto;
+    width: clamp(24px, 2vw, 48px);
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
 .card-value {
-    font-size: 1.6rem;
+    font-size: clamp(0.8rem, auto, 2.5rem);
+    font-weight: bold;
+    color: #343a40;
+}
+
+.card-title {
+    font-size: clamp(1rem, auto, 2.5rem);
     font-weight: 600;
     color: #343a40;
 }
 
-@media (max-width: 1350px) {
+@media (max-width: 1200px) {
 
     /* Margin only for columns that are not the last one */
     .kpi-cards-row > [class*='col-']:not(:last-child) {
@@ -27,17 +41,4 @@
         width: 100%;
     }
 
-}
-
-@media (max-width: 900px) {
-
-    /* Margin only for columns that are not the last one */
-    .kpi-cards-row > [class*='col-']:not(:last-child) {
-        width: 100%;
-        margin-bottom: 1rem;
-    }
-
-    .kpi-cards-row > [class*='col-']:last-child {
-        width: 100%;
-    }
 }

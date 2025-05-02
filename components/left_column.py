@@ -73,14 +73,14 @@ def create_kpi_card(card_id: IDs, data_manager: DataManager) -> dbc.Card:
     value_str = config["format_fn"](raw_value)
     icon = html.Img(
         src=Icons.get_icon(config["icon"]),
-        style=STYLES[Style.ICON]
+        className="kpi-card-icon"
     )
 
     return dbc.Card(
         dbc.CardBody([
             icon,
             html.P(value_str, className="card-value mb-0 pb-0"),
-            html.P(config["title"], className="card-title fw-bold fs-5"),
+            html.P(config["title"], className="card-title m-0 p-0"),
         ], style=STYLES[Style.KPI_CARD_BODY]),
         style=STYLES[Style.KPI_CARD],
         id=str(card_id.value),

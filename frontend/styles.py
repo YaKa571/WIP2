@@ -57,7 +57,8 @@ STYLES = {
 
     Style.BODY: {
         "backgroundColor": "#EBEBEB",
-        "height": "100vh"
+        "height": "100vh",
+        "minWidth": "700px"
     },
 
     Style.BUTTON: {
@@ -78,13 +79,6 @@ STYLES = {
     Style.DROPDOWN: {
         "borderRadius": "9px",
         "height": "39px"
-    },
-
-    Style.ICON: {
-        "height": "32px",
-        "marginBottom": "10px",
-        "draggable": "false",
-        "cursor": "pointer"
     },
 
     Style.MAP: {
