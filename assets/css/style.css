@@ -1,9 +1,72 @@
 .kpi-card {
-    height: 12.5vh;
-    min-height: 60px;
+    border-radius: 19px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    border: none;
+    background-color: white;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    justify-content: center;
+    height: auto;
+    max-height: 8rem;
 }
 
-@media (max-width: 1200px) {
+.kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease-in-out;
+}
+
+.kpi-card-icon {
+    height: auto;
+    width: clamp(21px, 2vw, 33px);
+    cursor: pointer;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+}
+
+.kpi-card-value {
+    width: 100%;
+    padding: 0 0.5rem;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: fade;
+    box-sizing: border-box;
+    font-weight: bold;
+    color: #343a40;
+    text-wrap: nowrap;
+    margin: 0;
+}
+
+.kpi-card-title {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    white-space: nowrap;
+    text-overflow: fade;
+    width: 100%;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+    font-weight: 600;
+    color: #343a40;
+    text-wrap: nowrap;
+    margin: 0;
+    line-height: 1.0;
+}
+
+.card-title {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: fade;
+    width: 100%;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+    font-weight: 600;
+    color: #343a40;
+    text-wrap: nowrap;
+}
+
+@media (max-width: 1520px) {
 
     /* Margin only for columns that are not the last one */
     .kpi-cards-row > [class*='col-']:not(:last-child) {
@@ -15,17 +78,4 @@
         width: 100%;
     }
 
-}
-
-@media (max-width: 768px) {
-
-    /* Margin only for columns that are not the last one */
-    .kpi-cards-row > [class*='col-']:not(:last-child) {
-        width: 100%;
-        margin-bottom: 1rem;
-    }
-
-    .kpi-cards-row > [class*='col-']:last-child {
-        width: 100%;
-    }
 }
