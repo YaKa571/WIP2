@@ -3,32 +3,46 @@ from utils.benchmark import Benchmark
 benchmark_startup_time = Benchmark("Dash App Startup")
 
 import dash_bootstrap_components as dbc
-from dash import Dash, html
+from dash import Dash, html, dcc
 
 import components.component_factory as comp_factory
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401 (don't remove this comment!)
+from backend.callbacks.darkmode_callback import toggle_dark_mode  # noqa: F401
 from backend.data_manager import DataManager
 from components.left_column import create_left_column
 from components.right_column import create_right_column
 from frontend.component_ids import IDs
-from frontend.styles import STYLES, Style
 
 
 def create_app(data_manager: DataManager):
-    app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+    app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
+                                               "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"])
     app.title = "Financial Transactions Dashboard"
 
-    app.layout = dbc.Container(
+    app.layout = html.Div(
         [
-            # Row with Title
+
+            # Store to persist the dark-mode state
+            dcc.Store(id=IDs.DARK_MODE_STORE.value, data=False),
+
+            # Row with title and dark mode switch
+            html.Div(
+                [
+                    html.H1("Financial Transactions Dashboard",
+                            className="m-0 flex-grow-1 text-center"),
+                    dbc.Button(
+                        html.I(className="bi bi-sun-fill"),
+                        id=IDs.DARK_MODE_TOGGLE.value,
+                        className="ms-auto btn-mode-toggle",
+                        n_clicks=0
+                    )
+                ],
+                className="dashboard-header d-flex align-items-center"
+            ),
+
             dbc.Row(
                 dbc.Col(
                     [
-                        html.H1(
-                            "Financial Transactions Dashboard",
-                            className="text-center m-0 pb-3",
-                            style=STYLES[Style.APP_TITLE]
-                        ),
 
                         # To have a look at a certain data table, add it here and set visible=True
                         comp_factory.create_data_table(IDs.TABLE_USERS, data_manager.df_users, visible=False),
@@ -39,22 +53,21 @@ def create_app(data_manager: DataManager):
 
                     ]
                 ),
-                className="g-0 flex-shrink-0"
+                className="g-0 flex-shrink-0",
+                style={"minSize": 0}
             ),
 
             # Row with Left and Right Column
-            dbc.Row(
+            html.Div(
                 [
                     create_left_column(data_manager),
                     create_right_column()
                 ],
-                className="gx-3 flex-grow-1",
-                style={"minHeight": "0"}
+                className="dashboard-body"
             )
         ],
-        fluid=True,
-        className="p-3 m-0 d-flex flex-column",
-        style=STYLES[Style.BODY]
+        id=IDs.DASHBOARD_CONTAINER.value,
+        className="dashboard dark-mode"
     )
 
     return app
