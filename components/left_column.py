@@ -7,7 +7,6 @@ import components.component_factory as comp_factory
 from backend.data_manager import DataManager
 from frontend.component_ids import IDs
 from frontend.icon_manager import Icons, IconID
-from frontend.styles import STYLES, Style
 
 
 # Define a TypedDict for KPI configuration
@@ -73,7 +72,8 @@ def create_kpi_card(card_id: IDs, data_manager: DataManager) -> dbc.Card:
     value_str = config["format_fn"](raw_value)
     icon = html.Img(
         src=Icons.get_icon(config["icon"]),
-        className="kpi-card-icon"
+        className="kpi-card-icon",
+        draggable="false"
     )
 
     return dbc.Card(
@@ -81,34 +81,36 @@ def create_kpi_card(card_id: IDs, data_manager: DataManager) -> dbc.Card:
             icon,
             html.P(value_str, className="kpi-card-value mb-0 pb-0"),
             html.P(config["title"], className="kpi-card-title m-0 p-0"),
-        ], style=STYLES[Style.KPI_CARD_BODY]),
+        ],
+            className="d-flex flex-column justify-content-center align-items-center"
+        ),
         id=str(card_id.value),
-        className="w-100 kpi-card"
+        className="card"
     )
 
 
-def create_kpi_cards(data_manager: DataManager) -> dbc.Row:
+def create_kpi_cards(data_manager: DataManager) -> html.Div:
     """
-    Creates and returns a layout row containing KPI cards.
+    Creates a collection of KPI cards in a dashboard layout.
 
-    This function generates a dashboard row with cards for each KPI defined in the global
-    KPI configuration. The data for each KPI is managed and passed through the provided
-    data manager instance. The returned row consists of multiple responsive columns where
-    each column contains a single KPI card.
+    This function generates a set of KPI cards based on the configuration
+    defined in `KPI_CONFIG`. Each card is created dynamically using the
+    `create_kpi_card` function with the provided `data_manager` instance. The
+    resulting cards are wrapped in a `html.Div` container with a specific
+    CSS class for styling.
 
     Args:
-        data_manager (DataManager): The data manager instance used to fetch or manage KPI
-        data.
+        data_manager: An instance of the DataManager object used to provide
+            data required for generating the KPI cards.
 
     Returns:
-        dbc.Row: A Bootstrap row populated with KPI cards, each wrapped in a responsive
-        column.
+        A Div component containing all the dynamically created KPI cards.
     """
-    cols = [
-        dbc.Col(create_kpi_card(kpi_id, data_manager), md=4)
+    cards = [
+        create_kpi_card(kpi_id, data_manager)
         for kpi_id in KPI_CONFIG
     ]
-    return dbc.Row(cols, className="gx-3 mb-3 kpi-cards-row")
+    return html.Div(cards, className="top-cards")
 
 
 def create_map_card(data_manager: DataManager) -> dbc.Card:
@@ -121,42 +123,40 @@ def create_map_card(data_manager: DataManager) -> dbc.Card:
         dbc.Card: A Dash Bootstrap Card object with a placeholder content for a map.
     """
     return dbc.Card(
-        dbc.CardBody([
+        dbc.CardBody(
+            [
+                html.H3("Map", className="card-title text-center"),
 
-            html.H3("Map", className="card-title text-center"),
-
-            html.Div(
-                comp_factory.create_usa_map(data_manager),
-                className="d-flex flex-fill",
-                style={"minHeight": 0, "borderRadius": "19px"}
-            )],
-            className="d-flex flex-column flex-fill",
-            style={"minHeight": 0, "borderRadius": "19px"}
+                html.Div(
+                    comp_factory.create_usa_map(data_manager),
+                    className="map-container flex-fill"
+                )
+            ],
+            className="map-card-body d-flex flex-column flex-fill",
         ),
-        className="d-flex flex-column",
-        style=STYLES[Style.CARD] | {"height": "100%"}
+        className="d-flex flex-column bottom-card card p-0"
     )
 
 
-def create_left_column(data_manager: DataManager) -> dbc.Col:
+def create_left_column(data_manager: DataManager) -> html.Div:
     """
-    Creates the left column layout for a dashboard, which includes key performance
-    indicator (KPI) cards and a map card. This function uses components from
-    Dash Bootstrap Components (dbc) to construct the column layout.
+    Creates the left column of a dashboard layout.
 
-    Args:
-        data_manager (DataManager): An object that manages and provides data required
-        for creating the KPI cards.
+    The left column includes KPI cards and a map card generated dynamically
+    based on the provided data manager.
+
+    Parameters:
+        data_manager (DataManager): The data source manager used to retrieve
+            and process data for populating KPI cards and the map card.
 
     Returns:
-        dbc.Col: A Dash Bootstrap Component column object containing the KPI cards
-        and map card with a specified width and a flex column layout.
+        dash.html.Div: A Div element containing the left column layout structure
+            with KPI cards and a map card.
     """
-    return dbc.Col(
+    return html.Div(
         [
             create_kpi_cards(data_manager),
             create_map_card(data_manager),
         ],
-        width=6,
-        className="d-flex flex-column"
+        className="left-column",
     )
