@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
+from dash import html
 
 from frontend.component_ids import IDs
-from frontend.styles import STYLES, Style
 
 
 def create_tabs():
@@ -16,19 +16,20 @@ def create_tabs():
         ],
         id=IDs.TABS_BAR.value,
         active_tab=IDs.TAB_DEFAULT.value,  # Setting the default tab
-        style=STYLES[Style.TAB]
+        className="tab"
     )
 
 
 def create_right_column():
-    return dbc.Col(
+    return html.Div(
         [
             dbc.Card(
-                dbc.CardBody(create_tabs()),
-                style=STYLES[Style.CARD],
-                className="flex-fill"
+                dbc.CardBody(
+                    create_tabs(),
+                    className="p-0"
+                ),
+                className="card"
             )
         ],
-        width=6,
-        className="d-flex flex-column"
+        className="right-column"
     )
