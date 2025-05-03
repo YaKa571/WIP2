@@ -9,7 +9,7 @@
     --card-bg: #ffffff;
 
     /* Icon-Filter trick */
-    --icon-filter: filter:invert(18%) sepia(11%) saturate(1631%) hue-rotate(175deg) brightness(95%) contrast(86%);
+    --icon-filter: invert(18%) sepia(11%) saturate(1631%) hue-rotate(175deg) brightness(95%) contrast(86%);
 
     /* Dark shadows for the light-mode */
     --card-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.08);
