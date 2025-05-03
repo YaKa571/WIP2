@@ -8,7 +8,7 @@
     text-align: center;
     justify-content: center;
     height: auto;
-    max-height: 10vh;
+    max-height: 8rem;
 }
 
 .kpi-card:hover {
