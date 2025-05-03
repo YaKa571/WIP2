@@ -79,10 +79,9 @@ def create_kpi_card(card_id: IDs, data_manager: DataManager) -> dbc.Card:
     return dbc.Card(
         dbc.CardBody([
             icon,
-            html.P(value_str, className="card-value mb-0 pb-0"),
-            html.P(config["title"], className="card-title m-0 p-0"),
+            html.P(value_str, className="kpi-card-value mb-0 pb-0"),
+            html.P(config["title"], className="kpi-card-title m-0 p-0"),
         ], style=STYLES[Style.KPI_CARD_BODY]),
-        style=STYLES[Style.KPI_CARD],
         id=str(card_id.value),
         className="w-100 kpi-card"
     )

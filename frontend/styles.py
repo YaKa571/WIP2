@@ -58,7 +58,7 @@ STYLES = {
     Style.BODY: {
         "backgroundColor": "#EBEBEB",
         "height": "100vh",
-        "minWidth": "700px"
+        "minWidth": "768px"
     },
 
     Style.BUTTON: {
@@ -87,17 +87,6 @@ STYLES = {
         "width": "100%",
         "height": "100%",
         "overflow": "hidden"
-    },
-
-    Style.KPI_CARD: {
-        "borderRadius": "19px",
-        "boxShadow": "0 4px 10px rgba(0,0,0,0.12)",
-        "border": "none",
-        "backgroundColor": "white",
-        "padding": "0",
-        "margin": "0",
-        "textAlign": "center",
-        "justifyContent": "center"
     },
 
     Style.KPI_CARD_BODY: {
