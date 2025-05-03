@@ -79,8 +79,8 @@ def create_data_table(id_name: str, dataset: pd.DataFrame, visible: bool = True,
                 )
             ]
         ),
-        className="mb-3",
-        style=STYLES[Style.CARD] if visible else STYLES[Style.CARD] | {"display": "none"}
+        className="mb-3 card",
+        style={"display": "block"} if visible else {"display": "none"}
     )
 
 
@@ -147,7 +147,7 @@ def create_usa_map(data_manager: DataManager) -> dcc.Graph:
     return dcc.Graph(
         id=str(IDs.MAP.value),
         figure=fig,
+        responsive=True,
         config={"displayModeBar": False, "scrollZoom": True},
-        style=STYLES[Style.MAP],
-        className="flex-fill"
+        className="map"
     )
