@@ -6,7 +6,7 @@ class IDs(str, Enum):
     KPI_CARD_AVG_TRANSACTION_AMOUNT = "kpi-card-avg-transaction-amount"
 
     TABS_BAR = "tabs-bar"
-    TAB_DEFAULT = "tab-default"
+    TAB_HOME = "tab-home"
     TAB_FRAUD = "tab-fraud"
     TAB_CLUSTER = "tab-cluster"
     TAB_USER = "tab-user"
@@ -19,3 +19,7 @@ class IDs(str, Enum):
     TABLE_MCC = "table-mcc"
 
     MAP = "map"
+
+    DARK_MODE_TOGGLE = "dark-mode-toggle"
+    DARK_MODE_STORE = "dark-mode-store"
+    DASHBOARD_CONTAINER = "dashboard-container"

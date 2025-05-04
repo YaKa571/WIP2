@@ -1,81 +1,371 @@
-.kpi-card {
-    border-radius: 19px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-    border: none;
-    background-color: white;
-    padding: 0;
-    margin: 0;
-    text-align: center;
-    justify-content: center;
-    height: auto;
-    max-height: 8rem;
+/* ==========================================================================
+   Variables
+   ========================================================================== */
+
+:root {
+    /* — Light Mode — */
+    --bg-page: #f5f7fa;
+    --text-main: #2e3a4a;
+    --card-bg: #ffffff;
+
+    /* Icon-Filter trick */
+    --icon-filter: invert(18%) sepia(11%) saturate(1631%) hue-rotate(175deg) brightness(95%) contrast(86%);
+
+    /* Dark shadows for the light-mode */
+    --card-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --card-shadow-2: 0 4px 6px rgba(0, 0, 0, 0.04);
+    --card-shadow-hover-1: 0 4px 8px rgba(0, 0, 0, 0.10);
+    --card-shadow-hover-2: 0 8px 15px rgba(0, 0, 0, 0.06);
+
+    /* Layout */
+    --gutter: 0.75rem;
+    --outer-border-radius: 15px;
+    --inner-border-radius: calc(var(--outer-border-radius) - var(--gutter));
+
+    --tab-text: #6b7280;
+    --tab-text-hover: #efefef;
+    --tab-text-active: #ffffff;
+    --tab-background-active: #0d6efd;
+    --tab-background-inactive-hover: #2a81ff;
+    --tab-background-active-hover: #0d59fd;
+    --tab-underline-color: #d1d5db;
+    --tab-underline-color-hover: #9ca3af;
+    --tab-underline-color-active: #ffffff;
 }
 
-.kpi-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease-in-out;
+.dark-mode {
+    /* — Dark Mode — */
+    --bg-page: #121212;
+    --text-main: #e5e5e5;
+    --card-bg: #1f1f1f;
+
+    /* Icon-Filter trick */
+    --icon-filter: invert(99%) sepia(86%) saturate(57%) hue-rotate(208deg) brightness(106%) contrast(80%);
+
+    /* White shadows for the dark-mode */
+    --card-shadow-1: 0 1px 3px rgba(255, 255, 255, 0.04);
+    --card-shadow-2: 0 4px 6px rgba(255, 255, 255, 0.02);
+    --card-shadow-hover-1: 0 4px 8px rgba(255, 255, 255, 0.08);
+    --card-shadow-hover-2: 0 8px 15px rgba(255, 255, 255, 0.04);
+
+    --tab-text: #ccd1d8;
+    --tab-text-hover: #efefef;
+    --tab-text-active: #ffffff;
+    --tab-background-active: #0d6efd;
+    --tab-background-inactive-hover: #2a81ff;
+    --tab-background-active-hover: #0d59fd;
+    --tab-underline-color: #d1d5db;
+    --tab-underline-color-hover: #9ca3af;
+    --tab-underline-color-active: #ffffff;
+
 }
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+
+html, body {
+    height: 100%;
+    margin: 0;
+    min-width: 768px;
+}
+
+/* ==========================================================================
+   Dashboard Layout
+   ========================================================================== */
+
+/* Overall wrapper: full viewport, flex-column */
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    padding: var(--gutter);
+    box-sizing: border-box;
+    gap: var(--gutter); /* Spacing between header & body */
+    background-color: var(--bg-page);
+    color: var(--text-main);
+}
+
+/* Header section: natural height, centered */
+.dashboard-header {
+    flex: 0 1 auto;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    padding: 0;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+/* Body section: two columns, fills remainder */
+.dashboard-body {
+    flex: 1 1 auto;
+    display: flex;
+    padding-top: 0;
+    margin-top: 0;
+    gap: var(--gutter); /* Spacing between columns */
+}
+
+/* Left & right columns: flex-column, equal share */
+.left-column, .right-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    gap: var(--gutter); /* Spacing within column */
+}
+
+/* ==========================================================================
+   Card Styling & Shadows
+   ========================================================================== */
+
+/* Global card rounding & shadows */
+.card {
+    background-color: var(--card-bg) !important;
+    border-radius: var(--outer-border-radius) !important;
+    box-shadow: var(--card-shadow-1), var(--card-shadow-2);
+    transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-main);
+}
+
+.card-title {
+    text-transform: uppercase;
+}
+
+.card:hover {
+    box-shadow: var(--card-shadow-hover-1), var(--card-shadow-hover-2);
+}
+
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+
+/* Fade-in-up for KPI cards and columns */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.left-column, .right-column {
+    animation: fadeInUp 0.6s ease both;
+}
+
+/* Hover effect for KPI cards */
+.top-cards .card:hover {
+    transform: translateY(-4px) scale(1.01) rotate(0.02deg);
+}
+
+/* ==========================================================================
+   Top Cards (KPI)
+   ========================================================================== */
+
+.top-cards {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping 3->2->1 per row */
+    gap: var(--gutter);
+}
+
+.top-cards .card {
+    flex: 1 1 0;
+    min-width: 240px;
+}
+
+/* ==========================================================================
+   Bottom Card (Map)
+   ========================================================================== */
+
+.bottom-card {
+    flex: 1 1 auto; /* fill remaining column space */
+    overflow: auto; /* internal scroll if needed */
+}
+
+/* ==========================================================================
+   Right Column Single Card
+   ========================================================================== */
+
+.right-column .card {
+    flex: 1 1 auto; /* Fill entire right column */
+    overflow: auto;
+}
+
+/* ==========================================================================
+   KPI-Specific Styles
+   ========================================================================== */
 
 .kpi-card-icon {
-    height: auto;
     width: clamp(21px, 2vw, 33px);
-    cursor: pointer;
+    height: auto;
     object-fit: contain;
     margin-bottom: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
+    filter: var(--icon-filter);
 }
 
 .kpi-card-value {
-    width: 100%;
+    width: auto;
+    text-align: center;
     padding: 0 0.5rem;
     font-size: clamp(1rem, 2vw, 1.5rem);
+    font-weight: bold;
+    color: var(--text-main);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: fade;
     box-sizing: border-box;
-    font-weight: bold;
-    color: #343a40;
-    text-wrap: nowrap;
     margin: 0;
 }
 
 .kpi-card-title {
-    font-size: clamp(1rem, 2vw, 1.5rem);
-    white-space: nowrap;
-    text-overflow: fade;
-    width: 100%;
+    width: auto;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: -1px;
     padding: 0 0.5rem;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-weight: 400;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: fade;
     box-sizing: border-box;
-    font-weight: 600;
-    color: #343a40;
-    text-wrap: nowrap;
     margin: 0;
     line-height: 1.0;
 }
 
-.card-title {
-    font-size: clamp(1rem, 2vw, 1.5rem);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: fade;
-    width: 100%;
-    padding: 0 0.5rem;
-    box-sizing: border-box;
-    font-weight: 600;
-    color: #343a40;
-    text-wrap: nowrap;
+/* ==========================================================================
+   Map-Specific Styles
+   ========================================================================== */
+
+.map-card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding: var(--gutter);
+    min-height: 0;
 }
 
-@media (max-width: 1520px) {
+.map-container {
+    flex: 1 1 auto;
+    border-radius: var(--outer-border-radius);
+    overflow: hidden;
+}
 
-    /* Margin only for columns that are not the last one */
-    .kpi-cards-row > [class*='col-']:not(:last-child) {
-        width: 50%;
-        margin-bottom: 1rem;
-    }
+.map {
+    flex: 1 1 auto;
+    border-radius: var(--inner-border-radius);
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
 
-    .kpi-cards-row > [class*='col-']:last-child {
-        width: 100%;
-    }
+/* ============================================================
+   Fancy Mode Toggle Button
+   ============================================================ */
 
+.btn-mode-toggle {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    padding: 0.5rem 0.75rem;
+    border-radius: 9px;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    box-shadow: var(--card-shadow-1), var(--card-shadow-2);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-mode-toggle:hover {
+    /* Pop a little on hover */
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: var(--card-shadow-hover-1), var(--card-shadow-hover-2);
+}
+
+.btn-mode-toggle:active {
+    /* Press-down feedback */
+    transform: translateY(0) scale(0.95);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================================
+   Custom Tab Bar (Modern Flat Style)
+   ============================================================ */
+
+/* Tab Bar Wrapper */
+.custom-tab-bar {
+    display: flex;
+    background: transparent;
+    border-bottom: 1px solid var(--tab-underline-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* Single Tab-Buttons */
+.custom-tab-button {
+    position: relative; /* for the pseudo-element */
+    flex: 1 1 auto;
+    background: transparent;
+    border: none;
+    padding: var(--gutter) var(--gutter);
+    color: var(--tab-text);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.1s ease-in;
+    border-radius: 0;
+}
+
+.custom-tab-button:hover {
+    color: var(--tab-text-hover);
+    background-color: var(--tab-background-inactive-hover);
+}
+
+/* Underline Pseudo-Element */
+.custom-tab-button::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    width: 50%;
+    height: 2px;
+    background: transparent;
+    transition: width 0.3s ease, background 0.3s ease, left 0.3s ease;
+}
+
+.custom-tab-button.active {
+    color: var(--tab-text-active);
+    background-color: var(--tab-background-active);
+    text-shadow: 0 0 1px currentColor,
+    0 0 1px currentColor;
+}
+
+.custom-tab-button.active:hover {
+    background-color: var(--tab-background-active-hover);
+}
+
+.custom-tab-button.active::after {
+    background: var(--tab-underline-color-active);
+    left: 10%;
+    width: 80%;
+}
+
+.custom-tab-button:hover::after {
+    background: var(--tab-underline-color-hover);
+    left: 20%;
+    width: 60%;
+}
+
+.tab-content-wrapper {
+    border-radius: 11px;
+    margin: var(--gutter);
 }
