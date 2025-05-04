@@ -1,10 +1,55 @@
-Product_Backlog
+# PRODUCT BACKLOG
+Project: Financial Transactions Dashboard
+Start Date: April 14, 2025
+Status: 🔄 In Progress
+Overall Progress: ~25%
 
-Grundlage Frontend   
-Grundlage Backend
+## 1. FOUNDATIONS [COMPLETED]
+Priority: HIGH | Effort: 7d | Status: ✅
+- Frontend Base Implementation
+  * Responsive Design Architecture
+  * Component Library Setup
+- Backend Base Implementation
+  * API Structure Definition
+  * Database Connection Setup
 
-Startseite
-Betrugsseite
-Clusterseite
-Userseite
-Händlerseite
+## 2. MAIN PAGES [IN PROGRESS]
+### 2.1 Home Page
+Priority: HIGH | Effort: 7d | Status: 🔄
+- Implement Dashboard Layout
+- Create KPI Overview
+- Set up Navigation Structure
+
+### 2.2 Fraud Page
+Priority: HIGH | Effort: 7d | Status: ⭕
+- Display Suspicious Transactions
+- Implement Filtering Options
+- Important thing no. 3
+
+### 2.3 Cluster Page
+Priority: HIGH | Effort: 7d | Status: ⭕
+- Cluster Visualization
+- Interactive Filter Functions
+- Detailed Cluster View
+
+### 2.4 User Page
+Priority: HIGH | Effort: 7d | Status: ⭕
+- Important thing no. 1
+- Important thing no. 2
+- Important thing no. 3
+
+### 2.5 Merchant Page
+Priority: MEDIUM | Effort: 7d | Status: ⭕
+- Important thing no. 1
+- Important thing no. 2
+- Important thing no. 3
+
+## 3. CLEAN-UP & OPTIMIZATIONS [OPEN]
+Priority: IRRELEVANT | Effort: 3d | Status: ⭕
+- Clean up code
+- Optimize
+
+## LEGEND
+✅ Completed
+🔄 In Progress
+⭕ Open
