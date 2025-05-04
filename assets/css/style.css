@@ -21,6 +21,16 @@
     --gutter: 0.75rem;
     --outer-border-radius: 15px;
     --inner-border-radius: calc(var(--outer-border-radius) - var(--gutter));
+
+    --tab-text: #6b7280;
+    --tab-text-hover: #efefef;
+    --tab-text-active: #ffffff;
+    --tab-background-active: #0d6efd;
+    --tab-background-inactive-hover: #2a81ff;
+    --tab-background-active-hover: #0d59fd;
+    --tab-underline-color: #d1d5db;
+    --tab-underline-color-hover: #9ca3af;
+    --tab-underline-color-active: #ffffff;
 }
 
 .dark-mode {
@@ -37,6 +47,17 @@
     --card-shadow-2: 0 4px 6px rgba(255, 255, 255, 0.02);
     --card-shadow-hover-1: 0 4px 8px rgba(255, 255, 255, 0.08);
     --card-shadow-hover-2: 0 8px 15px rgba(255, 255, 255, 0.04);
+
+    --tab-text: #ccd1d8;
+    --tab-text-hover: #efefef;
+    --tab-text-active: #ffffff;
+    --tab-background-active: #0d6efd;
+    --tab-background-inactive-hover: #2a81ff;
+    --tab-background-active-hover: #0d59fd;
+    --tab-underline-color: #d1d5db;
+    --tab-underline-color-hover: #9ca3af;
+    --tab-underline-color-active: #ffffff;
+
 }
 
 /* ==========================================================================
@@ -74,6 +95,9 @@ html, body {
 .dashboard-header h1 {
     margin: 0;
     padding: 0;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: var(--text-main);
 }
 
 /* Body section: two columns, fills remainder */
@@ -105,6 +129,10 @@ html, body {
     transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--text-main);
+}
+
+.card-title {
+    text-transform: uppercase;
 }
 
 .card:hover {
@@ -148,7 +176,7 @@ html, body {
 
 .top-cards .card {
     flex: 1 1 0;
-    min-width: 200px;
+    min-width: 240px;
 }
 
 /* ==========================================================================
@@ -201,9 +229,11 @@ html, body {
 .kpi-card-title {
     width: auto;
     text-align: center;
+    text-transform: uppercase;
+    letter-spacing: -1px;
     padding: 0 0.5rem;
     font-size: clamp(1rem, 2vw, 1.5rem);
-    font-weight: 600;
+    font-weight: 400;
     color: var(--text-main);
     white-space: nowrap;
     overflow: visible;
@@ -266,4 +296,77 @@ html, body {
     /* Press-down feedback */
     transform: translateY(0) scale(0.95);
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================================
+   Custom Tab Bar (Modern Flat Style)
+   ============================================================ */
+
+/* Tab Bar Wrapper */
+.custom-tab-bar {
+    display: flex;
+    background: transparent;
+    border-bottom: 1px solid var(--tab-underline-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* Single Tab-Buttons */
+.custom-tab-button {
+    position: relative; /* for the pseudo-element */
+    flex: 1 1 auto;
+    background: transparent;
+    border: none;
+    padding: var(--gutter) var(--gutter);
+    color: var(--tab-text);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.1s ease-in;
+    border-radius: 0;
+}
+
+.custom-tab-button:hover {
+    color: var(--tab-text-hover);
+    background-color: var(--tab-background-inactive-hover);
+}
+
+/* Underline Pseudo-Element */
+.custom-tab-button::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    width: 50%;
+    height: 2px;
+    background: transparent;
+    transition: width 0.3s ease, background 0.3s ease, left 0.3s ease;
+}
+
+.custom-tab-button.active {
+    color: var(--tab-text-active);
+    background-color: var(--tab-background-active);
+    text-shadow: 0 0 1px currentColor,
+    0 0 1px currentColor;
+}
+
+.custom-tab-button.active:hover {
+    background-color: var(--tab-background-active-hover);
+}
+
+.custom-tab-button.active::after {
+    background: var(--tab-underline-color-active);
+    left: 10%;
+    width: 80%;
+}
+
+.custom-tab-button:hover::after {
+    background: var(--tab-underline-color-hover);
+    left: 20%;
+    width: 60%;
+}
+
+.tab-content-wrapper {
+    border-radius: 11px;
+    margin: var(--gutter);
 }
