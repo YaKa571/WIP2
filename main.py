@@ -8,6 +8,7 @@ from dash import Dash, html, dcc
 import components.component_factory as comp_factory
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401 (don't remove this comment!)
 from backend.callbacks.darkmode_callback import toggle_dark_mode  # noqa: F401
+from backend.callbacks.tab_callback import update_tabs  # noqa: F401
 from backend.data_manager import DataManager
 from components.left_column import create_left_column
 from components.right_column import create_right_column
