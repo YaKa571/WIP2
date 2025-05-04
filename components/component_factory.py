@@ -135,7 +135,7 @@ def create_usa_map(data_manager: DataManager) -> dcc.Graph:
     # Update layout
     fig.update_layout(
         mapbox=dict(
-            style="open-street-map",
+            style="carto-darkmatter",
             center={"lat": 37.8, "lon": -96.9},
             zoom=3,
         ),
