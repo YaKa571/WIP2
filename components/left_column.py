@@ -132,9 +132,9 @@ def create_map_card(data_manager: DataManager) -> dbc.Card:
                     className="map-container flex-fill"
                 )
             ],
-            className="map-card-body d-flex flex-column flex-fill",
+            className="map-card-body d-flex flex-column",
         ),
-        className="d-flex flex-column bottom-card card p-0"
+        className="bottom-card card h-100"
     )
 
 
