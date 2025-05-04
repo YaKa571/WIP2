@@ -47,7 +47,7 @@ def update_tabs(n_clicks_list):
         content = (html.H3("Merchant content", className="card-title text-center"),
                    html.Div(className="tab-content-wrapper flex-fill"))
     else:
-        content = (html.H3("Default content", className="card-title text-center"),
+        content = (html.H3("Home content", className="card-title text-center"),
                    html.Div(className="tab-content-wrapper flex-fill"))
 
     return classnames, content
