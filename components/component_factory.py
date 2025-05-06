@@ -11,7 +11,6 @@ from shapely.geometry import shape
 
 from backend.data_manager import DataManager
 from frontend.component_ids import IDs
-from frontend.styles import STYLES, Style
 
 # GLOBAL DICT that holds all DataFrames
 DATASETS: dict[str, pd.DataFrame] = {}
@@ -63,19 +62,20 @@ def create_data_table(id_name: str, dataset: pd.DataFrame, visible: bool = True,
         dbc.CardBody(
             [
                 html.H3(str.upper(id_name), className="card-title text-center"),
-                dash_table.DataTable(
-                    id={"type": "data-table", "index": id_name},  # <-- Pattern-ID
-                    columns=columns,
-                    data=[],  # initially empty
-                    page_current=0,
-                    page_size=page_size,
-                    page_action="custom",  # <-- server-side paging
-                    style_table=STYLES[Style.TABLE],
-                    style_header=STYLES[Style.TABLE_HEADER],
-                    style_cell=STYLES[Style.TABLE_CELL],
-                    style_data_conditional=STYLES[Style.TABLE_CONDITIONAL],
-                    style_data=STYLES[Style.TABLE_DATA],
-                    virtualization=False
+
+                # Wrap DataTable in a Div with our custom CSS style
+                html.Div(
+                    dash_table.DataTable(
+                        id={"type": "data-table", "index": id_name},
+                        columns=columns,
+                        data=[],  # initially empty
+                        page_current=0,
+                        page_size=page_size,
+                        page_action="custom",  # <-- server-side paging
+                        cell_selectable=False,
+                        virtualization=False
+                    ),
+                    className="datatable"
                 )
             ]
         ),
@@ -119,6 +119,7 @@ def create_usa_map(data_manager: DataManager) -> dcc.Graph:
         color="transaction_count",
         color_continuous_scale="Reds",
         labels={"transaction_count": "Transactions"},
+        mapbox_style="carto-positron"
     )
 
     # Text with state abbreviations
@@ -135,7 +136,6 @@ def create_usa_map(data_manager: DataManager) -> dcc.Graph:
     # Update layout
     fig.update_layout(
         mapbox=dict(
-            style="carto-darkmatter",
             center={"lat": 37.8, "lon": -96.9},
             zoom=3,
         ),
