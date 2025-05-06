@@ -29,19 +29,19 @@ KPI_CONFIG: Dict[IDs, KPIConfig] = {
     IDs.KPI_CARD_AMT_TRANSACTIONS: KPIConfig(
         title="Transactions",
         icon=IconID.CHART_PIPE,
-        value_fn=lambda dm: len(dm.df_transactions),
+        value_fn=lambda dm: dm.amount_of_transactions,
         format_fn=lambda v: f"{v:,}".replace(",", "."),
     ),
     IDs.KPI_CARD_SUM_OF_TRANSACTIONS: KPIConfig(
         title="Total Value",
         icon=IconID.MONEY_DOLLAR,
-        value_fn=lambda dm: dm.df_transactions["amount"].sum(),
+        value_fn=lambda dm: dm.sum_of_transactions,
         format_fn=lambda v: f"${v:,.2f}",
     ),
     IDs.KPI_CARD_AVG_TRANSACTION_AMOUNT: KPIConfig(
         title="Avg. Transaction",
         icon=IconID.CHART_AVERAGE,
-        value_fn=lambda dm: dm.df_transactions["amount"].mean(),
+        value_fn=lambda dm: dm.avg_transaction_amount,
         format_fn=lambda v: f"${v:,.2f}",
     ),
 }
