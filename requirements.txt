@@ -1,0 +1,7 @@
+dash~=3.0.4
+pandas~=2.2.3
+pgeocode~=0.5.0
+us~=3.2.0
+dash-bootstrap-components~=2.0.2
+plotly~=6.1.0rc0
+shapely~=2.1.0
