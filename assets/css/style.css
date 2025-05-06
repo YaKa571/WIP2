@@ -7,6 +7,7 @@
     --bg-page: #f5f7fa;
     --text-main: #2e3a4a;
     --card-bg: #ffffff;
+    --blue-main: #0d6efd;
 
     /* Icon-Filter trick */
     --icon-filter: invert(18%) sepia(11%) saturate(1631%) hue-rotate(175deg) brightness(95%) contrast(86%);
@@ -25,12 +26,19 @@
     --tab-text: #6b7280;
     --tab-text-hover: #efefef;
     --tab-text-active: #ffffff;
-    --tab-background-active: #0d6efd;
+    --tab-background-active: var(--blue-main);
     --tab-background-inactive-hover: #2a81ff;
     --tab-background-active-hover: #0d59fd;
     --tab-underline-color: #d1d5db;
     --tab-underline-color-hover: #9ca3af;
     --tab-underline-color-active: #ffffff;
+
+    --table-bg-even: #f2f2f2;
+    --table-bg-odd: #ffffff;
+    --table-border-color: #b8b8b8;
+    --table-header-text-color: white;
+    --table-scrollbar-thumb-color: #9ca3af;
+    --table-button-radius: 7px;
 }
 
 .dark-mode {
@@ -51,13 +59,16 @@
     --tab-text: #ccd1d8;
     --tab-text-hover: #efefef;
     --tab-text-active: #ffffff;
-    --tab-background-active: #0d6efd;
+    --tab-background-active: var(--blue-main);
     --tab-background-inactive-hover: #2a81ff;
     --tab-background-active-hover: #0d59fd;
     --tab-underline-color: #d1d5db;
     --tab-underline-color-hover: #9ca3af;
     --tab-underline-color-active: #ffffff;
 
+    --table-bg-even: #1f1f1f;
+    --table-bg-odd: #2f2f2f;
+    --table-border-color: #404040;
 }
 
 /* ==========================================================================
@@ -368,4 +379,83 @@ html, body {
 .tab-content-wrapper {
     border-radius: 11px;
     margin: var(--gutter);
+}
+
+/* ============================================================
+   Data Table
+   ============================================================ */
+
+.datatable {
+    margin: var(--gutter) / 2;
+}
+
+.datatable .dash-table-container {
+    overflow-x: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--table-scrollbar-thumb-color) var(--card-bg) !important;
+}
+
+.datatable .dash-spreadsheet-container td,
+.datatable .dash-spreadsheet-container th {
+    padding: 8px !important;
+    text-align: center !important;
+    border: 1px solid var(--table-border-color) !important;
+
+}
+
+.datatable .dash-spreadsheet-container td {
+    color: var(--text-main) !important;
+}
+
+.datatable .dash-spreadsheet-container th {
+    background-color: var(--blue-main) !important;
+    color: var(--table-header-text-color) !important;
+    font-weight: bold !important;
+}
+
+/* Conditional odd cell background */
+.datatable .dash-spreadsheet-container table tr:nth-child(odd) td {
+    background-color: var(--table-bg-odd) !important;
+}
+
+/* Conditional even cell background */
+.datatable .dash-spreadsheet-container table tr:nth-child(even) td {
+    background-color: var(--table-bg-even) !important;
+}
+
+/* Set scrollbar height */
+.datatable .dash-table-container::-webkit-scrollbar {
+    height: 8px; /* scrollbar thickness */
+}
+
+/* Thumb (the draggable part) */
+.datatable .dash-table-container::-webkit-scrollbar-thumb {
+    background-color: #888 !important;
+    border-radius: 4px;
+    border: 2px solid #333;
+}
+
+.datatable .dash-table-container button {
+    padding: 0.25rem 0.5rem !important;
+    margin: 0 !important;
+}
+
+.datatable .dash-table-container button:first-child {
+    border-top-left-radius: var(--table-button-radius) !important;
+    border-bottom-left-radius: var(--table-button-radius) !important;
+}
+
+.datatable .dash-table-container button:last-child {
+    border-top-right-radius: var(--table-button-radius) !important;
+    border-bottom-right-radius: var(--table-button-radius) !important;
+}
+
+.datatable input, .datatable input::placeholder {
+    background-color: var(--card-bg) !important;
+    color: var(--text-main) !important;
+}
+
+.datatable input:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }
