@@ -64,6 +64,10 @@ class DataManager:
         self.df_mcc = None
         self.df_train_fraud = None
 
+        self.amount_of_transactions = None
+        self.sum_of_transactions = None
+        self.avg_transaction_amount = None
+
         self._nomi = pgeocode.Nominatim("us")
 
         self.initialize()
@@ -176,6 +180,11 @@ class DataManager:
 
         # Creates a 'state_name' column from the 'merchant_state' column (abbreviated state names)
         self.process_transaction_states()
+
+        # Calculations
+        self.amount_of_transactions = len(self.df_transactions)
+        self.sum_of_transactions = self.df_transactions["amount"].sum()
+        self.avg_transaction_amount = self.sum_of_transactions / self.amount_of_transactions
 
         # Print summary
         logger.log(f"ℹ️ Users: {self.units_users}", 1)
