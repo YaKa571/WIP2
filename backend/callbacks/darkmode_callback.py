@@ -4,31 +4,54 @@ from frontend.component_ids import IDs
 
 
 @callback(
+    Output(IDs.DARK_MODE_STORE.value, "data"),
     Output(IDs.DASHBOARD_CONTAINER.value, "className"),
     Output(IDs.DARK_MODE_TOGGLE.value, "children"),
     Output(IDs.MAP.value, "figure"),
     Input(IDs.DARK_MODE_TOGGLE.value, "n_clicks"),
-    State(IDs.DASHBOARD_CONTAINER.value, "className"),
-    State(IDs.MAP.value, "figure"),
+    State(IDs.DARK_MODE_STORE.value, "data"),
+    State(IDs.MAP.value, "figure")
 )
-def toggle_dark_mode(n_clicks, current_class, current_fig):
-    if not n_clicks:
-        return current_class or "dashboard", html.I(className="bi bi-sun-fill"), current_fig
+def toggle_dark_mode(n_clicks, is_dark, current_fig):
+    """
+    Toggles the dark mode for the dashboard application.
 
-    is_dark = "dark-mode" in current_class
+    This callback function manages the dark mode state, UI components' className, the icon
+    for the dark mode toggle, and the map styling within the application. It switches between
+    dark and light modes based on user interaction and updates corresponding elements
+    accordingly.
 
-    if is_dark:
-        # Switch to light
-        new_class = "dashboard"
-        new_icon = html.I(className="bi bi-sun-fill")
-        new_style = "carto-positron"
-    else:
-        # Switch to dark
-        new_class = "dashboard dark-mode"
-        new_icon = html.I(className="bi bi-moon-fill")
-        new_style = "carto-darkmatter"
+    Parameters
+    ----------
+    n_clicks: int
+        The number of times the dark mode toggle button has been clicked.
+    is_dark: bool
+        The current state of the dark mode (True for dark mode, False for light mode).
+    current_fig: dict
+        The current figure (map) data used in the application.
 
-    # Update only the mapbox.style in the existing figure
-    current_fig["layout"]["mapbox"]["style"] = new_style
+    Returns
+    -------
+    tuple[bool, str, dash_html_components.I, dict]
+        A tuple containing the updated dark mode state as a boolean, the updated className
+        as a string for the dashboard container, an html.I element representing the icon,
+        and the updated map figure as a dictionary.
+    """
+    # On first load keep stored value, else flip it
+    new_dark = is_dark if not n_clicks else not is_dark
 
-    return new_class, new_icon, current_fig
+    # Map className, icon class and map style from new_dark
+    cls = "dashboard dark-mode" if new_dark else "dashboard"
+    icon_name = "moon-fill" if new_dark else "sun-fill"
+    map_style = "carto-darkmatter" if new_dark else "carto-positron"
+
+    # Update mapbox style
+    current_fig["layout"]["mapbox"]["style"] = map_style
+
+    # Return new store value, className, icon and updated figure
+    return (
+        new_dark,
+        cls,
+        html.I(className=f"bi bi-{icon_name}"),
+        current_fig
+    )
