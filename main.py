@@ -24,7 +24,7 @@ def create_app(data_manager: DataManager):
         [
 
             # Store to persist the dark-mode state
-            dcc.Store(id=IDs.DARK_MODE_STORE.value, data=False),
+            dcc.Store(id=IDs.DARK_MODE_STORE.value, data=False, storage_type="local"),
 
             # Row with title and dark mode switch
             html.Div(
@@ -68,7 +68,7 @@ def create_app(data_manager: DataManager):
             )
         ],
         id=IDs.DASHBOARD_CONTAINER.value,
-        className="dashboard dark-mode"
+        className="dashboard"
     )
 
     return app
