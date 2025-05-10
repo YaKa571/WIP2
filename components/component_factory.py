@@ -1,4 +1,5 @@
 import json
+import time
 import urllib.request
 
 import dash_bootstrap_components as dbc
@@ -68,10 +69,10 @@ def create_data_table(id_name: str, dataset: pd.DataFrame, visible: bool = True,
                     dash_table.DataTable(
                         id={"type": "data-table", "index": id_name},
                         columns=columns,
-                        data=[],  # initially empty
+                        data=[],  # Initially empty
                         page_current=0,
                         page_size=page_size,
-                        page_action="custom",  # <-- server-side paging
+                        page_action="custom",  # <-- Server-side paging
                         cell_selectable=False,
                         virtualization=False
                     ),
@@ -84,7 +85,8 @@ def create_data_table(id_name: str, dataset: pd.DataFrame, visible: bool = True,
     )
 
 
-def create_usa_map(data_manager: DataManager) -> dcc.Graph:
+def create_usa_map(color_scale: str = "Blues",
+                   mapbox_style: str = "carto-positron") -> dcc.Graph:
     """
     Creates a choropleth map of the United States illustrating transaction count
     per state. The map is built using Plotly Mapbox and shows states colored by
@@ -93,17 +95,17 @@ def create_usa_map(data_manager: DataManager) -> dcc.Graph:
 
     Parameters
     ----------
-    data_manager : DataManager
-        An instance of the DataManager class containing the transaction data
-        required for generating the map.
-
+    color_scale : str, optional
+        The graphs color scale to use, by default "Reds"
+    mapbox_style: str, optional
+        Mapbox style to use, by default "carto-positron"
     Returns
     -------
     dash_core_components.Graph
         A Dash Graph component representing the map.
     """
     state_counts = (
-        data_manager.df_transactions
+        DataManager.get_instance().df_transactions
         .dropna(subset=["state_name"])
         .groupby("state_name", as_index=False)
         .size()
@@ -117,9 +119,9 @@ def create_usa_map(data_manager: DataManager) -> dcc.Graph:
         locations="state_name",
         featureidkey="properties.name",
         color="transaction_count",
-        color_continuous_scale="Reds",
+        color_continuous_scale=color_scale,
         labels={"transaction_count": "Transactions"},
-        mapbox_style="carto-positron"
+        mapbox_style=mapbox_style
     )
 
     # Text with state abbreviations
@@ -130,24 +132,68 @@ def create_usa_map(data_manager: DataManager) -> dcc.Graph:
         text=[full_to_abbr[n] for n in state_counts["state_name"]],
         textfont=dict(size=12, color="black"),
         showlegend=False,
-        hoverinfo="none"
+        hoverinfo="skip"
     ))
 
     # Update layout
     fig.update_layout(
+        autosize=False,
         mapbox=dict(
             center={"lat": 37.8, "lon": -96.9},
             zoom=3,
         ),
-        margin={"l": 0, "r": 0, "t": 0, "b": 0})
+        margin=dict(
+            b=0,
+            l=0,
+            r=0,
+            t=0,
+        ),
+        uirevision=str(time.time()),
+    )
 
     # Remove color scale
     fig.update_coloraxes(showscale=False)
 
     return dcc.Graph(
-        id=str(IDs.MAP.value),
+        id=IDs.MAP.value,
         figure=fig,
-        responsive=True,
         config={"displayModeBar": False, "scrollZoom": True},
-        className="map"
+        className="map",
+        style={"height": "100%", "width": "100%"},
+        responsive=True
+    )
+
+
+def create_tooltips():
+    """
+    Creates a container that holds tooltip components designed to provide additional
+    contextual information or shortcuts for the specified targets. Each tooltip is
+    associated with a unique target and can be triggered by hover. The placement of
+    the tooltip specifies the alignment of the tooltip relative to its target.
+
+    Returns:
+        html.Div: A div element containing the configured tooltip components.
+
+    """
+    return html.Div(
+        children=[
+            dbc.Tooltip(
+                "Shortcut: S",
+                target=IDs.BUTTON_SETTINGS_MENU.value,
+                placement="right",
+                is_open=False,
+                trigger="hover",
+                id={"type": "tooltip", "id": "settings-button"},
+            ),
+            dbc.Tooltip(
+                "Shortcut: T",
+                target=IDs.BUTTON_DARK_MODE_TOGGLE.value,
+                placement="left",
+                is_open=False,
+                trigger="hover",
+                id={"type": "tooltip", "id": "dark-mode-toggle"},
+            ),
+            # Add more...
+        ],
+        style={"display": "contents"}
     )
