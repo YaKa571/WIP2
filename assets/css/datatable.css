@@ -1,0 +1,78 @@
+/* ============================================================
+   Data Table
+   ============================================================ */
+
+.datatable {
+    margin: var(--gutter) / 2;
+}
+
+.datatable .dash-table-container {
+    overflow-x: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--table-scrollbar-thumb-color) var(--card-bg) !important;
+}
+
+.datatable .dash-spreadsheet-container td,
+.datatable .dash-spreadsheet-container th {
+    padding: 8px !important;
+    text-align: center !important;
+    border: 1px solid var(--table-border-color) !important;
+
+}
+
+.datatable .dash-spreadsheet-container td {
+    color: var(--text-main) !important;
+}
+
+.datatable .dash-spreadsheet-container th {
+    background-color: var(--blue-main) !important;
+    color: var(--table-header-text-color) !important;
+    font-weight: bold !important;
+}
+
+/* Conditional odd cell background */
+.datatable .dash-spreadsheet-container table tr:nth-child(odd) td {
+    background-color: var(--table-bg-odd) !important;
+}
+
+/* Conditional even cell background */
+.datatable .dash-spreadsheet-container table tr:nth-child(even) td {
+    background-color: var(--table-bg-even) !important;
+}
+
+/* Set scrollbar height */
+.datatable .dash-table-container::-webkit-scrollbar {
+    height: 8px; /* scrollbar thickness */
+}
+
+/* Thumb (the draggable part) */
+.datatable .dash-table-container::-webkit-scrollbar-thumb {
+    background-color: #888 !important;
+    border-radius: 4px;
+    border: 2px solid #333;
+}
+
+.datatable .dash-table-container button {
+    padding: 0.25rem 0.5rem !important;
+    margin: 0 !important;
+}
+
+.datatable .dash-table-container button:first-child {
+    border-top-left-radius: var(--table-button-radius) !important;
+    border-bottom-left-radius: var(--table-button-radius) !important;
+}
+
+.datatable .dash-table-container button:last-child {
+    border-top-right-radius: var(--table-button-radius) !important;
+    border-bottom-right-radius: var(--table-button-radius) !important;
+}
+
+.datatable input, .datatable input::placeholder {
+    background-color: var(--card-bg) !important;
+    color: var(--text-main) !important;
+}
+
+.datatable input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}

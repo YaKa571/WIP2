@@ -1,0 +1,69 @@
+/* ==========================================================================
+   Map-Specific Styles
+   ========================================================================== */
+
+.map-card-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 250px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100%;
+    border-radius: var(--outer-border-radius) !important;
+}
+
+.map-container {
+    flex: 1 1 auto;
+    height: 100%;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+    opacity: 1;
+    border-radius: var(--outer-border-radius) !important;
+    border: none;
+}
+
+/* Fix shiny borders */
+.map .main-svg,
+.map .js-plotly-plot {
+    border-radius: var(--bugfix-border-radius)
+}
+
+.map {
+    width: 100%;
+    min-height: 0;
+    flex-shrink: 1;
+    border-radius: var(--outer-border-radius) !important;
+}
+
+.map-container.fade-out {
+    opacity: 0;
+}
+
+.map-container.fade-in {
+    opacity: 1;
+    transition: opacity 0.33s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.map-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8rem;
+    height: 8rem;
+    border: 1px solid var(--spinner-bg);
+    border-top: 5px solid var(--blue-main);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.map-container.fade-out ~ .map-spinner {
+    opacity: 1;
+}

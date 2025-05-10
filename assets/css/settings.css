@@ -1,0 +1,249 @@
+/* ================================
+   SETTINGS CANVAS
+================================ */
+
+.settings-canvas {
+    background-color: var(--offcanvas-bg);
+    border-top-left-radius: var(--outer-border-radius);
+    border-top-right-radius: var(--outer-border-radius);
+    box-shadow: var(--offcanvas-settings-shadow);
+    height: 33%;
+}
+
+.offcanvas-backdrop.show {
+    background-color: var(--offcanvas-backdrop);
+}
+
+.settings-canvas .offcanvas-title {
+    color: var(--text-main);
+    flex: 1;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.settings-canvas .offcanvas-header {
+    padding-bottom: 0;
+}
+
+.settings-canvas .offcanvas-body {
+    padding: 0;
+}
+
+.settings-cards-row {
+    display: flex !important;
+    gap: var(--gutter);
+    height: 100%;
+    padding: var(--gutter) var(--gutter) !important;
+}
+
+.settings-card-col {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0;
+}
+
+.settings-card {
+    background-color: #fff;
+    border-radius: var(--outer-border-radius);
+    box-shadow: var(--card-shadow-1), var(--card-shadow-2);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    transition: transform .2s ease, box-shadow .2s ease;
+    width: 100%;
+}
+
+.settings-card:hover {
+    box-shadow: var(--card-shadow-hover-1), var(--card-shadow-hover-2);
+    transform: translateY(-3px);
+}
+
+.settings-card-body {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: .5rem;
+    justify-content: flex-start;
+    min-height: 0;
+    padding: 1rem;
+}
+
+.settings-canvas .btn-close {
+    filter: invert(0);
+    opacity: .6;
+    transition: filter .3s ease, opacity .3s ease;
+}
+
+.settings-canvas .btn-close:hover {
+    opacity: 1;
+}
+
+.settings-canvas.dark-mode .btn-close {
+    filter: invert(1);
+}
+
+.settings-card-header {
+    background-color: var(--blue-main);
+    border-top-left-radius: var(--outer-border-radius) !important;
+    border-top-right-radius: var(--outer-border-radius) !important;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: .5rem 1rem;
+    text-transform: uppercase;
+}
+
+.settings-item {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    height: 35px;
+    justify-content: space-between;
+    overflow: visible;
+    width: 100%;
+}
+
+.settings-label {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    font-size: 1rem;
+    font-weight: bold;
+    min-width: 50%;
+    max-width: 50%;
+    text-transform: uppercase;
+}
+
+.settings-item .form-check {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    width: auto;
+}
+
+.settings-item .form-check-input {
+    margin: 0;
+    padding: 0;
+    transform-origin: right center;
+    transform: scale(1.4);
+}
+
+.settings-canvas.offcanvas-start {
+    border-radius: 0 var(--outer-border-radius) var(--outer-border-radius) 0;
+}
+
+/* Left and Right Offcanvas */
+.settings-canvas.offcanvas-start,
+.settings-canvas.offcanvas-end {
+    height: 100%;
+    width: 25%;
+    max-width: 500px;
+    min-width: 420px;
+}
+
+.settings-canvas.offcanvas-end {
+    border-radius: var(--outer-border-radius) 0 0 var(--outer-border-radius);
+}
+
+.settings-canvas.offcanvas-start .offcanvas-body,
+.settings-canvas.offcanvas-end .offcanvas-body {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0 var(--gutter);
+}
+
+.settings-canvas.offcanvas-start .settings-cards-row,
+.settings-canvas.offcanvas-end .settings-cards-row {
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    overflow: hidden;
+}
+
+.settings-canvas.offcanvas-start .settings-cards-row > .settings-card-col,
+.settings-canvas.offcanvas-end .settings-cards-row > .settings-card-col {
+    flex: 1 1 0 !important;
+    max-width: none !important;
+    min-height: 0;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.settings-canvas.offcanvas-top .settings-cards-row,
+.settings-canvas.offcanvas-bottom .settings-cards-row {
+    min-width: 1200px !important;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* ================================
+   DROPDOWN
+================================ */
+
+.settings-dropdown .Select-control {
+    background-color: var(--dropdown-body-bg);
+    color: var(--dropdown-body-color);
+    border: 1px solid var(--dropdown-border-color, #ccc);
+    transition: all 0.2s ease;
+}
+
+.settings-dropdown .Select-control,
+.settings-dropdown .is-focused .Select-control,
+.settings-dropdown .Select,
+.settings-dropdown .is-focused .Select {
+    background-color: var(--dropdown-body-bg) !important;
+    color: var(--dropdown-body-color) !important;
+}
+
+.settings-dropdown .Select-value-label {
+    color: var(--dropdown-body-color) !important;
+    opacity: 1 !important;
+}
+
+.settings-dropdown .Select-input > input {
+    background-color: var(--dropdown-body-bg) !important;
+    color: var(--dropdown-body-color) !important;
+}
+
+.settings-dropdown .Select-menu-outer {
+    background-color: var(--dropdown-body-bg);
+    color: var(--dropdown-body-color);
+    border: 1px solid var(--dropdown-border-color, #ccc);
+}
+
+.settings-dropdown .Select-option {
+    background-color: var(--dropdown-body-bg);
+    color: var(--dropdown-body-color);
+}
+
+.settings-dropdown .Select-option.is-focused {
+    background-color: var(--dropdown-secondary-bg, #2a2a2a);
+}
+
+.settings-dropdown .Select-option.is-selected {
+    background-color: var(--dropdown-primary);
+    color: #fff;
+}
+
+.settings-dropdown .Select-placeholder {
+    color: var(--dropdown-body-color);
+    opacity: 0.7;
+}
+
+.settings-dropdown .Select-clear-zone,
+.settings-dropdown .Select-arrow-zone {
+    color: var(--dropdown-body-color);
+}
+
+.settings-dropdown .Select-value,
+.settings-dropdown .Select-multi-value-wrapper {
+    background-color: var(--dropdown-body-bg) !important;
+}
