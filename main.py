@@ -21,7 +21,8 @@ from frontend.component_ids import IDs
 
 def create_app():
     app = Dash(__name__, external_stylesheets=
-    [dbc.themes.BOOTSTRAP, "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"])
+    [dbc.themes.BOOTSTRAP, "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"],
+    suppress_callback_exceptions=True,)
 
     app.title = "Financial Transactions Dashboard"
 
