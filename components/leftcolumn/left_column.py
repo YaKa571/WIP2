@@ -1,89 +1,8 @@
-from typing import TypedDict, Callable, Any, Dict
-
 import dash_bootstrap_components as dbc
 from dash import html
 
-from backend.data_manager import DataManager
-from frontend.component_ids import IDs
-from frontend.icon_manager import Icons, IconID
-
-
-# Define a TypedDict for KPI configuration
-class KPIConfig(TypedDict):
-    """
-    Represents a TypedDict for configuration of a KPI.
-
-    KPIConfig defines the structure for configuring KPI data, including its title,
-    icon representation, value computation function, and formatting function.
-    It is used to organize and manage KPI-related configurations in a structured way.
-    """
-    title: str
-    icon: IconID
-    value_fn: Callable[[DataManager], Any]
-    format_fn: Callable[[Any], str]
-
-
-# Mapping of KPI IDs to their configuration
-KPI_CONFIG: Dict[IDs, KPIConfig] = {
-    IDs.KPI_CARD_AMT_TRANSACTIONS: KPIConfig(
-        title="Transactions",
-        icon=IconID.CHART_PIPE,
-        value_fn=lambda dm: dm.amount_of_transactions,
-        format_fn=lambda v: f"{v:,}".replace(",", "."),
-    ),
-    IDs.KPI_CARD_SUM_OF_TRANSACTIONS: KPIConfig(
-        title="Total Value",
-        icon=IconID.MONEY_DOLLAR,
-        value_fn=lambda dm: dm.sum_of_transactions,
-        format_fn=lambda v: f"${v:,.2f}",
-    ),
-    IDs.KPI_CARD_AVG_TRANSACTION_AMOUNT: KPIConfig(
-        title="Avg. Transaction",
-        icon=IconID.CHART_AVERAGE,
-        value_fn=lambda dm: dm.avg_transaction_amount,
-        format_fn=lambda v: f"${v:,.2f}",
-    ),
-}
-
-
-def create_kpi_card(card_id: IDs) -> dbc.Card:
-    """
-    Creates and returns a KPI card component with specific properties including
-    value, icon, and title. The configuration for the KPI card is sourced based
-    on the provided card ID.
-
-    Raises:
-        ValueError: If no KPI configuration is found for the given card ID.
-
-    Args:
-        card_id (IDs): Identifier for the KPI card to retrieve the configuration.
-
-    Returns:
-        dbc.Card: A Dash Bootstrap Component representing the KPI card.
-    """
-    config = KPI_CONFIG.get(card_id)
-    if config is None:
-        raise ValueError(f"No KPI configuration found for {card_id}")
-
-    raw_value = config["value_fn"](DataManager.get_instance())
-    value_str = config["format_fn"](raw_value)
-    icon = html.Img(
-        src=Icons.get_icon(config["icon"]),
-        className="kpi-card-icon",
-        draggable="false"
-    )
-
-    return dbc.Card(
-        dbc.CardBody([
-            icon,
-            html.P(value_str, className="kpi-card-value mb-0 pb-0"),
-            html.P(config["title"], className="kpi-card-title m-0 p-0"),
-        ],
-            className="d-flex flex-column justify-content-center align-items-center"
-        ),
-        id=str(card_id.value),
-        className="card"
-    )
+from components.factories.kpi_card_factory import create_kpi_card
+from frontend.component_ids import ID
 
 
 def create_kpi_cards() -> html.Div:
@@ -101,7 +20,11 @@ def create_kpi_cards() -> html.Div:
     """
     cards = [
         create_kpi_card(kpi_id)
-        for kpi_id in KPI_CONFIG
+        for kpi_id in {
+            ID.KPI_CARD_SUM_OF_TRANSACTIONS,
+            ID.KPI_CARD_AMT_TRANSACTIONS,
+            ID.KPI_CARD_AVG_TRANSACTION_AMOUNT
+        }
     ]
     return html.Div(cards, className="top-cards")
 
@@ -119,10 +42,10 @@ def create_map_card() -> dbc.Card:
         dbc.CardBody(
             [
 
-                html.Div(id=IDs.MAP_CONTAINER.value,
+                html.Div(id=ID.MAP_CONTAINER.value,
                          className="map-container fade-in"
                          ),
-                html.Div(id=IDs.MAP_SPINNER.value,
+                html.Div(id=ID.MAP_SPINNER.value,
                          className="map-spinner"
                          )
 
