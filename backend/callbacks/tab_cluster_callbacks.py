@@ -1,10 +1,10 @@
 from dash import Input, Output, callback, callback_context
-
+from frontend.component_ids import IDs
 
 
 @callback(
-    Output('cluster-dropdown-output', 'children'),
-    Input('cluster-dropdown', 'value')
+    Output(IDs.CLUSTER_DROPDOWN_OUTPUT, 'children'),
+    Input(IDs.CLUSTER_DROPDOWN, 'value')
 )
 def update_cluster(value):
     ctx = callback_context
