@@ -1,4 +1,4 @@
-from dash import Input, Output, callback
+from dash import Input, Output, callback, callback_context
 
 
 
@@ -7,5 +7,6 @@ from dash import Input, Output, callback
     Input('cluster-dropdown', 'value')
 )
 def update_cluster(value):
-    print(value)
+    ctx = callback_context
+    print(ctx.triggered)
     return f'You have selected "{value}" '
