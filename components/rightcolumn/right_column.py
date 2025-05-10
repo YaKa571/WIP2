@@ -1,8 +1,17 @@
+# components/rightcolumn/right_column.py
+
 import dash_bootstrap_components as dbc
 from dash import html
 
+from components.rightcolumn.tabs.tab_cluster import create_cluster_content
+from components.rightcolumn.tabs.tab_fraud import create_fraud_content
+# importiere Deine fünf Builder
+from components.rightcolumn.tabs.tab_home import create_home_content
+from components.rightcolumn.tabs.tab_merchant import create_merchant_content
+from components.rightcolumn.tabs.tab_user import create_user_content
 from frontend.component_ids import ID
 
+# nur Label und ID, Builder ziehen wir unten per Mapping
 TABS = [
     ("Home", ID.TAB_HOME.value),
     ("Fraud", ID.TAB_FRAUD.value),
@@ -11,20 +20,17 @@ TABS = [
     ("Merchant", ID.TAB_MERCHANT.value),
 ]
 
+# Mapping Tab-ID → Builder-Funktion
+TAB_BUILDERS = {
+    ID.TAB_HOME.value: create_home_content,
+    ID.TAB_FRAUD.value: create_fraud_content,
+    ID.TAB_CLUSTER.value: create_cluster_content,
+    ID.TAB_USER.value: create_user_content,
+    ID.TAB_MERCHANT.value: create_merchant_content,
+}
+
 
 def create_tabs():
-    """
-    Creates a custom tab bar with buttons for each defined tab in TABS.
-
-    This function dynamically generates a tab bar using a list of predefined
-    tab configurations from TABS. Each button in the tab bar corresponds to a
-    tab, with specific labels and identifiers. The buttons are styled and
-    initialized with a default click count of zero ('n_clicks').
-
-    Returns:
-        Div: A Dash HTML Div component containing the tab buttons.
-
-    """
     buttons = []
     for label, tid in TABS:
         buttons.append(
@@ -35,38 +41,40 @@ def create_tabs():
                 className="custom-tab-button"
             )
         )
-
-    return html.Div(
-        buttons,
-        className="d-flex custom-tab-bar"
-    )
+    return html.Div(buttons, className="d-flex custom-tab-bar")
 
 
 def create_right_column():
-    """
-    Creates the right-hand column layout of the page.
+    tabs = create_tabs()
 
-    This function composes the layout structure for the right-hand column
-    using Dash and Dash Bootstrap Components. The content includes a card
-    that contains tabs and a dynamic content area.
+    # Baue für jeden Tab-Inhalt einen Wrapper mit pattern-ID und Basis-Klasse
+    wrappers = []
+    for idx, (_, tid) in enumerate(TABS):
+        builder = TAB_BUILDERS[tid]
+        wrappers.append(
+            html.Div(
+                builder(),
+                id={"type": "tab-content", "index": tid},
+                className="tab-item active" if idx == 0 else "tab-item hidden"
+            )
+        )
 
-    Returns
-    -------
-    dash.html.Div
-        A Div component structured as the right-hand column of the page.
-    """
     return html.Div(
         [
             dbc.Card(
                 dbc.CardBody(
                     [
-                        create_tabs(),
-                        html.Div(id="custom-tab-content", className="tab-content-wrapper flex-fill")
+                        tabs,
+                        html.Div(
+                            wrappers,
+                            id="custom-tab-content",
+                            className="tab-content-wrapper flex-fill"
+                        )
                     ],
                     className="d-flex flex-column p-0"
                 ),
                 className="card h-100"
             )
         ],
-        className="right-column"
+        className="right-column d-flex flex-column"
     )
