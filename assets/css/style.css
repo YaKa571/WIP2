@@ -301,6 +301,7 @@ html, body {
     overflow: hidden;
     opacity: 1;
     border-radius: var(--outer-border-radius) !important;
+    border: none;
 }
 
 /* Fix shiny borders */
