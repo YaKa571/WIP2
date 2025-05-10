@@ -4,7 +4,7 @@ from dash import callback, Output, Input, State, MATCH, ctx, html
 from dash.exceptions import PreventUpdate
 
 from backend.data_manager import DataManager
-from components.component_factory import create_usa_map
+from components.factories.component_factory import create_usa_map
 from frontend.component_ids import IDs
 
 dm = DataManager.get_instance()

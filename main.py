@@ -8,13 +8,13 @@ dm = DataManager.get_instance()
 import dash_bootstrap_components as dbc
 from dash import Dash, dcc
 
-import components.component_factory as comp_factory
-import components.settings_components_factory as settings_comp_factory
+import components.factories.component_factory as comp_factory
+import components.factories.settings_components_factory as settings_comp_factory
 from backend.callbacks.settings_callbacks import *  # noqa: F401
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401
 from backend.callbacks.tab_callback import update_tabs  # noqa: F401
-from components.left_column import create_left_column
-from components.right_column import create_right_column
+from components.leftcolumn.left_column import create_left_column
+from components.rightcolumn.right_column import create_right_column
 from frontend.component_ids import IDs
 
 
