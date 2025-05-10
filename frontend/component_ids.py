@@ -1,6 +1,6 @@
 from enum import Enum
 
-class IDs(str, Enum):
+class ID(str, Enum):
 
     APP_STATE_STORE = "app-state-store"
     ANIMATION_STATE_STORE = "animation-state-store"

@@ -1,0 +1,185 @@
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+
+html, body {
+    height: 100%;
+    margin: 0;
+    min-width: 768px;
+}
+
+/* ==========================================================================
+   Dashboard Layout
+   ========================================================================== */
+
+/* Overall wrapper: full viewport, flex-column */
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    padding: var(--gutter);
+    box-sizing: border-box;
+    background-color: var(--bg-page);
+    color: var(--text-main);
+}
+
+/* Header section: natural height, centered */
+.dashboard-header {
+    flex: 0 1 auto;
+    padding-bottom: var(--gutter); /* Spacing between header & body */
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    padding: 0;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+/* Body section: two columns, fills remainder */
+.dashboard-body {
+    flex: 1 1 auto;
+    display: flex;
+    padding-top: 0;
+    margin-top: 0;
+    gap: var(--gutter); /* Spacing between columns */
+}
+
+/* Left & right columns: flex-column, equal share */
+.left-column, .right-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    gap: var(--gutter); /* Spacing within column */
+    animation: fadeInUp 0.6s ease both;
+}
+
+/* ==========================================================================
+   Top Cards (KPI)
+   ========================================================================== */
+
+.top-cards {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping 3->2->1 per row */
+    gap: var(--gutter);
+}
+
+.top-cards .card {
+    flex: 1 1 0;
+    min-width: 240px;
+}
+
+/* ==========================================================================
+   Right Column Single Card
+   ========================================================================== */
+
+.right-column .card {
+    flex: 1 1 auto; /* Fill entire right column */
+    overflow: auto;
+}
+
+/* ==========================================================================
+   Card Styling & Shadows
+   ========================================================================== */
+
+/* Global card rounding & shadows */
+.card {
+    background-color: var(--card-bg) !important;
+    border-radius: var(--outer-border-radius) !important;
+    box-shadow: var(--card-shadow-1), var(--card-shadow-2);
+    transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-main);
+}
+
+.card-title {
+    text-transform: uppercase;
+}
+
+.card:hover {
+    box-shadow: var(--card-shadow-hover-1), var(--card-shadow-hover-2);
+}
+
+/* ==========================================================================
+   KPI-Specific Styles
+   ========================================================================== */
+
+.kpi-card-icon {
+    width: clamp(21px, 2vw, 33px);
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
+    filter: var(--icon-filter);
+}
+
+.kpi-card-value {
+    width: auto;
+    text-align: center;
+    padding: 0 0.5rem;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-weight: bold;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: fade;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.kpi-card-title {
+    width: auto;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    padding: 0 0.5rem;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-weight: 400;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: fade;
+    box-sizing: border-box;
+    margin: 0;
+    line-height: 1.0;
+}
+
+/* ============================================================
+   Fancy Mode Toggle Button & Settings Button
+   ============================================================ */
+
+.square-button {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    padding: 0.5rem 0.75rem;
+    border-radius: 9px;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    box-shadow: var(--card-shadow-1), var(--card-shadow-2);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.square-button:hover {
+    /* Pop a little on hover */
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: var(--card-shadow-hover-1), var(--card-shadow-hover-2);
+}
+
+.square-button:active {
+    /* Press-down feedback */
+    transform: translateY(0) scale(0.95);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-header > .square-button:not(:first-child):not(:last-child) {
+    margin-inline: var(--gutter);
+}
+
+.settings-button {
+    /* Potential edits */
+}

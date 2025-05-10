@@ -16,7 +16,7 @@ from backend.callbacks.tab_callback import update_tabs  # noqa: F401
 from backend.callbacks.tab_cluster_callbacks import update_cluster
 from components.leftcolumn.left_column import create_left_column
 from components.rightcolumn.right_column import create_right_column
-from frontend.component_ids import IDs
+from frontend.component_ids import ID
 
 
 def create_app():
@@ -31,18 +31,18 @@ def create_app():
         [
 
             # Stores and Divs needed for the layout to work properly
-            dcc.Store(id=IDs.APP_STATE_STORE.value),
-            dcc.Store(id=IDs.ANIMATION_STATE_STORE.value),
+            dcc.Store(id=ID.APP_STATE_STORE.value),
+            dcc.Store(id=ID.ANIMATION_STATE_STORE.value),
             html.Div(id="app-init-trigger", style={"display": "none"}),
             html.Div(id="layout-ready-signal", style={"display": "none"}),
 
             # Row with title and dark mode switch
             html.Div(
                 [
-                    settings_comp_factory.create_icon_button("bi-gear", IDs.BUTTON_SETTINGS_MENU, "settings-menu"),
+                    settings_comp_factory.create_icon_button("bi-gear", ID.BUTTON_SETTINGS_MENU, "settings-menu"),
                     html.H1("Financial Transactions Dashboard",
                             className="m-0 flex-grow-1 text-center"),
-                    settings_comp_factory.create_icon_button("bi-sun-fill", IDs.BUTTON_DARK_MODE_TOGGLE),
+                    settings_comp_factory.create_icon_button("bi-sun-fill", ID.BUTTON_DARK_MODE_TOGGLE),
                     settings_comp_factory.create_settings_canvas()
                 ],
                 className="dashboard-header d-flex align-items-center"
@@ -53,11 +53,11 @@ def create_app():
                     [
 
                         # To have a look at a certain data table, add it here and set visible=True
-                        comp_factory.create_data_table(IDs.TABLE_USERS, dm.df_users, visible=False),
-                        comp_factory.create_data_table(IDs.TABLE_TRANSACTIONS, dm.df_transactions,
+                        comp_factory.create_data_table(ID.TABLE_USERS, dm.df_users, visible=False),
+                        comp_factory.create_data_table(ID.TABLE_TRANSACTIONS, dm.df_transactions,
                                                        visible=False),
-                        comp_factory.create_data_table(IDs.TABLE_CARDS, dm.df_cards, visible=False),
-                        comp_factory.create_data_table(IDs.TABLE_MCC, dm.df_mcc, visible=False),
+                        comp_factory.create_data_table(ID.TABLE_CARDS, dm.df_cards, visible=False),
+                        comp_factory.create_data_table(ID.TABLE_MCC, dm.df_mcc, visible=False),
 
                     ]
                 ),
@@ -77,7 +77,7 @@ def create_app():
             # Tooltips
             comp_factory.create_tooltips()
         ],
-        id=IDs.DASHBOARD_CONTAINER.value,
+        id=ID.DASHBOARD_CONTAINER.value,
         className="dashboard"
     )
 

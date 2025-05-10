@@ -1,0 +1,103 @@
+/* ==========================================================================
+   Variables
+   ========================================================================== */
+
+:root {
+    /* — Light Mode — */
+    --bg-page: #f5f7fa;
+    --text-main: #2e3a4a;
+    --card-bg: #ffffff;
+    --blue-main: #0d6efd;
+
+    /* Icon-Filter trick */
+    --icon-filter: invert(18%) sepia(11%) saturate(1631%) hue-rotate(175deg) brightness(95%) contrast(86%);
+
+    /* Dark shadows for the light-mode */
+    --card-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --card-shadow-2: 0 4px 6px rgba(0, 0, 0, 0.04);
+    --card-shadow-hover-1: 0 4px 8px rgba(0, 0, 0, 0.10);
+    --card-shadow-hover-2: 0 8px 15px rgba(0, 0, 0, 0.06);
+
+    /* Offcanvas Settings */
+    --offcanvas-settings-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+    --offcanvas-backdrop: rgba(0, 0, 0, 0.5);
+    --offcanvas-bg: rgba(240, 242, 245, 0.86);
+
+    /* Layout */
+    --gutter: 0.75rem;
+    --outer-border-radius: 15px;
+    --bugfix-border-radius: calc(var(--outer-border-radius) + 4px);
+
+    /* Tab */
+    --tab-text: #6b7280;
+    --tab-text-hover: #efefef;
+    --tab-text-active: #ffffff;
+    --tab-background-active: var(--blue-main);
+    --tab-background-inactive-hover: #2a81ff;
+    --tab-background-active-hover: #0d59fd;
+    --tab-underline-color: #d1d5db;
+    --tab-underline-color-hover: #9ca3af;
+    --tab-underline-color-active: #ffffff;
+
+    /* Table */
+    --table-bg-even: #f2f2f2;
+    --table-bg-odd: #ffffff;
+    --table-border-color: #b8b8b8;
+    --table-header-text-color: white;
+    --table-scrollbar-thumb-color: #9ca3af;
+    --table-button-radius: 7px;
+
+    /* Dropdown */
+    --dropdown-body-color: #333333;
+    --dropdown-body-bg: #fafafa;
+
+    /* Spinner */
+    --spinner-bg: rgba(0, 0, 0, 0.15);
+}
+
+.dark-mode {
+    /* — Dark Mode — */
+    --bg-page: #121212;
+    --text-main: #e5e5e5;
+    --card-bg: #1f1f1f;
+
+    /* Icon-Filter trick */
+    --icon-filter: invert(99%) sepia(86%) saturate(57%) hue-rotate(208deg) brightness(106%) contrast(80%);
+
+    /* White shadows for the dark-mode */
+    --card-shadow-1: 0 1px 3px rgba(255, 255, 255, 0.04);
+    --card-shadow-2: 0 4px 6px rgba(255, 255, 255, 0.02);
+    --card-shadow-hover-1: 0 4px 8px rgba(255, 255, 255, 0.06);
+    --card-shadow-hover-2: 0 8px 15px rgba(255, 255, 255, 0.03);
+
+    /* Off Canvas Settings */
+    --offcanvas-settings-shadow: 0 -4px 20px rgba(255, 255, 255, 0.04);
+    --offcanvas-backdrop: rgba(255, 255, 255, 0.08);
+    --offcanvas-bg: rgba(38, 38, 38, 0.94);
+
+    /* Tab */
+    --tab-text: #ccd1d8;
+    --tab-text-hover: #efefef;
+    --tab-text-active: #ffffff;
+    --tab-background-active: var(--blue-main);
+    --tab-background-inactive-hover: #2a81ff;
+    --tab-background-active-hover: #0d59fd;
+    --tab-underline-color: #d1d5db;
+    --tab-underline-color-hover: #9ca3af;
+    --tab-underline-color-active: #ffffff;
+
+    /* Table */
+    --table-bg-even: #1f1f1f;
+    --table-bg-odd: #2f2f2f;
+    --table-border-color: #404040;
+
+    /* Dropdown */
+    --dropdown-body-bg: #292929;
+    --dropdown-body-color: #e5e5e5;
+    --dropdown-border-color: #444;
+    --dropdown-secondary-bg: #2a2a2a;
+    --dropdown-primary: #0d6efd;
+
+    /* Spinner */
+    --spinner-bg: rgba(255, 255, 255, 0.2);
+}

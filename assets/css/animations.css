@@ -1,0 +1,26 @@
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+
+/* Fade-in-up for KPI cards and columns */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hover effect for KPI cards */
+.top-cards .card:hover {
+    transform: translateY(-4px) scale(1.01) rotate(0.02deg);
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
