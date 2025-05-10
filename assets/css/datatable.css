@@ -3,7 +3,7 @@
    ============================================================ */
 
 .datatable {
-    margin: var(--gutter) / 2;
+    margin: 0;
 }
 
 .datatable .dash-table-container {

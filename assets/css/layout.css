@@ -20,7 +20,6 @@ html, body {
     overflow: hidden;
     padding: var(--gutter);
     box-sizing: border-box;
-    gap: calc(var(--gutter) / 2); /* Spacing between header & body */
     background-color: var(--bg-page);
     color: var(--text-main);
 }
@@ -28,6 +27,7 @@ html, body {
 /* Header section: natural height, centered */
 .dashboard-header {
     flex: 0 1 auto;
+    padding-bottom: var(--gutter); /* Spacing between header & body */
 }
 
 .dashboard-header h1 {
