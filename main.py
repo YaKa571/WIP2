@@ -28,18 +28,18 @@ def create_app():
         [
 
             # Stores and Divs needed for the layout to work properly
-            dcc.Store(id="app-state-store"),
-            dcc.Store(id="animation-state-store"),
+            dcc.Store(id=IDs.APP_STATE_STORE.value),
+            dcc.Store(id=IDs.ANIMATION_STATE_STORE.value),
             html.Div(id="app-init-trigger", style={"display": "none"}),
             html.Div(id="layout-ready-signal", style={"display": "none"}),
 
             # Row with title and dark mode switch
             html.Div(
                 [
-                    settings_comp_factory.create_settings_button(),
+                    settings_comp_factory.create_icon_button("bi-gear", IDs.BUTTON_SETTINGS_MENU, "settings-menu"),
                     html.H1("Financial Transactions Dashboard",
                             className="m-0 flex-grow-1 text-center"),
-                    settings_comp_factory.create_mode_switch_button(),
+                    settings_comp_factory.create_icon_button("bi-sun-fill", IDs.BUTTON_DARK_MODE_TOGGLE),
                     settings_comp_factory.create_settings_canvas()
                 ],
                 className="dashboard-header d-flex align-items-center"
