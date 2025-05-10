@@ -802,3 +802,12 @@ html, body {
     height: 100% !important;
     min-height: 0 !important;
 }
+
+.tab-item.hidden {
+  display: none;
+}
+
+/* Nur das aktive Tab-Item einblenden */
+.tab-item.active {
+  display: block; /* oder flex, je nach Bedarf */
+}
