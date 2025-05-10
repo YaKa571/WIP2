@@ -380,6 +380,10 @@ html, body {
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
+.dashboard-header > .square-button:not(:first-child):not(:last-child) {
+    margin-inline: var(--gutter);
+}
+
 .settings-button {
     /* Potential edits */
 }
