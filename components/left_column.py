@@ -3,7 +3,6 @@ from typing import TypedDict, Callable, Any, Dict
 import dash_bootstrap_components as dbc
 from dash import html
 
-import components.component_factory as comp_factory
 from backend.data_manager import DataManager
 from frontend.component_ids import IDs
 from frontend.icon_manager import Icons, IconID
@@ -47,7 +46,7 @@ KPI_CONFIG: Dict[IDs, KPIConfig] = {
 }
 
 
-def create_kpi_card(card_id: IDs, data_manager: DataManager) -> dbc.Card:
+def create_kpi_card(card_id: IDs) -> dbc.Card:
     """
     Creates and returns a KPI card component with specific properties including
     value, icon, and title. The configuration for the KPI card is sourced based
@@ -58,8 +57,6 @@ def create_kpi_card(card_id: IDs, data_manager: DataManager) -> dbc.Card:
 
     Args:
         card_id (IDs): Identifier for the KPI card to retrieve the configuration.
-        data_manager (DataManager): Data manager instance used to calculate the KPI
-            value.
 
     Returns:
         dbc.Card: A Dash Bootstrap Component representing the KPI card.
@@ -68,7 +65,7 @@ def create_kpi_card(card_id: IDs, data_manager: DataManager) -> dbc.Card:
     if config is None:
         raise ValueError(f"No KPI configuration found for {card_id}")
 
-    raw_value = config["value_fn"](data_manager)
+    raw_value = config["value_fn"](DataManager.get_instance())
     value_str = config["format_fn"](raw_value)
     icon = html.Img(
         src=Icons.get_icon(config["icon"]),
@@ -89,7 +86,7 @@ def create_kpi_card(card_id: IDs, data_manager: DataManager) -> dbc.Card:
     )
 
 
-def create_kpi_cards(data_manager: DataManager) -> html.Div:
+def create_kpi_cards() -> html.Div:
     """
     Creates a collection of KPI cards in a dashboard layout.
 
@@ -99,21 +96,17 @@ def create_kpi_cards(data_manager: DataManager) -> html.Div:
     resulting cards are wrapped in a `html.Div` container with a specific
     CSS class for styling.
 
-    Args:
-        data_manager: An instance of the DataManager object used to provide
-            data required for generating the KPI cards.
-
     Returns:
         A Div component containing all the dynamically created KPI cards.
     """
     cards = [
-        create_kpi_card(kpi_id, data_manager)
+        create_kpi_card(kpi_id)
         for kpi_id in KPI_CONFIG
     ]
     return html.Div(cards, className="top-cards")
 
 
-def create_map_card(data_manager: DataManager) -> dbc.Card:
+def create_map_card() -> dbc.Card:
     """
     Creates and returns a styled Dash Bootstrap Card containing a placeholder text
     for a map. This card serves as a visual placeholder that can be extended to
@@ -125,29 +118,27 @@ def create_map_card(data_manager: DataManager) -> dbc.Card:
     return dbc.Card(
         dbc.CardBody(
             [
-                html.H3("Map", className="card-title text-center"),
 
-                html.Div(
-                    comp_factory.create_usa_map(data_manager),
-                    className="map-container flex-fill"
-                )
+                html.Div(id=IDs.MAP_CONTAINER.value,
+                         className="map-container fade-in"
+                         ),
+                html.Div(id=IDs.MAP_SPINNER.value,
+                         className="map-spinner"
+                         )
+
             ],
-            className="map-card-body d-flex flex-column",
+            className="map-card-body d-flex flex-column"
         ),
-        className="bottom-card card h-100"
+        className="card h-100 d-flex flex-column"
     )
 
 
-def create_left_column(data_manager: DataManager) -> html.Div:
+def create_left_column() -> html.Div:
     """
     Creates the left column of a dashboard layout.
 
     The left column includes KPI cards and a map card generated dynamically
     based on the provided data manager.
-
-    Parameters:
-        data_manager (DataManager): The data source manager used to retrieve
-            and process data for populating KPI cards and the map card.
 
     Returns:
         dash.html.Div: A Div element containing the left column layout structure
@@ -155,8 +146,8 @@ def create_left_column(data_manager: DataManager) -> html.Div:
     """
     return html.Div(
         [
-            create_kpi_cards(data_manager),
-            create_map_card(data_manager),
+            create_kpi_cards(),
+            create_map_card(),
         ],
         className="left-column",
     )
