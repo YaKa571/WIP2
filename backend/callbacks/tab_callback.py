@@ -1,53 +1,69 @@
 import json
 
-from dash import callback, Output, Input, callback_context, html, ALL
+from dash import callback, Output, Input, callback_context
+from dash.dependencies import ALL
 
-from components.right_column import TABS
+from components.rightcolumn.right_column import TABS
+from components.rightcolumn.tabs.tab_cluster import create_cluster_content
+from components.rightcolumn.tabs.tab_fraud import create_fraud_content
+from components.rightcolumn.tabs.tab_home import create_home_content
+from components.rightcolumn.tabs.tab_merchant import create_merchant_content
+from components.rightcolumn.tabs.tab_user import create_user_content
 from frontend.component_ids import IDs
+
+# Mapping tabs to their content‐builder functions
+TAB_CONTENT_BUILDERS = {
+    IDs.TAB_HOME.value: create_home_content,
+    IDs.TAB_FRAUD.value: create_fraud_content,
+    IDs.TAB_CLUSTER.value: create_cluster_content,
+    IDs.TAB_USER.value: create_user_content,
+    IDs.TAB_MERCHANT.value: create_merchant_content,
+}
 
 
 @callback(
-    # Update className of all buttons
     Output({"type": "custom-tab", "index": ALL}, "className"),
-    # Update the content area
     Output("custom-tab-content", "children"),
     Input({"type": "custom-tab", "index": ALL}, "n_clicks"),
 )
 def update_tabs(n_clicks_list):
-    # Determine which button was clicked last
+    """
+    Handles updating the className of custom tabs and determining the content
+    to render based on the active tab selected by users.
+
+    The function listens for user interactions (click events) on custom tabs
+    and updates their className to reflect the active state. Simultaneously,
+    it determines and updates the content displayed in the custom tab content
+    area using the appropriate content builder function.
+
+    @param n_clicks_list: List representing the number of clicks for each tab.
+                          Monitors click events for tabs.
+    @type n_clicks_list: List[int] | None
+
+    @return: A tuple containing a list of className updates for custom tabs
+             and the content for the active tab area.
+    @rtype: Tuple[List[str], Any]
+    """
     ctx = callback_context
+
+    # Determine active tab index from triggered event
     if not ctx.triggered:
-        # No click: Default-Tab
+        # no click yet -> default to first tab
         active = TABS[0][1]
     else:
-        # prop_id looks like this: '{"type":"custom-tab","index":"Fraud"}.n_clicks'
-        triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
-        active = json.loads(triggered_id)["index"]
+        # prop_id looks like '{"type":"custom-tab","index":"Fraud"}.n_clicks'
+        triggered_str = ctx.triggered[0]["prop_id"].split(".")[0]
+        triggered_id = json.loads(triggered_str)
+        active = triggered_id["index"]
 
-    # Generate classNames: add "active" only for the active tab
-    classnames = []
-    for _, tid in TABS:
-        cls = "custom-tab-button"
-        if tid == active:
-            cls += " active"
-        classnames.append(cls)
+    # Build className list, adding "active" to the selected tab
+    classnames = [
+        "custom-tab-button" + (" active" if tid == active else "")
+        for _, tid in TABS
+    ]
 
-    # Render content based on active ID
-    # TODO: Set content from components_factory later on
-    if active == IDs.TAB_FRAUD.value:
-        content = (html.H3("Fraud content", className="card-title text-center"),
-                   html.Div(className="tab-content-wrapper flex-fill"))
-    elif active == IDs.TAB_CLUSTER.value:
-        content = (html.H3("Cluster content", className="card-title text-center"),
-                   html.Div(className="tab-content-wrapper flex-fill"))
-    elif active == IDs.TAB_USER.value:
-        content = (html.H3("User content", className="card-title text-center"),
-                   html.Div(className="tab-content-wrapper flex-fill"))
-    elif active == IDs.TAB_MERCHANT.value:
-        content = (html.H3("Merchant content", className="card-title text-center"),
-                   html.Div(className="tab-content-wrapper flex-fill"))
-    else:
-        content = (html.H3("Home content", className="card-title text-center"),
-                   html.Div(className="tab-content-wrapper flex-fill"))
+    # Select the right builder, fallback to Home
+    builder = TAB_CONTENT_BUILDERS.get(active, create_home_content)
+    content = builder()
 
     return classnames, content
