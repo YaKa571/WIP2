@@ -180,7 +180,7 @@ def create_tooltips():
             dbc.Tooltip(
                 "Shortcut: S",
                 target=IDs.BUTTON_SETTINGS_MENU.value,
-                placement="right",
+                placement="bottom-start",
                 is_open=False,
                 trigger="hover",
                 id={"type": "tooltip", "id": "settings-button"},
@@ -188,7 +188,7 @@ def create_tooltips():
             dbc.Tooltip(
                 "Shortcut: T",
                 target=IDs.BUTTON_DARK_MODE_TOGGLE.value,
-                placement="left",
+                placement="bottom-end",
                 is_open=False,
                 trigger="hover",
                 id={"type": "tooltip", "id": "dark-mode-toggle"},

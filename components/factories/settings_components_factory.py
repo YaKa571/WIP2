@@ -127,7 +127,7 @@ def create_icon_button(icon: str, id: IDs, extra_cls: str = None) -> dbc.Button:
     return dbc.Button(
         html.I(className="bi " + icon),
         id=id.value,
-        className="ms-auto square-button" + (" " + extra_cls if extra_cls else ""),
+        className="square-button" + (" " + extra_cls if extra_cls else ""),
         n_clicks=0
     )
 
