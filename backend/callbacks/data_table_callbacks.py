@@ -1,6 +1,6 @@
 from dash import callback, Output, Input, MATCH, State
 
-from components.component_factory import DATASETS
+from components.factories.component_factory import DATASETS
 
 
 class DataTableCallbacks:

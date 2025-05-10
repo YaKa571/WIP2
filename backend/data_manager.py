@@ -2,7 +2,9 @@ from pathlib import Path
 
 import pandas as pd
 import pgeocode
+import pyarrow as pa
 import us
+from pyarrow.parquet import ParquetFile
 
 import utils.logger as logger
 from backend.data_handler import optimize_data, clean_units, json_to_data_frame
@@ -11,46 +13,94 @@ from utils.benchmark import Benchmark
 DATA_DIRECTORY = Path("assets/data/")
 
 
-def _read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.DataFrame:
+def _read_parquet_data(file_name: str, num_rows: int = 500_000, sort_alphabetically: bool = False) -> pd.DataFrame:
     """
-    Reads a Parquet file and loads it into a Pandas DataFrame. Optionally sorts the columns
-    alphabetically if specified.
+    Reads a Parquet file into a pandas DataFrame.
 
-    Arguments:
-        file_name (str): The name of the Parquet file to be read. The file must exist
-            in the predefined data directory.
-        sort_alphabetically (bool): Optional; whether to sort the DataFrame's columns
-            alphabetically. Defaults to False.
+    This function loads data from a specified Parquet file, with options to limit the
+    number of rows and to sort column names alphabetically.
+
+    Parameters:
+    file_name: str
+        The name of the Parquet file to read. Must exist in the DATA_DIRECTORY.
+    num_rows: int, optional
+        The number of rows to load from the Parquet file. By default, 500,000 rows
+        are loaded. If None or greater than the total number of rows in the file,
+        all rows will be loaded.
+    sort_alphabetically: bool, optional
+        If True, sort the column names alphabetically. Default is False.
 
     Returns:
-        pd.DataFrame: The loaded data in a Pandas DataFrame format.
+    pd.DataFrame
+        The pandas DataFrame containing the data from the Parquet file.
 
     Raises:
-        FileNotFoundError: If the specified file does not exist in the data directory.
+    FileNotFoundError
+        If the specified file does not exist in the DATA_DIRECTORY.
     """
     file_path = DATA_DIRECTORY / file_name
 
     if not file_path.exists():
         raise FileNotFoundError(f"⚠️ Parquet file not found: {file_path}")
 
-    data_frame = pd.read_parquet(file_path, engine="pyarrow")
+    pf = ParquetFile(file_path)
+    total_rows = pf.metadata.num_rows
+
+    if num_rows is None or num_rows >= total_rows:
+        df = pd.read_parquet(file_path, engine="pyarrow")
+    else:
+        batch = next(pf.iter_batches(batch_size=num_rows))
+        df = pa.Table.from_batches([batch]).to_pandas()
 
     if sort_alphabetically:
-        data_frame = data_frame.reindex(sorted(data_frame.columns), axis=1)
+        df = df.reindex(sorted(df.columns), axis=1)
 
-    return data_frame
+    return df
 
 
 class DataManager:
     """
-    Manages data loading, cleaning, and transformation processes.
+    Manages data initialization, preprocessing, and storage for use in a larger application.
 
-    DataManager centralizes the management of user, transaction, and card datasets. It handles the initialization
-    of datasets, including loading raw data, transforming it to predefined formats, and carrying out basic data
-    cleaning operations. This class is aimed for use in scenarios requiring pre-processed data as DataFrames.
+    The DataManager class is designed as a singleton to ensure a single consistent
+    instance throughout its usage. It initializes data-related components, handles
+    preprocessing tasks such as processing ZIP codes and state names in transaction data,
+    and computes summaries of loaded datasets. Data is read from CSV files, converted to
+    parquet files for optimization, cleaned, and updated in memory. Additionally, the class
+    provides detailed data summaries and logs progress during its operation.
+
+    Methods:
+        initialize: Creates a singleton instance of the class with a specified data
+        directory.
+
+        get_instance: Returns the singleton instance of the class.
+
+        process_transaction_zips: Preprocesses and standardizes ZIP codes in the
+        transactions dataset.
+
+        process_transaction_states: Maps state abbreviations to their full names in
+        the transactions dataset.
+
+        start: Performs the overall data setup and processing operations.
     """
 
+    _instance = None
+
+    @staticmethod
+    def initialize(data_dir: Path = DATA_DIRECTORY):
+        if DataManager._instance is None:
+            DataManager._instance = DataManager(data_dir)
+
+    @staticmethod
+    def get_instance():
+        if DataManager._instance is None:
+            raise Exception("⚠️ DataManager has not been initialized. Call DataManager.initialize() first.")
+        return DataManager._instance
+
     def __init__(self, data_dir: Path = DATA_DIRECTORY):
+        if DataManager._instance is not None:
+            raise Exception("⚠️ Use DataManager.get_instance() instead of creating a new instance.")
+
         benchmark_data_manager = Benchmark("DataManager initialization")
         logger.log("\nℹ️ Initializing DataManager...")
 
@@ -70,7 +120,7 @@ class DataManager:
 
         self._nomi = pgeocode.Nominatim("us")
 
-        self.initialize()
+        self.start()  # <-- Initializing all data
         benchmark_data_manager.print_time()
 
     def process_transaction_zips(self):
@@ -147,12 +197,12 @@ class DataManager:
         else:
             logger.log("ℹ️ State names already exist, skipping mapping", 1)
 
-    def initialize(self):
+    def start(self):
         """
-        Initializes and prepares data for further processing by converting CSV files to parquet files,
-        loading them as DataFrames, and performing cleaning and preprocessing tasks such as processing
-        zip codes and state names for transactions. Additionally, it logs a summary of the processed data
-        units.
+        Starts the process of loading, cleaning, and processing transaction data. The method primarily deals
+        with converting raw data files to optimized formats, reading the data as DataFrames, and performing
+        initial preprocessing steps. It also calculates summary statistics such as the total number,
+        sum, and average of transaction amounts and logs key insights about the processed data.
 
         Summary:
         1. Converts source CSV files to parquet format if not done previously.
