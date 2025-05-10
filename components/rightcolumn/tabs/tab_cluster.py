@@ -1,5 +1,5 @@
 from dash import html, dcc
-from frontend.component_ids import IDs
+from frontend.component_ids import ID
 
 # TODO: @Yannic
 
@@ -9,9 +9,9 @@ def create_cluster_content():
             html.H1("Cluster"),
             html.P("This is the cluster page of the application."),
             # TODO Names
-            dcc.Dropdown(['Default','Age Group','Income vs Expenditure'],'Default',id=IDs.CLUSTER_DROPDOWN),
+            dcc.Dropdown(['Default','Age Group','Income vs Expenditure'],'Default',id=ID.CLUSTER_DROPDOWN),
             html.Hr(),
-            html.Div(id=IDs.CLUSTER_DROPDOWN_OUTPUT)
+            html.Div(id=ID.CLUSTER_DROPDOWN_OUTPUT)
         ],
         className="tab-content-wrapper flex-fill"
     )

@@ -70,3 +70,11 @@
     border-radius: 11px;
     margin: var(--gutter);
 }
+.tab-item.hidden {
+  display: none;
+}
+
+/* Nur das aktive Tab-Item einblenden */
+.tab-item.active {
+  display: block; /* oder flex, je nach Bedarf */
+}
