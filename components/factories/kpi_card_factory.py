@@ -1,4 +1,3 @@
-# Define a TypedDict for KPI configuration
 from typing import TypedDict, Callable, Any, Dict
 
 import dash_bootstrap_components as dbc

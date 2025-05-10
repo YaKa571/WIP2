@@ -20,11 +20,11 @@ def create_kpi_cards() -> html.Div:
     """
     cards = [
         create_kpi_card(kpi_id)
-        for kpi_id in {
-            ID.KPI_CARD_SUM_OF_TRANSACTIONS,
+        for kpi_id in [
             ID.KPI_CARD_AMT_TRANSACTIONS,
+            ID.KPI_CARD_SUM_OF_TRANSACTIONS,
             ID.KPI_CARD_AVG_TRANSACTION_AMOUNT
-        }
+        ]
     ]
     return html.Div(cards, className="top-cards")
 
