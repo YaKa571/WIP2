@@ -11,7 +11,7 @@ from dash import dash_table, html, dcc
 from shapely.geometry import shape
 
 from backend.data_manager import DataManager
-from frontend.component_ids import IDs
+from frontend.component_ids import ID
 
 # GLOBAL DICT that holds all DataFrames
 DATASETS: dict[str, pd.DataFrame] = {}
@@ -155,7 +155,7 @@ def create_usa_map(color_scale: str = "Blues",
     fig.update_coloraxes(showscale=False)
 
     return dcc.Graph(
-        id=IDs.MAP.value,
+        id=ID.MAP.value,
         figure=fig,
         config={"displayModeBar": False, "scrollZoom": True},
         className="map",
@@ -179,7 +179,7 @@ def create_tooltips():
         children=[
             dbc.Tooltip(
                 "Shortcut: S",
-                target=IDs.BUTTON_SETTINGS_MENU.value,
+                target=ID.BUTTON_SETTINGS_MENU.value,
                 placement="bottom-start",
                 is_open=False,
                 trigger="hover",
@@ -187,7 +187,7 @@ def create_tooltips():
             ),
             dbc.Tooltip(
                 "Shortcut: T",
-                target=IDs.BUTTON_DARK_MODE_TOGGLE.value,
+                target=ID.BUTTON_DARK_MODE_TOGGLE.value,
                 placement="bottom-end",
                 is_open=False,
                 trigger="hover",

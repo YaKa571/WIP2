@@ -5,16 +5,16 @@ from dash.exceptions import PreventUpdate
 
 from backend.data_manager import DataManager
 from components.factories.component_factory import create_usa_map
-from frontend.component_ids import IDs
+from frontend.component_ids import ID
 
 dm = DataManager.get_instance()
 
 
 # === SETTINGS CANVAS TOGGLE ===
 @callback(
-    Output(IDs.SETTINGS_CANVAS.value, "is_open"),
-    Input(IDs.BUTTON_SETTINGS_MENU.value, "n_clicks"),
-    State(IDs.SETTINGS_CANVAS.value, "is_open")
+    Output(ID.SETTINGS_CANVAS.value, "is_open"),
+    Input(ID.BUTTON_SETTINGS_MENU.value, "n_clicks"),
+    State(ID.SETTINGS_CANVAS.value, "is_open")
 )
 def toggle_settings_canvas(n_clicks, is_open):
     return not is_open if n_clicks else is_open
@@ -22,14 +22,14 @@ def toggle_settings_canvas(n_clicks, is_open):
 
 # === CENTRAL APP STATE MANAGER ===
 @callback(
-    Output(IDs.SETTINGS_CANVAS.value, "className"),
-    Output(IDs.DASHBOARD_CONTAINER.value, "className"),
-    Output(IDs.BUTTON_DARK_MODE_TOGGLE.value, "children"),
-    Output(IDs.APP_STATE_STORE.value, "data"),
+    Output(ID.SETTINGS_CANVAS.value, "className"),
+    Output(ID.DASHBOARD_CONTAINER.value, "className"),
+    Output(ID.BUTTON_DARK_MODE_TOGGLE.value, "children"),
+    Output(ID.APP_STATE_STORE.value, "data"),
     Input("app-init-trigger", "children"),
-    Input(IDs.BUTTON_DARK_MODE_TOGGLE.value, "n_clicks"),
-    Input(IDs.SETTING_MAP_COLOR_SCALE.value, "value"),
-    State(IDs.APP_STATE_STORE.value, "data"),
+    Input(ID.BUTTON_DARK_MODE_TOGGLE.value, "n_clicks"),
+    Input(ID.SETTING_MAP_COLOR_SCALE.value, "value"),
+    State(ID.APP_STATE_STORE.value, "data"),
 )
 def update_app_state(_, n_clicks, color_scale, current_state):
     # Context determination
@@ -46,12 +46,12 @@ def update_app_state(_, n_clicks, color_scale, current_state):
         }
 
     # Update state based on trigger
-    if triggered_id == IDs.BUTTON_DARK_MODE_TOGGLE.value and n_clicks:
+    if triggered_id == ID.BUTTON_DARK_MODE_TOGGLE.value and n_clicks:
         current_state["dark_mode"] = not current_state.get("dark_mode", False)
         current_state["settings_changed"] = True
         current_state["update_id"] += 1
 
-    elif triggered_id == IDs.SETTING_MAP_COLOR_SCALE.value:
+    elif triggered_id == ID.SETTING_MAP_COLOR_SCALE.value:
         if current_state.get("color_scale") != color_scale:
             current_state["color_scale"] = color_scale
             current_state["settings_changed"] = True
@@ -70,10 +70,10 @@ def update_app_state(_, n_clicks, color_scale, current_state):
 
 # === FIRST STEP: START LOADING ANIMATION ===
 @callback(
-    Output(IDs.MAP_CONTAINER.value, "className"),
-    Output(IDs.ANIMATION_STATE_STORE.value, "data"),
-    Input(IDs.APP_STATE_STORE.value, "data"),
-    State(IDs.ANIMATION_STATE_STORE.value, "data"),
+    Output(ID.MAP_CONTAINER.value, "className"),
+    Output(ID.ANIMATION_STATE_STORE.value, "data"),
+    Input(ID.APP_STATE_STORE.value, "data"),
+    State(ID.ANIMATION_STATE_STORE.value, "data"),
 )
 def prepare_map_update(app_state, animation_state):
     if not app_state:
@@ -101,11 +101,11 @@ def prepare_map_update(app_state, animation_state):
 
 # === SECOND STEP: RENDER MAP ===
 @callback(
-    Output(IDs.MAP_CONTAINER.value, "children"),
-    Output(IDs.MAP_CONTAINER.value, "className", allow_duplicate=True),
-    Output(IDs.APP_STATE_STORE.value, "data", allow_duplicate=True),
-    Input(IDs.ANIMATION_STATE_STORE.value, "data"),
-    State(IDs.APP_STATE_STORE.value, "data"),
+    Output(ID.MAP_CONTAINER.value, "children"),
+    Output(ID.MAP_CONTAINER.value, "className", allow_duplicate=True),
+    Output(ID.APP_STATE_STORE.value, "data", allow_duplicate=True),
+    Input(ID.ANIMATION_STATE_STORE.value, "data"),
+    State(ID.APP_STATE_STORE.value, "data"),
     prevent_initial_call=True
 )
 def render_map(animation_state, app_state):
@@ -143,9 +143,9 @@ def initialize_layout(_):
 
 # === START RENDERING THE MAP ===
 @callback(
-    Output(IDs.APP_STATE_STORE.value, "data", allow_duplicate=True),
+    Output(ID.APP_STATE_STORE.value, "data", allow_duplicate=True),
     Input("layout-ready-signal", "children"),
-    State(IDs.APP_STATE_STORE.value, "data"),
+    State(ID.APP_STATE_STORE.value, "data"),
     prevent_initial_call=True,
 )
 def trigger_initial_render(ready_signal, app_state):
@@ -162,14 +162,14 @@ def trigger_initial_render(ready_signal, app_state):
 # === TOOLTIP TOGGLE ===
 @callback(
     Output({"type": "tooltip", "id": MATCH}, "style"),
-    Input(IDs.SETTING_GENERAL_SHOW_TOOLTIPS.value, "value")
+    Input(ID.SETTING_GENERAL_SHOW_TOOLTIPS.value, "value")
 )
 def toggle_tooltips(show):
     return {} if show else {"display": "none"}
 
 
-@callback(Output(IDs.SETTINGS_CANVAS.value, "placement"),
-          Input(IDs.SETTING_GENERAL_CANVAS_PLACEMENT.value, "value")
+@callback(Output(ID.SETTINGS_CANVAS.value, "placement"),
+          Input(ID.SETTING_GENERAL_CANVAS_PLACEMENT.value, "value")
           )
 def change_settings_position(placement):
     return placement

@@ -1,14 +1,14 @@
 import dash_bootstrap_components as dbc
 from dash import html
 
-from frontend.component_ids import IDs
+from frontend.component_ids import ID
 
 TABS = [
-    ("Home", IDs.TAB_HOME.value),
-    ("Fraud", IDs.TAB_FRAUD.value),
-    ("Cluster", IDs.TAB_CLUSTER.value),
-    ("User", IDs.TAB_USER.value),
-    ("Merchant", IDs.TAB_MERCHANT.value),
+    ("Home", ID.TAB_HOME.value),
+    ("Fraud", ID.TAB_FRAUD.value),
+    ("Cluster", ID.TAB_CLUSTER.value),
+    ("User", ID.TAB_USER.value),
+    ("Merchant", ID.TAB_MERCHANT.value),
 ]
 
 

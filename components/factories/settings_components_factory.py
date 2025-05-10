@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 from dash import html, dcc
 
-from frontend.component_ids import IDs
+from frontend.component_ids import ID
 
 
 ## SETTINGS ##
@@ -33,7 +33,7 @@ def create_map_setting_color_scale() -> html.Div:
             html.Label("Color Scale", className="settings-label"),
             dcc.Dropdown(className="settings-dropdown",
                          options=color_options,
-                         id=IDs.SETTING_MAP_COLOR_SCALE.value,
+                         id=ID.SETTING_MAP_COLOR_SCALE.value,
                          placeholder="Select a color scale...",
                          style={"width": "100%"},
                          value="blues"),
@@ -69,7 +69,7 @@ def create_general_setting_position() -> html.Div:
             html.Label("Settings Position", className="settings-label"),
             dcc.Dropdown(className="settings-dropdown",
                          options=placement_options,
-                         id=IDs.SETTING_GENERAL_CANVAS_PLACEMENT.value,
+                         id=ID.SETTING_GENERAL_CANVAS_PLACEMENT.value,
                          placeholder="Select a placement...",
                          style={"width": "100%"},
                          value="start"),
@@ -94,7 +94,7 @@ def create_general_setting_toggle_tooltips() -> html.Div:
     return html.Div(
         [
             html.Label("Show Tooltips", className="settings-label"),
-            dbc.Switch(id=IDs.SETTING_GENERAL_SHOW_TOOLTIPS.value,
+            dbc.Switch(id=ID.SETTING_GENERAL_SHOW_TOOLTIPS.value,
                        value=True,
                        className="settings-switch")
         ],
@@ -104,7 +104,7 @@ def create_general_setting_toggle_tooltips() -> html.Div:
 
 ## ICON BUTTONS ##
 
-def create_icon_button(icon: str, id: IDs, extra_cls: str = None) -> dbc.Button:
+def create_icon_button(icon: str, id: ID, extra_cls: str = None) -> dbc.Button:
     """
     Creates a square-shaped icon button with customizable icon, ID, and extra CSS
     classes. The button is styled using Bootstrap and includes an icon specified
@@ -206,7 +206,7 @@ def create_settings_canvas():
     """
     return dbc.Offcanvas(
         create_settings_canvas_categories(),
-        id=IDs.SETTINGS_CANVAS.value,
+        id=ID.SETTINGS_CANVAS.value,
         title="Settings",
         is_open=False,
         placement="start",

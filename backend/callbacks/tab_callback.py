@@ -9,15 +9,15 @@ from components.rightcolumn.tabs.tab_fraud import create_fraud_content
 from components.rightcolumn.tabs.tab_home import create_home_content
 from components.rightcolumn.tabs.tab_merchant import create_merchant_content
 from components.rightcolumn.tabs.tab_user import create_user_content
-from frontend.component_ids import IDs
+from frontend.component_ids import ID
 
 # Mapping tabs to their content‐builder functions
 TAB_CONTENT_BUILDERS = {
-    IDs.TAB_HOME.value: create_home_content,
-    IDs.TAB_FRAUD.value: create_fraud_content,
-    IDs.TAB_CLUSTER.value: create_cluster_content,
-    IDs.TAB_USER.value: create_user_content,
-    IDs.TAB_MERCHANT.value: create_merchant_content,
+    ID.TAB_HOME.value: create_home_content,
+    ID.TAB_FRAUD.value: create_fraud_content,
+    ID.TAB_CLUSTER.value: create_cluster_content,
+    ID.TAB_USER.value: create_user_content,
+    ID.TAB_MERCHANT.value: create_merchant_content,
 }
 
 
