@@ -24,6 +24,6 @@ def create_cluster_content():
                 ], width=4)
             ])
         ],
-        className="tab-content-wrapper flex-fill"
+        className="tab-content-inner"
     )
 

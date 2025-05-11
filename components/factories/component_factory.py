@@ -12,6 +12,7 @@ from shapely.geometry import shape
 
 from backend.data_manager import DataManager
 from frontend.component_ids import ID
+from frontend.icon_manager import IconID, Icons
 
 # GLOBAL DICT that holds all DataFrames
 DATASETS: dict[str, pd.DataFrame] = {}
@@ -62,7 +63,7 @@ def create_data_table(id_name: str, dataset: pd.DataFrame, visible: bool = True,
     return dbc.Card(
         dbc.CardBody(
             [
-                html.H3(str.upper(id_name), className="card-title text-center"),
+                html.H3(str.upper(id_name), className="card-title"),
 
                 # Wrap DataTable in a Div with our custom CSS style
                 html.Div(
@@ -193,7 +194,37 @@ def create_tooltips():
                 trigger="hover",
                 id={"type": "tooltip", "id": "dark-mode-toggle"},
             ),
+            dbc.Tooltip(children=[
+                "Merchant ID", html.Br(),
+                "MCC Code & Description", html.Br(),
+                "Total Transaction Amount"
+            ],
+                placement="bottom",
+                is_open=False,
+                trigger="hover",
+                id={"type": "tooltip", "id": "tooltip-1"},
+                target=ID.HOME_KPI_HIGHEST_VALUE_MERCHANT
+            )
             # Add more...
         ],
         style={"display": "contents"}
     )
+
+
+def create_icon(icon_id: IconID, cls: str = "icon") -> html.Img:
+    """
+    Creates an HTML image element representing an icon. This function generates
+    an image element using the specified icon identifier and allows customization
+    of the CSS class applied to the image. The created icon is not draggable.
+
+    Parameters:
+    icon_id: IconID
+        The identifier of the icon to be used.
+    cls: str, optional
+        The CSS class name(s) to be applied to the image element. Default is "icon".
+
+    Returns:
+    html.Img
+        The HTML image element representing the specified icon.
+    """
+    return html.Img(src=Icons.get_icon(icon_id), className=cls, draggable="False")

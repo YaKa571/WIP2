@@ -76,5 +76,5 @@ def create_user_content():
             # Ergebnisbereich (z. B. Tabelle später)
             html.Div(id='search-results', className="mt-4"),
         ],
-        className="tab-content-wrapper flex-fill"
+        className="tab-content-inner"
     )

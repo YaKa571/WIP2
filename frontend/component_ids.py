@@ -38,6 +38,12 @@ class ID(str, Enum):
     SETTING_GENERAL_SHOW_TOOLTIPS = "setting-general-show-tooltips"
     SETTING_GENERAL_CANVAS_PLACEMENT = "setting-general-canvas-placement"
 
+    # Home Tab
+    HOME_KPI_HIGHEST_VALUE_MERCHANT = "home-kpi-highest-value-merchant"
+    HOME_KPI_HIGHEST_VALUE_USER = "home-kpi-highest-value-user"
+    HOME_KPI_MOST_FREQUENT_MERCHANT = "home-kpi-most-frequent-merchant"
+    HOME_KPI_MOST_FREQUENT_USER = "home-kpi-most-frequent-user"
+
     # Cluster
     CLUSTER_DROPDOWN = "cluster-dropdown"
     CLUSTER_DROPDOWN_OUTPUT = "cluster-dropdown-output"
