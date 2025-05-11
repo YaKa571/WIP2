@@ -4,8 +4,9 @@ import dash_bootstrap_components as dbc
 from dash import html
 
 from backend.data_manager import DataManager
+from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
-from frontend.icon_manager import IconID, Icons
+from frontend.icon_manager import IconID
 
 
 class KPIConfig(TypedDict):
@@ -67,16 +68,12 @@ def create_kpi_card(card_id: ID) -> dbc.Card:
 
     raw_value = config["value_fn"](DataManager.get_instance())
     value_str = config["format_fn"](raw_value)
-    icon = html.Img(
-        src=Icons.get_icon(config["icon"]),
-        className="kpi-card-icon",
-        draggable="false"
-    )
+    icon = comp_factory.create_icon(config["icon"], cls="kpi-card-icon")
 
     return dbc.Card(
         dbc.CardBody([
             icon,
-            html.P(value_str, className="kpi-card-value mb-0 pb-0"),
+            html.P(value_str, className="kpi-card-value mb-0 pb-0 kpi-number-value"),
             html.P(config["title"], className="kpi-card-title m-0 p-0"),
         ],
             className="d-flex flex-column justify-content-center align-items-center"
