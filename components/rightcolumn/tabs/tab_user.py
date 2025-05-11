@@ -1,5 +1,8 @@
 from dash import html, dcc
 
+from frontend.icon_manager import IconID, Icons
+
+
 # TODO: @Son
 def create_user_content():
     return html.Div(
@@ -10,7 +13,7 @@ def create_user_content():
                     # Linke Suchleiste – Name
                     html.Div(
                         [
-                            html.Img(src="/assets/icons/lens-search.svg", className="search-icon"),
+                            html.Img(src=Icons.get_icon(IconID.LENS_SEARCH), className="search-icon"),
                             dcc.Input(
                                 id='name-search-input',
                                 type='text',
@@ -24,7 +27,7 @@ def create_user_content():
                     # Mittlere Suchleiste – User-ID
                     html.Div(
                         [
-                            html.Img(src="/assets/icons/lens-search.svg", className="search-icon"),
+                            html.Img(src=Icons.get_icon(IconID.LENS_SEARCH), className="search-icon"),
                             dcc.Input(
                                 id='user-id-search-input',
                                 type='text',
@@ -38,7 +41,7 @@ def create_user_content():
                     # Rechte Suchleiste – Card-ID
                     html.Div(
                         [
-                            html.Img(src="/assets/icons/lens-search.svg", className="search-icon"),
+                            html.Img(src=Icons.get_icon(IconID.LENS_SEARCH), className="search-icon"),
                             dcc.Input(
                                 id='card-id-search-input',
                                 type='text',
