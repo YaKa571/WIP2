@@ -9,4 +9,4 @@ from frontend.component_ids import ID
 def update_cluster(value):
 #    ctx = callback_context
 #    print(ctx.triggered)
-    return f'You have selected "{value}" '
+    return f'Cluster: "{value}" '
