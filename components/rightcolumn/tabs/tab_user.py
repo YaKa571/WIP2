@@ -59,10 +59,10 @@ def create_user_content():
             # Vier obere KPI-Boxen
             html.Div(
                 [
-                    html.Div("Amount of Transactions", className="user-kpi-box"),
-                    html.Div("Total Sum", className="user-kpi-box"),
-                    html.Div("Average Amount", className="user-kpi-box"),
-                    html.Div("Amount of Cards", className="user-kpi-box"),
+                    html.Div(id="kpi-user-tx-count", className="user-kpi-box"),  # Anzahl Transaktionen
+                    html.Div(id="kpi-user-tx-sum", className="user-kpi-box"),  # Gesamtsumme
+                    html.Div(id="kpi-user-tx-avg", className="user-kpi-box"),  # Durchschnitt
+                    html.Div(id="kpi-user-card-count", className="user-kpi-box"),  # Anzahl Karten
                 ],
                 className="d-flex justify-content-between mb-4"
             ),
