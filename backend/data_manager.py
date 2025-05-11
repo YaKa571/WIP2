@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Dict, Union
 
 import pandas as pd
 import pgeocode
@@ -7,13 +8,14 @@ import us
 from pyarrow.parquet import ParquetFile
 
 import utils.logger as logger
-from backend.data_handler import optimize_data, clean_units, json_to_data_frame
+from backend.data_handler import optimize_data, clean_units, json_to_data_frame, json_to_dict, \
+    get_mcc_by_merchant_id
 from utils.benchmark import Benchmark
 
 DATA_DIRECTORY = Path("assets/data/")
 
 
-def _read_parquet_data(file_name: str, num_rows: int = 500_000, sort_alphabetically: bool = False) -> pd.DataFrame:
+def _read_parquet_data(file_name: str, num_rows: int = 250_000, sort_alphabetically: bool = False) -> pd.DataFrame:
     """
     Reads a Parquet file into a pandas DataFrame.
 
@@ -85,6 +87,7 @@ class DataManager:
     """
 
     _instance = None
+    home_kpi: Dict[str, Dict[str, Union[int, str]]]
 
     @staticmethod
     def initialize(data_dir: Path = DATA_DIRECTORY):
@@ -120,10 +123,19 @@ class DataManager:
 
         self._nomi = pgeocode.Nominatim("us")
 
+        self.mcc_dict = json_to_dict("mcc_codes.json")
+
+        self.home_kpi = {
+            "most_valuable_merchant": {"id": 0, "mcc": "Undefined", "mcc_desc": "Undefined", "value": "0,00"},
+            "most_frequent_merchant": {"id": 0, "value": "0,00"},
+            "highest_value_user": {"id": 0, "value": "0,00"},
+            "most_frequent_user": {"id": 0, "value": "0,00"}
+        }
+
         self.start()  # <-- Initializing all data
         benchmark_data_manager.print_time()
 
-    def process_transaction_zips(self):
+    def _process_transaction_zips(self):
         """
         Processes zip codes in the transactions DataFrame.
 
@@ -163,7 +175,7 @@ class DataManager:
         else:
             logger.log("ℹ️ Latitude/Longitude already exist, skipping geocoding", 1)
 
-    def process_transaction_states(self):
+    def _process_transaction_states(self):
         """
         Processes transaction states by mapping state abbreviations to their full names. If the
         state names are already present in the DataFrame, the method skips the mapping process.
@@ -197,6 +209,54 @@ class DataManager:
         else:
             logger.log("ℹ️ State names already exist, skipping mapping", 1)
 
+    def _process_transaction_data(self):
+        # Process transaction zip codes
+        self._process_transaction_zips()
+
+        # Creates a 'state_name' column from the 'merchant_state' column (abbreviated state names)
+        self._process_transaction_states()
+
+    def calc_highest_value_merchant(self):
+        # Sum up the amounts per merchant and create a DataFrame
+        df_sums = (
+            self.df_transactions
+            .groupby(["merchant_id", "mcc"])["amount"]
+            .sum()
+            .to_frame("merchant_sum")  # Convert to DataFrame
+            .reset_index()  # merchant_id as index
+        )
+
+        # Find the row with the highest merchant_sum
+        idx_top = df_sums["merchant_sum"].idxmax()
+        top_row = df_sums.loc[idx_top]
+
+        # Extract values
+        merchant_id = int(top_row["merchant_id"])
+        mcc_desc = get_mcc_by_merchant_id(self.mcc_dict, top_row["mcc"])
+        value = float(top_row["merchant_sum"])
+
+        # Format in US style: "124,052.35"
+        us_formatted = "{:,.2f}".format(value)
+
+        # Write to dict
+        self.home_kpi["most_valuable_merchant"] = {
+            "id": merchant_id,
+            "mcc": int(top_row["mcc"]),
+            "mcc_desc": mcc_desc,
+            "value": us_formatted
+        }
+
+    def _calc_home_tab_kpis(self):
+        """
+        Calculates Key Performance Indicators (KPIs) for the home tab view.
+
+        This function performs the computation of essential metrics displayed on a
+        home tab interface, including calculations for determining the merchant with
+        the highest value.
+        """
+        self.calc_highest_value_merchant()
+        # TODO: Add remaining KPIs
+
     def start(self):
         """
         Starts the process of loading, cleaning, and processing transaction data. The method primarily deals
@@ -225,11 +285,11 @@ class DataManager:
         self.df_mcc = json_to_data_frame("mcc_codes.json")
         # TODO: Too slow --> self.df_train_fraud = json_to_data_frame("train_fraud_labels.json")
 
-        # Process transaction zip codes
-        self.process_transaction_zips()
+        # Process transaction_data.parquet file
+        self._process_transaction_data()
 
-        # Creates a 'state_name' column from the 'merchant_state' column (abbreviated state names)
-        self.process_transaction_states()
+        # Calculate KPIs for Home Tab
+        self._calc_home_tab_kpis()
 
         # Calculations
         self.amount_of_transactions = len(self.df_transactions)
