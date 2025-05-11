@@ -1,17 +1,13 @@
-# components/rightcolumn/right_column.py
-
 import dash_bootstrap_components as dbc
 from dash import html
 
 from components.rightcolumn.tabs.tab_cluster import create_cluster_content
 from components.rightcolumn.tabs.tab_fraud import create_fraud_content
-# importiere Deine fünf Builder
 from components.rightcolumn.tabs.tab_home import create_home_content
 from components.rightcolumn.tabs.tab_merchant import create_merchant_content
 from components.rightcolumn.tabs.tab_user import create_user_content
 from frontend.component_ids import ID
 
-# nur Label und ID, Builder ziehen wir unten per Mapping
 TABS = [
     ("Home", ID.TAB_HOME.value),
     ("Fraud", ID.TAB_FRAUD.value),
@@ -20,7 +16,7 @@ TABS = [
     ("Merchant", ID.TAB_MERCHANT.value),
 ]
 
-# Mapping Tab-ID → Builder-Funktion
+# Mapping Tab-ID -> Builder-Function
 TAB_BUILDERS = {
     ID.TAB_HOME.value: create_home_content,
     ID.TAB_FRAUD.value: create_fraud_content,
@@ -30,7 +26,17 @@ TAB_BUILDERS = {
 }
 
 
-def create_tabs():
+def create_tab_buttons():
+    """
+    Generates a list of Bootstrap-styled tab buttons based on predefined TABS
+    and returns them wrapped inside an HTML div container.
+
+    Returns
+    -------
+    html.Div
+        A Div component containing the tab buttons with their labels, IDs, and
+        custom styles applied.
+    """
     buttons = []
     for label, tid in TABS:
         buttons.append(
@@ -45,9 +51,9 @@ def create_tabs():
 
 
 def create_right_column():
-    tabs = create_tabs()
+    tabs = create_tab_buttons()
 
-    # Baue für jeden Tab-Inhalt einen Wrapper mit pattern-ID und Basis-Klasse
+    # Build a wrapper with pattern ID and base class for each tab content
     wrappers = []
     for idx, (_, tid) in enumerate(TABS):
         builder = TAB_BUILDERS[tid]
@@ -55,7 +61,8 @@ def create_right_column():
             html.Div(
                 builder(),
                 id={"type": "tab-content", "index": tid},
-                className="tab-item active" if idx == 0 else "tab-item hidden"
+                className="flex-fill " +
+                          ("tab-item active" if idx == 0 else "tab-item hidden")
             )
         )
 
