@@ -1,7 +1,10 @@
 import json
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
+from pandas import DataFrame
+
 import utils.logger as logger
 
 DATA_DIRECTORY = Path("assets/data/")
@@ -41,6 +44,7 @@ def optimize_data(*file_names: str):
                 compression='snappy',
             )
             logger.log(f"✅ Saved Parquet: {parquet_path}", 1)
+
 
 def clean_units(df: pd.DataFrame) -> (pd.DataFrame, dict):
     """
@@ -107,3 +111,105 @@ def json_to_data_frame(file_name: str) -> pd.DataFrame:
         data = json.load(f)
 
     return pd.json_normalize(data)
+
+
+def json_to_dict(file_name: str) -> Any:
+    """
+    Converts a JSON file into a Python dictionary.
+
+    This function reads a JSON file from the specified path and converts its
+    contents into a Python dictionary. If the file does not exist, a
+    FileNotFoundError is raised.
+
+    Parameters:
+        file_name (str): The name of the JSON file to be read, located in the
+            DATA_DIRECTORY.
+
+    Returns:
+        Any: The data parsed from the JSON file as a Python object.
+
+    Raises:
+        FileNotFoundError: If the specified JSON file is not found.
+    """
+    json_path = DATA_DIRECTORY / file_name
+    if not json_path.exists():
+        raise FileNotFoundError(f"⚠️ JSON file not found: {json_path}")
+
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    return data
+
+
+def get_mcc_by_merchant_id(mcc_dict: dict[str, str], merchant_id: int | str) -> str:
+    """
+    Fetch the Merchant Category Code (MCC) associated with a given merchant ID from a dictionary.
+    If the merchant ID is invalid or not found in the dictionary, returns "Undefined".
+
+    Args:
+        mcc_dict (dict): A dictionary where merchant IDs (as strings) are mapped to their corresponding MCC.
+        merchant_id (int | str): The merchant ID to lookup in the dictionary.
+
+    Returns:
+        str: The MCC associated with the given merchant ID, or "Undefined" if the ID is invalid or not found.
+    """
+    # Normalize string-key: Int->Str
+    try:
+        key = str(int(merchant_id))
+    except (ValueError, TypeError):
+        return "Undefined"
+
+    # Lookup in Dictionary
+    return mcc_dict.get(key, "Undefined")
+
+
+def convert_transaction_columns_to_int(dataframe: DataFrame, columns: list[str]):
+    """
+    Convert specified transaction columns in the DataFrame to integer, when necessary.
+
+    This function iterates through a list of specified columns in the provided
+    DataFrame. For each column, it checks if the column's data type is integer.
+    If not, it attempts to convert the column's data into integer values using
+    `pandas.to_numeric`. The converted DataFrame is then saved to a predefined parquet
+    file if any column has undergone conversion. For columns already in integer
+    format, the function skips the conversion step for efficiency.
+
+    Parameters:
+    dataframe: DataFrame
+        The input pandas DataFrame containing transaction data that may need
+        type conversion for specified columns.
+
+    columns: list[str]
+        A list of column names within the DataFrame that are checked for integer
+        type conversion.
+
+    Returns:
+    None
+    """
+    df = dataframe.copy()
+    changed = False
+
+    for col in columns:
+        if not pd.api.types.is_integer_dtype(df[col]):
+            logger.log(f"🔄 Converting '{col}' to integer...", 1)
+            df[col] = (
+                pd.to_numeric(df[col], errors="coerce")
+                .fillna(0)
+                .astype(int)
+            )
+            changed = True
+        else:
+            logger.log(f"ℹ️ '{col}' is already integer, skipping.", 1)
+
+    if changed:
+        # Write once after all conversions
+        df.to_parquet(
+            DATA_DIRECTORY / "transactions_data.parquet",
+            engine="pyarrow",
+            compression="snappy",
+            index=False
+        )
+        dataframe = df
+        logger.log("✅ Converted columns to integer and updated parquet file", 1)
+    else:
+        logger.log("ℹ️ No columns needed conversion, skipping parquet write", 1)
