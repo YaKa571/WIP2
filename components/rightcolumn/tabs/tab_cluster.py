@@ -1,7 +1,9 @@
 from dash import html, dcc
 from frontend.component_ids import ID
 import dash_bootstrap_components as dbc
-
+"""
+appearance of tab cluster
+"""
 # TODO: @Yannic
 # data.manager.getinsatnce
 def create_cluster_content():
@@ -18,7 +20,7 @@ def create_cluster_content():
 
                 ], width=8),
                 dbc.Col([
-
+                    html.Div(id=ID.CLUSTER_KEY)
                 ], width=4)
             ])
         ],
