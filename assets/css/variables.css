@@ -26,6 +26,7 @@
     /* Layout */
     --gutter: 0.75rem;
     --outer-border-radius: 15px;
+    --inner-border-radius: 11px;
     --bugfix-border-radius: calc(var(--outer-border-radius) + 4px);
 
     /* Tab */
@@ -53,6 +54,14 @@
 
     /* Spinner */
     --spinner-bg: rgba(0, 0, 0, 0.15);
+
+    /* Tab KPI Cards */
+    --kpi-card-header-bg: #f9f9f9;
+    --kpi-card-splitline: #dfdfdf;
+    --kpi-card-body-bg: #ffffff;
+
+    /* Etc. */
+    --kpi-number-value: #2E7D32
 }
 
 .dark-mode {
@@ -100,4 +109,13 @@
 
     /* Spinner */
     --spinner-bg: rgba(255, 255, 255, 0.2);
+
+    /* Tab KPI Cards */
+    --kpi-card-header-bg: #161616;
+    --kpi-card-splitline: #2c2a2a;
+    --kpi-card-body-bg: #191919;
+
+    /* Etc. */
+    --kpi-number-value: #81C784
+
 }

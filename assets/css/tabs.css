@@ -22,7 +22,6 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1px;
-    transition: color 0.1s ease-in;
     border-radius: 0;
 }
 
@@ -67,14 +66,102 @@
 }
 
 .tab-content-wrapper {
-    border-radius: 11px;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    border-radius: var(--inner-border-radius);
     margin: var(--gutter);
 }
-.tab-item.hidden {
-  display: none;
+
+.tab-content-inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    border-radius: var(--inner-border-radius);
+    padding: var(--gutter);
+    height: 100%;
 }
 
-/* Nur das aktive Tab-Item einblenden */
+.tab-content-inner h1,
+.tab-content-inner h2,
+.tab-content-inner h3,
+.tab-content-inner h4,
+.tab-content-inner h5,
+.tab-content-inner h6 {
+    line-height: 1.0;
+    padding: 0;
+    margin: 0;
+}
+
+.tab-item {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    border-radius: var(--inner-border-radius);
+}
+
+.tab-item.hidden {
+    display: none;
+}
+
 .tab-item.active {
-  display: block; /* oder flex, je nach Bedarf */
+    display: block;
+}
+
+/* ============================================================
+   Home Tab
+   ============================================================ */
+
+.tab-content-inner .kpi-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    border-radius: var(--inner-border-radius);
+    gap: var(--gutter);
+}
+
+.tab-content-inner .kpi-wrapper .kpi-card {
+    flex: 1 1 0;
+    min-width: 240px;
+}
+
+.tab-content-inner .kpi-wrapper .kpi-card .card-header,
+.tab-content-inner .kpi-wrapper .kpi-card .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0.75rem 1rem;
+}
+
+.tab-content-inner .kpi-wrapper .kpi-card .card-header {
+    background-color: var(--kpi-card-header-bg);
+    border-bottom: 1px solid var(--kpi-card-splitline);
+}
+
+.tab-content-inner .kpi-wrapper .kpi-card .card-body {
+    background-color: var(--kpi-card-body-bg);
+}
+
+.tab-content-inner .kpi-wrapper .kpi-card .kpi-card-title {
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.0;
+    padding-top: 0.5rem;
+}
+
+.tab-content-inner .kpi-wrapper .kpi-card .kpi-card-value {
+    line-height: 1.2;
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+    padding: 0;
 }

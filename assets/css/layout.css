@@ -5,7 +5,7 @@
 html, body {
     height: 100%;
     margin: 0;
-    min-width: 768px;
+    min-width: 1124px;
 }
 
 /* ==========================================================================
@@ -80,6 +80,11 @@ html, body {
     overflow: auto;
 }
 
+.right-column .card-body {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
 /* ==========================================================================
    Card Styling & Shadows
    ========================================================================== */
@@ -96,6 +101,7 @@ html, body {
 
 .card-title {
     text-transform: uppercase;
+    text-align: center;
 }
 
 .card:hover {
@@ -103,11 +109,26 @@ html, body {
 }
 
 /* ==========================================================================
+   Icon
+   ========================================================================== */
+
+.icon {
+    filter: var(--icon-filter);
+    cursor: pointer;
+    height: clamp(23px, 2vw, 33px);
+    width: auto;
+}
+
+.icon-small {
+    height: clamp(18px, 1.5vw, 23px) !important;
+}
+
+/* ==========================================================================
    KPI-Specific Styles
    ========================================================================== */
 
-.kpi-card-icon {
-    width: clamp(21px, 2vw, 33px);
+.top-cards .kpi-card-icon {
+    width: clamp(23px, 2vw, 33px);
     height: auto;
     object-fit: contain;
     margin-bottom: 0.5rem;
@@ -117,11 +138,11 @@ html, body {
     filter: var(--icon-filter);
 }
 
-.kpi-card-value {
+.top-cards .kpi-card-value {
     width: auto;
     text-align: center;
     padding: 0 0.5rem;
-    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-size: 1.5rem;
     font-weight: bold;
     color: var(--text-main);
     white-space: nowrap;
@@ -131,14 +152,15 @@ html, body {
     margin: 0;
 }
 
-.kpi-card-title {
+/* Only for kpi-card-title in top cards of left column */
+.top-cards .kpi-card-title {
     width: auto;
     text-align: center;
     text-transform: uppercase;
     letter-spacing: -1px;
     padding: 0 0.5rem;
-    font-size: clamp(1rem, 2vw, 1.5rem);
-    font-weight: 400;
+    font-size: 1.5rem;
+    font-weight: 500;
     color: var(--text-main);
     white-space: nowrap;
     overflow: visible;
@@ -146,6 +168,10 @@ html, body {
     box-sizing: border-box;
     margin: 0;
     line-height: 1.0;
+}
+
+.kpi-number-value {
+    color: var(--kpi-number-value) !important;
 }
 
 /* ============================================================
