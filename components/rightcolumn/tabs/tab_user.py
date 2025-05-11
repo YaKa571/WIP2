@@ -7,5 +7,5 @@ def create_user_content():
             html.H1("User"),
             html.P("This is the user page of the application."),
         ],
-        className="tab-content-wrapper flex-fill"
+        className="tab-content-inner"
     )

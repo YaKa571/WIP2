@@ -13,6 +13,6 @@ def create_cluster_content():
             html.Hr(),
             html.Div(id=ID.CLUSTER_DROPDOWN_OUTPUT)
         ],
-        className="tab-content-wrapper flex-fill"
+        className="tab-content-inner"
     )
 

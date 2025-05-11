@@ -8,5 +8,5 @@ def create_fraud_content():
             html.H1("Fraud"),
             html.P("This is the fraud page of the application."),
         ],
-        className="tab-content-wrapper flex-fill"
+        className="tab-content-inner"
     )
