@@ -5,8 +5,11 @@ class IconID(str, Enum):
     CHART_PIPE = "chart-pipe"
     MONEY_DOLLAR = "money-dollar"
     CHART_AVERAGE = "chart-average"
+
     TROPHY = "trophy"
     REPEAT = "repeat"
+    LENS_SEARCH = "lens-search"
+
 
 class Icons:
     BASE_PATH = "/assets/icons/"
