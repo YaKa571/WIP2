@@ -1,11 +1,80 @@
-from dash import html
+from dash import html, dcc
+
+from frontend.icon_manager import IconID, Icons
+
 
 # TODO: @Son
 def create_user_content():
     return html.Div(
         [
-            html.H1("User"),
-            html.P("This is the user page of the application."),
+            # Drei Suchleisten nebeneinander mit Lupe
+            html.Div(
+                [
+                    # Linke Suchleiste – Name
+                    html.Div(
+                        [
+                            html.Img(src=Icons.get_icon(IconID.LENS_SEARCH), className="search-icon"),
+                            dcc.Input(
+                                id='name-search-input',
+                                type='text',
+                                placeholder='Search by Name',
+                                className='search-input',
+                            )
+                        ],
+                        className="search-wrapper p-2 flex-grow-1 me-2"
+                    ),
+
+                    # Mittlere Suchleiste – User-ID
+                    html.Div(
+                        [
+                            html.Img(src=Icons.get_icon(IconID.LENS_SEARCH), className="search-icon"),
+                            dcc.Input(
+                                id='user-id-search-input',
+                                type='text',
+                                placeholder='Search by User ID',
+                                className='search-input',
+                            )
+                        ],
+                        className="search-wrapper p-2 flex-grow-1 me-2"
+                    ),
+
+                    # Rechte Suchleiste – Card-ID
+                    html.Div(
+                        [
+                            html.Img(src=Icons.get_icon(IconID.LENS_SEARCH), className="search-icon"),
+                            dcc.Input(
+                                id='card-id-search-input',
+                                type='text',
+                                placeholder='Search by Card ID',
+                                className='search-input',
+                            )
+                        ],
+                        className="search-wrapper p-2 flex-grow-1"
+                    ),
+                ],
+                className="d-flex mb-4"
+            ),
+
+            # KPI-Boxen (Platzhalter)
+            # Vier obere KPI-Boxen
+            html.Div(
+                [
+                    html.Div(id="kpi-user-tx-count", className="user-kpi-box"),  # Anzahl Transaktionen
+                    html.Div(id="kpi-user-tx-sum", className="user-kpi-box"),  # Gesamtsumme
+                    html.Div(id="kpi-user-tx-avg", className="user-kpi-box"),  # Durchschnitt
+                    html.Div(id="kpi-user-card-count", className="user-kpi-box"),  # Anzahl Karten
+                ],
+                className="d-flex justify-content-between mb-4"
+            ),
+
+            # Neue mittige Box für Credit Limit
+            html.Div(
+                "Credit Limit",
+                className="user-credit-limit-box my-2 mx-auto"
+            ),
+
+            # Ergebnisbereich (z. B. Tabelle später)
+            html.Div(id='search-results', className="mt-4"),
         ],
         className="tab-content-wrapper flex-fill"
     )
