@@ -17,7 +17,7 @@ def create_cluster_content():
             html.Div(id=ID.CLUSTER_DROPDOWN_OUTPUT),
             dbc.Row([
                 dbc.Col([
-
+                    dcc.Graph(id=ID.CLUSTER_GRAPH)
                 ], width=8),
                 dbc.Col([
                     html.Div(id=ID.CLUSTER_KEY)
