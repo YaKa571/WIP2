@@ -25,7 +25,7 @@ my_test_agg = my_test_df.groupby('client_id').agg(
 kmeans_default = KMeans(n_clusters=4, n_init=20)
 my_test_agg['cluster'] = kmeans_default.fit_predict(my_test_agg[['transaction_count','total_value']])
 my_test_agg['cluster_str'] = my_test_agg['cluster'].astype(str)
-print(my_test_agg)
+# print(my_test_agg)
 
 # Callback
 @callback(
