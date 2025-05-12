@@ -15,7 +15,9 @@ my_df_transactions=dm.df_transactions
 my_test_df = pd.DataFrame({'client_id': [1,1,2,2,3,4,4,4,5,1,1,1,6],
                            'amount': [100,150,10,20,500,5,10,15,1000,250,4500,30,450]
                            })
-
+"""
+Data Set Up Test
+"""
 # Aggregation per user
 my_test_agg = my_test_df.groupby('client_id').agg(
     transaction_count=('amount', 'count'),
