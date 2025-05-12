@@ -12,16 +12,21 @@ def create_cluster_content():
             html.H1("Cluster"),
             html.P("This is the cluster page of the application."),
             # TODO Names
-            dcc.Dropdown(['Default','Age Group','Income vs Expenditures'],'Default',id=ID.CLUSTER_DROPDOWN),
+            dcc.Dropdown(['Default','Age Group','Income vs Expenditures','Test'],'Test',id=ID.CLUSTER_DROPDOWN),
             html.Hr(),
             html.Div(id=ID.CLUSTER_DROPDOWN_OUTPUT),
             dbc.Row([
-                dbc.Col([
-
-                ], width=8),
-                dbc.Col([
-                    html.Div(id=ID.CLUSTER_KEY)
-                ], width=4)
+                dbc.Col(
+                    dcc.Graph(
+                        id=ID.CLUSTER_GRAPH,
+                        style={"height": "100%", "minHeight": "500px", "width": "100%"}
+                    ),
+                    width=8
+                ),
+                dbc.Col(
+                    html.Div(id=ID.CLUSTER_KEY),
+                    width=4
+                )
             ])
         ],
         className="tab-content-inner"
