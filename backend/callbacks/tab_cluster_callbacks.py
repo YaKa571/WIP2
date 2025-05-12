@@ -1,9 +1,29 @@
 from dash import Input, Output, callback, callback_context, html
+from sklearn.cluster import KMeans
+from backend.data_manager import DataManager
 from frontend.component_ids import ID
+import pandas as pd
 """
 callbacks and logic of tab cluster
 """
 
+# Data Files
+dm=DataManager.get_instance()
+my_df_transactions=dm.df_transactions
+# Test Data File
+my_test_df = pd.DataFrame({'client_id': [1,1,2,2,3,4,4,4,5,1,1,1,6],
+                           'amount': [100,150,10,20,500,5,10,15,1000,250,4500,30,450]
+                           })
+
+# Aggregation per user
+my_test_agg = my_test_df.groupby('client_id').agg(
+    transaction_count=('amount', 'count'),
+    total_amount=('amount', 'sum')).reset_index()
+print(my_test_agg)
+# Clustering
+kmeans_default = KMeans(n_clusters=4, n_init=20)
+
+# Callback
 @callback(
     Output(ID.CLUSTER_DROPDOWN_OUTPUT, 'children'),
     Output(ID.CLUSTER_KEY, 'children'),
