@@ -36,6 +36,15 @@ print(my_test_agg)
 )
 def update_cluster(value):
     if value == "Default":
+        fig = px.scatter()
+        key = html.Ul([
+            html.Li("Cluster 1", style={"color": "red"}),
+            html.Li("Cluster 2", style={"color": "blue"}),
+            html.Li("Cluster 3", style={"color": "green"}),
+            html.Li("Cluster 4", style={"color": "yellow"})
+        ])
+        text = 'Cluster: "Default"'
+    elif value == "Test":
         cluster_colors = {
             "0": "red",
             "1": "blue",
@@ -51,7 +60,7 @@ def update_cluster(value):
             html.Li(f"Cluster {i}", style={"color": cluster_colors[str(i)]})
             for i in range(4)
         ])
-        text = 'Cluster: "Default"'
+        text = 'Cluster: "Test"'
     elif value == "Age Group":
         fig = px.scatter()
         key = html.Ul([
@@ -73,5 +82,4 @@ def update_cluster(value):
         fig = px.scatter()
         key = html.Div("no key available")
         text = "Cluster: Unknown"
-    text = text + " TODO: Colortheme"
     return text, fig, html.Div([html.H5("Key:"), key])
