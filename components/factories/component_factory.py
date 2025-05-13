@@ -180,16 +180,22 @@ def create_tooltips():
     """
     return html.Div(
         children=[
-            dbc.Tooltip(
-                "Shortcut: S",
+            dbc.Tooltip(children=[
+                "Open Settings",
+                html.Br(),
+                "Shortcut: S"
+            ],
                 target=ID.BUTTON_SETTINGS_MENU.value,
                 placement="bottom-start",
                 is_open=False,
                 trigger="hover",
                 id={"type": "tooltip", "id": "settings-button"},
             ),
-            dbc.Tooltip(
-                "Shortcut: T",
+            dbc.Tooltip(children=[
+                "Toggle Theme",
+                html.Br(),
+                "Shortcut: T"
+            ],
                 target=ID.BUTTON_DARK_MODE_TOGGLE.value,
                 placement="bottom-end",
                 is_open=False,
@@ -197,7 +203,8 @@ def create_tooltips():
                 id={"type": "tooltip", "id": "dark-mode-toggle"},
             ),
             dbc.Tooltip(children=[
-                f"Merchant ID: {dm.home_kpi.most_valuable_merchant.id}", html.Br(),
+                f"Merchant ID: {dm.home_kpi.most_valuable_merchant.id}",
+                html.Br(),
                 f"MCC: {dm.home_kpi.most_valuable_merchant.mcc}"
             ],
                 placement="bottom",
@@ -207,7 +214,8 @@ def create_tooltips():
                 target=ID.HOME_KPI_MOST_VALUABLE_MERCHANT
             ),
             dbc.Tooltip(children=[
-                f"Merchant ID: {dm.home_kpi.most_visited_merchant.id}", html.Br(),
+                f"Merchant ID: {dm.home_kpi.most_visited_merchant.id}",
+                html.Br(),
                 f"MCC: {dm.home_kpi.most_visited_merchant.mcc}"
             ],
                 placement="bottom",
