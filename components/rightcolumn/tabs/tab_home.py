@@ -6,7 +6,7 @@ from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID
 
-dm = DataManager.get_instance()
+dm: DataManager = DataManager.get_instance()
 
 
 # TODO: @Diego
@@ -44,23 +44,21 @@ def _create_top_kpis() -> html.Div:
             dbc.CardHeader(children=[
 
                 comp_factory.create_icon(IconID.TROPHY, cls="icon icon-small"),
-                html.P("Highest Value Merchant", className="kpi-card-title")
+                html.P("Most Valuable Merchant", className="kpi-card-title")
 
             ],
                 className="card-header"),
             dbc.CardBody(children=[
 
-                html.P(dm.home_kpi["most_valuable_merchant"]["id"],
-                       className="kpi-card-value"),
                 html.P(
-                    f"{dm.home_kpi["most_valuable_merchant"]["mcc"]} {dm.home_kpi["most_valuable_merchant"]["mcc_desc"]}",
+                    f"{dm.home_kpi.most_valuable_merchant.mcc_desc}",
                     className="kpi-card-value"),
-                html.P(f"${dm.home_kpi["most_valuable_merchant"]["value"]}",
-                       className="kpi-card-value kpi-number-value"),
+                html.P(f"${dm.home_kpi.most_valuable_merchant.value}",
+                       className="kpi-card-value kpi-number-value")
 
             ],
                 className="card-body",
-                id=ID.HOME_KPI_HIGHEST_VALUE_MERCHANT
+                id=ID.HOME_KPI_MOST_VALUABLE_MERCHANT
 
             )],
             className="card kpi-card",
@@ -71,17 +69,21 @@ def _create_top_kpis() -> html.Div:
             dbc.CardHeader(children=[
 
                 comp_factory.create_icon(IconID.REPEAT, cls="icon icon-small"),
-                html.P("Most Frequent Merchant", className="kpi-card-title"),
+                html.P("Most Visited Merchant", className="kpi-card-title"),
 
             ],
                 className="card-header"),
             dbc.CardBody(children=[
 
-                html.P("Placeholder", className="kpi-card-value"),
+                html.P(
+                    f"{dm.home_kpi.most_visited_merchant.mcc_desc}",
+                    className="kpi-card-value"),
+                html.P(f"{dm.home_kpi.most_visited_merchant.visits} visits",
+                       className="kpi-card-value kpi-number-value")
 
             ],
                 className="card-body",
-                id=ID.HOME_KPI_MOST_FREQUENT_MERCHANT
+                id=ID.HOME_KPI_MOST_VISITED_MERCHANT
 
             )],
             className="card kpi-card",
@@ -92,17 +94,21 @@ def _create_top_kpis() -> html.Div:
             dbc.CardHeader(children=[
 
                 comp_factory.create_icon(IconID.TROPHY, cls="icon icon-small"),
-                html.P(children="Highest Value User", className="kpi-card-title"),
+                html.P(children="Top Spending User", className="kpi-card-title"),
 
             ],
                 className="card-header"),
             dbc.CardBody(children=[
 
-                html.P("Placeholder", className="kpi-card-value"),
+                html.P(
+                    f"{dm.home_kpi.top_spending_user.gender}, {dm.home_kpi.top_spending_user.current_age} years",
+                    className="kpi-card-value"),
+                html.P(f"${dm.home_kpi.top_spending_user.value}",
+                       className="kpi-card-value kpi-number-value")
 
             ],
                 className="card-body",
-                id=ID.HOME_KPI_HIGHEST_VALUE_USER
+                id=ID.HOME_KPI_TOP_SPENDING_USER
 
             )],
             className="card kpi-card",
