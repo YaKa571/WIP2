@@ -141,7 +141,7 @@ def json_to_dict(file_name: str) -> Any:
     return data
 
 
-def get_mcc_by_merchant_id(mcc_dict: dict[str, str], merchant_id: int | str) -> str:
+def get_mcc_description_by_merchant_id(mcc_dict: dict[str, str], merchant_id: int | str) -> str:
     """
     Fetch the Merchant Category Code (MCC) associated with a given merchant ID from a dictionary.
     If the merchant ID is invalid or not found in the dictionary, returns "Undefined".
