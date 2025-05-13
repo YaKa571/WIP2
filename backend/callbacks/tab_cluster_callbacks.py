@@ -1,19 +1,21 @@
-from dash import Input, Output, callback, callback_context, html
-from sklearn.cluster import KMeans
-from backend.data_manager import DataManager
-from frontend.component_ids import ID
 import pandas as pd
 import plotly.express as px
+from dash import Input, Output, callback, html
+from sklearn.cluster import KMeans
+
+from backend.data_manager import DataManager
+from frontend.component_ids import ID
+
 """
 callbacks and logic of tab cluster
 """
 
 # Data Files
-dm=DataManager.get_instance()
-my_df_transactions=dm.df_transactions
+dm: DataManager = DataManager.get_instance()
+my_df_transactions = dm.df_transactions
 # Test Data File
-my_test_df = pd.DataFrame({'client_id': [1,1,2,2,3,4,4,4,5,1,1,1,6],
-                           'amount': [100,150,10,20,500,5,10,15,1000,250,4500,30,450]
+my_test_df = pd.DataFrame({'client_id': [1, 1, 2, 2, 3, 4, 4, 4, 5, 1, 1, 1, 6],
+                           'amount': [100, 150, 10, 20, 500, 5, 10, 15, 1000, 250, 4500, 30, 450]
                            })
 """
 Data Set Up Test
@@ -25,7 +27,7 @@ my_test_agg = my_test_df.groupby('client_id').agg(
 
 # Clustering
 kmeans_default = KMeans(n_clusters=4, n_init=20)
-my_test_agg['cluster'] = kmeans_default.fit_predict(my_test_agg[['transaction_count','total_value']])
+my_test_agg['cluster'] = kmeans_default.fit_predict(my_test_agg[['transaction_count', 'total_value']])
 my_test_agg['cluster_str'] = my_test_agg['cluster'].astype(str)
 # print(my_test_agg)
 
@@ -56,7 +58,7 @@ def update_cluster(value):
         fig = px.scatter(my_test_agg, x="transaction_count", y="total_value",
                          color="cluster_str",
                          color_discrete_map=cluster_colors,
-                         hover_data=['client_id','transaction_count','total_value'],
+                         hover_data=['client_id', 'transaction_count', 'total_value'],
                          title='Cluster: transaction amount/total value')
         key = html.Ul([
             html.Li(f"Cluster {i}", style={"color": cluster_colors[str(i)]})
