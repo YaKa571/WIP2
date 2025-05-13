@@ -6,3 +6,4 @@ dash-bootstrap-components~=2.0.2
 plotly~=6.1.0rc0
 shapely~=2.1.0
 pyarrow~=20.0.0
+scikit-learn~=1.6.1
