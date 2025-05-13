@@ -202,6 +202,15 @@ html, body {
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
+.square-button .bi {
+    display: inline-block;
+    transition: transform 0.25s ease-in-out;
+}
+
+.square-button:hover .bi {
+    transform: rotate(180deg);
+}
+
 .dashboard-header > .square-button:not(:first-child):not(:last-child) {
     margin-inline: var(--gutter);
 }
