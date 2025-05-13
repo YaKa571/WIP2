@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict, Union
 
 import pandas as pd
 import pgeocode
@@ -9,13 +8,14 @@ from pyarrow.parquet import ParquetFile
 
 import utils.logger as logger
 from backend.data_handler import optimize_data, clean_units, json_to_data_frame, json_to_dict, \
-    get_mcc_by_merchant_id
+    get_mcc_description_by_merchant_id
+from backend.kpi_models import HomeKPIs, MerchantKPI, VisitKPI, UserKPI
 from utils.benchmark import Benchmark
 
 DATA_DIRECTORY = Path("assets/data/")
 
 
-def _read_parquet_data(file_name: str, num_rows: int = 250_000, sort_alphabetically: bool = False) -> pd.DataFrame:
+def _read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically: bool = False) -> pd.DataFrame:
     """
     Reads a Parquet file into a pandas DataFrame.
 
@@ -52,7 +52,7 @@ def _read_parquet_data(file_name: str, num_rows: int = 250_000, sort_alphabetica
         df = pd.read_parquet(file_path, engine="pyarrow")
     else:
         batch = next(pf.iter_batches(batch_size=num_rows))
-        df = pa.Table.from_batches([batch]).to_pandas()
+        df = pa.Table.from_batches(batches=[batch]).to_pandas()
 
     if sort_alphabetically:
         df = df.reindex(sorted(df.columns), axis=1)
@@ -87,7 +87,6 @@ class DataManager:
     """
 
     _instance = None
-    home_kpi: Dict[str, Dict[str, Union[int, str]]]
 
     @staticmethod
     def initialize(data_dir: Path = DATA_DIRECTORY):
@@ -108,29 +107,29 @@ class DataManager:
         logger.log("\nℹ️ Initializing DataManager...")
 
         self.data_dir = data_dir
-        self.df_users = None
-        self.units_users = None
-        self.df_transactions = None
-        self.units_transactions = None
-        self.df_cards = None
-        self.units_cards = None
-        self.df_mcc = None
-        self.df_train_fraud = None
+        self.df_users: pd.DataFrame = pd.DataFrame()
+        self.units_users: dict = {}
+        self.df_transactions: pd.DataFrame = pd.DataFrame()
+        self.units_transactions: dict = {}
+        self.df_cards: pd.DataFrame = pd.DataFrame()
+        self.units_cards: dict = {}
+        self.df_mcc: pd.DataFrame = pd.DataFrame()
+        self.df_train_fraud: pd.DataFrame = pd.DataFrame()
 
-        self.amount_of_transactions = None
-        self.sum_of_transactions = None
-        self.avg_transaction_amount = None
+        self.amount_of_transactions: int = 0
+        self.sum_of_transactions: float = 0.00
+        self.avg_transaction_amount: float = 0.00
 
         self._nomi = pgeocode.Nominatim("us")
 
         self.mcc_dict = json_to_dict("mcc_codes.json")
 
-        self.home_kpi = {
-            "most_valuable_merchant": {"id": 0, "mcc": "Undefined", "mcc_desc": "Undefined", "value": "0,00"},
-            "most_frequent_merchant": {"id": 0, "value": "0,00"},
-            "highest_value_user": {"id": 0, "value": "0,00"},
-            "most_frequent_user": {"id": 0, "value": "0,00"}
-        }
+        self.home_kpi = HomeKPIs(
+            most_valuable_merchant=MerchantKPI(0, 0, "Undefined", "0,00"),
+            most_visited_merchant=VisitKPI(0, 0, "Undefined", "0"),
+            top_spending_user=UserKPI(0, "Undefined", 0, "0,00"),
+            most_frequent_user=UserKPI(0, "Undefined", 0, "0,00"),
+        )
 
         self.start()  # <-- Initializing all data
         benchmark_data_manager.print_time()
@@ -216,8 +215,16 @@ class DataManager:
         # Creates a 'state_name' column from the 'merchant_state' column (abbreviated state names)
         self._process_transaction_states()
 
-    def calc_highest_value_merchant(self):
-        # Sum up the amounts per merchant and create a DataFrame
+    def _calc_most_valuable_merchant(self) -> None:
+        """
+        Calculate and update the most valuable merchant details in the home_kpi dictionary.
+
+        This method analyzes transaction data to determine details of the merchant with the
+        highest transaction sum. It then updates the information including merchant ID, MCC code,
+        MCC description, and the transaction value formatted in US style into the `home_kpi`
+        dictionary under the key `most_valuable_merchant`. The method relies on the provided
+        transaction DataFrame and MCC dictionary.
+        """
         df_sums = (
             self.df_transactions
             .groupby(["merchant_id", "mcc"])["amount"]
@@ -232,19 +239,77 @@ class DataManager:
 
         # Extract values
         merchant_id = int(top_row["merchant_id"])
-        mcc_desc = get_mcc_by_merchant_id(self.mcc_dict, top_row["mcc"])
+        mcc = top_row["mcc"]
+        mcc_desc = get_mcc_description_by_merchant_id(self.mcc_dict, mcc)
         value = float(top_row["merchant_sum"])
 
-        # Format in US style: "124,052.35"
-        us_formatted = "{:,.2f}".format(value)
-
         # Write to dict
-        self.home_kpi["most_valuable_merchant"] = {
-            "id": merchant_id,
-            "mcc": int(top_row["mcc"]),
-            "mcc_desc": mcc_desc,
-            "value": us_formatted
-        }
+        self.home_kpi.most_valuable_merchant = MerchantKPI(
+            id=merchant_id,
+            mcc=int(top_row["mcc"]),
+            mcc_desc=mcc_desc,
+            value="{:,.2f}".format(value)
+        )
+
+    def _calc_most_valuable_user(self) -> None:
+        """
+        Calculates and updates the most valuable user based on transaction data.
+
+        The method identifies the client with the highest transaction sum from the
+        provided transaction dataframe. It retrieves the client's details, such as
+        ID, gender, and current age, by matching the client ID with the users' dataframe.
+        The method updates the most valuable user's information as a `UserKPI` object
+        in the `home_kpi.top_spending_user` attribute.
+        """
+        df_sums = (
+            self.df_transactions
+            .groupby("client_id")["amount"]
+            .sum()
+            .to_frame("client_sum")
+            .reset_index()
+        )
+
+        idx_top = df_sums["client_sum"].idxmax()
+        top_row = df_sums.loc[idx_top]
+
+        client_id = int(top_row["client_id"])
+        client_sum = float(top_row["client_sum"])
+
+        client_gender = self.df_users[self.df_users["id"] == client_id]["gender"].values[0]
+        client_current_age = self.df_users[self.df_users["id"] == client_id]["current_age"].values[0]
+
+        self.home_kpi.top_spending_user = UserKPI(
+            id=client_id,
+            gender=client_gender,
+            current_age=client_current_age,
+            value="{:,.2f}".format(client_sum)
+        )
+
+    def _calc_most_visited_merchant(self) -> None:
+        """
+        Calculates the most visited merchant from transaction data and updates the home KPI
+        with details of the most visited merchant, including its ID, visit count, MCC code,
+        and MCC description. This method operates on the dataframe containing transaction
+        data and relies on external utility functions and objects for MCC description and
+        home KPI updates.
+        """
+        column = self.df_transactions["merchant_id"]
+
+        most_visited_merchant_id = column.value_counts().idxmax()
+        visits = column.value_counts().max()
+
+        top_rows = self.df_transactions[self.df_transactions["merchant_id"] == most_visited_merchant_id]
+        top_row = top_rows.iloc[0]
+
+        mcc = top_row["mcc"]
+        mcc_desc = get_mcc_description_by_merchant_id(self.mcc_dict, mcc)
+
+        self.home_kpi.most_visited_merchant = VisitKPI(
+            id=most_visited_merchant_id,
+            visits="{:,}".format(visits).replace(",", "."),
+            mcc=mcc,
+            mcc_desc=mcc_desc
+        )
 
     def _calc_home_tab_kpis(self):
         """
@@ -254,7 +319,9 @@ class DataManager:
         home tab interface, including calculations for determining the merchant with
         the highest value.
         """
-        self.calc_highest_value_merchant()
+        self._calc_most_valuable_merchant()
+        self._calc_most_visited_merchant()
+        self._calc_most_valuable_user()
         # TODO: Add remaining KPIs
 
     def start(self):
@@ -280,7 +347,8 @@ class DataManager:
 
         # Read and clean data – clean_units returns (df, unit_info)
         self.df_users, self.units_users = clean_units(_read_parquet_data("users_data.parquet"))
-        self.df_transactions, self.units_transactions = clean_units(_read_parquet_data("transactions_data.parquet"))
+        self.df_transactions, self.units_transactions = clean_units(_read_parquet_data("transactions_data.parquet",
+                                                                                       num_rows=500_000))
         self.df_cards, self.units_cards = clean_units(_read_parquet_data("cards_data.parquet"))
         self.df_mcc = json_to_data_frame("mcc_codes.json")
         # TODO: Too slow --> self.df_train_fraud = json_to_data_frame("train_fraud_labels.json")
