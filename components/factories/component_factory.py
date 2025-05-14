@@ -89,10 +89,10 @@ def create_data_table(id_name: str, dataset: pd.DataFrame, visible: bool = True,
 
 
 def create_usa_map(color_scale: str = "Blues",
-                   mapbox_style: str = "carto-positron") -> dcc.Graph:
+                   map_style: str = "carto-positron-nolabels") -> dcc.Graph:
     """
     Creates a choropleth map of the United States illustrating transaction count
-    per state. The map is built using Plotly Mapbox and shows states colored by
+    per state. The map is built using Plotly Map and shows states colored by
     transaction density on a red color scale. State abbreviations are overlaid as
     text annotations.
 
@@ -100,7 +100,7 @@ def create_usa_map(color_scale: str = "Blues",
     ----------
     color_scale : str, optional
         The graphs color scale to use, by default "Reds"
-    mapbox_style: str, optional
+    map_style: str, optional
         Mapbox style to use, by default "carto-positron"
     Returns
     -------
@@ -116,7 +116,7 @@ def create_usa_map(color_scale: str = "Blues",
     )
 
     # Choropleth Mapbox
-    fig = px.choropleth_mapbox(
+    fig = px.choropleth_map(
         state_counts,
         geojson=states_geo,
         locations="state_name",
@@ -124,11 +124,11 @@ def create_usa_map(color_scale: str = "Blues",
         color="transaction_count",
         color_continuous_scale=color_scale,
         labels={"transaction_count": "Transactions"},
-        mapbox_style=mapbox_style
+        map_style=map_style
     )
 
     # Text with state abbreviations
-    fig.add_trace(go.Scattermapbox(
+    fig.add_trace(go.Scattermap(
         lat=[state_centroids[n][0] for n in state_counts["state_name"]],
         lon=[state_centroids[n][1] for n in state_counts["state_name"]],
         mode="text",
@@ -141,7 +141,7 @@ def create_usa_map(color_scale: str = "Blues",
     # Update layout
     fig.update_layout(
         autosize=False,
-        mapbox=dict(
+        map=dict(
             center={"lat": 37.8, "lon": -96.9},
             zoom=3,
         ),
