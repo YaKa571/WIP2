@@ -30,6 +30,18 @@ kmeans_default = KMeans(n_clusters=4, n_init=20)
 my_test_agg['cluster'] = kmeans_default.fit_predict(my_test_agg[['transaction_count', 'total_value']])
 my_test_agg['cluster_str'] = my_test_agg['cluster'].astype(str)
 # print(my_test_agg)
+"""
+Data Set Up Default
+"""
+# Aggregation per user
+my_transactions_agg = my_df_transactions.groupby('client_id').agg(
+    transaction_count=('amount', 'count'),
+    total_value=('amount', 'sum')).reset_index()
+
+# Clustering
+kmeans_default = KMeans(n_clusters=4, n_init=20)
+my_transactions_agg['cluster'] = kmeans_default.fit_predict(my_transactions_agg[['transaction_count', 'total_value']])
+my_transactions_agg['cluster_str'] = my_transactions_agg['cluster'].astype(str)
 
 # Callback
 @callback(
