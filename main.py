@@ -18,6 +18,7 @@ from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F
 from backend.callbacks.tabs.tab_buttons_callbacks import update_tabs  # noqa: F401
 from backend.callbacks.tabs.tab_cluster_callbacks import update_cluster  # noqa: F401
 from backend.callbacks.user_kpi_callbacks import *  # noqa: F401
+from backend.callbacks.tabs.tab_home_callbacks import update_pie_graphs  # noqa: F401
 
 from components.leftcolumn.left_column import create_left_column
 from components.rightcolumn.right_column import create_right_column
