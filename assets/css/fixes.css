@@ -14,3 +14,40 @@
     height: 100% !important;
     min-height: 0 !important;
 }
+
+/* Hide modebar initially */
+.graph-card .js-plotly-plot .modebar {
+    opacity: 0 !important;
+    pointer-events: none; /* Prevents clicks as long as modebar is invisible */
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* When hovering over diagram show modebar */
+.graph-card .js-plotly-plot:hover .modebar {
+    opacity: 1 !important;
+    pointer-events: auto;
+}
+
+/* Remove modebar background */
+.graph-card .js-plotly-plot .modebar-group {
+    background-color: transparent !important;
+}
+
+/* Remove gray area around camera button */
+.graph-card .js-plotly-plot .modebar-btn {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Filter icon */
+.graph-card .js-plotly-plot .modebar-btn[data-title="Download plot as a png"] .icon {
+    opacity: 1 !important;
+    filter: var(--modebar-icon-filter) !important;
+
+}
+
+/* Optional: No hover background */
+.graph-card .js-plotly-plot .modebar-btn:hover {
+    background-color: transparent !important;
+}
