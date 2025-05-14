@@ -52,12 +52,20 @@ my_transactions_agg['cluster_str'] = my_transactions_agg['cluster'].astype(str)
 )
 def update_cluster(value):
     if value == "Default":
-        fig = px.scatter()
+        cluster_colors = {
+            "0": "red",
+            "1": "blue",
+            "2": "green",
+            "3": "orange"
+        }
+        fig = px.scatter(my_transactions_agg, x="transaction_count", y="total_value",
+                         color="cluster_str",
+                         color_discrete_map=cluster_colors,
+                         hover_data=['client_id', 'transaction_count', 'total_value'],
+                         title='Cluster: transaction amount/total value')
         key = html.Ul([
-            html.Li("Cluster 1", style={"color": "red"}),
-            html.Li("Cluster 2", style={"color": "blue"}),
-            html.Li("Cluster 3", style={"color": "green"}),
-            html.Li("Cluster 4", style={"color": "yellow"})
+            html.Li(f"Cluster {i}", style={"color": cluster_colors[str(i)]})
+            for i in range(4)
         ])
         text = 'Cluster: "Default"'
     elif value == "Test":
