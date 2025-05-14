@@ -13,6 +13,7 @@ class IconID(str, Enum):
     USER_PAYING = "user-paying"
     GENDERS = "genders"
     CART = "cart"
+    CAKE = "cake"
 
 
 class Icons:
