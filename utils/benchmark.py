@@ -17,13 +17,13 @@ class Benchmark:
         self.start = time.perf_counter()
         self.end = None
 
-    def print_time(self, add_empty_line: bool = False):
+    def print_time(self, add_empty_line: bool = False, level: int = 1):
         """
         Prints the elapsed time for a process in seconds, formatted to two decimal places,
         with an associated name of the process. This method calculates the time elapsed
         since the process started and includes visual indication.
         """
         self.end = time.perf_counter()
-        logger.log(f"🚀 {self.name} took {self.end - self.start:.2f} seconds.")
+        logger.log(f"🚀 {self.name} took {self.end - self.start:.2f} seconds.", indent_level=level)
         if add_empty_line:
             logger.log("")
