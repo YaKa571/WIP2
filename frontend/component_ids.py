@@ -43,6 +43,8 @@ class ID(str, Enum):
     HOME_KPI_TOP_SPENDING_USER = "home-kpi-top-spending-user"
     HOME_KPI_MOST_VISITED_MERCHANT = "home-kpi-most-visited-merchant"
     HOME_KPI_MOST_FREQUENT_USER = "home-kpi-most-frequent-user"
+    HOME_GRAPH_EXPENDITURES_BY_GENDER = "home-graph-expenditures-by-gender"
+    HOME_GRAPH_EXPENDITURES_BY_CHANNEL = "home-graph-expenditures-by-channel"
 
     # Cluster
     CLUSTER_DROPDOWN = "cluster-dropdown"
