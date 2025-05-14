@@ -11,10 +11,10 @@ dm: DataManager = DataManager.get_instance()
     Output(ID.HOME_GRAPH_EXPENDITURES_BY_GENDER, "figure"),
     Output(ID.HOME_GRAPH_EXPENDITURES_BY_CHANNEL, "figure"),
     Output(ID.HOME_GRAPH_EXPENDITURES_BY_AGE, "figure"),
-    Input(ID.APP_STATE_STORE, "data")
+    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks")
 )
-def update_pie_graphs(app_state):
-    dark_mode = app_state.get("dark_mode", False)
+def update_pie_graphs(n_clicks):
+    dark_mode = n_clicks % 2 == 1
 
     gender_data = dm.calc_expenditures_by_gender()
     channel_data = dm.calc_expenditures_by_channel()
