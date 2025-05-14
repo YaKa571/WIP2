@@ -1,5 +1,5 @@
 # Constants
-INDENT_CHARS = "  "
+INDENT_CHARS = "   "
 DEBUG_START_MARKER = "⛔ "
 DEBUG_END_MARKER = " ⛔"
 
