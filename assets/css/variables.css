@@ -61,7 +61,8 @@
     --kpi-card-body-bg: #ffffff;
 
     /* Etc. */
-    --kpi-number-value: #2E7D32
+    --kpi-number-value: #2E7D32;
+    --modebar-icon-filter: brightness(0%);
 }
 
 .dark-mode {
@@ -116,6 +117,7 @@
     --kpi-card-body-bg: #191919;
 
     /* Etc. */
-    --kpi-number-value: #81C784
+    --kpi-number-value: #81C784;
+    --modebar-icon-filter: brightness(1000%);
 
 }
