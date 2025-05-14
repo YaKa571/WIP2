@@ -39,10 +39,12 @@ class ID(str, Enum):
     SETTING_GENERAL_CANVAS_PLACEMENT = "setting-general-canvas-placement"
 
     # Home Tab
-    HOME_KPI_HIGHEST_VALUE_MERCHANT = "home-kpi-highest-value-merchant"
-    HOME_KPI_HIGHEST_VALUE_USER = "home-kpi-highest-value-user"
-    HOME_KPI_MOST_FREQUENT_MERCHANT = "home-kpi-most-frequent-merchant"
+    HOME_KPI_MOST_VALUABLE_MERCHANT = "home-kpi-most-valuable-merchant"
+    HOME_KPI_TOP_SPENDING_USER = "home-kpi-top-spending-user"
+    HOME_KPI_MOST_VISITED_MERCHANT = "home-kpi-most-visited-merchant"
     HOME_KPI_MOST_FREQUENT_USER = "home-kpi-most-frequent-user"
+    HOME_GRAPH_EXPENDITURES_BY_GENDER = "home-graph-expenditures-by-gender"
+    HOME_GRAPH_EXPENDITURES_BY_CHANNEL = "home-graph-expenditures-by-channel"
 
     # Cluster
     CLUSTER_DROPDOWN = "cluster-dropdown"

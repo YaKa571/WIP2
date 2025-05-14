@@ -23,7 +23,7 @@ def update_user_kpis(user_id):
     except ValueError:
         return ["Invalid ID"] * 4
 
-    dm = DataManager.get_instance()
+    dm: DataManager = DataManager.get_instance()
 
     # Filtere Transaktionen anhand ID
     tx = dm.df_transactions[dm.df_transactions["id"] == uid]

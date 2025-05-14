@@ -115,23 +115,27 @@ html, body {
 .icon {
     filter: var(--icon-filter);
     cursor: pointer;
-    height: clamp(23px, 2vw, 33px);
+    height: clamp(21px, 1.5vw, 31px);
     width: auto;
 }
 
 .icon-small {
-    height: clamp(18px, 1.5vw, 23px) !important;
+    height: clamp(19px, 1.5vw, 23px) !important;
 }
 
 /* ==========================================================================
    KPI-Specific Styles
    ========================================================================== */
 
+.top-cards {
+    line-height: 1.2;
+}
+
 .top-cards .kpi-card-icon {
-    width: clamp(23px, 2vw, 33px);
+    width: clamp(21px, 1.5vw, 31px);
     height: auto;
     object-fit: contain;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.33rem;
     cursor: pointer;
     user-select: none;
     -webkit-user-drag: none;
@@ -157,7 +161,6 @@ html, body {
     width: auto;
     text-align: center;
     text-transform: uppercase;
-    letter-spacing: -1px;
     padding: 0 0.5rem;
     font-size: 1.5rem;
     font-weight: 500;
@@ -200,6 +203,15 @@ html, body {
     /* Press-down feedback */
     transform: translateY(0) scale(0.95);
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.square-button .bi {
+    display: inline-block;
+    transition: transform 0.25s ease-in-out;
+}
+
+.square-button:hover .bi {
+    transform: rotate(180deg);
 }
 
 .dashboard-header > .square-button:not(:first-child):not(:last-child) {

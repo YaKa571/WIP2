@@ -9,6 +9,10 @@ class IconID(str, Enum):
     TROPHY = "trophy"
     REPEAT = "repeat"
     LENS_SEARCH = "lens-search"
+    TIME = "time"
+    USER_PAYING = "user-paying"
+    GENDERS = "genders"
+    CART = "cart"
 
 
 class Icons:

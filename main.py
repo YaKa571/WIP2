@@ -1,20 +1,22 @@
 from backend.data_manager import DataManager
+from utils import logger
 from utils.benchmark import Benchmark
 
+logger.log("\nℹ️ Starting Dash App...")
 benchmark_startup_time = Benchmark("Dash App Startup")
 DataManager.initialize()
-dm = DataManager.get_instance()
+dm: DataManager = DataManager.get_instance()
 
 import dash_bootstrap_components as dbc
 from dash import Dash, dcc
 
 import components.factories.component_factory as comp_factory
 import components.factories.settings_components_factory as settings_comp_factory
+
 from backend.callbacks.settings_callbacks import *  # noqa: F401
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401
-from backend.callbacks.tab_callback import update_tabs  # noqa: F401
-
-from backend.callbacks.tab_cluster_callbacks import update_cluster # noqa: F401
+from backend.callbacks.tabs.tab_buttons_callbacks import update_tabs  # noqa: F401
+from backend.callbacks.tabs.tab_cluster_callbacks import update_cluster  # noqa: F401
 from backend.callbacks.user_kpi_callbacks import *  # noqa: F401
 
 from components.leftcolumn.left_column import create_left_column
@@ -90,6 +92,6 @@ if __name__ == '__main__':
     app = create_app()
 
     # Print startup time
-    benchmark_startup_time.print_time(add_empty_line=True)
+    benchmark_startup_time.print_time(add_empty_line=True, level=0)
 
     app.run(debug=True)

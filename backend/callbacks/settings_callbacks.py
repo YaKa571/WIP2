@@ -7,7 +7,7 @@ from backend.data_manager import DataManager
 from components.factories.component_factory import create_usa_map
 from frontend.component_ids import ID
 
-dm = DataManager.get_instance()
+dm: DataManager = DataManager.get_instance()
 
 
 # === SETTINGS CANVAS TOGGLE ===

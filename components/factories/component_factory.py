@@ -14,6 +14,8 @@ from backend.data_manager import DataManager
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID, Icons
 
+dm: DataManager = DataManager.get_instance()
+
 # GLOBAL DICT that holds all DataFrames
 DATASETS: dict[str, pd.DataFrame] = {}
 
@@ -106,7 +108,7 @@ def create_usa_map(color_scale: str = "Blues",
         A Dash Graph component representing the map.
     """
     state_counts = (
-        DataManager.get_instance().df_transactions
+        dm.df_transactions
         .dropna(subset=["state_name"])
         .groupby("state_name", as_index=False)
         .size()
@@ -178,16 +180,22 @@ def create_tooltips():
     """
     return html.Div(
         children=[
-            dbc.Tooltip(
-                "Shortcut: S",
+            dbc.Tooltip(children=[
+                "Open Settings",
+                html.Br(),
+                "Shortcut: S"
+            ],
                 target=ID.BUTTON_SETTINGS_MENU.value,
                 placement="bottom-start",
                 is_open=False,
                 trigger="hover",
                 id={"type": "tooltip", "id": "settings-button"},
             ),
-            dbc.Tooltip(
-                "Shortcut: T",
+            dbc.Tooltip(children=[
+                "Toggle Theme",
+                html.Br(),
+                "Shortcut: T"
+            ],
                 target=ID.BUTTON_DARK_MODE_TOGGLE.value,
                 placement="bottom-end",
                 is_open=False,
@@ -195,16 +203,36 @@ def create_tooltips():
                 id={"type": "tooltip", "id": "dark-mode-toggle"},
             ),
             dbc.Tooltip(children=[
-                "Merchant ID", html.Br(),
-                "MCC Code & Description", html.Br(),
-                "Total Transaction Amount"
+                f"Merchant ID: {dm.home_kpi.most_valuable_merchant.id}",
+                html.Br(),
+                f"MCC: {dm.home_kpi.most_valuable_merchant.mcc}"
             ],
                 placement="bottom",
                 is_open=False,
                 trigger="hover",
-                id={"type": "tooltip", "id": "tooltip-1"},
-                target=ID.HOME_KPI_HIGHEST_VALUE_MERCHANT
-            )
+                id={"type": "tooltip", "id": "tab_home_kpi_1"},
+                target=ID.HOME_KPI_MOST_VALUABLE_MERCHANT
+            ),
+            dbc.Tooltip(children=[
+                f"Merchant ID: {dm.home_kpi.most_visited_merchant.id}",
+                html.Br(),
+                f"MCC: {dm.home_kpi.most_visited_merchant.mcc}"
+            ],
+                placement="bottom",
+                is_open=False,
+                trigger="hover",
+                id={"type": "tooltip", "id": "tab_home_kpi_2"},
+                target=ID.HOME_KPI_MOST_VISITED_MERCHANT
+            ),
+            dbc.Tooltip(children=[
+                f"User ID: {dm.home_kpi.top_spending_user.id}"
+            ],
+                placement="bottom",
+                is_open=False,
+                trigger="hover",
+                id={"type": "tooltip", "id": "tab_home_kpi_3"},
+                target=ID.HOME_KPI_TOP_SPENDING_USER
+            ),
             # Add more...
         ],
         style={"display": "contents"}

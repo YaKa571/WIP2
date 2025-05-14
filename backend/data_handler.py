@@ -6,6 +6,7 @@ import pandas as pd
 from pandas import DataFrame
 
 import utils.logger as logger
+from utils.benchmark import Benchmark
 
 DATA_DIRECTORY = Path("assets/data/")
 
@@ -32,9 +33,11 @@ def optimize_data(*file_names: str):
 
         # Only convert if Parquet missing or outdated
         if parquet_path.exists() and parquet_path.stat().st_mtime >= csv_mtime:
-            logger.log(f"ℹ️ Loading from Parquet: {parquet_path}", 1)
+            logger.log(f"ℹ️ Loading from Parquet: {parquet_path}", 2)
         else:
-            logger.log(f"🔄 Converting CSV to Parquet: {csv_path}", 1)
+            logger.log(f"🔄 Converting CSV to Parquet: {csv_path}", 2)
+            bm = Benchmark("Conversion")
+
             # Read CSV into DataFrame
             df = pd.read_csv(csv_path)
             # Write Parquet with fast encoding
@@ -43,7 +46,8 @@ def optimize_data(*file_names: str):
                 engine='pyarrow',
                 compression='snappy',
             )
-            logger.log(f"✅ Saved Parquet: {parquet_path}", 1)
+            logger.log(f"✅ Saved Parquet: {parquet_path}", 3)
+            bm.print_time(level=3)
 
 
 def clean_units(df: pd.DataFrame) -> (pd.DataFrame, dict):
@@ -106,11 +110,15 @@ def json_to_data_frame(file_name: str) -> pd.DataFrame:
     if not json_path.exists():
         raise FileNotFoundError(f"⚠️ JSON file not found: {json_path}")
 
-    logger.log(f"🔄 Converting JSON to DataFrame: {json_path}", 1)
+    logger.log(f"🔄 Converting JSON to DataFrame: {json_path}", 2)
+    bm = Benchmark("Conversion")
     with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    return pd.json_normalize(data)
+    df = pd.json_normalize(data)
+    bm.print_time(level=3)
+
+    return df
 
 
 def json_to_dict(file_name: str) -> Any:
@@ -141,7 +149,7 @@ def json_to_dict(file_name: str) -> Any:
     return data
 
 
-def get_mcc_by_merchant_id(mcc_dict: dict[str, str], merchant_id: int | str) -> str:
+def get_mcc_description_by_merchant_id(mcc_dict: dict[str, str], merchant_id: int | str) -> str:
     """
     Fetch the Merchant Category Code (MCC) associated with a given merchant ID from a dictionary.
     If the merchant ID is invalid or not found in the dictionary, returns "Undefined".
@@ -186,12 +194,13 @@ def convert_transaction_columns_to_int(dataframe: DataFrame, columns: list[str])
     Returns:
     None
     """
+    bm = Benchmark("Conversion")
     df = dataframe.copy()
     changed = False
 
     for col in columns:
         if not pd.api.types.is_integer_dtype(df[col]):
-            logger.log(f"🔄 Converting '{col}' to integer...", 1)
+            logger.log(f"🔄 Converting '{col}' to integer...", 2)
             df[col] = (
                 pd.to_numeric(df[col], errors="coerce")
                 .fillna(0)
@@ -199,7 +208,7 @@ def convert_transaction_columns_to_int(dataframe: DataFrame, columns: list[str])
             )
             changed = True
         else:
-            logger.log(f"ℹ️ '{col}' is already integer, skipping.", 1)
+            logger.log(f"ℹ️ '{col}' is already integer, skipping.", 2)
 
     if changed:
         # Write once after all conversions
@@ -210,6 +219,7 @@ def convert_transaction_columns_to_int(dataframe: DataFrame, columns: list[str])
             index=False
         )
         dataframe = df
-        logger.log("✅ Converted columns to integer and updated parquet file", 1)
+        logger.log("✅ Converted columns to integer and updated parquet file", 2)
+        bm.print_time(level=2)
     else:
-        logger.log("ℹ️ No columns needed conversion, skipping parquet write", 1)
+        logger.log("ℹ️ No columns needed conversion, skipping parquet write", 2)
