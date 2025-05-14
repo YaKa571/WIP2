@@ -393,6 +393,45 @@ class DataManager:
         )
         return gender_sums
 
+    def calc_expenditures_by_age(self) -> dict[int, float]:
+        """
+        Calculates total expenditures grouped by age brackets.
+
+        This method merges transaction data with user data based on client
+        identifiers, groups the resulting data into age brackets of ten-year
+        intervals (e.g., "20-30", "30-40"), then calculates the cumulative
+        sum of transaction amounts for each age group. The results are
+        returned as a dictionary where the keys are age brackets and the
+        values are the total expenditures for those brackets.
+
+        Returns:
+            dict[int, float]: A dictionary mapping age brackets (represented
+            as strings) to the sum of transaction amounts in each bracket.
+        """
+        df_merged = pd.merge(
+            self.df_transactions[["client_id", "amount"]],
+            self.df_users[["id", "current_age"]],
+            left_on="client_id",
+            right_on="id",
+            how="left"
+        )
+
+        # Create age groups like "20-30", "30-40", etc.
+        df_merged["age_group"] = df_merged["current_age"].floordiv(10) * 10
+        df_merged["age_group"] = df_merged["age_group"].astype(int).astype(str) + "-" + (
+                df_merged["age_group"] + 10).astype(int).astype(str)
+
+        # Group by age group
+        age_group_sums = (
+            df_merged
+            .groupby("age_group")["amount"]
+            .sum()
+            .sort_index()
+            .to_dict()
+        )
+
+        return age_group_sums
+
     def calc_expenditures_by_channel(self) -> dict[str, float]:
         """
         Calculates the total expenditures divided by transaction channels.
