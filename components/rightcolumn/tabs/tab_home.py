@@ -1,6 +1,7 @@
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from dash import html, dcc
+from plotly.graph_objs._figure import Figure
 
 from backend.data_manager import DataManager
 from components.factories import component_factory as comp_factory
@@ -8,6 +9,11 @@ from frontend.component_ids import ID
 from frontend.icon_manager import IconID
 
 dm: DataManager = DataManager.get_instance()
+PIE_CONFIG = {
+    "displayModeBar": True,
+    "displaylogo": False
+}
+COLOR_BLUE_MAIN = "#0d6efd"
 
 
 # TODO: @Diego
@@ -21,9 +27,12 @@ def create_home_content() -> html.Div:
     )
 
 
-def _create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label") -> go.Figure:
+def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label", showlegend: bool = True,
+                     dark_mode: bool = False) -> go.Figure:
     if colors is None:
         colors = ["#c65ed4", "#5d9cf8"]  # Female = pink, Male = blue
+
+    textcolor = "white" if dark_mode else "black"
 
     labels = list(data.keys())
     values = list(data.values())
@@ -36,11 +45,12 @@ def _create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label") 
             hole=0.42,
             marker=dict(colors=colors),
             textinfo=textinfo,
+            textfont=dict(color=textcolor),
             hovertemplate="%{label}<br>%{percent}<br>$%{value:,.2f}"
         )],
         layout=go.Layout(
             margin=dict(l=0, r=0, t=0, b=0),
-            showlegend=True
+            showlegend=showlegend
         )
     )
 
@@ -206,10 +216,19 @@ def _create_middle_circle_diagrams() -> html.Div:
                 className="card-header"),
 
             dbc.CardBody(children=[
-                dcc.Graph(figure=_create_pie_graph(data=dm.calc_expenditures_by_gender()), className="circle-diagram",
-                          id=ID.HOME_GRAPH_EXPENDITURES_BY_GENDER,
-                          responsive=True)
+                dcc.Loading(children=[
+                    dcc.Graph(
+                        figure=Figure(),
+                        className="circle-diagram",
+                        id=ID.HOME_GRAPH_EXPENDITURES_BY_GENDER,
+                        responsive=True,
+                        config=PIE_CONFIG,
+                        style={"height": "16vh", "minHeight": 0, "minWidth": 0}
+                    )
 
+                ],
+                    type="circle",
+                    color=COLOR_BLUE_MAIN)
             ])
 
         ],
@@ -226,11 +245,49 @@ def _create_middle_circle_diagrams() -> html.Div:
                 className="card-header"),
 
             dbc.CardBody(children=[
-                dcc.Graph(
-                    figure=_create_pie_graph(data=dm.calc_expenditures_by_channel(), colors=["#FFCD00", "#81C784"]),
-                    className="circle-diagram",
-                    id=ID.HOME_GRAPH_EXPENDITURES_BY_CHANNEL,
-                    responsive=True)
+                dcc.Loading(children=[
+                    dcc.Graph(
+                        figure=Figure(),
+                        className="circle-diagram",
+                        id=ID.HOME_GRAPH_EXPENDITURES_BY_CHANNEL,
+                        responsive=True,
+                        config=PIE_CONFIG,
+                        style={"height": "16vh", "minHeight": 0, "minWidth": 0}
+                    )
+
+                ],
+                    type="circle",
+                    color=COLOR_BLUE_MAIN)
+            ])
+
+        ],
+            className="card graph-card"),
+
+        dbc.Card(children=[
+
+            dbc.CardHeader(children=[
+
+                comp_factory.create_icon(IconID.CAKE, cls="icon icon-small"),
+                html.P(children="Expenditures by Age", className="graph-card-title"),
+
+            ],
+                className="card-header"
+            ),
+
+            dbc.CardBody(children=[
+                dcc.Loading(children=[
+                    dcc.Graph(
+                        figure=Figure(),
+                        className="circle-diagram",
+                        id=ID.HOME_GRAPH_EXPENDITURES_BY_AGE,
+                        responsive=True,
+                        config=PIE_CONFIG,
+                        style={"height": "16vh", "minHeight": 0, "minWidth": 0}
+                    )
+                ],
+                    type="circle",
+                    color=COLOR_BLUE_MAIN)
+
             ])
 
         ],
