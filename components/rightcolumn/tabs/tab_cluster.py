@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 appearance of tab cluster
 """
 # TODO: @Yannic
-# data.manager.getinsatnce
+
 def create_cluster_content():
     return html.Div(
         [

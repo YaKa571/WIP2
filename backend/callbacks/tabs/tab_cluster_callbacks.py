@@ -30,6 +30,18 @@ kmeans_default = KMeans(n_clusters=4, n_init=20)
 my_test_agg['cluster'] = kmeans_default.fit_predict(my_test_agg[['transaction_count', 'total_value']])
 my_test_agg['cluster_str'] = my_test_agg['cluster'].astype(str)
 # print(my_test_agg)
+"""
+Data Set Up Default
+"""
+# Aggregation per user
+my_transactions_agg = my_df_transactions.groupby('client_id').agg(
+    transaction_count=('amount', 'count'),
+    total_value=('amount', 'sum')).reset_index()
+
+# Clustering
+kmeans_default = KMeans(n_clusters=4, n_init=20)
+my_transactions_agg['cluster'] = kmeans_default.fit_predict(my_transactions_agg[['transaction_count', 'total_value']])
+my_transactions_agg['cluster_str'] = my_transactions_agg['cluster'].astype(str)
 
 # Callback
 @callback(
@@ -40,12 +52,20 @@ my_test_agg['cluster_str'] = my_test_agg['cluster'].astype(str)
 )
 def update_cluster(value):
     if value == "Default":
-        fig = px.scatter()
+        cluster_colors = {
+            "0": "red",
+            "1": "blue",
+            "2": "green",
+            "3": "orange"
+        }
+        fig = px.scatter(my_transactions_agg, x="transaction_count", y="total_value",
+                         color="cluster_str",
+                         color_discrete_map=cluster_colors,
+                         hover_data=['client_id', 'transaction_count', 'total_value'],
+                         title='Cluster: transaction amount/total value')
         key = html.Ul([
-            html.Li("Cluster 1", style={"color": "red"}),
-            html.Li("Cluster 2", style={"color": "blue"}),
-            html.Li("Cluster 3", style={"color": "green"}),
-            html.Li("Cluster 4", style={"color": "yellow"})
+            html.Li(f"Cluster {i}", style={"color": cluster_colors[str(i)]})
+            for i in range(4)
         ])
         text = 'Cluster: "Default"'
     elif value == "Test":
