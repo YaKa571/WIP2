@@ -29,9 +29,16 @@ class UserKPI:
 
 
 @dataclass
+class PeakHourKPI:
+    """Peak Hour KPI"""
+    hour_range: str
+    value: str
+
+
+@dataclass
 class HomeKPIs:
     """Home Tab KPIs"""
     most_valuable_merchant: MerchantKPI
     most_visited_merchant: VisitKPI
     top_spending_user: UserKPI
-    most_frequent_user: UserKPI
+    peak_hour: PeakHourKPI
