@@ -12,7 +12,7 @@ callbacks and logic of tab cluster
 
 # Data Files
 dm: DataManager = DataManager.get_instance()
-my_df_transactions = dm.df_transactions
+my_transactions = dm.df_transactions
 # Test Data File
 my_test_df = pd.DataFrame({'client_id': [1, 1, 2, 2, 3, 4, 4, 4, 5, 1, 1, 1, 6],
                            'amount': [100, 150, 10, 20, 500, 5, 10, 15, 1000, 250, 4500, 30, 450]
@@ -34,7 +34,7 @@ my_test_agg['cluster_str'] = my_test_agg['cluster'].astype(str) #needed for colo
 Data Set Up Default
 """
 # Aggregation per user
-my_transactions_agg = my_df_transactions.groupby('client_id').agg(
+my_transactions_agg = my_transactions.groupby('client_id').agg(
     transaction_count=('amount', 'count'),
     total_value=('amount', 'sum')).reset_index()
 
