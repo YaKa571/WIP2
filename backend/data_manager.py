@@ -9,12 +9,13 @@ from pyarrow.parquet import ParquetFile
 import utils.logger as logger
 from backend.data_handler import optimize_data, clean_units, json_to_data_frame, json_to_dict, \
     get_mcc_description_by_merchant_id
-from backend.kpi_models import HomeKPIs, MerchantKPI, VisitKPI, UserKPI, PeakHourKPI
+from backend.kpi_models import MerchantKPI, VisitKPI, UserKPI, PeakHourKPI
 from utils.benchmark import Benchmark
 
 DATA_DIRECTORY = Path("assets/data/")
 
 
+# TODO: @Diego: Move home-tab-related methods into home tab class
 def _read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically: bool = False) -> pd.DataFrame:
     """
     Reads a Parquet file into a pandas DataFrame.
@@ -124,12 +125,13 @@ class DataManager:
 
         self.mcc_dict = json_to_dict("mcc_codes.json")
 
-        self.home_kpi = HomeKPIs(
-            most_valuable_merchant=MerchantKPI(0, 0, "Undefined", "0,00"),
-            most_visited_merchant=VisitKPI(0, 0, "Undefined", "0"),
-            top_spending_user=UserKPI(0, "Undefined", 0, "0,00"),
-            peak_hour=PeakHourKPI("Undefined", "Undefined")
-        )
+        self._cache_most_valuable_merchant: dict[str | None, MerchantKPI] = {}
+        self._cache_most_visited_merchant: dict[str | None, VisitKPI] = {}
+        self._cache_top_spending_user: dict[str | None, UserKPI] = {}
+        self._cache_peak_hour: dict[str | None, PeakHourKPI] = {}
+        self._cache_expenditures_by_gender: dict[str | None, dict[str, float]] = {}
+        self._cache_expenditures_by_age: dict[str | None, dict[str, float]] = {}
+        self._cache_expenditures_by_channel: dict[str | None, dict[str, float]] = {}
 
         self.start()  # <-- Initializing all data
         benchmark_data_manager.print_time()
@@ -219,197 +221,312 @@ class DataManager:
         # Creates a 'state_name' column from the 'merchant_state' column (abbreviated state names)
         self._process_transaction_states()
 
-    def _calc_most_valuable_merchant(self) -> None:
+    def get_most_valuable_merchant(self, state: str = None) -> MerchantKPI:
         """
-        Calculate and update the most valuable merchant details in the home_kpi dictionary.
+        Gets the most valuable merchant based on transaction amounts. The method
+        can fetch results for all states or filter data by a specific state if
+        provided. Results are cached for efficiency when the same state data is
+        requested repeatedly.
 
-        This method analyzes transaction data to determine details of the merchant with the
-        highest transaction sum. It then updates the information including merchant ID, MCC code,
-        MCC description, and the transaction value formatted in US style into the `home_kpi`
-        dictionary under the key `most_valuable_merchant`. The method relies on the provided
-        transaction DataFrame and MCC dictionary.
+        Parameters:
+        state: str, optional
+            The state name to filter transactions. If None, data from all states
+            is considered.
+
+        Returns:
+        MerchantKPI
+            The MerchantKPI object containing details of the most valuable
+            merchant, including its ID, MCC, MCC description, and total transaction
+            value.
         """
-        df_sums = (
-            self.df_transactions
-            .groupby(["merchant_id", "mcc"])["amount"]
-            .sum()
-            .to_frame("merchant_sum")  # Convert to DataFrame
-            .reset_index()  # merchant_id as index
-        )
+        # Cache-Check
+        if state in self._cache_most_valuable_merchant:
+            return self._cache_most_valuable_merchant[state]
 
-        # Find the row with the highest merchant_sum
-        idx_top = df_sums["merchant_sum"].idxmax()
-        top_row = df_sums.loc[idx_top]
-
-        # Extract values
-        merchant_id = int(top_row["merchant_id"])
-        mcc = top_row["mcc"]
-        mcc_desc = get_mcc_description_by_merchant_id(self.mcc_dict, mcc)
-        value = float(top_row["merchant_sum"])
-
-        # Write to dict
-        self.home_kpi.most_valuable_merchant = MerchantKPI(
-            id=merchant_id,
-            mcc=int(top_row["mcc"]),
-            mcc_desc=mcc_desc,
-            value="{:,.2f}".format(value)
-        )
-
-    def _calc_most_active_time_of_day(self) -> None:
-        """
-        Calculates the hour of day with the highest number of transactions and updates the
-        home KPI accordingly. The hour is extracted from the transaction timestamps and the
-        most frequent hour is identified. The result is saved as a formatted string in the
-        home_kpi.most_active_hour attribute.
-        """
-        # Ensure date is datetime
+        # Compute if not cached
         df = self.df_transactions.copy()
-        df["date"] = pd.to_datetime(df["date"])
+        if state:
+            df = df[df["state_name"] == state]
 
-        # Extract hour (0–23)
+        # Ensure we work on a copy
+        df = df.copy()
+        df_sums = (
+            df.groupby(["merchant_id", "mcc"])["amount"]
+            .sum()
+            .reset_index(name="merchant_sum")
+        )
+        top = df_sums.loc[df_sums["merchant_sum"].idxmax()]
+
+        kpi = MerchantKPI(
+            id=int(top["merchant_id"]),
+            mcc=int(top["mcc"]),
+            mcc_desc=get_mcc_description_by_merchant_id(self.mcc_dict, int(top["mcc"])),
+            value=f"{float(top['merchant_sum']):,.2f}"
+        )
+
+        # Cache & return
+        self._cache_most_valuable_merchant[state] = kpi
+        return kpi
+
+    def get_peak_hour(self, state: str = None) -> PeakHourKPI:
+        """
+        Determines the hour with the highest number of transactions from the given data, optionally
+        filtering transactions by state. The resulting information is cached for future calls to
+        optimize performance.
+
+        Attributes:
+            _cache_peak_hour: A dictionary used to store cached results of peak hour calculations
+                for each state for quick future references.
+            df_transactions: A DataFrame containing transaction data with "date" and "state_name"
+                columns.
+
+        Args:
+            state: str, optional
+                The name of the state to filter transactions by, or None to include all transactions.
+
+        Returns:
+            PeakHourKPI
+                An object containing the hour range with the most transactions and the formatted count
+                of these transactions. The hour range is formatted as "HH:00 – HH:00", ensuring
+                a 24-hour time format.
+        """
+        # Cache-Check
+        if state in self._cache_peak_hour:
+            return self._cache_peak_hour[state]
+
+        # Filter transactions by state if provided
+        df = self.df_transactions
+        if state:
+            df = df[df["state_name"] == state]
+
+        # Ensure we work on a copy and parse dates
+        df = df.copy()
+        df["date"] = pd.to_datetime(df["date"])
         df["hour"] = df["date"].dt.hour
 
         # Count transactions per hour
         hour_counts = df["hour"].value_counts().sort_index()
-
-        # Identify most active hour
         most_active_hour = hour_counts.idxmax()
-        count = hour_counts.max()
+        count = int(hour_counts.max())
 
-        # Format hour string: e.g. "14:00 – 15:00"
+        # Format results
         hour_str = f"{most_active_hour:02d}:00 – {(most_active_hour + 1) % 24:02d}:00"
+        value_str = f"{count:,}".replace(",", ".")
 
-        self.home_kpi.peak_hour = PeakHourKPI(
-            hour_range=hour_str,
-            value=f"{count:,}".replace(",", ".")
-        )
+        # Build the KPI object
+        kpi = PeakHourKPI(hour_range=hour_str, value=value_str)
 
-    def _calc_most_valuable_user(self) -> None:
+        # Cache & return
+        self._cache_peak_hour[state] = kpi
+        return kpi
+
+    def get_top_spending_user(self, state: str = None) -> UserKPI:
         """
-        Calculates and updates the most valuable user based on transaction data.
+        Identifies and returns the user with the highest total spending within the dataset. If a state
+        name is provided, the function filters the data by the specified state before determining the
+        top spending user. The result is cached for future calls with the same state.
 
-        The method identifies the client with the highest transaction sum from the
-        provided transaction dataframe. It retrieves the client's details, such as
-        ID, gender, and current age, by matching the client ID with the users' dataframe.
-        The method updates the most valuable user's information as a `UserKPI` object
-        in the `home_kpi.top_spending_user` attribute.
+        Parameters:
+        state: str, optional
+            The name of the state to filter the transactions. If None, transactions from all states
+            are considered.
+
+        Returns:
+        UserKPI
+            An object containing details of the top spending user, including their ID, gender,
+            current age, and a formatted string of their total spending.
         """
+        # Cache-Check
+        if state in self._cache_top_spending_user:
+            return self._cache_top_spending_user[state]
+
+        # Filter transactions by state if provided
+        df = self.df_transactions
+        if state:
+            df = df[df["state_name"] == state]
+
+        # Ensure we work on a copy and sum amounts per client
+        df = df.copy()
         df_sums = (
-            self.df_transactions
-            .groupby("client_id")["amount"]
+            df.groupby("client_id")["amount"]
             .sum()
-            .to_frame("client_sum")
-            .reset_index()
+            .reset_index(name="client_sum")
         )
 
+        # Identify top client
         idx_top = df_sums["client_sum"].idxmax()
-        top_row = df_sums.loc[idx_top]
+        top = df_sums.loc[idx_top]
+        client_id = int(top["client_id"])
+        client_sum = float(top["client_sum"])
 
-        client_id = int(top_row["client_id"])
-        client_sum = float(top_row["client_sum"])
+        # Lookup user details
+        user_row = self.df_users.loc[self.df_users["id"] == client_id].iloc[0]
+        gender = user_row["gender"]
+        current_age = int(user_row["current_age"])
 
-        client_gender = self.df_users[self.df_users["id"] == client_id]["gender"].values[0]
-        client_current_age = self.df_users[self.df_users["id"] == client_id]["current_age"].values[0]
-
-        self.home_kpi.top_spending_user = UserKPI(
+        # Build KPI object
+        value_str = f"{client_sum:,.2f}"
+        kpi = UserKPI(
             id=client_id,
-            gender=client_gender,
-            current_age=client_current_age,
-            value="{:,.2f}".format(client_sum)
+            gender=gender,
+            current_age=current_age,
+            value=value_str
         )
 
-    def _calc_most_visited_merchant(self) -> None:
+        # Cache & return
+        self._cache_top_spending_user[state] = kpi
+        return kpi
+
+    def get_most_visited_merchant(self, state: str = None) -> VisitKPI:
         """
-        Calculates the most visited merchant from transaction data and updates the home KPI
-        with details of the most visited merchant, including its ID, visit count, MCC code,
-        and MCC description. This method operates on the dataframe containing transaction
-        data and relies on external utility functions and objects for MCC description and
-        home KPI updates.
+        Returns the most visited merchant within the specified state or across all states if no state is
+        specified. This method analyzes transaction data to determine the merchant with the highest visit
+        count. Additionally, it retrieves the merchant's MCC and its description and formats the visit count
+        as a string with dot-separated thousand delimiters.
+
+        If data is already cached for the specified state, it retrieves the record directly from the cache
+        for improved efficiency.
+
+        Attributes:
+            self.df_transactions (DataFrame): A DataFrame containing transaction data. Expected columns
+                include 'state_name', 'merchant_id', and 'mcc'.
+            self._cache_most_visited_merchant (dict): A cache to store previously computed results for
+                faster retrieval. Keys are state names, and values are corresponding most-visited merchant data.
+            self.mcc_dict (dict): A dictionary mapping MCC codes to their descriptions.
+
+        Args:
+            state (str, optional): The name of the state for which the most visited merchant is to be
+                identified. Defaults to None, in which case all states are analyzed.
+
+        Returns:
+            VisitKPI: An object containing the most visited merchant's details, including their ID, MCC,
+                MCC description, and formatted number of visits. Visit count is provided as a string with
+                dots as thousand separators.
         """
-        column = self.df_transactions["merchant_id"]
+        # Cache check
+        if state in self._cache_most_visited_merchant:
+            return self._cache_most_visited_merchant[state]
 
-        most_visited_merchant_id = column.value_counts().idxmax()
-        visits = column.value_counts().max()
+        # Filter by state if provided
+        df = self.df_transactions
+        if state:
+            df = df[df["state_name"] == state]
 
-        top_rows = self.df_transactions[self.df_transactions["merchant_id"] == most_visited_merchant_id]
-        top_row = top_rows.iloc[0]
+        # Ensure we work on a copy and compute visit counts per merchant_id
+        df = df.copy()
+        vc = df["merchant_id"].value_counts()
+        most_id = int(vc.idxmax())
+        visits = int(vc.max())
 
-        mcc = top_row["mcc"]
+        # Lookup MCC for this merchant
+        #    we take the first matching row to get the mcc
+        mcc = int(df.loc[df["merchant_id"] == most_id, "mcc"].iloc[0])
         mcc_desc = get_mcc_description_by_merchant_id(self.mcc_dict, mcc)
 
-        self.home_kpi.most_visited_merchant = VisitKPI(
-            id=most_visited_merchant_id,
-            visits="{:,}".format(visits).replace(",", "."),
+        # Format visits with dot as thousand separator
+        visits_str = f"{visits:,}".replace(",", ".")
+
+        # Build the KPI object
+        kpi = VisitKPI(
+            id=most_id,
             mcc=mcc,
-            mcc_desc=mcc_desc
+            mcc_desc=mcc_desc,
+            visits=visits_str
         )
+
+        # Cache & return
+        self._cache_most_visited_merchant[state] = kpi
+        return kpi
 
     def _calc_home_tab_kpis(self):
         """
-        Calculates Key Performance Indicators (KPIs) for the home tab view.
-
-        This function performs the computation of essential metrics displayed on a
-        home tab interface, including calculations for determining the merchant with
-        the highest value.
+        Calculates the Key Performance Indicators (KPIs) required for the Home Tab. This function logs
+        the start of the KPI calculation and uses benchmark tracking to log the time taken for the
+        calculation process. It performs several operations to fetch specific KPI values related to
+        merchants and users.
         """
         logger.log("ℹ️ Calculating KPIs for Home Tab...", 2)
         bm = Benchmark("Calculation")
-        self._calc_most_valuable_merchant()
-        self._calc_most_visited_merchant()
-        self._calc_most_valuable_user()
-        self._calc_most_active_time_of_day()
+        self.get_most_valuable_merchant()
+        self.get_most_visited_merchant()
+        self.get_top_spending_user()
+        self.get_peak_hour()
         bm.print_time(level=3)
 
-    def calc_expenditures_by_gender(self) -> dict[str, float]:
+    def get_expenditures_by_gender(self, state: str = None) -> dict[str, float]:
         """
-        Calculates expenditures by gender for the given transactions. The method merges
-        a transactions dataset with a users dataset to associate each transaction
-        to a gender. It then groups the merged data by gender and computes the sum
-        of expenditures for each gender.
+        Calculates the total expenditures grouped by gender, with an optional filter for a specific state. The function
+        utilizes a caching mechanism to optimize repeated queries for the same state.
 
-        Args:
-            self: The instance of the class where the method belongs. Contains
-                attributes `df_transactions` (DataFrame) and `df_users` (DataFrame).
+        Arguments:
+        state: str, optional
+            The name of the state to filter the transactions. If not provided, the calculation is performed
+            on all available data.
 
         Returns:
-            dict[str, float]: A dictionary where the keys are genders (e.g., "M", "F")
-            and the values are the total expenditure for each gender.
+        dict[str, float]
+            A dictionary where keys are gender identifiers and the values are the total expenditures associated
+            with each gender.
+
         """
-        # Merge transactions with users to get gender per transaction
+        # Cache-Check
+        if state in self._cache_expenditures_by_gender:
+            return self._cache_expenditures_by_gender[state]
+
+        # Copy & optional filter
+        df = self.df_transactions.copy()
+        if state:
+            df = df[df["state_name"] == state]
+
+        # Merge with user gender
         df_merged = pd.merge(
-            self.df_transactions[["client_id", "amount"]],
+            df[["client_id", "amount"]],
             self.df_users[["id", "gender"]],
             left_on="client_id",
             right_on="id",
             how="left"
         )
 
-        # Group by gender and sum amounts
+        # Group & sum
         gender_sums = (
             df_merged
             .groupby("gender")["amount"]
             .sum()
             .to_dict()
         )
+
+        # Cache & return
+        self._cache_expenditures_by_gender[state] = gender_sums
         return gender_sums
 
-    def calc_expenditures_by_age(self) -> dict[int, float]:
+    def get_expenditures_by_age(self, state: str = None) -> dict[str, float]:
         """
-        Calculates total expenditures grouped by age brackets.
+        Calculates the total expenditures per age group, optionally filtering by state.
 
-        This method merges transaction data with user data based on client
-        identifiers, groups the resulting data into age brackets of ten-year
-        intervals (e.g., "20-30", "30-40"), then calculates the cumulative
-        sum of transaction amounts for each age group. The results are
-        returned as a dictionary where the keys are age brackets and the
-        values are the total expenditures for those brackets.
+        This function processes transaction data by merging it with user age data, creating
+        age groups (e.g., "20-30", "30-40", etc.), and then summing transaction amounts
+        within each age group. It can also filter the transactions by a specified state.
+
+        Parameters:
+            state (str, optional): The name of the state to filter transactions by. Defaults to None.
 
         Returns:
-            dict[int, float]: A dictionary mapping age brackets (represented
-            as strings) to the sum of transaction amounts in each bracket.
+            dict[str, float]: A dictionary where keys represent age groups, and values represent
+            the corresponding total expenditures.
+
         """
+        # Cache-Check
+        if state in self._cache_expenditures_by_age:
+            return self._cache_expenditures_by_age[state]
+
+        # Copy & optional filter
+        df = self.df_transactions.copy()
+        if state:
+            df = df[df["state_name"] == state]
+
+        # Merge with user ages
         df_merged = pd.merge(
-            self.df_transactions[["client_id", "amount"]],
+            df[["client_id", "amount"]],
             self.df_users[["id", "current_age"]],
             left_on="client_id",
             right_on="id",
@@ -417,11 +534,13 @@ class DataManager:
         )
 
         # Create age groups like "20-30", "30-40", etc.
-        df_merged["age_group"] = df_merged["current_age"].floordiv(10) * 10
-        df_merged["age_group"] = df_merged["age_group"].astype(int).astype(str) + "-" + (
-                df_merged["age_group"] + 10).astype(int).astype(str)
+        df_merged["age_group"] = (
+                df_merged["current_age"].floordiv(10).mul(10).astype(int).astype(str)
+                + "-"
+                + (df_merged["current_age"].floordiv(10).mul(10) + 10).astype(int).astype(str)
+        )
 
-        # Group by age group
+        # Group by age group and sum amounts
         age_group_sums = (
             df_merged
             .groupby("age_group")["amount"]
@@ -430,31 +549,56 @@ class DataManager:
             .to_dict()
         )
 
+        # Cache & return
+        self._cache_expenditures_by_age[state] = age_group_sums
         return age_group_sums
 
-    def calc_expenditures_by_channel(self) -> dict[str, float]:
+    def get_expenditures_by_channel(self, state: str = None) -> dict[str, float]:
         """
-        Calculates the total expenditures divided by transaction channels.
+        Calculates the total expenditures divided by transaction channels,
+        optionally filtered by a given U.S. state. Results are cached per state.
 
-        This method processes transaction data to determine the total expenditures for
-        each channel, categorized as either "Online" or "In-Store". The classification
-        is based on the 'merchant_city' column, and the resulting sums are returned as
-        a dictionary.
+        Parameters
+        ----------
+        state : str, optional
+            If provided, only 'Swipe Transaction' in this state are considered
+            for the In-Store sum. Online transactions are always global.
 
-        Returns:
-            dict[str, float]: A dictionary where keys are the transaction channels
-            ("Online" or "In-Store"), and values represent the summed expenditures for
-            each channel.
+        Returns
+        -------
+        dict[str, float]
+            A dictionary where keys are the transaction channels
+            ("Online" or "In-Store"), and values represent the summed expenditures
+            for each channel.
         """
+        # Cache-Check
+        if state in self._cache_expenditures_by_channel:
+            return self._cache_expenditures_by_channel[state]
+
+        # Work on a copy
         df = self.df_transactions.copy()
 
-        df["channel"] = df["merchant_city"].apply(
-            lambda x: "Online" if str(x).strip().upper() == "ONLINE" else "In-Store"
-        )
+        # Normalize use_chip for matching
+        df["use_chip_norm"] = df["use_chip"].str.strip().str.lower()
 
-        channel_sums = df.groupby("channel")["amount"].sum().to_dict()
+        # All online transactions (state_name may be null)
+        online_mask = df["use_chip_norm"].str.startswith("online")
+        online_sum = df.loc[online_mask, "amount"].sum()
 
-        return channel_sums
+        # In-Store: only swipe transactions, optionally filtered by state
+        instore_mask = df["use_chip_norm"].str.startswith("swipe")
+        if state:
+            instore_mask &= (df["state_name"] == state)
+        instore_sum = df.loc[instore_mask, "amount"].sum()
+
+        result = {
+            "Online": online_sum,
+            "In-Store": instore_sum
+        }
+
+        # Cache & return
+        self._cache_expenditures_by_channel[state] = result
+        return result
 
     def start(self):
         """
