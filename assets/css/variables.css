@@ -60,6 +60,10 @@
     --kpi-card-splitline: #dfdfdf;
     --kpi-card-body-bg: #ffffff;
 
+    /* Settings Button Text */
+    --settings-button-text-border: 1px solid var(--text-main);
+    --settings-button-text-bg-hover: #f9f9f9;
+
     /* Etc. */
     --kpi-number-value: #2E7D32;
     --modebar-icon-filter: brightness(0%);
@@ -115,6 +119,10 @@
     --kpi-card-header-bg: #161616;
     --kpi-card-splitline: #2c2a2a;
     --kpi-card-body-bg: #191919;
+
+    /* Settings Button Text */
+    --settings-button-text-border: 1px solid var(--text-main);
+    --settings-button-text-bg-hover: #161616;
 
     /* Etc. */
     --kpi-number-value: #81C784;
