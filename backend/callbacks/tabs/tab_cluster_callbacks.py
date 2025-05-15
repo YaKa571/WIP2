@@ -52,14 +52,15 @@ Logic
 """
 # Callback
 @callback(
-    Output(ID.CLUSTER_DROPDOWN_OUTPUT, 'children'),
+#    Output(ID.CLUSTER_DROPDOWN_OUTPUT, 'children'),
     Output(ID.CLUSTER_GRAPH, 'figure'),
     Output(ID.CLUSTER_LEGEND, 'children'),
     Output(ID.CLUSTER_DEFAULT_SWITCH_CONTAINER, 'style'),
-    Input(ID.CLUSTER_DROPDOWN, 'value')
+    Input(ID.CLUSTER_DROPDOWN, 'value'),
+    Input(ID.CLUSTER_DEFAULT_SWITCH, 'value')
 )
-def update_cluster(value):
-    # color scheme, based on Paul Tol's color schemas and Color Universal Design
+def update_cluster(value, default_switch_value):
+    # color scheme
     cluster_colors = {
         "0": "#56B4E9",  # light blue
         "1": "#D55E00",  # reddish brown
@@ -74,12 +75,22 @@ def update_cluster(value):
     }
     if value == "Default":
         default_switch_container = {'display' : 'block'}
-        fig = px.scatter(my_transactions_agg, x="transaction_count", y="total_value",
-                         color="cluster_str",
-                         color_discrete_map=cluster_colors,
-                         hover_data=['client_id', 'transaction_count', 'total_value','average_value'],
-                         title='Cluster: transaction amount/total value')
-        fig.update_layout(showlegend=False)
+        if default_switch_value == 'total_value':
+            fig = px.scatter(my_transactions_agg, x="transaction_count", y="total_value",
+                            color="cluster_str",
+                            color_discrete_map=cluster_colors,
+                            hover_data=['client_id', 'transaction_count', 'total_value','average_value'],
+                            title='Cluster: transaction amount/total value')
+            fig.update_layout(showlegend=False)
+        elif default_switch_value == 'average_value':
+            fig = px.scatter(my_transactions_agg, x="transaction_count", y="average_value",
+                             color="cluster_str",
+                             color_discrete_map=cluster_colors,
+                             hover_data=['client_id', 'transaction_count', 'total_value', 'average_value'],
+                             title='Cluster: transaction amount/average value')
+            fig.update_layout(showlegend=False)
+        else:
+            fig=px.scatter()
         # TODO: Check Description
         legend = html.Ul([
             html.Li([
@@ -107,7 +118,7 @@ def update_cluster(value):
             ], style={"margin-bottom": "12px"}),
         ])
 
-        text = 'Cluster: "Default"'
+#        text = 'Cluster: "Default"'
     elif value == "Test":
         default_switch_container = {'display' : 'none'}
         cluster_colors = {
@@ -125,7 +136,7 @@ def update_cluster(value):
             html.Li(f"Cluster {i}", style={"color": cluster_colors[str(i)]})
             for i in range(4)
         ])
-        text = 'Cluster: "Test"'
+#        text = 'Cluster: "Test"'
     elif value == "Age Group":
         default_switch_container = {'display' : 'none'}
         fig = px.scatter()
@@ -134,7 +145,7 @@ def update_cluster(value):
             html.Li("Middle-aged", style={"color": "blue"}),
             html.Li("Senior", style={"color": "green"}),
         ])
-        text = 'Cluster: "Age Group"'
+#        text = 'Cluster: "Age Group"'
     elif value == "Income vs Expenditures":
         default_switch_container = {'display' : 'none'}
         fig = px.scatter()
@@ -144,10 +155,10 @@ def update_cluster(value):
             html.Li("High Income / High Spending", style={"color": "green"}),
             html.Li("High Income / Low Spending", style={"color": "yellow"}),
         ])
-        text = 'Cluster: "Income vs Expenditures"'
+#        text = 'Cluster: "Income vs Expenditures"'
     else:
         default_switch_container = {'display' : 'none'}
         fig = px.scatter()
         legend = html.Div("no key available")
-        text = "Cluster: Unknown"
-    return text, fig, html.Div([html.H5("Legend:"),html.Br(), legend]), default_switch_container
+#        text = "Cluster: Unknown"
+    return fig, html.Div([html.H5("Legend:"),html.Br(), legend]), default_switch_container # text on first position TODO:delete
