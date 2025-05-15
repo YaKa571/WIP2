@@ -123,6 +123,10 @@ html, body {
     height: clamp(19px, 1.5vw, 23px) !important;
 }
 
+.info-icon {
+    font-size: 1.4rem !important;
+}
+
 /* ==========================================================================
    KPI-Specific Styles
    ========================================================================== */
@@ -231,11 +235,30 @@ html, body {
     color: var(--text-main);
     padding: 0.25rem 0.5rem;
     text-transform: uppercase !important;
+    pointer-events: auto;
+    opacity: 1;
+    transition: opacity 0.33s ease-in-out,
+    transform 0.33s ease-in-out;
+    user-select: none; /* disable text selection */
+    -webkit-user-select: none; /* Chrome/Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+ */
+}
+
+.settings-button-text.hidden {
+    opacity: 0.33;
+    pointer-events: none;
 }
 
 .settings-button-text:hover {
     background-color: var(--settings-button-text-bg-hover);
+    transform: scale(1.02);
 }
+
+.settings-button-text:active {
+    transform: scale(0.95);
+}
+
 
 /* ============================================================
    User KPIs
