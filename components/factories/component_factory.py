@@ -19,7 +19,7 @@ dm: DataManager = DataManager.get_instance()
 # GLOBAL DICT that holds all DataFrames
 DATASETS: dict[str, pd.DataFrame] = {}
 
-# → Load GeoJSON of US states (only once at app startup)
+# -> Load GeoJSON of US states (only once at app startup)
 with urllib.request.urlopen(
         "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
 ) as response:
@@ -167,7 +167,6 @@ def create_usa_map(color_scale: str = "Blues",
     )
 
 
-# TODO: @Diego: Make KPI Tooltips update dynamically
 def create_tooltips():
     """
     Creates a container that holds tooltip components designed to provide additional
@@ -181,6 +180,7 @@ def create_tooltips():
     """
     return html.Div(
         children=[
+
             dbc.Tooltip(children=[
                 "Open Settings",
                 html.Br(),
@@ -203,38 +203,8 @@ def create_tooltips():
                 trigger="hover",
                 id={"type": "tooltip", "id": "dark-mode-toggle"},
             ),
-            dbc.Tooltip(children=[
-                f"Merchant ID: {dm.get_most_valuable_merchant().id}",
-                html.Br(),
-                f"MCC: {dm.get_most_valuable_merchant().mcc}"
-            ],
-                placement="bottom",
-                is_open=False,
-                trigger="hover",
-                id={"type": "tooltip", "id": "tab_home_kpi_1"},
-                target=ID.HOME_KPI_MOST_VALUABLE_MERCHANT
-            ),
-            dbc.Tooltip(children=[
-                f"Merchant ID: {dm.get_most_visited_merchant().id}",
-                html.Br(),
-                f"MCC: {dm.get_most_visited_merchant().mcc}"
-            ],
-                placement="bottom",
-                is_open=False,
-                trigger="hover",
-                id={"type": "tooltip", "id": "tab_home_kpi_2"},
-                target=ID.HOME_KPI_MOST_VISITED_MERCHANT
-            ),
-            dbc.Tooltip(children=[
-                f"User ID: {dm.get_top_spending_user().id}"
-            ],
-                placement="bottom",
-                is_open=False,
-                trigger="hover",
-                id={"type": "tooltip", "id": "tab_home_kpi_3"},
-                target=ID.HOME_KPI_TOP_SPENDING_USER
-            ),
             # Add more...
+
         ],
         style={"display": "contents"}
     )
@@ -257,3 +227,20 @@ def create_icon(icon_id: IconID, cls: str = "icon") -> html.Img:
         The HTML image element representing the specified icon.
     """
     return html.Img(src=Icons.get_icon(icon_id), className=cls, draggable="False")
+
+
+def create_info_icon(icon_id: ID) -> html.I:
+    """
+    Creates an HTML info icon element with the specified ID.
+
+    This function generates an HTML <i> tag meant to represent an info icon. It applies
+    specific classes to style the icon as a "bi bi-info-circle-fill info-icon" and assigns
+    the provided ID to the element.
+
+    Parameters:
+    id (ID): The unique identifier to be assigned to the HTML info icon element.
+
+    Returns:
+    html.I: HTML <i> element with specified id and predefined classes.
+    """
+    return html.I(className="bi bi-info-circle-fill info-icon", id=icon_id)
