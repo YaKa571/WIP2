@@ -28,7 +28,7 @@ my_test_agg = my_test_df.groupby('client_id').agg(
 # Clustering
 kmeans_default = KMeans(n_clusters=4, n_init=20)
 my_test_agg['cluster'] = kmeans_default.fit_predict(my_test_agg[['transaction_count', 'total_value']])
-my_test_agg['cluster_str'] = my_test_agg['cluster'].astype(str)
+my_test_agg['cluster_str'] = my_test_agg['cluster'].astype(str) #needed for color scheme allocation
 # print(my_test_agg)
 """
 Data Set Up Default
@@ -41,29 +41,37 @@ my_transactions_agg = my_df_transactions.groupby('client_id').agg(
 # Clustering
 kmeans_default = KMeans(n_clusters=4, random_state=42, n_init=30)
 my_transactions_agg['cluster'] = kmeans_default.fit_predict(my_transactions_agg[['transaction_count', 'total_value']])
-my_transactions_agg['cluster_str'] = my_transactions_agg['cluster'].astype(str)
+my_transactions_agg['cluster_str'] = my_transactions_agg['cluster'].astype(str) #needed for color scheme allocation
 
 # Callback
 @callback(
     Output(ID.CLUSTER_DROPDOWN_OUTPUT, 'children'),
     Output(ID.CLUSTER_GRAPH, 'figure'),
-    Output(ID.CLUSTER_KEY, 'children'),
+    Output(ID.CLUSTER_LEGEND, 'children'),
     Input(ID.CLUSTER_DROPDOWN, 'value')
 )
 def update_cluster(value):
+    # color scheme, based on Paul Tol's color schemas and Color Universal Design
+    cluster_colors = {
+        "0": "#56B4E9",  # light blue
+        "1": "#D55E00",  # reddish brown
+        "2": "#009E73",  # teal green
+        "3": "#E69F00",  # orange
+        "4": "#0072B2",  # dark blue
+        "5": "#F0E442",  # yellow
+        "6": "#CC79A7",  # pink/magenta
+        "7": "#999999",  # grey
+        "8": "#ADFF2F",  # light green
+        "9": "#87CEEB"  # sky blue
+    }
     if value == "Default":
-        cluster_colors = {
-            "0": "red",
-            "1": "blue",
-            "2": "green",
-            "3": "orange"
-        }
         fig = px.scatter(my_transactions_agg, x="transaction_count", y="total_value",
                          color="cluster_str",
                          color_discrete_map=cluster_colors,
                          hover_data=['client_id', 'transaction_count', 'total_value'],
                          title='Cluster: transaction amount/total value')
-        key = html.Ul([
+        fig.update_layout(showlegend=False)
+        legend = html.Ul([
             html.Li(f"Cluster {i}", style={"color": cluster_colors[str(i)]})
             for i in range(4)
         ])
@@ -80,14 +88,14 @@ def update_cluster(value):
                          color_discrete_map=cluster_colors,
                          hover_data=['client_id', 'transaction_count', 'total_value'],
                          title='Cluster: transaction amount/total value')
-        key = html.Ul([
+        legend = html.Ul([
             html.Li(f"Cluster {i}", style={"color": cluster_colors[str(i)]})
             for i in range(4)
         ])
         text = 'Cluster: "Test"'
     elif value == "Age Group":
         fig = px.scatter()
-        key = html.Ul([
+        legend = html.Ul([
             html.Li("Young", style={"color": "red"}),
             html.Li("Middle-aged", style={"color": "blue"}),
             html.Li("Senior", style={"color": "green"}),
@@ -95,7 +103,7 @@ def update_cluster(value):
         text = 'Cluster: "Age Group"'
     elif value == "Income vs Expenditures":
         fig = px.scatter()
-        key = html.Ul([
+        legend = html.Ul([
             html.Li("Low Income / High Spending", style={"color": "red"}),
             html.Li("Low Income / Low Spending", style={"color": "blue"}),
             html.Li("High Income / High Spending", style={"color": "green"}),
@@ -104,6 +112,6 @@ def update_cluster(value):
         text = 'Cluster: "Income vs Expenditures"'
     else:
         fig = px.scatter()
-        key = html.Div("no key available")
+        legend = html.Div("no key available")
         text = "Cluster: Unknown"
-    return text, fig, html.Div([html.H5("Key:"), key])
+    return text, fig, html.Div([html.H5("Legend:"), legend])

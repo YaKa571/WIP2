@@ -54,7 +54,7 @@ class ID(str, Enum):
     # Cluster
     CLUSTER_DROPDOWN = "cluster-dropdown"
     CLUSTER_DROPDOWN_OUTPUT = "cluster-dropdown-output"
-    CLUSTER_KEY = "cluster-key"
+    CLUSTER_LEGEND = "cluster-legend"
     CLUSTER_GRAPH = "cluster-graph"
     CLUSTER_HEADING = "cluster-heading"
     CLUSTER_INFO_ICON = "cluster-info-icon"

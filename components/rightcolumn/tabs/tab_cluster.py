@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 appearance of tab cluster
 """
 # TODO: @Yannic
-
+# TODO: Darkmode
 def create_cluster_heading():
     return html.Div(
         children=[
@@ -28,7 +28,7 @@ def create_cluster_heading():
                     width=4
                 )
         ],
-        # TODO: maybe own css class
+        # TODO: maybe custom css class
         className="tab-home-heading-wrapper"
     )
 def create_cluster_content():
@@ -37,7 +37,7 @@ def create_cluster_content():
             create_cluster_heading(),
             html.P("This is the cluster page of the application."),
             # TODO Names
-            dcc.Dropdown(['Default','Age Group','Income vs Expenditures','Test'],'Test',id=ID.CLUSTER_DROPDOWN),
+            dcc.Dropdown(['Default','Age Group','Income vs Expenditures','Test'],'Default',id=ID.CLUSTER_DROPDOWN),
             html.Hr(),
             html.Div(id=ID.CLUSTER_DROPDOWN_OUTPUT),
             dbc.Row([
@@ -49,7 +49,7 @@ def create_cluster_content():
                     width=8
                 ),
                 dbc.Col(
-                    html.Div(id=ID.CLUSTER_KEY),
+                    html.Div(id=ID.CLUSTER_LEGEND),
                     width=4
                 )
             ])
