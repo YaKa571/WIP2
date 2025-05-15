@@ -38,12 +38,18 @@ Data Set Up Default
 my_transactions_agg = my_transactions.groupby('client_id').agg(
     transaction_count=('amount', 'count'),
     total_value=('amount', 'sum')).reset_index()
-
+my_transactions_agg['average_value'] = my_transactions_agg['total_value'] / my_transactions_agg['transaction_count']
 # Clustering
 kmeans_default = KMeans(n_clusters=4, random_state=42, n_init=30)
 my_transactions_agg['cluster'] = kmeans_default.fit_predict(my_transactions_agg[['transaction_count', 'total_value']])
-my_transactions_agg['cluster_str'] = my_transactions_agg['cluster'].astype(str) #needed for color scheme allocation
+my_transactions_agg['cluster_str'] = my_transactions_agg['cluster'].astype(str) # needed for color scheme allocation
 
+my_transactions_agg['cluster_average'] = kmeans_default.fit_predict(my_transactions_agg[['transaction_count', 'average_value']])
+my_transactions_agg['cluster_average_str'] = my_transactions_agg['cluster_average'].astype(str)
+
+"""
+Logic
+"""
 # Callback
 @callback(
     Output(ID.CLUSTER_DROPDOWN_OUTPUT, 'children'),
@@ -69,7 +75,7 @@ def update_cluster(value):
         fig = px.scatter(my_transactions_agg, x="transaction_count", y="total_value",
                          color="cluster_str",
                          color_discrete_map=cluster_colors,
-                         hover_data=['client_id', 'transaction_count', 'total_value'],
+                         hover_data=['client_id', 'transaction_count', 'total_value','average_value'],
                          title='Cluster: transaction amount/total value')
         fig.update_layout(showlegend=False)
         legend = html.Ul([

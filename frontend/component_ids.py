@@ -58,3 +58,4 @@ class ID(str, Enum):
     CLUSTER_GRAPH = "cluster-graph"
     CLUSTER_HEADING = "cluster-heading"
     CLUSTER_INFO_ICON = "cluster-info-icon"
+    CLUSTER_DEFAULT_SWITCH = "cluster-default-switch"
