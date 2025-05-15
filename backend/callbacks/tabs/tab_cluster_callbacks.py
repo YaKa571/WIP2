@@ -55,6 +55,7 @@ Logic
     Output(ID.CLUSTER_DROPDOWN_OUTPUT, 'children'),
     Output(ID.CLUSTER_GRAPH, 'figure'),
     Output(ID.CLUSTER_LEGEND, 'children'),
+    Output(ID.CLUSTER_DEFAULT_SWITCH_CONTAINER, 'style'),
     Input(ID.CLUSTER_DROPDOWN, 'value')
 )
 def update_cluster(value):
@@ -72,12 +73,14 @@ def update_cluster(value):
         "9": "#87CEEB"  # sky blue
     }
     if value == "Default":
+        default_switch_container = {'display' : 'block'}
         fig = px.scatter(my_transactions_agg, x="transaction_count", y="total_value",
                          color="cluster_str",
                          color_discrete_map=cluster_colors,
                          hover_data=['client_id', 'transaction_count', 'total_value','average_value'],
                          title='Cluster: transaction amount/total value')
         fig.update_layout(showlegend=False)
+        # TODO: Check Description
         legend = html.Ul([
             html.Li([
                 html.Span("Cluster 0", style={"color": cluster_colors["0"], "font-weight": "bold"}),
@@ -106,6 +109,7 @@ def update_cluster(value):
 
         text = 'Cluster: "Default"'
     elif value == "Test":
+        default_switch_container = {'display' : 'none'}
         cluster_colors = {
             "0": "red",
             "1": "blue",
@@ -123,6 +127,7 @@ def update_cluster(value):
         ])
         text = 'Cluster: "Test"'
     elif value == "Age Group":
+        default_switch_container = {'display' : 'none'}
         fig = px.scatter()
         legend = html.Ul([
             html.Li("Young", style={"color": "red"}),
@@ -131,6 +136,7 @@ def update_cluster(value):
         ])
         text = 'Cluster: "Age Group"'
     elif value == "Income vs Expenditures":
+        default_switch_container = {'display' : 'none'}
         fig = px.scatter()
         legend = html.Ul([
             html.Li("Low Income / High Spending", style={"color": "red"}),
@@ -140,7 +146,8 @@ def update_cluster(value):
         ])
         text = 'Cluster: "Income vs Expenditures"'
     else:
+        default_switch_container = {'display' : 'none'}
         fig = px.scatter()
         legend = html.Div("no key available")
         text = "Cluster: Unknown"
-    return text, fig, html.Div([html.H5("Legend:"),html.Br(), legend])
+    return text, fig, html.Div([html.H5("Legend:"),html.Br(), legend]), default_switch_container

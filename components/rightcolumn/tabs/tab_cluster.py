@@ -40,6 +40,18 @@ def create_cluster_content():
             dcc.Dropdown(['Default','Age Group','Income vs Expenditures','Test'],'Default',id=ID.CLUSTER_DROPDOWN),
             html.Hr(),
             html.Div(id=ID.CLUSTER_DROPDOWN_OUTPUT),
+            html.Div(
+                dcc.RadioItems(
+                    id=ID.CLUSTER_DEFAULT_SWITCH,
+                    options=[
+                        {'label': 'Total Value', 'value': 'total_value'},
+                        {'label': 'Average Value', 'value': 'average_value'},
+                    ],
+                    value='total_value'
+                ),
+                id=ID.CLUSTER_DEFAULT_SWITCH_CONTAINER,
+                style={'display': 'none'}
+            ),
             dbc.Row([
                 dbc.Col(
                     dcc.Graph(
