@@ -1,5 +1,6 @@
 import pandas as pd
 import plotly.express as px
+import datetime
 from dash import Input, Output, callback, html
 from sklearn.cluster import KMeans
 
@@ -13,6 +14,7 @@ callbacks and logic of tab cluster
 # Data Files
 dm: DataManager = DataManager.get_instance()
 my_transactions = dm.df_transactions
+my_users = dm.df_users
 # Test Data File
 my_test_df = pd.DataFrame({'client_id': [1, 1, 2, 2, 3, 4, 4, 4, 5, 1, 1, 1, 6],
                            'amount': [100, 150, 10, 20, 500, 5, 10, 15, 1000, 250, 4500, 30, 450]
@@ -46,6 +48,34 @@ my_transactions_agg['cluster_str'] = my_transactions_agg['cluster'].astype(str) 
 
 my_transactions_agg['cluster_average'] = kmeans_default.fit_predict(my_transactions_agg[['transaction_count', 'average_value']])
 my_transactions_agg['cluster_average_str'] = my_transactions_agg['cluster_average'].astype(str)
+"""
+Data Set Up Age Group
+"""
+my_transactions_users_joined = my_transactions.merge(
+    my_users,
+    left_on='client_id',
+    right_on='id',
+    how='left'
+)
+# compute age group
+current_year = datetime.datetime.now().year
+my_transactions_users_joined['current_age'] = current_year - my_transactions_users_joined['birth_year']
+def get_age_group(age):
+    if age < 18:
+        return '0'
+    elif age < 25:
+        return '1'
+    elif age < 35:
+        return '2'
+    elif age < 45:
+        return '3'
+    elif age < 55:
+        return '4'
+    elif age < 65:
+        return '5'
+    else:
+        return '6'
+my_transactions_users_joined['age_group'] = my_transactions_users_joined['current_age'].apply(get_age_group)
 
 """
 Logic
@@ -141,9 +171,44 @@ def update_cluster(value, default_switch_value):
         default_switch_container = {'display' : 'none'}
         fig = px.scatter()
         legend = html.Ul([
-            html.Li("Young", style={"color": "red"}),
-            html.Li("Middle-aged", style={"color": "blue"}),
-            html.Li("Senior", style={"color": "green"}),
+            html.Li([
+                html.Span("Age Group 1", style={"color": cluster_colors["0"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("Under 18", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+
+            html.Li([
+                html.Span("Age Group 2", style={"color": cluster_colors["1"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("18-24", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+
+            html.Li([
+                html.Span("Age Group 3", style={"color": cluster_colors["2"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("25-34", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+
+            html.Li([
+                html.Span("Age Group 4", style={"color": cluster_colors["3"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("35-44", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+            html.Li([
+                html.Span("Age Group 5", style={"color": cluster_colors["4"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("45-54", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+            html.Li([
+                html.Span("Age Group 6", style={"color": cluster_colors["5"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("55-64", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+            html.Li([
+                html.Span("Age Group 7", style={"color": cluster_colors["6"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("65+", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
         ])
 #        text = 'Cluster: "Age Group"'
     elif value == "Income vs Expenditures":
