@@ -222,6 +222,21 @@ html, body {
     /* Potential edits */
 }
 
+.settings-button-text {
+    border: var(--settings-button-text-border);
+    font-size: 1.0rem;
+    font-weight: 500;
+    border-radius: 5px;
+    background-color: transparent;
+    color: var(--text-main);
+    padding: 0.25rem 0.5rem;
+    text-transform: uppercase !important;
+}
+
+.settings-button-text:hover {
+    background-color: var(--settings-button-text-bg-hover);
+}
+
 /* ============================================================
    User KPIs
    ============================================================ */
