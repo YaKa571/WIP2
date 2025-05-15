@@ -18,7 +18,7 @@ from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F
 from backend.callbacks.tabs.tab_buttons_callbacks import update_tabs  # noqa: F401
 from backend.callbacks.tabs.tab_cluster_callbacks import update_cluster  # noqa: F401
 from backend.callbacks.user_kpi_callbacks import *  # noqa: F401
-from backend.callbacks.tabs.tab_home_callbacks import update_pie_graphs  # noqa: F401
+from backend.callbacks.tabs.tab_home_callbacks import store_selected_state, update_all_pies  # noqa: F401
 
 from components.leftcolumn.left_column import create_left_column
 from components.rightcolumn.right_column import create_right_column
@@ -29,7 +29,7 @@ def create_app():
     app = Dash(__name__, external_stylesheets=
     [dbc.themes.BOOTSTRAP, "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"],
                # If there are callback problems, set this False to use debugger
-               suppress_callback_exceptions=False)
+               suppress_callback_exceptions=True)
 
     app.title = "Financial Transactions Dashboard"
 
@@ -38,6 +38,7 @@ def create_app():
         # Stores and Divs needed for the layout to work properly
         dcc.Store(id=ID.APP_STATE_STORE.value),
         dcc.Store(id=ID.ANIMATION_STATE_STORE.value),
+        dcc.Store(id=ID.HOME_TAB_SELECTED_STATE_STORE, data=None),
         html.Div(id="app-init-trigger", style={"display": "none"}),
         html.Div(id="layout-ready-signal", style={"display": "none"}),
 
