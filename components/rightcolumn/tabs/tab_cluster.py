@@ -28,6 +28,7 @@ def create_cluster_heading():
                     width=4
                 )
         ],
+        # TODO: maybe own css class
         className="tab-home-heading-wrapper"
     )
 def create_cluster_content():
