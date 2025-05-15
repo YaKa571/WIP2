@@ -53,8 +53,10 @@ class ID(str, Enum):
 
     # Cluster
     CLUSTER_DROPDOWN = "cluster-dropdown"
-    CLUSTER_DROPDOWN_OUTPUT = "cluster-dropdown-output"
+#    CLUSTER_DROPDOWN_OUTPUT = "cluster-dropdown-output" TODO:delete
     CLUSTER_LEGEND = "cluster-legend"
     CLUSTER_GRAPH = "cluster-graph"
     CLUSTER_HEADING = "cluster-heading"
     CLUSTER_INFO_ICON = "cluster-info-icon"
+    CLUSTER_DEFAULT_SWITCH = "cluster-default-switch"
+    CLUSTER_DEFAULT_SWITCH_CONTAINER = "cluster-default-switch-container" #needed for invisibility
