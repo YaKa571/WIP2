@@ -192,6 +192,7 @@
     text-align: center;
     margin: 0;
     padding: 1rem;
+    height: 25%;
 }
 
 .tab-content-inner .flex-wrapper .graph-card .card-header {
@@ -229,6 +230,23 @@
     max-width: 100% !important;
     min-width: 0 !important;
     min-height: 0 !important;
+}
+
+.tab-home-heading-wrapper {
+    display: flex;
+    position: relative;
+    align-items: center;
+    color: var(--text-main) !important;
+    text-transform: uppercase;
+    justify-content: space-between;
+}
+
+.tab-home-heading-wrapper h4 {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-weight: 600;
 }
 
 /* Graph Cards END */
