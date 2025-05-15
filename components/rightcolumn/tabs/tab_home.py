@@ -17,7 +17,6 @@ COLOR_BLUE_MAIN = "#0d6efd"
 
 
 # TODO: @Diego
-# TODO: Fix KPI Tooltips to update data based on selected states
 def create_home_content() -> html.Div:
     """
     Creates the main content structure for the home tab of a dashboard.
@@ -64,13 +63,17 @@ def _create_heading() -> html.Div:
     return html.Div(
         children=[
 
-            html.Button("Show all States", className="settings-button-text",
-                        id=ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES),
+            html.Button(children=[
+                html.I(className="bi bi-geo-alt-fill me-2"),
+                "Show all States"
+            ]
+                , className="settings-button-text hidden",
+                id=ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES),
             html.H4(
                 "All States",
                 id=ID.HOME_TAB_STATE_HEADING
             ),
-            html.I(className="bi bi-info-circle-fill", id=ID.HOME_TAB_INFO_ICON),
+            comp_factory.create_info_icon(ID.HOME_TAB_INFO_ICON),
             dbc.Tooltip(children=[
                 "Click on any State on",
                 html.Br(),
@@ -443,8 +446,19 @@ def get_most_valuable_merchant_details(state: str = None) -> list:
         className="kpi-card-value")
     two = html.P(f"${dm.get_most_valuable_merchant(state).value}",
                  className="kpi-card-value kpi-number-value")
+    tooltip = dbc.Tooltip(children=[
+        f"Merchant ID: {dm.get_most_valuable_merchant(state).id}",
+        html.Br(),
+        f"MCC: {dm.get_most_valuable_merchant(state).mcc}"
+    ],
+        placement="bottom",
+        is_open=False,
+        trigger="hover",
+        id={"type": "tooltip", "id": "tab_home_kpi_1"},
+        target=ID.HOME_KPI_MOST_VALUABLE_MERCHANT
+    )
 
-    return [one, two]
+    return [one, two, tooltip]
 
 
 def get_most_visited_merchant_details(state: str = None) -> list:
@@ -468,8 +482,18 @@ def get_most_visited_merchant_details(state: str = None) -> list:
         className="kpi-card-value")
     two = html.P(f"{dm.get_most_visited_merchant(state).visits} visits",
                  className="kpi-card-value kpi-number-value")
-
-    return [one, two]
+    tooltip = dbc.Tooltip(children=[
+        f"Merchant ID: {dm.get_most_visited_merchant(state).id}",
+        html.Br(),
+        f"MCC: {dm.get_most_visited_merchant(state).mcc}"
+    ],
+        placement="bottom",
+        is_open=False,
+        trigger="hover",
+        id={"type": "tooltip", "id": "tab_home_kpi_2"},
+        target=ID.HOME_KPI_MOST_VISITED_MERCHANT
+    )
+    return [one, two, tooltip]
 
 
 def get_top_spending_user_details(state: str = None) -> list:
@@ -493,8 +517,16 @@ def get_top_spending_user_details(state: str = None) -> list:
         className="kpi-card-value")
     two = html.P(f"${dm.get_top_spending_user(state).value}",
                  className="kpi-card-value kpi-number-value")
-
-    return [one, two]
+    tooltip = dbc.Tooltip(children=[
+        f"User ID: {dm.get_top_spending_user(state).id}"
+    ],
+        placement="bottom",
+        is_open=False,
+        trigger="hover",
+        id={"type": "tooltip", "id": "tab_home_kpi_3"},
+        target=ID.HOME_KPI_TOP_SPENDING_USER
+    )
+    return [one, two, tooltip]
 
 
 def get_peak_hour_details(state: str = None) -> list:
