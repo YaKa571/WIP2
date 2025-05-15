@@ -62,19 +62,19 @@ current_year = datetime.datetime.now().year
 my_transactions_users_joined['current_age'] = current_year - my_transactions_users_joined['birth_year']
 def get_age_group(age):
     if age < 18:
-        return 'Under 18'
+        return '0'
     elif age < 25:
-        return '18–24'
+        return '1'
     elif age < 35:
-        return '25–34'
+        return '2'
     elif age < 45:
-        return '35–44'
+        return '3'
     elif age < 55:
-        return '45–54'
+        return '4'
     elif age < 65:
-        return '55–64'
+        return '5'
     else:
-        return '65+'
+        return '6'
 my_transactions_users_joined['age_group'] = my_transactions_users_joined['current_age'].apply(get_age_group)
 
 """
@@ -171,9 +171,44 @@ def update_cluster(value, default_switch_value):
         default_switch_container = {'display' : 'none'}
         fig = px.scatter()
         legend = html.Ul([
-            html.Li("Young", style={"color": "red"}),
-            html.Li("Middle-aged", style={"color": "blue"}),
-            html.Li("Senior", style={"color": "green"}),
+            html.Li([
+                html.Span("Age Group 1", style={"color": cluster_colors["0"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("Under 18", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+
+            html.Li([
+                html.Span("Age Group 2", style={"color": cluster_colors["1"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("18-24", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+
+            html.Li([
+                html.Span("Age Group 3", style={"color": cluster_colors["2"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("25-34", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+
+            html.Li([
+                html.Span("Age Group 4", style={"color": cluster_colors["3"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("35-44", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+            html.Li([
+                html.Span("Age Group 5", style={"color": cluster_colors["4"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("45-54", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+            html.Li([
+                html.Span("Age Group 6", style={"color": cluster_colors["5"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("55-64", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+            html.Li([
+                html.Span("Age Group 7", style={"color": cluster_colors["6"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("65+", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
         ])
 #        text = 'Cluster: "Age Group"'
     elif value == "Income vs Expenditures":
