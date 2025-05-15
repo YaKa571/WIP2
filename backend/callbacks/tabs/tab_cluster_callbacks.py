@@ -33,6 +33,7 @@ my_test_agg['cluster_str'] = my_test_agg['cluster'].astype(str) #needed for colo
 """
 Data Set Up Default
 """
+# TODO besser durchschnittswert, statt gesamtwert plotten?
 # Aggregation per user
 my_transactions_agg = my_transactions.groupby('client_id').agg(
     transaction_count=('amount', 'count'),
@@ -72,9 +73,31 @@ def update_cluster(value):
                          title='Cluster: transaction amount/total value')
         fig.update_layout(showlegend=False)
         legend = html.Ul([
-            html.Li(f"Cluster {i}", style={"color": cluster_colors[str(i)]})
-            for i in range(4)
+            html.Li([
+                html.Span("Cluster 0", style={"color": cluster_colors["0"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("Frequent, moderate transactions", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+
+            html.Li([
+                html.Span("Cluster 1", style={"color": cluster_colors["1"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("Infrequent, low-value transactions", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+
+            html.Li([
+                html.Span("Cluster 2", style={"color": cluster_colors["2"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("Low frequency, high-value clients", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
+
+            html.Li([
+                html.Span("Cluster 3", style={"color": cluster_colors["3"], "font-weight": "bold"}),
+                html.Br(),
+                html.Span("High frequency, high-value clients", style={"color": "#555"}),
+            ], style={"margin-bottom": "12px"}),
         ])
+
         text = 'Cluster: "Default"'
     elif value == "Test":
         cluster_colors = {
@@ -114,4 +137,4 @@ def update_cluster(value):
         fig = px.scatter()
         legend = html.Div("no key available")
         text = "Cluster: Unknown"
-    return text, fig, html.Div([html.H5("Legend:"), legend])
+    return text, fig, html.Div([html.H5("Legend:"),html.Br(), legend])
