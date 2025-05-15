@@ -60,8 +60,13 @@
     --kpi-card-splitline: #dfdfdf;
     --kpi-card-body-bg: #ffffff;
 
+    /* Settings Button Text */
+    --settings-button-text-border: 1px solid var(--text-main);
+    --settings-button-text-bg-hover: #f9f9f9;
+
     /* Etc. */
-    --kpi-number-value: #2E7D32
+    --kpi-number-value: #2E7D32;
+    --modebar-icon-filter: brightness(0%);
 }
 
 .dark-mode {
@@ -115,7 +120,12 @@
     --kpi-card-splitline: #2c2a2a;
     --kpi-card-body-bg: #191919;
 
+    /* Settings Button Text */
+    --settings-button-text-border: 1px solid var(--text-main);
+    --settings-button-text-bg-hover: #161616;
+
     /* Etc. */
-    --kpi-number-value: #81C784
+    --kpi-number-value: #81C784;
+    --modebar-icon-filter: brightness(1000%);
 
 }

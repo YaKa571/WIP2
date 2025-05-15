@@ -120,8 +120,8 @@ def render_map(animation_state, app_state):
     dark = app_state.get("dark_mode", False)
     color_scale = app_state.get("color_scale", "blues")
 
-    mapbox_style = "carto-darkmatter" if dark else "carto-positron"
-    map_component = create_usa_map(color_scale=color_scale, mapbox_style=mapbox_style)
+    map_style = "carto-darkmatter-nolabels" if dark else "carto-positron-nolabels"
+    map_component = create_usa_map(color_scale=color_scale, map_style=map_style)
 
     # Reset settings changed flag
     app_state["settings_changed"] = False

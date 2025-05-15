@@ -42,9 +42,14 @@ class ID(str, Enum):
     HOME_KPI_MOST_VALUABLE_MERCHANT = "home-kpi-most-valuable-merchant"
     HOME_KPI_TOP_SPENDING_USER = "home-kpi-top-spending-user"
     HOME_KPI_MOST_VISITED_MERCHANT = "home-kpi-most-visited-merchant"
-    HOME_KPI_MOST_FREQUENT_USER = "home-kpi-most-frequent-user"
+    HOME_KPI_PEAK_HOUR = "home-kpi-peak-hour"
     HOME_GRAPH_EXPENDITURES_BY_GENDER = "home-graph-expenditures-by-gender"
     HOME_GRAPH_EXPENDITURES_BY_CHANNEL = "home-graph-expenditures-by-channel"
+    HOME_GRAPH_EXPENDITURES_BY_AGE = "home-graph-expenditures-by-age"
+    HOME_TAB_SELECTED_STATE_STORE = "home-tab-selected-state-store"
+    HOME_TAB_STATE_HEADING = "home-tab-state-heading"
+    HOME_TAB_BUTTON_TOGGLE_ALL_STATES = "home-tab-button-toggle-all-states"
+    HOME_TAB_INFO_ICON = "home-tab-info-icon"
 
     # Cluster
     CLUSTER_DROPDOWN = "cluster-dropdown"
