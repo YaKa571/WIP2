@@ -39,7 +39,7 @@ my_transactions_agg = my_df_transactions.groupby('client_id').agg(
     total_value=('amount', 'sum')).reset_index()
 
 # Clustering
-kmeans_default = KMeans(n_clusters=4, n_init=20)
+kmeans_default = KMeans(n_clusters=4, random_state=42, n_init=30)
 my_transactions_agg['cluster'] = kmeans_default.fit_predict(my_transactions_agg[['transaction_count', 'total_value']])
 my_transactions_agg['cluster_str'] = my_transactions_agg['cluster'].astype(str)
 

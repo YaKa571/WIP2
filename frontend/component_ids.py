@@ -56,3 +56,5 @@ class ID(str, Enum):
     CLUSTER_DROPDOWN_OUTPUT = "cluster-dropdown-output"
     CLUSTER_KEY = "cluster-key"
     CLUSTER_GRAPH = "cluster-graph"
+    CLUSTER_HEADING = "cluster-heading"
+    CLUSTER_INFO_ICON = "cluster-info-icon"

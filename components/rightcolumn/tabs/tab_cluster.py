@@ -6,10 +6,35 @@ appearance of tab cluster
 """
 # TODO: @Yannic
 
+def create_cluster_heading():
+    return html.Div(
+        children=[
+                dbc.Col(width=4),
+                dbc.Col(html.H4("Cluster", id=ID.CLUSTER_HEADING, className="text-center"),
+                        width=4),
+                dbc.Col(
+                    html.Div([
+                        html.I(className="bi bi-info-circle-fill", id=ID.CLUSTER_INFO_ICON),
+                        dbc.Tooltip(
+                            children=[
+                                "Click on dropdown",
+                                html.Br(),
+                                "to choose Cluster"
+                            ],
+                            target=ID.CLUSTER_INFO_ICON,
+                            placement="bottom-end"
+                        )
+                    ], className="d-flex justify-content-end"),
+                    width=4
+                )
+        ],
+        # TODO: maybe own css class
+        className="tab-home-heading-wrapper"
+    )
 def create_cluster_content():
     return html.Div(
         [
-            html.H1("Cluster"),
+            create_cluster_heading(),
             html.P("This is the cluster page of the application."),
             # TODO Names
             dcc.Dropdown(['Default','Age Group','Income vs Expenditures','Test'],'Test',id=ID.CLUSTER_DROPDOWN),
