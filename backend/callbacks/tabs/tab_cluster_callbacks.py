@@ -61,14 +61,20 @@ my_transactions_users_joined = my_transactions.merge(
 current_year = datetime.datetime.now().year
 my_transactions_users_joined['current_age'] = current_year - my_transactions_users_joined['birth_year']
 def get_age_group(age):
-    if age < 25:
-        return 'Under 25'
-    elif age < 40:
-        return '25–39'
-    elif age < 60:
-        return '40–59'
+    if age < 18:
+        return 'Under 18'
+    elif age < 25:
+        return '18–24'
+    elif age < 35:
+        return '25–34'
+    elif age < 45:
+        return '35–44'
+    elif age < 55:
+        return '45–54'
+    elif age < 65:
+        return '55–64'
     else:
-        return '60+'
+        return '65+'
 my_transactions_users_joined['age_group'] = my_transactions_users_joined['current_age'].apply(get_age_group)
 
 """
