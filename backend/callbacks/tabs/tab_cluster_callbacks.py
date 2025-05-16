@@ -76,6 +76,7 @@ def get_age_group(age):
         return '5'
     else:
         return '6'
+
 my_transactions_users_joined['age_group'] = my_transactions_users_joined['current_age'].apply(get_age_group)
 my_age_group = my_transactions_users_joined.groupby('client_id').agg(
     transaction_count=('amount', 'count'),
@@ -83,6 +84,7 @@ my_age_group = my_transactions_users_joined.groupby('client_id').agg(
     average_value=('amount', 'mean'),
     age_group=('age_group','first') # first age group of user (data 2010 - 2019)
 ).reset_index()
+
 my_age_group_clustered = []
 for group in my_age_group['age_group'].unique():
     subset = my_age_group[my_age_group['age_group'] == group].copy()
@@ -162,16 +164,29 @@ def update_cluster(value, default_switch_value):
         ])
         # TODO switch average value
     elif value == "Age Group":
-        default_switch_container = {'display' : 'none'}
-        fig = px.scatter(my_age_group_clustered_result,
-                         x="transaction_count",
-                         y="total_value",
-                         color="cluster_str",
-                         color_discrete_map=cluster_colors,
-                         facet_col="age_group",
-                         hover_data=["client_id", "total_value", "average_value"],
-                         title="Cluster per age group")
-        fig.update_layout(height=600, showlegend=False)
+        default_switch_container = {'display' : 'block'}
+        if default_switch_value == 'total_value':
+            fig = px.scatter(my_age_group_clustered_result,
+                             x="transaction_count",
+                             y="total_value",
+                             color="cluster_str",
+                             color_discrete_map=cluster_colors,
+                             facet_col="age_group",
+                             hover_data=["client_id", "total_value", "average_value"],
+                             title="Cluster per age group")
+            fig.update_layout(showlegend=False)
+        elif default_switch_value == 'average_value':
+            fig = px.scatter(my_age_group_clustered_result,
+                             x="transaction_count",
+                             y="average_value",
+                             color="cluster_str",
+                             color_discrete_map=cluster_colors,
+                             facet_col="age_group",
+                             hover_data=["client_id", "total_value", "average_value"],
+                             title="Cluster per age group")
+            fig.update_layout(showlegend=False)
+        else:
+            fig = px.scatter()
         legend = get_legend_age_group(cluster_colors)
     elif value == "Income vs Expenditures":
         default_switch_container = {'display' : 'none'}
