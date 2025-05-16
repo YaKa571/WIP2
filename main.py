@@ -36,7 +36,7 @@ def create_app():
     app.layout = html.Div(children=[
 
         # Stores and Divs needed for the layout to work properly
-        dcc.Store(id=ID.APP_STATE_STORE.value),
+        dcc.Store(id=ID.APP_STATE_STORE.value, storage_type="session"),
         dcc.Store(id=ID.ANIMATION_STATE_STORE.value),
         dcc.Store(id=ID.HOME_TAB_SELECTED_STATE_STORE, data=None),
         html.Div(id="app-init-trigger", style={"display": "none"}),
