@@ -35,7 +35,6 @@ my_test_agg['cluster_str'] = my_test_agg['cluster'].astype(str) #needed for colo
 """
 Data Set Up Default
 """
-# TODO besser durchschnittswert, statt gesamtwert plotten?
 # Aggregation per user
 my_transactions_agg = my_transactions.groupby('client_id').agg(
     transaction_count=('amount', 'count'),
@@ -77,11 +76,27 @@ def get_age_group(age):
     else:
         return '6'
 my_transactions_users_joined['age_group'] = my_transactions_users_joined['current_age'].apply(get_age_group)
-my_age_group = my_transactions_users_joined.groupby('age_group').agg(
+my_age_group = my_transactions_users_joined.groupby('client_id').agg(
     transaction_count=('amount', 'count'),
     total_value=('amount', 'sum'),
-    average_value=('amount', 'mean')
+    average_value=('amount', 'mean'),
+    age_group=('age_group','first') # first age group of user (data 2010 - 2019)
 ).reset_index()
+my_age_group_clustered = []
+for group in my_age_group['age_group'].unique():
+    subset = my_age_group[my_age_group['age_group'] == group].copy()
+
+    if len(subset) >= 4:  # KMeans needs a minimum of k points
+        kmeans_age_group = KMeans(n_clusters=3, random_state=42, n_init=10)
+        subset['cluster'] = kmeans_age_group.fit_predict(subset[['transaction_count', 'total_value']])
+        subset['cluster_str'] = subset['cluster'].astype(str)
+    else:
+        subset['cluster'] = -1
+        subset['cluster_str'] = 'N/A'
+
+    my_age_group_clustered.append(subset)
+
+my_age_group_clustered_result = pd.concat(my_age_group_clustered)
 
 """
 Logic
@@ -149,7 +164,14 @@ def update_cluster(value, default_switch_value):
 #        text = 'Cluster: "Test"'
     elif value == "Age Group":
         default_switch_container = {'display' : 'none'}
-        fig = px.bar(my_age_group, x="age_group", y="total_value", title="Age Group")
+        fig = px.scatter(my_age_group_clustered_result,
+                         x="transaction_count",
+                         y="total_value",
+                         color="cluster_str",
+                         facet_col="age_group",
+                         hover_data=["client_id", "total_value", "average_value"],
+                         title="Cluster per age group")
+        fig.update_layout(height=600, showlegend=False)
         legend = get_legend_age_group(cluster_colors)
 #        text = 'Cluster: "Age Group"'
     elif value == "Income vs Expenditures":
