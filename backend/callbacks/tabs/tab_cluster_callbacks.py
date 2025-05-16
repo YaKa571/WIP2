@@ -64,18 +64,16 @@ my_transactions_users_joined['current_age'] = current_year - my_transactions_use
 def get_age_group(age):
     if age < 25:
         return '0'
-    elif age < 25:
-        return '1'
     elif age < 35:
-        return '2'
+        return '1'
     elif age < 45:
-        return '3'
+        return '2'
     elif age < 55:
-        return '4'
+        return '3'
     elif age < 65:
-        return '5'
+        return '4'
     else:
-        return '6'
+        return '5'
 
 my_transactions_users_joined['age_group'] = my_transactions_users_joined['current_age'].apply(get_age_group)
 my_age_group = my_transactions_users_joined.groupby('client_id').agg(
