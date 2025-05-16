@@ -51,7 +51,7 @@ my_transactions_agg['cluster_average_str'] = my_transactions_agg['cluster_averag
 """
 Data Set Up Age Group
 """
-my_transactions_users_joined = my_transactions.merge(
+my_transactions_users_joined = my_transactions_agg.merge(
     my_users,
     left_on='client_id',
     right_on='id',
@@ -121,33 +121,7 @@ def update_cluster(value, default_switch_value):
             fig.update_layout(showlegend=False)
         else:
             fig=px.scatter()
-        # TODO: Check Description
-        legend = html.Ul([
-            html.Li([
-                html.Span("Cluster 0", style={"color": cluster_colors["0"], "font-weight": "bold"}),
-                html.Br(),
-                html.Span("Frequent, moderate transactions", style={"color": "#555"}),
-            ], style={"margin-bottom": "12px"}),
-
-            html.Li([
-                html.Span("Cluster 1", style={"color": cluster_colors["1"], "font-weight": "bold"}),
-                html.Br(),
-                html.Span("Infrequent, low-value transactions", style={"color": "#555"}),
-            ], style={"margin-bottom": "12px"}),
-
-            html.Li([
-                html.Span("Cluster 2", style={"color": cluster_colors["2"], "font-weight": "bold"}),
-                html.Br(),
-                html.Span("Low frequency, high-value clients", style={"color": "#555"}),
-            ], style={"margin-bottom": "12px"}),
-
-            html.Li([
-                html.Span("Cluster 3", style={"color": cluster_colors["3"], "font-weight": "bold"}),
-                html.Br(),
-                html.Span("High frequency, high-value clients", style={"color": "#555"}),
-            ], style={"margin-bottom": "12px"}),
-        ])
-
+        legend = get_legend_default(cluster_colors)
 #        text = 'Cluster: "Default"'
     elif value == "Test":
         default_switch_container = {'display' : 'none'}
@@ -170,60 +144,98 @@ def update_cluster(value, default_switch_value):
     elif value == "Age Group":
         default_switch_container = {'display' : 'none'}
         fig = px.scatter()
-        legend = html.Ul([
-            html.Li([
-                html.Span("Age Group 1", style={"color": cluster_colors["0"], "font-weight": "bold"}),
-                html.Br(),
-                html.Span("Under 18", style={"color": "#555"}),
-            ], style={"margin-bottom": "12px"}),
-
-            html.Li([
-                html.Span("Age Group 2", style={"color": cluster_colors["1"], "font-weight": "bold"}),
-                html.Br(),
-                html.Span("18-24", style={"color": "#555"}),
-            ], style={"margin-bottom": "12px"}),
-
-            html.Li([
-                html.Span("Age Group 3", style={"color": cluster_colors["2"], "font-weight": "bold"}),
-                html.Br(),
-                html.Span("25-34", style={"color": "#555"}),
-            ], style={"margin-bottom": "12px"}),
-
-            html.Li([
-                html.Span("Age Group 4", style={"color": cluster_colors["3"], "font-weight": "bold"}),
-                html.Br(),
-                html.Span("35-44", style={"color": "#555"}),
-            ], style={"margin-bottom": "12px"}),
-            html.Li([
-                html.Span("Age Group 5", style={"color": cluster_colors["4"], "font-weight": "bold"}),
-                html.Br(),
-                html.Span("45-54", style={"color": "#555"}),
-            ], style={"margin-bottom": "12px"}),
-            html.Li([
-                html.Span("Age Group 6", style={"color": cluster_colors["5"], "font-weight": "bold"}),
-                html.Br(),
-                html.Span("55-64", style={"color": "#555"}),
-            ], style={"margin-bottom": "12px"}),
-            html.Li([
-                html.Span("Age Group 7", style={"color": cluster_colors["6"], "font-weight": "bold"}),
-                html.Br(),
-                html.Span("65+", style={"color": "#555"}),
-            ], style={"margin-bottom": "12px"}),
-        ])
+        legend = get_legend_default(cluster_colors)
 #        text = 'Cluster: "Age Group"'
     elif value == "Income vs Expenditures":
         default_switch_container = {'display' : 'none'}
         fig = px.scatter()
-        legend = html.Ul([
-            html.Li("Low Income / High Spending", style={"color": "red"}),
-            html.Li("Low Income / Low Spending", style={"color": "blue"}),
-            html.Li("High Income / High Spending", style={"color": "green"}),
-            html.Li("High Income / Low Spending", style={"color": "yellow"}),
-        ])
+        legend = get_legend_income_expenditure(cluster_colors)
 #        text = 'Cluster: "Income vs Expenditures"'
     else:
         default_switch_container = {'display' : 'none'}
         fig = px.scatter()
-        legend = html.Div("no key available")
+        legend = html.Div("no legend available")
 #        text = "Cluster: Unknown"
     return fig, html.Div([html.H5("Legend:"),html.Br(), legend]), default_switch_container # text on first position TODO:delete
+
+
+# TODO: Check Description
+def get_legend_default(cluster_colors):
+    legend = html.Ul([
+        html.Li([
+            html.Span("Cluster 0", style={"color": cluster_colors["0"], "font-weight": "bold"}),
+            html.Br(),
+            html.Span("Frequent, moderate transactions", style={"color": "#555"}),
+        ], style={"margin-bottom": "12px"}),
+
+        html.Li([
+            html.Span("Cluster 1", style={"color": cluster_colors["1"], "font-weight": "bold"}),
+            html.Br(),
+            html.Span("Infrequent, low-value transactions", style={"color": "#555"}),
+        ], style={"margin-bottom": "12px"}),
+
+        html.Li([
+            html.Span("Cluster 2", style={"color": cluster_colors["2"], "font-weight": "bold"}),
+            html.Br(),
+            html.Span("Low frequency, high-value clients", style={"color": "#555"}),
+        ], style={"margin-bottom": "12px"}),
+
+        html.Li([
+            html.Span("Cluster 3", style={"color": cluster_colors["3"], "font-weight": "bold"}),
+            html.Br(),
+            html.Span("High frequency, high-value clients", style={"color": "#555"}),
+        ], style={"margin-bottom": "12px"}),
+    ])
+    return legend
+
+def get_legend_age_group(cluster_colors):
+    legend = html.Ul([
+        html.Li([
+            html.Span("Age Group 1", style={"color": cluster_colors["0"], "font-weight": "bold"}),
+            html.Br(),
+            html.Span("Under 18", style={"color": "#555"}),
+        ], style={"margin-bottom": "12px"}),
+
+        html.Li([
+            html.Span("Age Group 2", style={"color": cluster_colors["1"], "font-weight": "bold"}),
+            html.Br(),
+            html.Span("18-24", style={"color": "#555"}),
+        ], style={"margin-bottom": "12px"}),
+
+        html.Li([
+            html.Span("Age Group 3", style={"color": cluster_colors["2"], "font-weight": "bold"}),
+            html.Br(),
+            html.Span("25-34", style={"color": "#555"}),
+        ], style={"margin-bottom": "12px"}),
+
+        html.Li([
+            html.Span("Age Group 4", style={"color": cluster_colors["3"], "font-weight": "bold"}),
+            html.Br(),
+            html.Span("35-44", style={"color": "#555"}),
+        ], style={"margin-bottom": "12px"}),
+        html.Li([
+            html.Span("Age Group 5", style={"color": cluster_colors["4"], "font-weight": "bold"}),
+            html.Br(),
+            html.Span("45-54", style={"color": "#555"}),
+        ], style={"margin-bottom": "12px"}),
+        html.Li([
+            html.Span("Age Group 6", style={"color": cluster_colors["5"], "font-weight": "bold"}),
+            html.Br(),
+            html.Span("55-64", style={"color": "#555"}),
+        ], style={"margin-bottom": "12px"}),
+        html.Li([
+            html.Span("Age Group 7", style={"color": cluster_colors["6"], "font-weight": "bold"}),
+            html.Br(),
+            html.Span("65+", style={"color": "#555"}),
+        ], style={"margin-bottom": "12px"}),
+    ])
+    return legend
+
+def get_legend_income_expenditure(cluster_colors):
+    legend = html.Ul([
+        html.Li("Low Income / High Spending", style={"color": "red"}),
+        html.Li("Low Income / Low Spending", style={"color": "blue"}),
+        html.Li("High Income / High Spending", style={"color": "green"}),
+        html.Li("High Income / Low Spending", style={"color": "yellow"}),
+    ])
+    return legend
