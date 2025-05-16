@@ -99,6 +99,17 @@ for group in my_age_group['age_group'].unique():
 
 my_age_group_clustered_result = pd.concat(my_age_group_clustered)
 
+# better visualization of scatterplot
+age_group_labels = {
+    '0': '18–24',
+    '1': '25–34',
+    '2': '35–44',
+    '3': '45–54',
+    '4': '55–64',
+    '5': '65+'
+}
+my_age_group_clustered_result['age_group_label'] = my_age_group_clustered_result['age_group'].map(age_group_labels)
+
 """
 Logic
 """
@@ -124,6 +135,7 @@ def update_cluster(value, default_switch_value):
         "8": "#ADFF2F",  # light green
         "9": "#87CEEB"  # sky blue
     }
+    # Default
     if value == "Default":
         default_switch_container = {'display' : 'block'}
         if default_switch_value == 'total_value':
@@ -160,7 +172,7 @@ def update_cluster(value, default_switch_value):
             html.Li(f"Cluster {i}", style={"color": cluster_colors[str(i)]})
             for i in range(4)
         ])
-        # TODO switch average value
+    # Age Group
     elif value == "Age Group":
         default_switch_container = {'display' : 'block'}
         if default_switch_value == 'total_value':
@@ -169,9 +181,14 @@ def update_cluster(value, default_switch_value):
                              y="total_value",
                              color="cluster_str",
                              color_discrete_map=cluster_colors,
-                             facet_col="age_group",
+                             facet_col="age_group_label",
+                             facet_col_wrap=3,
+                             category_orders={"age_group_label": ["18–24", "25–34", "35–44", "45–54", "55–64", "65+"]},
+                             labels={"age_group_label": " "},
                              hover_data=["client_id", "total_value", "average_value"],
-                             title="Cluster per age group")
+                             title="Cluster per age group total value")
+            # removes '=' from scatterplot
+            fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
             fig.update_layout(showlegend=False)
         elif default_switch_value == 'average_value':
             fig = px.scatter(my_age_group_clustered_result,
@@ -179,17 +196,23 @@ def update_cluster(value, default_switch_value):
                              y="average_value",
                              color="cluster_str",
                              color_discrete_map=cluster_colors,
-                             facet_col="age_group",
+                             facet_col="age_group_label",
+                             facet_col_wrap=3,
+                             category_orders={"age_group_label": ["18–24", "25–34", "35–44", "45–54", "55–64", "65+"]},
                              hover_data=["client_id", "total_value", "average_value"],
-                             title="Cluster per age group")
+                             title="Cluster per age group average value")
+            # removes '=' from scatterplot
+            fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
             fig.update_layout(showlegend=False)
         else:
             fig = px.scatter()
         legend = get_legend_age_group(cluster_colors)
+    # Income vs Expenditure
     elif value == "Income vs Expenditures":
         default_switch_container = {'display' : 'none'}
         fig = px.scatter()
         legend = get_legend_income_expenditure(cluster_colors)
+    # in case something went wrong
     else:
         default_switch_container = {'display' : 'none'}
         fig = px.scatter()
