@@ -42,16 +42,17 @@ my_transactions_agg = my_transactions.groupby('client_id').agg(
     total_value=('amount', 'sum')).reset_index()
 my_transactions_agg['average_value'] = my_transactions_agg['total_value'] / my_transactions_agg['transaction_count']
 # Clustering
-kmeans_default = KMeans(n_clusters=4, random_state=42, n_init=30)
-my_transactions_agg['cluster'] = kmeans_default.fit_predict(my_transactions_agg[['transaction_count', 'total_value']])
+kmeans_default_total = KMeans(n_clusters=4, random_state=42, n_init=30)
+my_transactions_agg['cluster'] = kmeans_default_total.fit_predict(my_transactions_agg[['transaction_count', 'total_value']])
 my_transactions_agg['cluster_str'] = my_transactions_agg['cluster'].astype(str) # needed for color scheme allocation
 
-my_transactions_agg['cluster_average'] = kmeans_default.fit_predict(my_transactions_agg[['transaction_count', 'average_value']])
+kmeans_default_avg = KMeans(n_clusters=4, random_state=42, n_init=30)
+my_transactions_agg['cluster_average'] = kmeans_default_avg.fit_predict(my_transactions_agg[['transaction_count', 'average_value']])
 my_transactions_agg['cluster_average_str'] = my_transactions_agg['cluster_average'].astype(str)
 """
 Data Set Up Age Group
 """
-my_transactions_users_joined = my_transactions_agg.merge(
+my_transactions_users_joined = my_transactions.merge(
     my_users,
     left_on='client_id',
     right_on='id',
@@ -76,6 +77,11 @@ def get_age_group(age):
     else:
         return '6'
 my_transactions_users_joined['age_group'] = my_transactions_users_joined['current_age'].apply(get_age_group)
+my_age_group = my_transactions_users_joined.groupby('age_group').agg(
+    transaction_count=('amount', 'count'),
+    total_value=('amount', 'sum'),
+    average_value=('amount', 'mean')
+).reset_index()
 
 """
 Logic
@@ -143,8 +149,8 @@ def update_cluster(value, default_switch_value):
 #        text = 'Cluster: "Test"'
     elif value == "Age Group":
         default_switch_container = {'display' : 'none'}
-        fig = px.scatter()
-        legend = get_legend_default(cluster_colors)
+        fig = px.bar(my_age_group, x="age_group", y="total_value", title="Age Group")
+        legend = get_legend_age_group(cluster_colors)
 #        text = 'Cluster: "Age Group"'
     elif value == "Income vs Expenditures":
         default_switch_container = {'display' : 'none'}
