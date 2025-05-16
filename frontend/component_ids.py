@@ -53,7 +53,6 @@ class ID(str, Enum):
 
     # Cluster
     CLUSTER_DROPDOWN = "cluster-dropdown"
-#    CLUSTER_DROPDOWN_OUTPUT = "cluster-dropdown-output" TODO:delete
     CLUSTER_LEGEND = "cluster-legend"
     CLUSTER_GRAPH = "cluster-graph"
     CLUSTER_HEADING = "cluster-heading"
