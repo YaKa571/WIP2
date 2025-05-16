@@ -38,7 +38,6 @@ def create_cluster_content():
             # TODO Names
             dcc.Dropdown(['Default','Age Group','Income vs Expenditures','Test'],'Default',id=ID.CLUSTER_DROPDOWN),
             html.Hr(),
-#            html.Div(id=ID.CLUSTER_DROPDOWN_OUTPUT), TODO:delete
             html.Div(
                 dcc.RadioItems(
                     id=ID.CLUSTER_DEFAULT_SWITCH,
