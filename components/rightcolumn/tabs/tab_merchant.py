@@ -3,6 +3,7 @@ from frontend.component_ids import ID
 from components.factories import component_factory as comp_factory
 from frontend.icon_manager import Icons, IconID
 import dash_bootstrap_components as dbc
+from backend.data_setup.tabs import tab_merchant_data_setup
 
 COLOR_BLUE_MAIN = "#0d6efd"
 # TODO: Free...(Yannic): Idee untere Teil der Seite wie in Skizze, oben Verteilung der Händlerkategorien und Aufschlüsselung (evtl. als Popup)
@@ -71,8 +72,8 @@ def create_merchant_individual():
     ])
 
 def create_merchant_kpis():
-    group_1, count_1 = get_most_frequently_used_merchant_group()
-    group_2, value_2 = get_highest_value_merchant_group()
+    group_1, count_1 = tab_merchant_data_setup.get_most_frequently_used_merchant_group()
+    group_2, value_2 = tab_merchant_data_setup.get_highest_value_merchant_group()
     return html.Div(children=[
         html.Div(children=[
             # KPI 1: Most frequently used merchant group
@@ -137,14 +138,3 @@ def create_merchant_kpis():
             className="flex-wrapper"
         )
     ])
-
-def get_most_frequently_used_merchant_group():
-    group_return = "group 1"
-    count_return = "count 1"
-    return group_return, count_return
-
-def get_highest_value_merchant_group():
-    group_return = "group 2"
-    value_return = "value 2"
-    return group_return, value_return
-
