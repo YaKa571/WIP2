@@ -303,3 +303,60 @@
     box-shadow: 0 6px 20px rgba(0,0,0,0.14);
     background: #f6faff;
 }
+
+.tab-content-inner .user-kpi-row {
+    display: flex;
+    flex-direction: row;
+    gap: var(--gutter, 1rem);
+    align-items: stretch;
+    min-width: 0;
+    min-height: 0;
+    margin-bottom: var(--gutter, 1rem);
+}
+
+.tab-content-inner .user-kpi-box {
+    flex: 1 1 0;
+    background: var(--kpi-card-body-bg, #fff);
+    border-radius: var(--inner-border-radius, 18px);
+    box-shadow: var(--shadow-small, 0 2px 8px rgba(0,0,0,0.07));
+    padding: 1.5rem 1rem;
+    min-width: 0;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-align: center;
+    transition: box-shadow 0.18s;
+    border: 1px solid var(--kpi-card-splitline, #eee);
+}
+
+.tab-content-inner .user-kpi-box:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.11);
+    background: #f6f8fa;
+}
+
+.user-kreditlimit-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.user-credit-limit-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: var(--kpi-card-body-bg, #fff);
+    border: 1px solid var(--kpi-card-splitline, #eee);
+    border-radius: var(--inner-border-radius, 18px);
+    font-weight: 700;
+    font-size: 1.15rem;
+    padding: 1.5rem;
+    margin: 0 auto;
+    min-width: 300px;
+    width: 48%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+}

@@ -6,11 +6,15 @@ from backend.data_manager import DataManager
 dm: DataManager = DataManager.get_instance()
 
 def create_user_content() -> html.Div:
+    """
+    Constructs the main content for the user tab.
+    Includes: heading, search bars, KPI row, credit limit box.
+    """
     return html.Div(
-        [
-            _create_user_heading(),
-            html.Div(  # ROW der vier KPIs
-                [
+        children=[
+            _create_user_heading(),   # Heading mit Suchleisten + Info
+            html.Div(
+                [  # KPI-Boxen in einer Zeile
                     html.Div(id="kpi-user-tx-count", className="user-kpi-box"),
                     html.Div(id="kpi-user-tx-sum", className="user-kpi-box"),
                     html.Div(id="kpi-user-tx-avg", className="user-kpi-box"),
@@ -18,13 +22,14 @@ def create_user_content() -> html.Div:
                 ],
                 className="user-kpi-row"
             ),
-            html.Div(  # Kreditlimit-Box EIGENE Zeile
-                id="user-credit-limit-box",
-                className="user-credit-limit-box"
+            html.Div(
+                html.Div(id="user-credit-limit-box", className="user-credit-limit-box"),
+                className="user-kreditlimit-row"
             )
         ],
         className="tab-content-inner"
     )
+
 
 
 def _create_user_heading() -> html.Div:
