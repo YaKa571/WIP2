@@ -136,3 +136,13 @@ def create_merchant_kpis():
         )
     ])
 
+def get_most_frequently_used_merchant_group():
+    group_return = "group"
+    count_return = "count"
+    return group_return, count_return
+
+def get_highest_value_merchant_group():
+    group_return = "group"
+    value_return = "value"
+    return group_return, value_return
+
