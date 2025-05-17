@@ -255,34 +255,51 @@
    User Tab - KPI Boxes
    ============================================================ */
 
-.tab-content-inner .user-kpi-row {
+.user-kpi-row {
     display: flex;
-    flex-direction: row;
-    gap: var(--gutter);
-    align-items: stretch;
-    min-width: 0;
-    min-height: 0;
-    margin-bottom: var(--gutter);
+    gap: 1.5rem;
+    width: 100%;
+    margin-bottom: 2.2rem;
 }
-
-.tab-content-inner .user-kpi-box {
+.user-kpi-box {
     flex: 1 1 0;
     background: #fff;
-    border-radius: var(--inner-border-radius);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    padding: 1.5rem 1rem;
-    min-width: 0;
-    min-height: 70px;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 1.4rem 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
-    font-size: 1.1rem;
+    font-weight: 700;
+    font-size: 1.14rem;
+    border: 1px solid #e1e4e8;
     text-align: center;
-    transition: box-shadow 0.18s;
+    min-width: 0;
+    min-height: 65px;
+    transition: box-shadow 0.18s, background 0.2s;
 }
-
-.tab-content-inner .user-kpi-box:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.11);
-    background: #f6f8fa;
+.user-kpi-box:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.14);
+    background: #f6faff;
+}
+.user-credit-limit-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #e1e4e8;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    font-weight: 700;
+    font-size: 1.14rem;
+    padding: 1.7rem;
+    margin: 0 auto;
+    min-width: 350px;
+    width: 49%;
+    max-width: 650px;
+    text-align: center;
+}
+.user-credit-limit-box:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.14);
+    background: #f6faff;
 }

@@ -600,40 +600,60 @@ class DataManager:
         self._cache_expenditures_by_channel[state] = result
         return result
 
-    # TODO: @Son: User KPIs for tab_user
+    # TODO: @SonPhạm: Tab User - User/Card KPIs
 
     def get_user_kpis(self, user_id: int) -> dict:
+        """
+        Gibt KPIs für einen bestimmten User zurück.
+        Kreditlimit ist die SUMME aller Kreditlimits der Karten des Users.
+        """
         tx = self.df_transactions[self.df_transactions["client_id"] == user_id]
-        user_row = self.df_users[self.df_users["id"] == user_id]
-        tx_count = len(tx)
-        tx_sum = tx["amount"].sum()
-        tx_avg = tx["amount"].mean() if tx_count > 0 else 0
-        card_count = int(user_row.iloc[0]["num_credit_cards"]) if not user_row.empty else 0
+        # user_row = self.df_users[self.df_users["id"] == user_id]  # credit_limit gibt es hier NICHT!
+        card_count = self.df_cards[self.df_cards["client_id"] == user_id].shape[0]
+        # Kreditlimit aller Karten summieren:
+        cards = self.df_cards[self.df_cards["client_id"] == user_id]
+        credit_limit = cards["credit_limit"].sum() if not cards.empty else None
+
         return {
-            "amount_of_transactions": tx_count,
-            "total_sum": tx_sum,
-            "average_amount": tx_avg,
-            "amount_of_cards": card_count
+            "amount_of_transactions": tx.shape[0],
+            "total_sum": tx["amount"].sum(),
+            "average_amount": tx["amount"].mean() if tx.shape[0] > 0 else 0,
+            "amount_of_cards": card_count,
+            "credit_limit": credit_limit
         }
 
     def get_card_kpis(self, card_id: int) -> dict:
-        tx = self.df_transactions[self.df_transactions["card_id"] == card_id]
+        """
+        Gibt KPIs für eine bestimmte Card zurück.
+        """
         card_row = self.df_cards[self.df_cards["id"] == card_id]
-        tx_count = len(tx)
-        tx_sum = tx["amount"].sum()
-        tx_avg = tx["amount"].mean() if tx_count > 0 else 0
-        # Hole user_id der Karte, um Kartenanzahl zu ermitteln
-        user_id = int(card_row.iloc[0]["client_id"]) if not card_row.empty else None
-        card_count = 0
+        if card_row.empty:
+            return {"amount_of_transactions": 0, "total_sum": 0, "average_amount": 0, "amount_of_cards": 0,
+                    "credit_limit": None}
+        user_id = card_row.iloc[0]["client_id"]
+        d = self.get_user_kpis(user_id)
+        # Card hat ggf. eigenes Kreditlimit, das überschreibt das des Users!
+        credit_limit = float(card_row.iloc[0]["credit_limit"]) if not card_row.empty else d["credit_limit"]
+        d["credit_limit"] = credit_limit
+        return d
+
+    def get_credit_limit(self, user_id: int = None, card_id: int = None):
+        """
+        Gibt das Kreditlimit zurück (Card hat Priorität).
+        - Wenn Card-ID angegeben, zeige das Kreditlimit der Karte.
+        - Wenn nur User-ID angegeben, aggregiere über alle Karten des Users (z.B. Summe).
+        """
+        if card_id is not None:
+            card_row = self.df_cards[self.df_cards["id"] == card_id]
+            if not card_row.empty:
+                return card_row.iloc[0]["credit_limit"]
+
         if user_id is not None:
-            user_row = self.df_users[self.df_users["id"] == user_id]
-            card_count = int(user_row.iloc[0]["num_credit_cards"]) if not user_row.empty else 0
-        return {
-            "amount_of_transactions": tx_count,
-            "total_sum": tx_sum,
-            "average_amount": tx_avg,
-            "amount_of_cards": card_count
-        }
+            user_cards = self.df_cards[self.df_cards["client_id"] == user_id]
+            if not user_cards.empty:
+                # Du kannst auch mean() oder sum() nehmen je nach gewünschter Logik!
+                return user_cards["credit_limit"].sum()  # Summe aller Limits des Users
+        return None
 
     def start(self):
         """
