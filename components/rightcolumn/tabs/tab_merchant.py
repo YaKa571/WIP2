@@ -3,6 +3,7 @@ from frontend.component_ids import ID
 from components.factories import component_factory as comp_factory
 from frontend.icon_manager import Icons, IconID
 import dash_bootstrap_components as dbc
+from backend.data_setup.tabs import tab_merchant_data_setup
 
 COLOR_BLUE_MAIN = "#0d6efd"
 # TODO: Free...(Yannic): Idee untere Teil der Seite wie in Skizze, oben Verteilung der Händlerkategorien und Aufschlüsselung (evtl. als Popup)
@@ -71,6 +72,8 @@ def create_merchant_individual():
     ])
 
 def create_merchant_kpis():
+    group_1, count_1 = tab_merchant_data_setup.get_most_frequently_used_merchant_group()
+    group_2, value_2 = tab_merchant_data_setup.get_highest_value_merchant_group()
     return html.Div(children=[
         html.Div(children=[
             # KPI 1: Most frequently used merchant group
@@ -87,8 +90,8 @@ def create_merchant_kpis():
 
                     dcc.Loading(children=[
                         html.Div(children=[
-                            html.P("", className="kpi-card-value"),
-                            html.P("", className="kpi-card-value kpi-number-value")
+                            html.P(group_1, className="kpi-card-value"),
+                            html.P(count_1, className="kpi-card-value kpi-number-value")
                         ],
                             id=ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP
                         )
@@ -116,8 +119,8 @@ def create_merchant_kpis():
 
                     dcc.Loading(children=[
                         html.Div(children=[
-                            html.P("", className="kpi-card-value"),
-                            html.P("", className="kpi-card-value kpi-number-value")
+                            html.P(group_2, className="kpi-card-value"),
+                            html.P(value_2, className="kpi-card-value kpi-number-value")
                         ],
                             id=ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP
                         )
@@ -135,4 +138,3 @@ def create_merchant_kpis():
             className="flex-wrapper"
         )
     ])
-
