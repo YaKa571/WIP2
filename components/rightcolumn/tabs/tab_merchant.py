@@ -9,14 +9,40 @@ from frontend.icon_manager import Icons, IconID
 def create_merchant_content():
     return html.Div(
         [
-            html.H1("Merchant"),
-            html.P("This is the merchant page of the application."),
+            create_merchant_heading(),
             # top: general data
             create_merchant_general(),
             # bottom: individual merchant data
             create_merchant_individual()
         ],
         className="tab-content-inner"
+    )
+
+def create_merchant_heading():
+    return html.Div(
+        children=[
+                dbc.Col(width=4),
+                dbc.Col(html.H4("Merchant", id=ID.MERCHANT_HEADING, className="text-center"),
+                        width=4),
+                dbc.Col(
+                    html.Div([
+                        html.I(className="bi bi-info-circle-fill", id=ID.MERCHANT_INFO_ICON),
+                        dbc.Tooltip(
+                            children=[
+                                # TODO: tooltip
+                                "TODO",
+                                html.Br(),
+                                "Tooltip"
+                            ],
+                            target=ID.MERCHANT_INFO_ICON,
+                            placement="bottom-end"
+                        )
+                    ], className="d-flex justify-content-end"),
+                    width=4
+                )
+        ],
+        # TODO: maybe custom css class
+        className="tab-home-heading-wrapper"
     )
 
 def create_merchant_general():
@@ -42,3 +68,5 @@ def create_merchant_individual():
             className="search-wrapper p-2 flex-grow-1 me-2"
         ),
     ])
+
+

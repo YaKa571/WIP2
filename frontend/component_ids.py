@@ -62,3 +62,5 @@ class ID(str, Enum):
 
     # Merchant Tab
     MERCHANT_ID_SEARCH = "merchant-id-search"
+    MERCHANT_HEADING = "merchant-heading"
+    MERCHANT_INFO_ICON = "merchant-info-icon"
