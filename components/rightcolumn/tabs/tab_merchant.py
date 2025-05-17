@@ -1,10 +1,10 @@
 from dash import html, dcc
 from frontend.component_ids import ID
+from components.factories import component_factory as comp_factory
+from frontend.icon_manager import Icons, IconID
 import dash_bootstrap_components as dbc
 
-from frontend.icon_manager import Icons, IconID
-
-
+COLOR_BLUE_MAIN = "#0d6efd"
 # TODO: Free...(Yannic): Idee untere Teil der Seite wie in Skizze, oben Verteilung der Händlerkategorien und Aufschlüsselung (evtl. als Popup)
 def create_merchant_content():
     return html.Div(
@@ -48,6 +48,7 @@ def create_merchant_heading():
 def create_merchant_general():
     return dbc.Row([
         html.P("general merchant data"),
+        create_merchant_kpis(),
         html.Hr()
     ])
 
@@ -69,4 +70,40 @@ def create_merchant_individual():
         ),
     ])
 
+def create_merchant_kpis():
+    return html.Div(children=[
+        html.Div(children=[
+            # KPI 1: Most frequently used merchant group
+            dbc.Card(children=[
+                dbc.CardHeader(children=[
+                    comp_factory.create_icon(IconID.TROPHY, cls="icon icon-small"),
+                    html.P("Most frequently used merchant group", className="kpi-card-title")
+
+                ],
+                    className="card-header"
+                ),
+
+                dbc.CardBody(children=[
+
+                    dcc.Loading(children=[
+                        html.Div(children=[
+                            html.P("", className="kpi-card-value"),
+                            html.P("", className="kpi-card-value kpi-number-value")
+                        ],
+                            id=ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP
+                        )
+                    ],
+                        type="circle",
+                        color=COLOR_BLUE_MAIN)
+
+                ],
+                    className="card-body",
+                )
+            ],
+                className="card kpi-card",
+            )
+        ],
+            className="flex-wrapper"
+        )
+    ])
 
