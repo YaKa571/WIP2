@@ -1,38 +1,39 @@
 from dash import html, dcc
 from frontend.icon_manager import IconID, Icons
+import dash_bootstrap_components as dbc
 
 def create_user_content() -> html.Div:
     """
     Creates the content structure for the user tab.
-    This includes search bars for name, user ID, card ID,
-    the KPI boxes, and a placeholder for results.
+    Heading: two search bars (User-ID, Card-ID) and an info icon/tooltip.
+    Below: Platz für weitere Bereiche wie KPI-Boxen etc.
     """
     return html.Div(
         children=[
-            _create_search_bars(),
-            _create_kpi_boxes_row(),
-            _create_credit_limit_box(),
-            html.Div(id='search-results', className="mt-4"),
+            _create_user_heading(),
+            # Hier später weitere Bereiche (z.B. KPI-Boxen)
         ],
         className="tab-content-inner"
     )
 
-def _create_search_bars() -> html.Div:
+
+def _create_user_heading() -> html.Div:
     """
-    Creates three search bars: by name, user ID, and card ID,
-    each with a lens/search icon.
+    Heading mit zwei Suchleisten (User-ID, Card-ID) und Infobox.
     """
     return html.Div(
-        [
+        children=[
             _create_single_search_bar("user-id-search-input", "Search by User ID"),
             _create_single_search_bar("card-id-search-input", "Search by Card ID"),
+            _create_info_icon_with_tooltip()
         ],
-        className="d-flex mb-4"
+        className="d-flex align-items-center mb-4"
     )
+
 
 def _create_single_search_bar(input_id: str, placeholder: str) -> html.Div:
     """
-    Helper for a single search bar with icon.
+    Eine Suchleiste mit Lupe.
     """
     return html.Div(
         [
@@ -44,29 +45,22 @@ def _create_single_search_bar(input_id: str, placeholder: str) -> html.Div:
                 className='search-input',
             )
         ],
-        className="search-wrapper p-2 flex-grow-1 me-2" if "card-id" not in input_id else "search-wrapper p-2 flex-grow-1"
+        className="search-wrapper p-2 flex-grow-1 me-2"
     )
 
-def _create_kpi_boxes_row() -> html.Div:
-    """
-    Creates a row of four KPI boxes.
-    """
-    return html.Div(
-        [
-            html.Div(id="kpi-user-tx-count", className="user-kpi-box"),
-            html.Div(id="kpi-user-tx-sum", className="user-kpi-box"),
-            html.Div(id="kpi-user-tx-avg", className="user-kpi-box"),
-            html.Div(id="kpi-user-card-count", className="user-kpi-box"),
-        ],
-        className="d-flex justify-content-between mb-4"
-    )
 
-def _create_credit_limit_box() -> html.Div:
+def _create_info_icon_with_tooltip() -> html.Div:
     """
-    Creates a box for the user's credit limit.
+    Info-Icon mit Tooltip (Infobox) – erklärt das Aktualisieren der Werte.
     """
-    return html.Div(
-        id="user-credit-limit-box",
-        children="Credit Limit",
-        className="user-credit-limit-box my-2 mx-auto"
-    )
+    return html.Div([
+        html.I(className="bi bi-info-circle-fill ms-2", id="user-tab-info-icon"),
+        dbc.Tooltip(
+            "Enter a User ID or Card ID to update the information for the selected user or card.",
+            target="user-tab-info-icon",
+            placement="bottom",
+            className="user-info-tooltip"
+        )
+    ])
+
+# --- Später fügst du unten weitere Bereiche wie KPI-Boxen ein ---
