@@ -80,7 +80,8 @@ my_age_group = my_transactions_users_joined.groupby('client_id').agg(
     transaction_count=('amount', 'count'),
     total_value=('amount', 'sum'),
     average_value=('amount', 'mean'),
-    age_group=('age_group','first') # first age group of user (data 2010 - 2019)
+    #TODO dynamische zuteiltung für user (altersgruppe wechselt über die Jahre)
+    age_group=('age_group','first') # first appearing age group of user is used
 ).reset_index()
 
 my_age_group_clustered = []
