@@ -74,10 +74,10 @@ def _create_middle_kpis() -> html.Div:
     """
     return html.Div(
         [
-            html.Div(id="kpi-user-tx-count", className="user-kpi-box"),       # Amount of Transactions
-            html.Div(id="kpi-user-tx-sum", className="user-kpi-box"),         # Total Sum
-            html.Div(id="kpi-user-tx-avg", className="user-kpi-box"),         # Average Amount
-            html.Div(id="kpi-user-card-count", className="user-kpi-box"),     # Amount of Cards
+            html.Div(id="kpi-user-tx-count", className="user-kpi-box"),
+            html.Div(id="kpi-user-tx-sum", className="user-kpi-box"),
+            html.Div(id="kpi-user-tx-avg", className="user-kpi-box"),
+            html.Div(id="kpi-user-card-count", className="user-kpi-box"),
         ],
-        className="d-flex justify-content-between mb-4"
+        className="user-kpi-row"
     )
