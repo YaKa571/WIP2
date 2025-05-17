@@ -1,6 +1,9 @@
 from dash import html, dcc
 from frontend.icon_manager import IconID, Icons
 import dash_bootstrap_components as dbc
+from backend.data_manager import DataManager
+
+dm: DataManager = DataManager.get_instance()
 
 def create_user_content() -> html.Div:
     """
@@ -10,7 +13,8 @@ def create_user_content() -> html.Div:
     """
     return html.Div(
         children=[
-            _create_user_heading(),
+            _create_user_heading(),         # Heading mit Suchleisten und Info-Box
+            _create_middle_kpis(),     # Die vier KPI-Boxen in einer Zeile
             # Hier später weitere Bereiche (z.B. KPI-Boxen)
         ],
         className="tab-content-inner"
@@ -63,4 +67,17 @@ def _create_info_icon_with_tooltip() -> html.Div:
         )
     ])
 
-# --- Später fügst du unten weitere Bereiche wie KPI-Boxen ein ---
+def _create_middle_kpis() -> html.Div:
+    """
+    Creates a row of four KPI boxes for the selected user or card.
+    The values update when a User ID or Card ID is entered.
+    """
+    return html.Div(
+        [
+            html.Div(id="kpi-user-tx-count", className="user-kpi-box"),       # Amount of Transactions
+            html.Div(id="kpi-user-tx-sum", className="user-kpi-box"),         # Total Sum
+            html.Div(id="kpi-user-tx-avg", className="user-kpi-box"),         # Average Amount
+            html.Div(id="kpi-user-card-count", className="user-kpi-box"),     # Amount of Cards
+        ],
+        className="d-flex justify-content-between mb-4"
+    )

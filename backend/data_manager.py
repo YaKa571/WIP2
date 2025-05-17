@@ -600,6 +600,41 @@ class DataManager:
         self._cache_expenditures_by_channel[state] = result
         return result
 
+    # TODO: @Son: User KPIs for tab_user
+
+    def get_user_kpis(self, user_id: int) -> dict:
+        tx = self.df_transactions[self.df_transactions["client_id"] == user_id]
+        user_row = self.df_users[self.df_users["id"] == user_id]
+        tx_count = len(tx)
+        tx_sum = tx["amount"].sum()
+        tx_avg = tx["amount"].mean() if tx_count > 0 else 0
+        card_count = int(user_row.iloc[0]["num_credit_cards"]) if not user_row.empty else 0
+        return {
+            "amount_of_transactions": tx_count,
+            "total_sum": tx_sum,
+            "average_amount": tx_avg,
+            "amount_of_cards": card_count
+        }
+
+    def get_card_kpis(self, card_id: int) -> dict:
+        tx = self.df_transactions[self.df_transactions["card_id"] == card_id]
+        card_row = self.df_cards[self.df_cards["id"] == card_id]
+        tx_count = len(tx)
+        tx_sum = tx["amount"].sum()
+        tx_avg = tx["amount"].mean() if tx_count > 0 else 0
+        # Hole user_id der Karte, um Kartenanzahl zu ermitteln
+        user_id = int(card_row.iloc[0]["client_id"]) if not card_row.empty else None
+        card_count = 0
+        if user_id is not None:
+            user_row = self.df_users[self.df_users["id"] == user_id]
+            card_count = int(user_row.iloc[0]["num_credit_cards"]) if not user_row.empty else 0
+        return {
+            "amount_of_transactions": tx_count,
+            "total_sum": tx_sum,
+            "average_amount": tx_avg,
+            "amount_of_cards": card_count
+        }
+
     def start(self):
         """
         Starts the process of loading, cleaning, and processing transaction data. The method primarily deals
