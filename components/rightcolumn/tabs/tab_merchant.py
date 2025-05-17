@@ -76,7 +76,7 @@ def create_merchant_kpis():
             # KPI 1: Most frequently used merchant group
             dbc.Card(children=[
                 dbc.CardHeader(children=[
-                    comp_factory.create_icon(IconID.TROPHY, cls="icon icon-small"),
+                    comp_factory.create_icon(IconID.REPEAT, cls="icon icon-small"),
                     html.P("Most frequently used merchant group", className="kpi-card-title")
 
                 ],
@@ -101,7 +101,36 @@ def create_merchant_kpis():
                 )
             ],
                 className="card kpi-card",
-            )
+            ),
+            # KPI 2: Merchant group with the highest total transfers
+            dbc.Card(children=[
+                dbc.CardHeader(children=[
+                    comp_factory.create_icon(IconID.USER_PAYING, cls="icon icon-small"),
+                    html.P("Merchant group with the highest total transfers", className="kpi-card-title")
+
+                ],
+                    className="card-header"
+                ),
+
+                dbc.CardBody(children=[
+
+                    dcc.Loading(children=[
+                        html.Div(children=[
+                            html.P("", className="kpi-card-value"),
+                            html.P("", className="kpi-card-value kpi-number-value")
+                        ],
+                            id=ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP
+                        )
+                    ],
+                        type="circle",
+                        color=COLOR_BLUE_MAIN)
+
+                ],
+                    className="card-body",
+                )
+            ],
+                className="card kpi-card",
+            ),
         ],
             className="flex-wrapper"
         )
