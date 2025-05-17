@@ -71,6 +71,8 @@ def create_merchant_individual():
     ])
 
 def create_merchant_kpis():
+    group_1, count_1 = get_most_frequently_used_merchant_group()
+    group_2, value_2 = get_highest_value_merchant_group()
     return html.Div(children=[
         html.Div(children=[
             # KPI 1: Most frequently used merchant group
@@ -87,8 +89,8 @@ def create_merchant_kpis():
 
                     dcc.Loading(children=[
                         html.Div(children=[
-                            html.P("", className="kpi-card-value"),
-                            html.P("", className="kpi-card-value kpi-number-value")
+                            html.P(group_1, className="kpi-card-value"),
+                            html.P(count_1, className="kpi-card-value kpi-number-value")
                         ],
                             id=ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP
                         )
@@ -116,8 +118,8 @@ def create_merchant_kpis():
 
                     dcc.Loading(children=[
                         html.Div(children=[
-                            html.P("", className="kpi-card-value"),
-                            html.P("", className="kpi-card-value kpi-number-value")
+                            html.P(group_2, className="kpi-card-value"),
+                            html.P(value_2, className="kpi-card-value kpi-number-value")
                         ],
                             id=ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP
                         )
@@ -137,12 +139,12 @@ def create_merchant_kpis():
     ])
 
 def get_most_frequently_used_merchant_group():
-    group_return = "group"
-    count_return = "count"
+    group_return = "group 1"
+    count_return = "count 1"
     return group_return, count_return
 
 def get_highest_value_merchant_group():
-    group_return = "group"
-    value_return = "value"
+    group_return = "group 2"
+    value_return = "value 2"
     return group_return, value_return
 
