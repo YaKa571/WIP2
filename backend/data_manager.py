@@ -125,7 +125,7 @@ class DataManager:
 
         self.mcc_dict = json_to_dict("mcc_codes.json")
 
-        self._cache_most_valuable_merchant: dict[str | None, MerchantKPI] = {}
+        self._cache_most_valuable_merchant: dict[str, pd.DataFrame] = {}
         self._cache_most_visited_merchant: dict[str | None, VisitKPI] = {}
         self._cache_top_spending_user: dict[str | None, UserKPI] = {}
         self._cache_peak_hour: dict[str | None, PeakHourKPI] = {}
@@ -221,52 +221,79 @@ class DataManager:
         # Creates a 'state_name' column from the 'merchant_state' column (abbreviated state names)
         self._process_transaction_states()
 
-    def get_most_valuable_merchant(self, state: str = None) -> MerchantKPI:
+    def get_merchant_values_by_state(self, state: str = None) -> pd.DataFrame:
         """
-        Gets the most valuable merchant based on transaction amounts. The method
-        can fetch results for all states or filter data by a specific state if
-        provided. Results are cached for efficiency when the same state data is
-        requested repeatedly.
+        Fetches and processes merchant transaction data grouped by state and mcc.
+
+        This method returns a DataFrame containing the aggregated transaction amount
+        per merchant grouped by 'merchant_id' and 'mcc', sorted in descending order
+        by total transaction amount. If a specific state is provided, the data is
+        filtered for that state. Processed results are cached to enhance
+        performance for repeated calls with the same state.
 
         Parameters:
         state: str, optional
-            The state name to filter transactions. If None, data from all states
-            is considered.
+            The state for which data needs to be fetched. If None, data for all states
+            is processed.
 
         Returns:
-        MerchantKPI
-            The MerchantKPI object containing details of the most valuable
-            merchant, including its ID, MCC, MCC description, and total transaction
-            value.
+        DataFrame
+            A DataFrame containing the aggregated transaction amounts by
+            'merchant_id' and 'mcc', sorted in descending order of the total
+            transaction amount. Includes a column with MCC descriptions.
+
+        Raises:
+            KeyError: If the provided state doesn't exist in the transaction data.
         """
-        # Cache-Check
         if state in self._cache_most_valuable_merchant:
             return self._cache_most_valuable_merchant[state]
 
-        # Compute if not cached
-        df = self.df_transactions.copy()
+        df = self.df_transactions
         if state:
             df = df[df["state_name"] == state]
 
-        # Ensure we work on a copy
-        df = df.copy()
         df_sums = (
             df.groupby(["merchant_id", "mcc"])["amount"]
-            .sum()
-            .reset_index(name="merchant_sum")
+              .sum()
+              .reset_index(name="merchant_sum")
+              .sort_values("merchant_sum", ascending=False)
         )
-        top = df_sums.loc[df_sums["merchant_sum"].idxmax()]
 
-        kpi = MerchantKPI(
+        # Apply the same helper used in KPI to each MCC code.
+        df_sums["mcc_desc"] = df_sums["mcc"].apply(
+            lambda m: get_mcc_description_by_merchant_id(self.mcc_dict, int(m))
+        )
+
+        self._cache_most_valuable_merchant[state] = df_sums
+        return df_sums
+
+    def get_most_valuable_merchant(self, state: str = None) -> MerchantKPI:
+        """
+        Fetches the most valuable merchant based on the given state and associated metrics.
+
+        This method determines the top-performing merchant by analyzing transaction data,
+        and optionally filters the data by a specific state. It utilizes auxiliary methods
+        to calculate the necessary metrics and retrieve MCC (Merchant Category Code)
+        descriptions.
+
+        Args:
+            state (str, optional): A specific state used to filter merchant transaction
+            data. Defaults to None.
+
+        Returns:
+            MerchantKPI: An object containing details about the most valuable merchant,
+            including its ID, MCC, MCC description, and the total transaction value.
+        """
+        # Reuse get_merchant_values_by_state to avoid duplicate logic.
+        df_sums = self.get_merchant_values_by_state(state)
+        top = df_sums.iloc[0]
+
+        return MerchantKPI(
             id=int(top["merchant_id"]),
             mcc=int(top["mcc"]),
             mcc_desc=get_mcc_description_by_merchant_id(self.mcc_dict, int(top["mcc"])),
             value=f"{float(top['merchant_sum']):,.2f}"
         )
-
-        # Cache & return
-        self._cache_most_valuable_merchant[state] = kpi
-        return kpi
 
     def get_peak_hour(self, state: str = None) -> PeakHourKPI:
         """
