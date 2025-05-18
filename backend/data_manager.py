@@ -600,6 +600,69 @@ class DataManager:
         self._cache_expenditures_by_channel[state] = result
         return result
 
+    # TODO: @SonPhạm: Tab User - User/Card KPIs
+
+    # In deiner DataManager-Klasse (data_manager.py):
+
+    def get_user_kpis(self, user_id: int) -> dict:
+        """
+        Gibt KPIs für einen bestimmten User korrekt zurück.
+        """
+        # Stelle sicher, dass client_id als int verglichen wird!
+        tx = self.df_transactions[self.df_transactions["client_id"].astype(int) == int(user_id)]
+        cards_user = self.df_cards[self.df_cards["client_id"].astype(int) == int(user_id)]
+        credit_limit = cards_user["credit_limit"].sum() if not cards_user.empty else 0
+
+        return {
+            "amount_of_transactions": tx.shape[0],
+            "total_sum": tx["amount"].sum(),
+            "average_amount": tx["amount"].mean() if tx.shape[0] > 0 else 0,
+            "amount_of_cards": cards_user.shape[0],
+            "credit_limit": credit_limit
+        }
+
+    def get_card_kpis(self, card_id: int) -> dict:
+        """
+        Gibt KPIs für eine bestimmte Karte (card_id) korrekt zurück.
+        - Zeigt die KPIs für den Besitzer der Karte an.
+        - Kreditlimit ist das der Karte.
+        """
+        # Finde die Karte
+        card_row = self.df_cards[self.df_cards["id"] == card_id]
+        if card_row.empty:
+            return {
+                "amount_of_transactions": 0,
+                "total_sum": 0,
+                "average_amount": 0,
+                "amount_of_cards": 0,
+                "credit_limit": None
+            }
+        user_id = card_row.iloc[0]["client_id"]
+
+        # Hole die KPIs für diesen User
+        data = self.get_user_kpis(user_id)
+
+        # Überschreibe das Kreditlimit mit dem Limit der Karte!
+        data["credit_limit"] = card_row.iloc[0]["credit_limit"]
+
+        return data
+
+    def get_credit_limit(self, user_id: int = None, card_id: int = None):
+        """
+        Gibt das Kreditlimit zurück (Card-ID hat Priorität).
+        - Falls Card-ID angegeben, das Kreditlimit dieser Karte.
+        - Falls nur User-ID, Summe der Kreditlimits aller Karten dieses Users.
+        """
+        if card_id is not None:
+            card_row = self.df_cards[self.df_cards["id"] == card_id]
+            if not card_row.empty:
+                return float(card_row.iloc[0]["credit_limit"])
+        if user_id is not None:
+            user_cards = self.df_cards[self.df_cards["client_id"] == user_id]
+            if not user_cards.empty:
+                return float(user_cards["credit_limit"].sum())
+        return None
+
     def start(self):
         """
         Starts the process of loading, cleaning, and processing transaction data. The method primarily deals
@@ -644,3 +707,11 @@ class DataManager:
         # logger.log(f"ℹ️ Users: {self.units_users}", 2)
         # logger.log(f"ℹ️ Transactions: {self.units_transactions}", 2)
         # logger.log(f"ℹ️ Cards: {self.units_cards}", 2)
+
+# Test für Summe Transaktionen bei User-ID 123. Im Dashboard 463, aber Pycharm 27?
+
+        # print("Transaktionen für client_id 123:",
+        #      self.df_transactions[self.df_transactions["client_id"] == 123].shape[0])
+        # print("Typ von client_id in transactions:", self.df_transactions["client_id"].dtype)
+        # print("Alle Werte für client_id 123 (head):")
+        # print(self.df_transactions[self.df_transactions["client_id"] == 123].head())
