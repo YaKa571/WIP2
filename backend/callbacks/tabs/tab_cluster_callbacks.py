@@ -2,7 +2,6 @@ import pandas as pd
 import plotly.express as px
 import datetime
 from dash import Input, Output, callback, html
-from sklearn.cluster import KMeans
 
 from backend.data_manager import DataManager
 from backend.data_setup.tabs.tab_cluster_data_setup import prepare_test_data, prepare_default_data, \
