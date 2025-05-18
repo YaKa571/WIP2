@@ -51,6 +51,7 @@ class ID(str, Enum):
     HOME_TAB_BUTTON_TOGGLE_ALL_STATES = "home-tab-button-toggle-all-states"
     HOME_TAB_INFO_ICON = "home-tab-info-icon"
     HOME_TAB_BAR_CHART_DROPDOWN = "home-tab-bar-chart-dropdown"
+    HOME_GRAPH_BAR_CHART = "home-graph-bar-chart"
 
     # Fraud Tab
 
