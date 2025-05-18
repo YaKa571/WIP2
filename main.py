@@ -18,7 +18,8 @@ from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F
 from backend.callbacks.tabs.tab_buttons_callbacks import update_tabs  # noqa: F401
 from backend.callbacks.tabs.tab_cluster_callbacks import update_cluster  # noqa: F401
 from backend.callbacks.user_kpi_callbacks import *  # noqa: F401
-from backend.callbacks.tabs.tab_home_callbacks import store_selected_state, update_all_pies  # noqa: F401
+from backend.callbacks.tabs.tab_home_callbacks import (store_selected_state, update_all_pies,  # noqa: F401
+                                                       update_bar_chart)  # noqa: F401
 
 from components.leftcolumn.left_column import create_left_column
 from components.rightcolumn.right_column import create_right_column
@@ -36,7 +37,7 @@ def create_app():
     app.layout = html.Div(children=[
 
         # Stores and Divs needed for the layout to work properly
-        dcc.Store(id=ID.APP_STATE_STORE.value, storage_type="session"),
+        dcc.Store(id=ID.APP_STATE_STORE.value),
         dcc.Store(id=ID.ANIMATION_STATE_STORE.value),
         dcc.Store(id=ID.HOME_TAB_SELECTED_STATE_STORE, data=None),
         html.Div(id="app-init-trigger", style={"display": "none"}),
