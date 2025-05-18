@@ -14,6 +14,12 @@ PIE_CONFIG = {
     "displaylogo": False
 }
 COLOR_BLUE_MAIN = "#0d6efd"
+BAR_CHART_OPTIONS = [
+    {"label": "MOST VALUABLE MERCHANTS", "value": "most_valuable_merchants"},
+    {"label": "MOST VISITED MERCHANTS", "value": "most_visited_merchants"},
+    {"label": "TOP SPENDING USERS", "value": "top_spending_users"},
+    {"label": "PEAK HOUR", "value": "peak_hour"},
+]
 
 
 # TODO: @Diego
@@ -36,7 +42,8 @@ def create_home_content() -> html.Div:
 
         _create_heading(),
         _create_top_kpis(),
-        _create_middle_circle_diagrams()
+        _create_middle_circle_diagrams(),
+        _create_bottom_bar_diagrams()
 
     ],
         className="tab-content-inner"
@@ -355,6 +362,39 @@ def _create_middle_circle_diagrams() -> html.Div:
     ],
         className="flex-wrapper"
     )
+
+
+def _create_bottom_bar_diagrams() -> html.Div:
+    return html.Div(children=[
+
+        dbc.Card(children=[
+
+            dbc.CardHeader(children=[
+
+                comp_factory.create_icon(IconID.BAR_CHART_LINE_FILL, cls="icon icon-small"),
+                html.Div(children=[
+                    dcc.Dropdown(className="settings-dropdown settings-text-centered",
+                                 options=BAR_CHART_OPTIONS,
+                                 id=ID.HOME_TAB_BAR_CHART_DROPDOWN,
+                                 placeholder="Select a KPI...",
+                                 style={"width": "100%"},
+                                 value=BAR_CHART_OPTIONS[0]["value"],
+                                 clearable=False
+                                 ),
+                ],
+                    className="settings-item mt-2")
+            ],
+                className="card-header"),
+
+            dbc.CardBody(children=[
+                html.P("Bottom Bar Diagram Body")
+            ])
+
+        ],
+            className="card graph-card")
+
+    ],
+        className="flex-wrapper flex-fill")
 
 
 def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label", showlegend: bool = True,
