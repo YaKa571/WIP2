@@ -1,12 +1,56 @@
+import pandas as pd
+from backend.data_manager import DataManager
+import json
 """
 contains data setup for Merchant tab
 """
+
+# Data Files
+dm: DataManager = DataManager.get_instance()
+my_transactions = dm.df_transactions
+# mcc code
+with open("assets/data/mcc_codes.json", "r", encoding="utf-8") as file:
+    data = json.load(file)
+my_mcc = pd.DataFrame(list(data.items()), columns=["mcc", "merchant_group"])
+my_mcc["mcc"] = my_mcc["mcc"].astype(int)
+# print(my_mcc.head())
+# join transactions and mcc_codes
+my_transactions_mcc=my_transactions.merge(my_mcc, how="left", on="mcc")
+# print(my_transactions_mcc[["id", "mcc", "merchant_group"]].head())
+
 def get_most_frequently_used_merchant_group():
-    group_return = "group 1"
-    count_return = "count 1"
+    """
+        Calculate the merchant group with the highest number of transactions.
+
+        This function counts how many transactions are associated with each merchant group
+        by using the 'merchant_group' column in the DataFrame 'my_transactions_mcc'.
+        It returns the merchant group that appears most frequently along with the count of transactions.
+
+        Returns:
+            tuple: (group_return, count_return)
+                group_return (str): The name of the most frequently used merchant group.
+                count_return (int): The number of transactions for this merchant group.
+        """
+    my_freq_agg = my_transactions_mcc["merchant_group"].value_counts()
+    my_freq = my_freq_agg.reset_index().sort_values(by="count", ascending=False)
+    group_return = my_freq.loc[0,"merchant_group"]
+    count_return = my_freq.loc[0,"count"]
     return group_return, count_return
 
 def get_highest_value_merchant_group():
-    group_return = "group 2"
-    value_return = "value 2"
+    """
+       Calculate the merchant group with the highest total transaction value.
+
+       This function sums the 'amount' values for each merchant group in the DataFrame 'my_transactions_mcc'.
+       It returns the merchant group with the highest aggregated transaction amount along with the total value.
+
+       Returns:
+           tuple: (group_return, value_return)
+               group_return (str): The name of the merchant group with the highest transaction value.
+               value_return (float): The total summed transaction amount for this merchant group.
+       """
+    my_value_agg = my_transactions_mcc.groupby("merchant_group")["amount"].sum()
+    my_value = my_value_agg.reset_index().sort_values(by="amount", ascending=False)
+    group_return = my_value.loc[0, "merchant_group"]
+    value_return = my_value.loc[0, "amount"]
     return group_return, value_return
