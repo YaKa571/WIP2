@@ -5,51 +5,29 @@ from dash import Input, Output, callback, html
 from sklearn.cluster import KMeans
 
 from backend.data_manager import DataManager
+from backend.data_setup.tabs.tab_cluster_data_setup import prepare_test_data, prepare_default_data, \
+    prepare_age_group_data
 from frontend.component_ids import ID
 
 """
-callbacks and logic of tab cluster
+callbacks of tab cluster
 """
 
 # Data Files
 dm: DataManager = DataManager.get_instance()
 my_transactions = dm.df_transactions
 my_users = dm.df_users
+
+my_test_agg = prepare_test_data()
+my_transactions_agg = prepare_default_data(my_transactions)
+my_age_group_clustered_result = prepare_age_group_data(my_transactions, my_users)
 # Test Data File
 my_test_df = pd.DataFrame({'client_id': [1, 1, 2, 2, 3, 4, 4, 4, 5, 1, 1, 1, 6],
                            'amount': [100, 150, 10, 20, 500, 5, 10, 15, 1000, 250, 4500, 30, 450]
                            })
-"""
-Data Set Up Test
-"""
-# Aggregation per user
-my_test_agg = my_test_df.groupby('client_id').agg(
-    transaction_count=('amount', 'count'),
-    total_value=('amount', 'sum')).reset_index()
 
-# Clustering
-kmeans_default = KMeans(n_clusters=4, n_init=20)
-my_test_agg['cluster'] = kmeans_default.fit_predict(my_test_agg[['transaction_count', 'total_value']])
-my_test_agg['cluster_str'] = my_test_agg['cluster'].astype(str) #needed for color scheme allocation
-# print(my_test_agg)
 """
-Data Set Up Default
-"""
-# Aggregation per user
-my_transactions_agg = my_transactions.groupby('client_id').agg(
-    transaction_count=('amount', 'count'),
-    total_value=('amount', 'sum')).reset_index()
-my_transactions_agg['average_value'] = my_transactions_agg['total_value'] / my_transactions_agg['transaction_count']
-# Clustering
-kmeans_default_total = KMeans(n_clusters=4, random_state=42, n_init=30)
-my_transactions_agg['cluster'] = kmeans_default_total.fit_predict(my_transactions_agg[['transaction_count', 'total_value']])
-my_transactions_agg['cluster_str'] = my_transactions_agg['cluster'].astype(str) # needed for color scheme allocation
-
-kmeans_default_avg = KMeans(n_clusters=4, random_state=42, n_init=30)
-my_transactions_agg['cluster_average'] = kmeans_default_avg.fit_predict(my_transactions_agg[['transaction_count', 'average_value']])
-my_transactions_agg['cluster_average_str'] = my_transactions_agg['cluster_average'].astype(str)
-"""
-Data Set Up Age Group
+Additional Data and Scatterplot Set Up for Age Group
 """
 my_transactions_users_joined = my_transactions.merge(
     my_users,
@@ -60,45 +38,6 @@ my_transactions_users_joined = my_transactions.merge(
 # compute age group
 current_year = datetime.datetime.now().year
 my_transactions_users_joined['current_age'] = current_year - my_transactions_users_joined['birth_year']
-# TODO set appropriate age groups
-def get_age_group(age):
-    if age < 25:
-        return '0'
-    elif age < 35:
-        return '1'
-    elif age < 45:
-        return '2'
-    elif age < 55:
-        return '3'
-    elif age < 65:
-        return '4'
-    else:
-        return '5'
-
-my_transactions_users_joined['age_group'] = my_transactions_users_joined['current_age'].apply(get_age_group)
-my_age_group = my_transactions_users_joined.groupby('client_id').agg(
-    transaction_count=('amount', 'count'),
-    total_value=('amount', 'sum'),
-    average_value=('amount', 'mean'),
-    #TODO dynamische zuteiltung für user (altersgruppe wechselt über die Jahre)
-    age_group=('age_group','first') # first appearing age group of user is used
-).reset_index()
-
-my_age_group_clustered = []
-for group in my_age_group['age_group'].unique():
-    subset = my_age_group[my_age_group['age_group'] == group].copy()
-
-    if len(subset) >= 4:  # KMeans needs a minimum of k points
-        kmeans_age_group = KMeans(n_clusters=4, random_state=42, n_init=30)
-        subset['cluster'] = kmeans_age_group.fit_predict(subset[['transaction_count', 'total_value']])
-        subset['cluster_str'] = subset['cluster'].astype(str)
-    else:
-        subset['cluster'] = -1
-        subset['cluster_str'] = 'N/A'
-
-    my_age_group_clustered.append(subset)
-
-my_age_group_clustered_result = pd.concat(my_age_group_clustered)
 
 # better visualization of scatterplot
 age_group_labels = {
@@ -126,9 +65,8 @@ dummy_data = pd.DataFrame([{
 my_age_group_clustered_result = pd.concat([my_age_group_clustered_result, dummy_data], ignore_index=True)
 
 """
-Logic
+Callback
 """
-# Callback
 @callback(
     Output(ID.CLUSTER_GRAPH, 'figure'),
     Output(ID.CLUSTER_LEGEND, 'children'),
@@ -137,6 +75,23 @@ Logic
     Input(ID.CLUSTER_DEFAULT_SWITCH, 'value')
 )
 def update_cluster(value, default_switch_value):
+    """
+        Update the cluster scatter plot figure, legend, and UI visibility based on user input.
+
+        This callback function dynamically generates a scatter plot visualization of clustered transaction data,
+        responding to user selections for clustering type ('Default', 'Test', 'Age Group', 'Income vs Expenditures')
+        and a switch controlling whether to display total or average transaction values.
+
+        Parameters:
+            value (str): Selected cluster type from dropdown ('Default', 'Test', 'Age Group', 'Income vs Expenditures').
+            default_switch_value (str): Selected value type for the default cluster ('total_value' or 'average_value').
+
+        Returns:
+            tuple:
+                fig (plotly.graph_objs._figure.Figure): Scatter plot figure showing transaction clusters.
+                legend (dash.html.Div): HTML component containing the legend describing clusters.
+                default_switch_container (dict): CSS style dict controlling visibility of the default switch UI element.
+        """
     # color scheme
     cluster_colors = {
         "0": "#56B4E9",  # light blue
@@ -234,6 +189,19 @@ def update_cluster(value, default_switch_value):
     return fig, html.Div([html.H5("Legend:"),html.Br(), legend]), default_switch_container
 
 def get_legend_default(cluster_colors):
+    """
+        Generate the HTML legend for the default clustering view.
+
+        Creates an unordered list (<ul>) of cluster descriptions with colored labels
+        corresponding to cluster colors, explaining the characteristics of each cluster
+        in terms of transaction frequency and value.
+
+        Parameters:
+            cluster_colors (dict): Mapping of cluster IDs (str) to color hex codes (str).
+
+        Returns:
+            dash.html.Ul: HTML unordered list component representing the cluster legend.
+        """
     legend = html.Ul([
         html.Li([
             html.Span("Cluster 0", style={"color": cluster_colors["0"], "font-weight": "bold"}),
@@ -262,6 +230,18 @@ def get_legend_default(cluster_colors):
     return legend
 
 def get_legend_age_group(cluster_colors):
+    """
+       Generate the HTML legend for clustering by age group.
+
+       Builds a legend similar to the default legend, adding additional information
+       if any age groups are missing from the clustered dataset.
+
+       Parameters:
+           cluster_colors (dict): Mapping of cluster IDs (str) to color hex codes (str).
+
+       Returns:
+           dash.html.Ul: HTML unordered list component representing the age group cluster legend.
+       """
     legend_items = [
         html.Li([
             html.Span("Cluster 0", style={"color": cluster_colors["0"], "font-weight": "bold"}),
@@ -295,6 +275,7 @@ def get_legend_age_group(cluster_colors):
     return html.Ul(legend_items)
 
 def get_legend_income_expenditure(cluster_colors):
+    # TODO
     legend = html.Ul([
         html.Li("Low Income / High Spending", style={"color": "red"}),
         html.Li("Low Income / Low Spending", style={"color": "blue"}),

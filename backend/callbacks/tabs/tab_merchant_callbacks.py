@@ -1,4 +1,4 @@
 from frontend.component_ids import ID
 """
-callbacks and logic of tab Merchant
+callbacks of tab Merchant
 """
