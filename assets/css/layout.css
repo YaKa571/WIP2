@@ -2,9 +2,10 @@
    Base Styles
    ========================================================================== */
 
-html, body {
+html, body, #react-entry-point, .dash-application {
     height: 100%;
     margin: 0;
+    padding: 0;
     min-width: 1124px;
 }
 
@@ -51,7 +52,8 @@ html, body {
 .left-column, .right-column {
     display: flex;
     flex-direction: column;
-    flex: 1 1 0;
+    width: 50%;
+    flex: 0 1 auto;
     gap: var(--gutter); /* Spacing within column */
     animation: fadeInUp 0.6s ease both;
 }
@@ -78,6 +80,7 @@ html, body {
 .right-column .card {
     flex: 1 1 auto; /* Fill entire right column */
     overflow: auto;
+    min-height: 0;
 }
 
 .right-column .card-body {
