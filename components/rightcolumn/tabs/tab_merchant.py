@@ -1,12 +1,16 @@
-from dash import html, dcc
-from frontend.component_ids import ID
-from components.factories import component_factory as comp_factory
-from frontend.icon_manager import Icons, IconID
 import dash_bootstrap_components as dbc
+from dash import html, dcc
+
 from backend.data_setup.tabs import tab_merchant_data_setup
+from components.factories import component_factory as comp_factory
+from frontend.component_ids import ID
+from frontend.icon_manager import Icons, IconID
 
 COLOR_BLUE_MAIN = "#0d6efd"
-# TODO: Free...(Yannic): Idee untere Teil der Seite wie in Skizze, oben Verteilung der Händlerkategorien und Aufschlüsselung (evtl. als Popup)
+
+
+# TODO: Free...(Yannic): Idee untere Teil der Seite wie in Skizze, oben Verteilung der Händlerkategorien und
+# Aufschlüsselung (evtl. als Popup)
 def create_merchant_content():
     return html.Div(
         [
@@ -19,32 +23,34 @@ def create_merchant_content():
         className="tab-content-inner"
     )
 
+
 def create_merchant_heading():
     return html.Div(
         children=[
-                dbc.Col(width=4),
-                dbc.Col(html.H4("Merchant", id=ID.MERCHANT_HEADING, className="text-center"),
-                        width=4),
-                dbc.Col(
-                    html.Div([
-                        html.I(className="bi bi-info-circle-fill", id=ID.MERCHANT_INFO_ICON),
-                        dbc.Tooltip(
-                            children=[
-                                # TODO: tooltip
-                                "TODO",
-                                html.Br(),
-                                "Tooltip"
-                            ],
-                            target=ID.MERCHANT_INFO_ICON,
-                            placement="bottom-end"
-                        )
-                    ], className="d-flex justify-content-end"),
-                    width=4
-                )
+            dbc.Col(width=4),
+            dbc.Col(html.H4("Merchant", id=ID.MERCHANT_HEADING, className="text-center"),
+                    width=4),
+            dbc.Col(
+                html.Div([
+                    comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
+                    dbc.Tooltip(
+                        children=[
+                            # TODO: tooltip
+                            "TODO",
+                            html.Br(),
+                            "Tooltip"
+                        ],
+                        target=ID.MERCHANT_INFO_ICON,
+                        placement="bottom-end"
+                    )
+                ], className="d-flex justify-content-end"),
+                width=4
+            )
         ],
         # TODO: maybe custom css class
         className="tab-home-heading-wrapper"
     )
+
 
 def create_merchant_general():
     return dbc.Row([
@@ -52,6 +58,7 @@ def create_merchant_general():
         create_merchant_kpis(),
         html.Hr()
     ])
+
 
 def create_merchant_individual():
     return dbc.Row([
@@ -70,6 +77,7 @@ def create_merchant_individual():
             className="search-wrapper p-2 flex-grow-1 me-2"
         ),
     ])
+
 
 def create_merchant_kpis():
     group_1, count_1 = tab_merchant_data_setup.get_most_frequently_used_merchant_group()
