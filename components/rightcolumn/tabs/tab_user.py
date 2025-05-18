@@ -1,6 +1,10 @@
 import dash_bootstrap_components as dbc
 from dash import html, dcc
+
+from components.factories import component_factory as comp_factory
+from frontend.component_ids import ID
 from frontend.icon_manager import IconID, Icons
+
 
 def create_user_content() -> html.Div:
     """
@@ -21,6 +25,7 @@ def create_user_content() -> html.Div:
         className="tab-content-inner"
     )
 
+
 def _create_user_heading() -> html.Div:
     """
     Returns heading with two search bars and an info box.
@@ -33,6 +38,7 @@ def _create_user_heading() -> html.Div:
         ],
         className="d-flex align-items-center mb-4"
     )
+
 
 def _create_single_search_bar(input_id: str, placeholder: str) -> html.Div:
     """
@@ -51,20 +57,24 @@ def _create_single_search_bar(input_id: str, placeholder: str) -> html.Div:
         className="search-wrapper p-2 flex-grow-1 me-2"
     )
 
+
 def _create_info_icon_with_tooltip() -> html.Div:
     """
     Returns an info icon with a tooltip explaining the usage.
     """
-    import dash_bootstrap_components as dbc
-    return html.Div([
-        html.I(className="bi bi-info-circle-fill ms-2", id="user-tab-info-icon"),
+    return html.Div(children=[
+
+        comp_factory.create_info_icon(ID.USER_TAB_INFO_ICON),
         dbc.Tooltip(
             "Enter a User ID or Card ID to update the information for the selected user or card.",
             target="user-tab-info-icon",
             placement="bottom",
             className="user-info-tooltip"
         )
-    ])
+
+    ]
+    )
+
 
 def _create_top_kpis() -> html.Div:
     """
@@ -81,6 +91,7 @@ def _create_top_kpis() -> html.Div:
         className="user-kpi-row"
     )
 
+
 def _create_middle_kpis() -> html.Div:
     """
     Creates the centered credit limit box.
@@ -91,6 +102,7 @@ def _create_middle_kpis() -> html.Div:
         ],
         className="user-kreditlimit-row"
     )
+
 
 def _create_bottom_merchant_diagram() -> html.Div:
     """
