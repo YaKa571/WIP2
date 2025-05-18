@@ -4,9 +4,42 @@ from dash.exceptions import PreventUpdate
 from backend.data_manager import DataManager
 from components.rightcolumn.tabs.tab_home import create_pie_graph, get_most_valuable_merchant_details, \
     get_most_visited_merchant_details, get_top_spending_user_details, get_peak_hour_details
+from components.rightcolumn.tabs.tab_home import get_most_valuable_merchant_bar_chart
 from frontend.component_ids import ID
 
 dm: DataManager = DataManager.get_instance()
+
+# Map of dropdown-values -> chart-builder functions
+CHART_BUILDERS = {
+    "most_valuable_merchants": get_most_valuable_merchant_bar_chart,
+    "most_visited_merchants": "a",
+    "top_spending_users": "b",
+    "peak_hours": "c",
+}
+
+
+@callback(
+    Output(ID.HOME_GRAPH_BAR_CHART, "figure"),
+    Input(ID.HOME_TAB_SELECTED_STATE_STORE, "data"),
+    Input(ID.HOME_TAB_BAR_CHART_DROPDOWN, "value"),
+    Input(ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES, "n_clicks"),
+    prevent_initial_call=True
+)
+def update_bar_chart(selected_state, chart_option, n_clicks_toggle):
+    trigger = ctx.triggered_id
+
+    if trigger == ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES:
+        state = None
+    else:
+        state = selected_state
+
+    # Validate chart_option
+    builder = CHART_BUILDERS.get(chart_option)
+    if builder is None:
+        raise PreventUpdate
+
+    fig = builder(state=state)
+    return fig
 
 
 @callback(
