@@ -1,4 +1,5 @@
 import dash_bootstrap_components as dbc
+import plotly.express as px
 import plotly.graph_objects as go
 from dash import html, dcc
 from plotly.graph_objs._figure import Figure
@@ -383,15 +384,27 @@ def _create_bottom_bar_diagrams() -> html.Div:
                                  ),
                 ],
                     className="settings-item mt-2")
-            ],
-                className="card-header"),
+            ]
+            ),
 
             dbc.CardBody(children=[
-                html.P("Bottom Bar Diagram Body")
-            ])
 
+                dcc.Loading(children=[
+                    dcc.Graph(
+                        figure=Figure(),
+                        className="bar-chart",
+                        id=ID.HOME_GRAPH_BAR_CHART,
+                        config={"responsive": True},
+                        responsive=True,
+                        style={"height": "16vh", "minHeight": 0, "minWidth": 0}
+                    )
+                ],
+                    type="circle",
+                    color=COLOR_BLUE_MAIN)
+
+            ])
         ],
-            className="card graph-card")
+            className="graph-card")
 
     ],
         className="flex-wrapper flex-fill")
@@ -591,3 +604,25 @@ def get_peak_hour_details(state: str = None) -> list:
                  className="kpi-card-value kpi-number-value")
 
     return [one, two]
+
+
+def get_most_valuable_merchant_bar_chart(state: str = None):
+    df = dm.get_merchant_values_by_state(state=state).head(10)
+
+    fig = px.bar(df,
+                 x="mcc",
+                 y="merchant_sum",
+                 hover_data=["mcc_desc", "merchant_id"],
+                 )
+
+    # Handle x-axis values as category as they're numerical
+    fig.update_xaxes(type="category")
+
+    # Sort categories -> merchant_sum descending
+    fig.update_layout(xaxis=dict(categoryorder="total descending"),
+                      margin=dict(l=0, t=0, r=0, b=0))
+
+    # Set bar color
+    fig.update_traces(marker_color=COLOR_BLUE_MAIN)
+
+    return fig
