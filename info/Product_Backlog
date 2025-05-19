@@ -49,3 +49,10 @@ Priority: IRRELEVANT | Effort: 3d | Status: ⭕
 ✅ Completed
 🔄 In Progress
 ⭕ Open
+
+## Ideas for interactivities between tabs
+Home Top 10 Merchants -> Open Merchants Tab with specific merchant data
+Home Top 10 Users -> Open Users Tab with specific user data
+Fraud suspicious Users Liset -> Open Users Tab with specific user data
+Cluster -> Open Users Tab with specific user data
+Cluster: State selection via map -> Clustering for specific state
