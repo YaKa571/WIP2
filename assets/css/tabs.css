@@ -116,7 +116,7 @@
    ============================================================ */
 
 .tab-content-inner {
-    gap: calc(2 * var(--gutter));
+    gap: calc(1.5 * var(--gutter));
 }
 
 .tab-content-inner .flex-wrapper {
@@ -227,7 +227,8 @@
     padding: 0;
 }
 
-.circle-diagram {
+.circle-diagram,
+.bar-chart {
     flex: 0 0 auto !important;
     width: 100% !important;
     max-width: 100% !important;
