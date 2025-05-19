@@ -61,27 +61,30 @@ def create_right_column():
             html.Div(
                 builder(),
                 id={"type": "tab-content", "index": tid},
-                className="flex-fill " +
-                          ("tab-item active" if idx == 0 else "tab-item hidden")
+                className="flex-fill " + ("tab-item active" if idx == 0 else "tab-item hidden")
             )
         )
 
     return html.Div(
-        [
+        className="right-column d-flex flex-column",
+        children=[
+
             dbc.Card(
-                dbc.CardBody(
-                    [
-                        tabs,
-                        html.Div(
-                            wrappers,
-                            id="custom-tab-content",
-                            className="tab-content-wrapper flex-fill"
-                        )
-                    ],
-                    className="d-flex flex-column p-0"
-                ),
-                className="card h-100"
-            )
-        ],
-        className="right-column d-flex flex-column"
-    )
+                className="h-100",
+                children=[
+
+                    dbc.CardBody(
+                        className="d-flex flex-column p-0",
+                        children=[
+
+                            tabs,
+
+                            html.Div(
+                                wrappers,
+                                id="custom-tab-content",
+                                className="tab-content-wrapper flex-fill"
+                            )
+
+                        ])
+                ])
+        ])
