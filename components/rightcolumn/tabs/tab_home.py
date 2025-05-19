@@ -41,16 +41,16 @@ def create_home_content() -> html.Div:
         A Div element containing the formatted components for the home tab
         content.
     """
-    return html.Div(children=[
+    return html.Div(
+        className="tab-content-inner",
+        children=[
 
-        _create_heading(),
-        _create_top_kpis(),
-        _create_middle_circle_diagrams(),
-        _create_bottom_bar_diagrams()
+            _create_heading(),
+            _create_top_kpis(),
+            _create_middle_circle_diagrams(),
+            _create_bottom_bar_diagrams()
 
-    ],
-        className="tab-content-inner"
-    )
+        ])
 
 
 def _create_heading() -> html.Div:
@@ -71,34 +71,34 @@ def _create_heading() -> html.Div:
         icon with an interactive tooltip, and necessary CSS classes.
     """
     return html.Div(
+        className="tab-home-heading-wrapper",
         children=[
 
-            html.Button(children=[
-                html.I(className="bi bi-geo-alt-fill me-2"),
-                "Show all States"
-            ]
-                , className="settings-button-text hidden",
-                id=ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES),
-            html.H4(
-                "All States",
-                id=ID.HOME_TAB_STATE_HEADING
-            ),
+            html.Button(
+                className="settings-button-text hidden",
+                id=ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES,
+                children=[
+
+                    html.I(className="bi bi-geo-alt-fill me-2"),
+                    "Show all States"
+
+                ]),
+
+            html.H4("All States", id=ID.HOME_TAB_STATE_HEADING),
             comp_factory.create_info_icon(ID.HOME_TAB_INFO_ICON),
-            dbc.Tooltip(children=[
-                "Click on any State on",
-                html.Br(),
-                "the map to update the",
-                html.Br(),
-                "charts and KPIs"
-            ],
+            dbc.Tooltip(
                 target=ID.HOME_TAB_INFO_ICON,
                 is_open=False,
-                placement="bottom-end"
-            )
+                placement="bottom-end",
+                children=[
+                    "Click on any State on",
+                    html.Br(),
+                    "the map to update the",
+                    html.Br(),
+                    "charts and KPIs"
+                ])
 
-        ],
-        className="tab-home-heading-wrapper"
-    )
+        ])
 
 
 def _create_top_kpis() -> html.Div:
@@ -119,126 +119,149 @@ def _create_top_kpis() -> html.Div:
         html.Div: A `Div` container element that wraps all the KPI cards with a
         specific class style for layout and styling consistency.
     """
-    return html.Div(children=[
-
-        html.Div(children=[
+    return html.Div(
+        className="flex-wrapper",
+        children=[
 
             # KPI 1: Most Value Merchant
-            dbc.Card(children=[
-                dbc.CardHeader(children=[
+            dbc.Card(
+                className="kpi-card",
+                children=[
 
-                    comp_factory.create_icon(IconID.TROPHY, cls="icon icon-small"),
-                    html.P("Most Valuable Merchant", className="kpi-card-title")
+                    dbc.CardHeader(
+                        children=[
+
+                            comp_factory.create_icon(IconID.TROPHY, cls="icon icon-small"),
+                            html.P("Most Valuable Merchant", className="kpi-card-title")
+
+                        ]),
+
+                    dbc.CardBody(
+                        children=[
+
+                            dcc.Loading(
+                                type="circle",
+                                color=COLOR_BLUE_MAIN,
+                                children=[
+
+                                    html.Div(
+                                        id=ID.HOME_KPI_MOST_VALUABLE_MERCHANT,
+                                        children=[
+
+                                            html.P("", className="kpi-card-value"),
+                                            html.P("", className="kpi-card-value kpi-number-value")
+
+                                        ])
+                                ])
+
+                        ])
 
                 ]),
-
-                dbc.CardBody(children=[
-
-                    dcc.Loading(children=[
-                        html.Div(children=[
-                            html.P("", className="kpi-card-value"),
-                            html.P("", className="kpi-card-value kpi-number-value")
-                        ],
-                            id=ID.HOME_KPI_MOST_VALUABLE_MERCHANT
-                        )
-                    ],
-                        type="circle",
-                        color=COLOR_BLUE_MAIN)
-
-                ])
-
-            ],
-                className="kpi-card",
-            ),
 
             # KPI 2: Most Visited Merchant
-            dbc.Card(children=[
-                dbc.CardHeader(children=[
+            dbc.Card(
+                className="kpi-card",
+                children=[
 
-                    comp_factory.create_icon(IconID.REPEAT, cls="icon icon-small"),
-                    html.P("Most Visited Merchant", className="kpi-card-title"),
+                    dbc.CardHeader(
+                        children=[
+
+                            comp_factory.create_icon(IconID.REPEAT, cls="icon icon-small"),
+                            html.P("Most Visited Merchant", className="kpi-card-title"),
+
+                        ]),
+
+                    dbc.CardBody(
+                        children=[
+
+                            dcc.Loading(
+                                type="circle",
+                                color=COLOR_BLUE_MAIN,
+                                children=[
+
+                                    html.Div(
+                                        id=ID.HOME_KPI_MOST_VISITED_MERCHANT,
+                                        children=[
+
+                                            html.P("", className="kpi-card-value"),
+                                            html.P("", className="kpi-card-value kpi-number-value")
+
+                                        ])
+                                ])
+
+                        ])
 
                 ]),
-
-                dbc.CardBody(children=[
-
-                    dcc.Loading([
-                        html.Div(children=[
-
-                            html.P("", className="kpi-card-value"),
-                            html.P("", className="kpi-card-value kpi-number-value")
-
-                        ],
-                            id=ID.HOME_KPI_MOST_VISITED_MERCHANT
-                        )
-                    ],
-                        type="circle",
-                        color=COLOR_BLUE_MAIN)
-
-                ])
-
-            ],
-                className="kpi-card",
-            ),
 
             # KPI 3: Top Spending User
-            dbc.Card(children=[
-                dbc.CardHeader(children=[
-
-                    comp_factory.create_icon(IconID.USER_PAYING, cls="icon icon-small"),
-                    html.P(children="Top Spending User", className="kpi-card-title"),
-
-                ]),
-
-                dbc.CardBody(children=[
-
-                    dcc.Loading(children=[
-                        html.Div(children=[
-                            html.P("", className="kpi-card-value"),
-                            html.P("", className="kpi-card-value kpi-number-value")
-                        ],
-                            id=ID.HOME_KPI_TOP_SPENDING_USER
-                        )
-                    ],
-                        type="circle",
-                        color=COLOR_BLUE_MAIN)
-
-                ])
-            ],
+            dbc.Card(
                 className="kpi-card",
-            ),
+                children=[
+
+                    dbc.CardHeader(
+                        children=[
+
+                            comp_factory.create_icon(IconID.USER_PAYING, cls="icon icon-small"),
+                            html.P(children="Top Spending User", className="kpi-card-title"),
+
+                        ]),
+
+                    dbc.CardBody(
+                        children=[
+
+                            dcc.Loading(
+                                type="circle",
+                                color=COLOR_BLUE_MAIN,
+                                children=[
+
+                                    html.Div(
+                                        id=ID.HOME_KPI_TOP_SPENDING_USER,
+                                        children=[
+
+                                            html.P("", className="kpi-card-value"),
+                                            html.P("", className="kpi-card-value kpi-number-value")
+
+                                        ])
+                                ])
+
+                        ])
+                ]),
 
             # KPI 4: Peak Hour
-            dbc.Card(children=[
-                dbc.CardHeader(children=[
-
-                    comp_factory.create_icon(IconID.TIME, cls="icon icon-small"),
-                    html.P(children="Peak Hour", className="kpi-card-title"),
-
-                ]),
-
-                dbc.CardBody(children=[
-
-                    dcc.Loading(children=[
-                        html.Div(children=[
-                            html.P("", className="kpi-card-value"),
-                            html.P("", className="kpi-card-value kpi-number-value")
-                        ],
-                            id=ID.HOME_KPI_PEAK_HOUR
-                        )
-                    ],
-                        type="circle",
-                        color=COLOR_BLUE_MAIN)
-
-                ])
-            ],
+            dbc.Card(
                 className="kpi-card",
-            ),
+                children=[
 
-        ],
-            className="flex-wrapper"
-        )
-    ])
+                    dbc.CardHeader(
+                        children=[
+
+                            comp_factory.create_icon(IconID.TIME, cls="icon icon-small"),
+                            html.P(children="Peak Hour", className="kpi-card-title"),
+
+                        ]),
+
+                    dbc.CardBody(
+                        children=[
+
+                            dcc.Loading(
+                                type="circle",
+                                color=COLOR_BLUE_MAIN,
+                                children=[
+
+                                    html.Div(
+                                        id=ID.HOME_KPI_PEAK_HOUR,
+                                        children=[
+
+                                            html.P("", className="kpi-card-value"),
+                                            html.P("", className="kpi-card-value kpi-number-value")
+
+                                        ])
+                                ])
+
+                        ])
+                ])
+
+        ])
 
 
 def _create_middle_circle_diagrams() -> html.Div:
@@ -253,95 +276,114 @@ def _create_middle_circle_diagrams() -> html.Div:
         bodies include pie chart graphs for gender-based and channel-based
         expenditure data.
     """
-    return html.Div(children=[
+    return html.Div(
+        className="flex-wrapper",
+        children=[
 
-        dbc.Card(children=[
+            dbc.Card(
+                className="graph-card",
+                children=[
 
-            dbc.CardHeader(children=[
+                    dbc.CardHeader(
+                        children=[
 
-                comp_factory.create_icon(IconID.GENDERS, cls="icon icon-small"),
-                html.P(children="Expenditures by Gender", className="graph-card-title"),
+                            comp_factory.create_icon(IconID.GENDERS, cls="icon icon-small"),
+                            html.P(children="Expenditures by Gender", className="graph-card-title"),
 
-            ]),
+                        ]),
 
-            dbc.CardBody(children=[
-                dcc.Loading(children=[
-                    dcc.Graph(
-                        figure=Figure(),
-                        className="circle-diagram",
-                        id=ID.HOME_GRAPH_EXPENDITURES_BY_GENDER,
-                        responsive=True,
-                        config=PIE_CONFIG,
-                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
-                    )
+                    dbc.CardBody(
+                        children=[
 
-                ],
-                    type="circle",
-                    color=COLOR_BLUE_MAIN)
-            ])
+                            dcc.Loading(
+                                type="circle",
+                                color=COLOR_BLUE_MAIN,
+                                children=[
 
-        ],
-            className="graph-card"),
+                                    dcc.Graph(
+                                        figure=Figure(),
+                                        className="circle-diagram",
+                                        id=ID.HOME_GRAPH_EXPENDITURES_BY_GENDER,
+                                        responsive=True,
+                                        config=PIE_CONFIG,
+                                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
+                                    )
 
-        dbc.Card(children=[
+                                ])
+                        ])
 
-            dbc.CardHeader(children=[
+                ]),
 
-                comp_factory.create_icon(IconID.CART, cls="icon icon-small"),
-                html.P(children="Expenditures by Channel", className="graph-card-title"),
+            dbc.Card(
+                className="graph-card",
+                children=[
 
-            ]),
+                    dbc.CardHeader(
+                        children=[
 
-            dbc.CardBody(children=[
-                dcc.Loading(children=[
-                    dcc.Graph(
-                        figure=Figure(),
-                        className="circle-diagram",
-                        id=ID.HOME_GRAPH_EXPENDITURES_BY_CHANNEL,
-                        responsive=True,
-                        config=PIE_CONFIG,
-                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
-                    )
+                            comp_factory.create_icon(IconID.CART, cls="icon icon-small"),
+                            html.P(children="Expenditures by Channel", className="graph-card-title"),
 
-                ],
-                    type="circle",
-                    color=COLOR_BLUE_MAIN)
-            ])
+                        ]),
 
-        ],
-            className="graph-card"),
+                    dbc.CardBody(
+                        children=[
 
-        dbc.Card(children=[
+                            dcc.Loading(
+                                type="circle",
+                                color=COLOR_BLUE_MAIN,
+                                children=[
 
-            dbc.CardHeader(children=[
+                                    dcc.Graph(
+                                        figure=Figure(),
+                                        className="circle-diagram",
+                                        id=ID.HOME_GRAPH_EXPENDITURES_BY_CHANNEL,
+                                        responsive=True,
+                                        config=PIE_CONFIG,
+                                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
+                                    )
 
-                comp_factory.create_icon(IconID.CAKE, cls="icon icon-small"),
-                html.P(children="Expenditures by Age", className="graph-card-title"),
+                                ])
+                        ])
 
-            ]),
+                ]),
 
-            dbc.CardBody(children=[
-                dcc.Loading(children=[
-                    dcc.Graph(
-                        figure=Figure(),
-                        className="circle-diagram",
-                        id=ID.HOME_GRAPH_EXPENDITURES_BY_AGE,
-                        responsive=True,
-                        config=PIE_CONFIG,
-                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
-                    )
-                ],
-                    type="circle",
-                    color=COLOR_BLUE_MAIN)
+            dbc.Card(
+                className="graph-card",
+                children=[
 
-            ])
+                    dbc.CardHeader(
+                        children=[
 
-        ],
-            className="graph-card"),
+                            comp_factory.create_icon(IconID.CAKE, cls="icon icon-small"),
+                            html.P(children="Expenditures by Age", className="graph-card-title"),
 
-    ],
-        className="flex-wrapper"
-    )
+                        ]),
+
+                    dbc.CardBody(
+                        children=[
+
+                            dcc.Loading(
+                                type="circle",
+                                color=COLOR_BLUE_MAIN,
+                                children=[
+
+                                    dcc.Graph(
+                                        figure=Figure(),
+                                        className="circle-diagram",
+                                        id=ID.HOME_GRAPH_EXPENDITURES_BY_AGE,
+                                        responsive=True,
+                                        config=PIE_CONFIG,
+                                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
+                                    )
+
+                                ])
+
+                        ])
+
+                ])
+
+        ])
 
 
 def _create_bottom_bar_diagrams() -> html.Div:
@@ -356,48 +398,58 @@ def _create_bottom_bar_diagrams() -> html.Div:
     Returns:
         html.Div: A Dash HTML Div containing the entire layout for the bottom bar diagram.
     """
-    return html.Div(children=[
+    return html.Div(
+        className="flex-wrapper flex-fill",
+        children=[
 
-        dbc.Card(children=[
+            dbc.Card(
+                className="graph-card",
+                children=[
 
-            dbc.CardHeader(children=[
+                    dbc.CardHeader(
+                        children=[
 
-                comp_factory.create_icon(IconID.BAR_CHART_LINE_FILL, cls="icon icon-small"),
-                html.Div(children=[
-                    dcc.Dropdown(className="settings-dropdown settings-text-centered",
-                                 options=BAR_CHART_OPTIONS,
-                                 id=ID.HOME_TAB_BAR_CHART_DROPDOWN,
-                                 placeholder="Select a KPI...",
-                                 style={"width": "100%"},
-                                 value=BAR_CHART_OPTIONS[0]["value"],
-                                 clearable=False
-                                 ),
-                ],
-                    className="settings-item mt-2")
-            ]
-            ),
+                            comp_factory.create_icon(IconID.BAR_CHART_LINE_FILL, cls="icon icon-small"),
+                            html.Div(
+                                className="settings-item mt-2",
+                                children=[
 
-            dbc.CardBody(children=[
+                                    dcc.Dropdown(
+                                        className="settings-dropdown settings-text-centered",
+                                        options=BAR_CHART_OPTIONS,
+                                        id=ID.HOME_TAB_BAR_CHART_DROPDOWN,
+                                        placeholder="Select a KPI...",
+                                        style={"width": "100%"},
+                                        value=BAR_CHART_OPTIONS[0]["value"],
+                                        clearable=False
+                                    )
 
-                dcc.Loading(children=[
-                    dcc.Graph(
-                        figure=Figure(),
-                        className="bar-chart",
-                        id=ID.HOME_GRAPH_BAR_CHART,
-                        config={"responsive": True},
-                        responsive=True,
-                        style={"height": "19vh"}
-                    )
-                ],
-                    type="circle",
-                    color=COLOR_BLUE_MAIN)
+                                ])
+                        ]),
 
-            ])
-        ],
-            className="graph-card")
+                    dbc.CardBody(
+                        children=[
 
-    ],
-        className="flex-wrapper flex-fill")
+                            dcc.Loading(
+                                type="circle",
+                                color=COLOR_BLUE_MAIN,
+                                children=[
+
+                                    dcc.Graph(
+                                        figure=Figure(),
+                                        className="bar-chart",
+                                        id=ID.HOME_GRAPH_BAR_CHART,
+                                        config={"responsive": True},
+                                        responsive=True,
+                                        style={"height": "19vh"}
+                                    )
+
+                                ])
+
+                        ])
+                ])
+
+        ])
 
 
 def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label", showlegend: bool = True,
@@ -436,16 +488,18 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label", s
     values = list(data.values())
 
     fig = go.Figure(
-        data=[go.Pie(
-            name="",
-            labels=labels,
-            values=values,
-            hole=0.42,
-            marker=dict(colors=colors),
-            textinfo=textinfo,
-            textfont=dict(color=textcolor),
-            hovertemplate="%{label}<br>%{percent}<br>$%{value:,.2f}"
-        )],
+        data=[
+            go.Pie(
+                name="",
+                labels=labels,
+                values=values,
+                hole=0.42,
+                marker=dict(colors=colors),
+                textinfo=textinfo,
+                textfont=dict(color=textcolor),
+                hovertemplate="%{label}<br>%{percent}<br>$%{value:,.2f}"
+            )
+        ],
         layout=go.Layout(
             margin=dict(l=0, r=0, t=0, b=0),
             showlegend=showlegend
@@ -487,19 +541,21 @@ def get_most_valuable_merchant_details(state: str = None) -> list:
     one = html.P(
         f"{dm.get_most_valuable_merchant(state).mcc_desc}",
         className="kpi-card-value")
+
     two = html.P(f"${dm.get_most_valuable_merchant(state).value}",
                  className="kpi-card-value kpi-number-value")
-    tooltip = dbc.Tooltip(children=[
-        f"Merchant ID: {dm.get_most_valuable_merchant(state).id}",
-        html.Br(),
-        f"MCC: {dm.get_most_valuable_merchant(state).mcc}"
-    ],
+
+    tooltip = dbc.Tooltip(
         placement="bottom",
         is_open=False,
         trigger="hover",
         id={"type": "tooltip", "id": "tab_home_kpi_1"},
-        target=ID.HOME_KPI_MOST_VALUABLE_MERCHANT
-    )
+        target=ID.HOME_KPI_MOST_VALUABLE_MERCHANT,
+        children=[
+            f"Merchant ID: {dm.get_most_valuable_merchant(state).id}",
+            html.Br(),
+            f"MCC: {dm.get_most_valuable_merchant(state).mcc}"
+        ])
 
     return [one, two, tooltip]
 
@@ -523,19 +579,22 @@ def get_most_visited_merchant_details(state: str = None) -> list:
     one = html.P(
         f"{dm.get_most_visited_merchant(state).mcc_desc}",
         className="kpi-card-value")
+
     two = html.P(f"{dm.get_most_visited_merchant(state).visits} visits",
                  className="kpi-card-value kpi-number-value")
-    tooltip = dbc.Tooltip(children=[
-        f"Merchant ID: {dm.get_most_visited_merchant(state).id}",
-        html.Br(),
-        f"MCC: {dm.get_most_visited_merchant(state).mcc}"
-    ],
+
+    tooltip = dbc.Tooltip(
         placement="bottom",
         is_open=False,
         trigger="hover",
         id={"type": "tooltip", "id": "tab_home_kpi_2"},
-        target=ID.HOME_KPI_MOST_VISITED_MERCHANT
-    )
+        target=ID.HOME_KPI_MOST_VISITED_MERCHANT,
+        children=[
+            f"Merchant ID: {dm.get_most_visited_merchant(state).id}",
+            html.Br(),
+            f"MCC: {dm.get_most_visited_merchant(state).mcc}"
+        ])
+
     return [one, two, tooltip]
 
 
@@ -558,17 +617,19 @@ def get_top_spending_user_details(state: str = None) -> list:
     one = html.P(
         f"{dm.get_top_spending_user(state).gender}, {dm.get_top_spending_user(state).current_age} years",
         className="kpi-card-value")
-    two = html.P(f"${dm.get_top_spending_user(state).value}",
-                 className="kpi-card-value kpi-number-value")
-    tooltip = dbc.Tooltip(children=[
-        f"User ID: {dm.get_top_spending_user(state).id}"
-    ],
+
+    two = html.P(f"${dm.get_top_spending_user(state).value}", className="kpi-card-value kpi-number-value")
+
+    tooltip = dbc.Tooltip(
         placement="bottom",
         is_open=False,
         trigger="hover",
         id={"type": "tooltip", "id": "tab_home_kpi_3"},
-        target=ID.HOME_KPI_TOP_SPENDING_USER
-    )
+        target=ID.HOME_KPI_TOP_SPENDING_USER,
+        children=[
+            f"User ID: {dm.get_top_spending_user(state).id}"
+        ])
+
     return [one, two, tooltip]
 
 
@@ -587,11 +648,8 @@ def get_peak_hour_details(state: str = None) -> list:
         list: A list of HTML paragraph elements containing the peak hour range and the
             transaction count information.
     """
-    one = html.P(
-        f"{dm.get_peak_hour(state).hour_range}",
-        className="kpi-card-value")
-    two = html.P(f"{dm.get_peak_hour(state).value} transactions",
-                 className="kpi-card-value kpi-number-value")
+    one = html.P(f"{dm.get_peak_hour(state).hour_range}", className="kpi-card-value")
+    two = html.P(f"{dm.get_peak_hour(state).value} transactions", className="kpi-card-value kpi-number-value")
 
     return [one, two]
 

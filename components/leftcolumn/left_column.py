@@ -39,21 +39,25 @@ def create_map_card() -> dbc.Card:
         dbc.Card: A Dash Bootstrap Card object with a placeholder content for a map.
     """
     return dbc.Card(
-        dbc.CardBody(
-            [
+        className="card h-100 d-flex flex-column",
+        children=[
 
-                html.Div(id=ID.MAP_CONTAINER.value,
-                         className="map-container fade-in"
-                         ),
-                html.Div(id=ID.MAP_SPINNER.value,
-                         className="map-spinner"
-                         )
+            dbc.CardBody(
+                className="map-card-body d-flex flex-column",
+                children=[
 
-            ],
-            className="map-card-body d-flex flex-column"
-        ),
-        className="card h-100 d-flex flex-column"
-    )
+                    html.Div(
+                        id=ID.MAP_CONTAINER.value,
+                        className="map-container fade-in"
+                    ),
+
+                    html.Div(
+                        id=ID.MAP_SPINNER.value,
+                        className="map-spinner"
+                    )
+
+                ])
+        ])
 
 
 def create_left_column() -> html.Div:
@@ -68,9 +72,9 @@ def create_left_column() -> html.Div:
             with KPI cards and a map card.
     """
     return html.Div(
-        [
+        className="left-column",
+        children=[
+
             create_kpi_cards(),
             create_map_card(),
-        ],
-        className="left-column",
-    )
+        ])
