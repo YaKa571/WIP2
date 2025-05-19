@@ -681,8 +681,53 @@ class DataManager:
         self._cache_expenditures_by_channel[state] = result
         return result
 
-    # TODO: @SonPhạm: Tab User - User/Card KPIs
+    def _pre_cache_home_tab_data(self) -> None:
+        """
+        Pre-caches data for the Home-Tab view by performing data aggregation and calculations for
+        both overall data and state-specific data. This method is intended to optimize subsequent
+        data retrieval and ensure that necessary insights are readily available for analysis. The
+        method executes a series of predefined data aggregation functions for all states in the
+        transaction dataset.
 
+        Parameters
+        ----------
+        self : object
+            An instance of the class for which the method is defined. It provides access
+            to attributes and other methods of the object.
+
+        Raises
+        ------
+        None
+
+        Returns
+        -------
+        None
+        """
+        bm = Benchmark("Pre-caching Home-Tab data")
+        logger.log("🔄 Pre-caching Home-Tab data...", indent_level=2)
+        # First for overall (state=None)
+        self.get_merchant_values_by_state(state=None)
+        self.get_transaction_counts_by_hour(state=None)
+        self.get_spending_by_user(state=None)
+        self.get_visits_by_merchant(state=None)
+        self.get_expenditures_by_gender(state=None)
+        self.get_expenditures_by_age(state=None)
+        self.get_expenditures_by_channel(state=None)
+
+        # Then for each individual state
+        states = self.df_transactions['state_name'].dropna().unique().tolist()
+        for st in states:
+            self.get_merchant_values_by_state(state=st)
+            self.get_transaction_counts_by_hour(state=st)
+            self.get_spending_by_user(state=st)
+            self.get_visits_by_merchant(state=st)
+            self.get_expenditures_by_gender(state=st)
+            self.get_expenditures_by_age(state=st)
+            self.get_expenditures_by_channel(state=st)
+
+        bm.print_time(level=3)
+
+    # TODO: @SonPhạm: Tab User - User/Card KPIs
     # In deiner DataManager-Klasse (data_manager.py):
 
     def get_user_kpis(self, user_id: int) -> dict:
@@ -768,7 +813,7 @@ class DataManager:
         # Read and clean data – clean_units returns (df, unit_info)
         self.df_users, self.units_users = clean_units(_read_parquet_data("users_data.parquet"))
         self.df_transactions, self.units_transactions = clean_units(_read_parquet_data("transactions_data.parquet",
-                                                                                       num_rows=500_000))
+                                                                                       num_rows=50_000))
         self.df_cards, self.units_cards = clean_units(_read_parquet_data("cards_data.parquet"))
         self.df_mcc = json_to_data_frame("mcc_codes.json")
         # TODO: Too slow --> self.df_train_fraud = json_to_data_frame("train_fraud_labels.json")
@@ -783,6 +828,7 @@ class DataManager:
         self.amount_of_transactions = len(self.df_transactions)
         self.sum_of_transactions = self.df_transactions["amount"].sum()
         self.avg_transaction_amount = self.sum_of_transactions / self.amount_of_transactions
+        self._pre_cache_home_tab_data()
 
         # Print summary
         # logger.log(f"ℹ️ Users: {self.units_users}", 2)
