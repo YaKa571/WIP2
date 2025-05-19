@@ -9,54 +9,61 @@ from frontend.icon_manager import Icons, IconID
 COLOR_BLUE_MAIN = "#0d6efd"
 
 
+# Info: Edit grid layout in assets/css/tabs.css
+
 # TODO: Free...(Yannic): Idee untere Teil der Seite wie in Skizze, oben Verteilung der Händlerkategorien und
 # Aufschlüsselung (evtl. als Popup)
 def create_merchant_content():
     return html.Div(
-        [
-            create_merchant_heading(),
+        className="tab-content-inner merchant-tab",
+        children=[
+
+            _create_merchant_heading(),
             # top: general data
             create_merchant_general(),
             # bottom: individual merchant data
             create_merchant_individual()
-        ],
-        className="tab-content-inner"
-    )
+
+        ])
 
 
-def create_merchant_heading():
+def _create_merchant_heading() -> html.Div:
+    """
+    Creates and returns a `html.Div` element specifically styled for a merchant section
+    heading in a user interface. The returned `html.Div` includes a dummy paragraph
+    element, a heading with the text "Merchant", an info icon, and a tooltip describing
+    the info icon.
+
+    Returns:
+        html.Div: A Div element containing the merchant section heading and supplementary UI
+        elements.
+    """
     return html.Div(
+        className="tab-heading-wrapper",
         children=[
-            dbc.Col(width=4),
-            dbc.Col(html.H4("Merchant", id=ID.MERCHANT_HEADING, className="text-center"),
-                    width=4),
-            dbc.Col(
-                html.Div([
-                    comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
-                    dbc.Tooltip(
-                        children=[
-                            # TODO: tooltip
-                            "TODO",
-                            html.Br(),
-                            "Tooltip"
-                        ],
-                        target=ID.MERCHANT_INFO_ICON,
-                        placement="bottom-end"
-                    )
-                ], className="d-flex justify-content-end"),
-                width=4
-            )
-        ],
-        # TODO: maybe custom css class
-        className="tab-home-heading-wrapper"
-    )
+
+            html.P(),  # Dummy element
+            html.H4("Merchant", id=ID.MERCHANT_HEADING),
+            comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
+            dbc.Tooltip(
+                target=ID.MERCHANT_INFO_ICON,
+                is_open=False,
+                placement="bottom-end",
+                children=[
+                    "Placeholder for",
+                    html.Br(),
+                    "the tooltip",
+                    html.Br(),
+                    "..."
+                ])
+
+        ])
 
 
 def create_merchant_general():
     return dbc.Row([
         html.P("general merchant data"),
-        create_merchant_kpis(),
-        html.Hr()
+        create_merchant_kpis()
     ])
 
 
