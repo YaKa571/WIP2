@@ -34,58 +34,60 @@ def create_app():
 
     app.title = "Financial Transactions Dashboard"
 
-    app.layout = html.Div(children=[
-
-        # Stores and Divs needed for the layout to work properly
-        dcc.Store(id=ID.APP_STATE_STORE.value),
-        dcc.Store(id=ID.ANIMATION_STATE_STORE.value),
-        dcc.Store(id=ID.HOME_TAB_SELECTED_STATE_STORE, data=None),
-        html.Div(id="app-init-trigger", style={"display": "none"}),
-        html.Div(id="layout-ready-signal", style={"display": "none"}),
-
-        # Row with title and dark mode switch
-        html.Div(children=[
-
-            settings_comp_factory.create_icon_button("bi-gear", ID.BUTTON_SETTINGS_MENU, "settings-menu"),
-            html.H1("Financial Transactions Dashboard", className="m-0 flex-grow-1 text-center"),
-            settings_comp_factory.create_icon_button("bi-sun-fill", ID.BUTTON_DARK_MODE_TOGGLE),
-            settings_comp_factory.create_settings_canvas()
-
-        ],
-            className="dashboard-header d-flex align-items-center"
-        ),
-
-        dbc.Row(
-            dbc.Col(children=[
-
-                # To have a look at a certain data table, add it here and set visible=True
-                comp_factory.create_data_table(ID.TABLE_USERS, dm.df_users, visible=False),
-                comp_factory.create_data_table(ID.TABLE_TRANSACTIONS, dm.df_transactions, visible=False),
-                comp_factory.create_data_table(ID.TABLE_CARDS, dm.df_cards, visible=False),
-                comp_factory.create_data_table(ID.TABLE_MCC, dm.df_mcc, visible=False),
-
-            ]
-            ),
-            className="g-0 flex-shrink-0",
-            style={"minSize": 0}
-        ),
-
-        # Row with Left and Right Column
-        html.Div(children=[
-
-            create_left_column(),
-            create_right_column()
-
-        ],
-            className="dashboard-body"
-        ),
-
-        # Tooltips
-        comp_factory.create_tooltips()
-    ],
+    app.layout = html.Div(
+        className="dashboard",
         id=ID.DASHBOARD_CONTAINER.value,
-        className="dashboard"
-    )
+        children=[
+
+            # Stores and Divs needed for the layout to work properly
+            dcc.Store(id=ID.APP_STATE_STORE.value),
+            dcc.Store(id=ID.ANIMATION_STATE_STORE.value),
+            dcc.Store(id=ID.HOME_TAB_SELECTED_STATE_STORE, data=None),
+            html.Div(id="app-init-trigger", style={"display": "none"}),
+            html.Div(id="layout-ready-signal", style={"display": "none"}),
+
+            # Row with title and dark mode switch
+            html.Div(
+                className="dashboard-header d-flex align-items-center",
+                children=[
+
+                    settings_comp_factory.create_icon_button("bi-gear", ID.BUTTON_SETTINGS_MENU, "settings-menu"),
+                    html.H1("Financial Transactions Dashboard", className="m-0 flex-grow-1 text-center"),
+                    settings_comp_factory.create_icon_button("bi-sun-fill", ID.BUTTON_DARK_MODE_TOGGLE),
+                    settings_comp_factory.create_settings_canvas()
+
+                ]),
+
+            dbc.Row(
+                className="g-0 flex-shrink-0",
+                style={"minSize": 0},
+                children=[
+
+                    dbc.Col(
+                        children=[
+
+                            # To have a look at a certain data table, add it here and set visible=True
+                            comp_factory.create_data_table(ID.TABLE_USERS, dm.df_users, visible=False),
+                            comp_factory.create_data_table(ID.TABLE_TRANSACTIONS, dm.df_transactions, visible=False),
+                            comp_factory.create_data_table(ID.TABLE_CARDS, dm.df_cards, visible=False),
+                            comp_factory.create_data_table(ID.TABLE_MCC, dm.df_mcc, visible=False),
+
+                        ])
+                ]),
+
+            # Row with Left and Right Column
+            html.Div(
+                className="dashboard-body",
+                children=[
+
+                    create_left_column(),
+                    create_right_column()
+
+                ]),
+
+            # Tooltips
+            comp_factory.create_tooltips()
+        ])
 
     return app
 
