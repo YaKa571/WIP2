@@ -4,7 +4,8 @@ from dash.exceptions import PreventUpdate
 from backend.data_manager import DataManager
 from components.rightcolumn.tabs.tab_home import create_pie_graph, get_most_valuable_merchant_details, \
     get_most_visited_merchant_details, get_top_spending_user_details, get_peak_hour_details
-from components.rightcolumn.tabs.tab_home import get_most_valuable_merchant_bar_chart
+from components.rightcolumn.tabs.tab_home import get_most_valuable_merchant_bar_chart, get_peak_hour_bar_chart, \
+    get_spending_by_user_bar_chart, get_most_visited_merchants_bar_chart
 from frontend.component_ids import ID
 
 dm: DataManager = DataManager.get_instance()
@@ -12,9 +13,9 @@ dm: DataManager = DataManager.get_instance()
 # Map of dropdown-values -> chart-builder functions
 CHART_BUILDERS = {
     "most_valuable_merchants": get_most_valuable_merchant_bar_chart,
-    "most_visited_merchants": "a",
-    "top_spending_users": "b",
-    "peak_hours": "c",
+    "most_visited_merchants": get_most_visited_merchants_bar_chart,
+    "top_spending_users": get_spending_by_user_bar_chart,
+    "peak_hours": get_peak_hour_bar_chart,
 }
 
 
