@@ -1,4 +1,42 @@
 /* ============================================================
+   Tab Layout
+   ============================================================ */
+
+.tab-content-inner.home-tab {
+    grid-template-rows: auto auto 3fr 4fr !important; /* 4 rows: heading, KPIs, pies, bar */
+    align-items: start;
+    align-content: start;
+}
+
+/* Fraud Tab Grid Layout */
+.tab-content-inner.fraud-tab {
+    grid-template-rows: auto !important;
+    align-items: start;
+    align-content: start;
+}
+
+/* Cluster Tab Grid Layout */
+.tab-content-inner.cluster-tab {
+    grid-template-rows: auto !important;
+    align-items: start;
+    align-content: start;
+}
+
+/* User Tab Grid Layout */
+.tab-content-inner.user-tab {
+    grid-template-rows: auto !important;
+    align-items: start;
+    align-content: start;
+}
+
+/* Merchant Tab Grid Layout */
+.tab-content-inner.merchant-tab {
+    grid-template-rows: auto !important;
+    align-items: start;
+    align-content: start;
+}
+
+/* ============================================================
    Custom Tab Bar
    ============================================================ */
 
@@ -75,16 +113,6 @@
     margin: var(--gutter);
 }
 
-.tab-content-inner {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    min-height: 0;
-    border-radius: var(--inner-border-radius);
-    padding: var(--gutter);
-    height: 100%;
-}
-
 .tab-content-inner h1,
 .tab-content-inner h2,
 .tab-content-inner h3,
@@ -108,7 +136,10 @@
 }
 
 .tab-item.active {
-    display: block;
+    display: flex !important;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 /* ============================================================
@@ -116,7 +147,17 @@
    ============================================================ */
 
 .tab-content-inner {
-    gap: calc(1.5 * var(--gutter));
+    display: grid !important; /* override flex */
+    height: 100% !important; /* fill parent */
+    gap: calc(var(--gutter) * 1.5) !important; /* same vertical gap as before */
+    min-height: 0 !important; /* allow shrink */
+    border-radius: var(--inner-border-radius) !important;
+    padding: var(--gutter) !important;
+}
+
+.tab-content-inner > * {
+    height: 100% !important;
+    min-height: 0 !important;
 }
 
 .tab-content-inner .flex-wrapper {
@@ -127,9 +168,10 @@
     border-radius: var(--inner-border-radius);
     gap: var(--gutter);
     align-items: stretch;
-    min-height: 0;
+    min-height: 0 !important;
     min-width: 0;
 }
+
 
 /* KPI Cards START */
 .tab-content-inner .flex-wrapper .kpi-card {
@@ -145,17 +187,19 @@
     align-items: center;
     text-align: center;
     margin: 0;
-    padding: 1rem;
+    padding: 0.5rem;
     height: 50%;
 }
 
 .tab-content-inner .flex-wrapper .kpi-card .card-header {
     background-color: var(--kpi-card-header-bg);
     border-bottom: 1px solid var(--kpi-card-splitline);
+    height: 50%
 }
 
 .tab-content-inner .flex-wrapper .kpi-card .card-body {
     background-color: var(--kpi-card-body-bg);
+    height: 50%;
 }
 
 .tab-content-inner .flex-wrapper .kpi-card .kpi-card-title {
@@ -193,20 +237,17 @@
     align-items: center;
     text-align: center;
     margin: 0;
-    padding: 1rem;
-    height: 25%;
-}
-
-.tab-content-inner .flex-wrapper .graph-card .card-header {
+    padding: 0.5rem;
     background-color: var(--kpi-card-header-bg);
     border-bottom: 1px solid var(--kpi-card-splitline);
-    height: fit-content;
+    min-height: fit-content;
 }
 
 .tab-content-inner .flex-wrapper .graph-card .card-body {
     background-color: var(--kpi-card-body-bg);
     margin: 0;
-    padding: 1rem;
+    padding: 0.5rem;
+    min-height: 0;
 }
 
 .tab-content-inner .flex-wrapper .graph-card .graph-card-title {
@@ -227,16 +268,22 @@
     padding: 0;
 }
 
-.circle-diagram,
+.tab-content-inner .flex-wrapper .graph-card .card-body .circle-diagram {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 auto !important;
+    display: block !important;
+}
+
 .bar-chart {
-    flex: 0 0 auto !important;
+    flex: 1 1 auto !important;
+    height: 100% !important;
     width: 100% !important;
-    max-width: 100% !important;
     min-width: 0 !important;
     min-height: 0 !important;
 }
 
-.tab-home-heading-wrapper {
+.tab-heading-wrapper {
     display: flex;
     position: relative;
     align-items: center;
@@ -245,7 +292,7 @@
     justify-content: space-between;
 }
 
-.tab-home-heading-wrapper h4 {
+.tab-heading-wrapper h4 {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
