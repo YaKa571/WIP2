@@ -236,6 +236,8 @@
 .settings-dropdown .Select-placeholder {
     color: var(--dropdown-body-color);
     opacity: 0.7;
+    display: flex;
+    justify-content: center;
 }
 
 .settings-dropdown .Select-clear-zone,
@@ -246,4 +248,12 @@
 .settings-dropdown .Select-value,
 .settings-dropdown .Select-multi-value-wrapper {
     background-color: var(--dropdown-body-bg) !important;
+    display: flex;
+    justify-content: center;
+}
+
+.settings-text-centered .VirtualizedSelectOption {
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }

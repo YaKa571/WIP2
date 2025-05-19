@@ -10,7 +10,7 @@
     min-height: 0 !important;
 }
 
-.js-plotly-plot svg.main-svg {
+.js-plotly-plot .main-svg {
     height: 100% !important;
     min-height: 0 !important;
 }

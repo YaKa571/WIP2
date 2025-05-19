@@ -1,4 +1,5 @@
 import dash_bootstrap_components as dbc
+import plotly.express as px
 import plotly.graph_objects as go
 from dash import html, dcc
 from plotly.graph_objs._figure import Figure
@@ -14,9 +15,17 @@ PIE_CONFIG = {
     "displaylogo": False
 }
 COLOR_BLUE_MAIN = "#0d6efd"
+FEMALE_PINK = "#c65ed4"
+BAR_CHART_OPTIONS = [
+    {"label": "MOST VALUABLE MERCHANTS", "value": "most_valuable_merchants"},
+    {"label": "MOST VISITED MERCHANTS", "value": "most_visited_merchants"},
+    {"label": "TOP SPENDING USERS", "value": "top_spending_users"},
+    {"label": "PEAK HOURS", "value": "peak_hours"},
+]
 
 
 # TODO: @Diego
+# TODO: Add dark mode to bar charts
 def create_home_content() -> html.Div:
     """
     Creates the main content structure for the home tab of a dashboard.
@@ -36,7 +45,8 @@ def create_home_content() -> html.Div:
 
         _create_heading(),
         _create_top_kpis(),
-        _create_middle_circle_diagrams()
+        _create_middle_circle_diagrams(),
+        _create_bottom_bar_diagrams()
 
     ],
         className="tab-content-inner"
@@ -120,9 +130,7 @@ def _create_top_kpis() -> html.Div:
                     comp_factory.create_icon(IconID.TROPHY, cls="icon icon-small"),
                     html.P("Most Valuable Merchant", className="kpi-card-title")
 
-                ],
-                    className="card-header"
-                ),
+                ]),
 
                 dbc.CardBody(children=[
 
@@ -137,13 +145,10 @@ def _create_top_kpis() -> html.Div:
                         type="circle",
                         color=COLOR_BLUE_MAIN)
 
-                ],
-                    className="card-body",
-
-                )
+                ])
 
             ],
-                className="card kpi-card",
+                className="kpi-card",
             ),
 
             # KPI 2: Most Visited Merchant
@@ -153,9 +158,7 @@ def _create_top_kpis() -> html.Div:
                     comp_factory.create_icon(IconID.REPEAT, cls="icon icon-small"),
                     html.P("Most Visited Merchant", className="kpi-card-title"),
 
-                ],
-                    className="card-header"
-                ),
+                ]),
 
                 dbc.CardBody(children=[
 
@@ -172,12 +175,10 @@ def _create_top_kpis() -> html.Div:
                         type="circle",
                         color=COLOR_BLUE_MAIN)
 
-                ],
-                    className="card-body"
-                )
+                ])
 
             ],
-                className="card kpi-card",
+                className="kpi-card",
             ),
 
             # KPI 3: Top Spending User
@@ -187,9 +188,7 @@ def _create_top_kpis() -> html.Div:
                     comp_factory.create_icon(IconID.USER_PAYING, cls="icon icon-small"),
                     html.P(children="Top Spending User", className="kpi-card-title"),
 
-                ],
-                    className="card-header"
-                ),
+                ]),
 
                 dbc.CardBody(children=[
 
@@ -204,12 +203,9 @@ def _create_top_kpis() -> html.Div:
                         type="circle",
                         color=COLOR_BLUE_MAIN)
 
-                ],
-                    className="card-body",
-
-                )
+                ])
             ],
-                className="card kpi-card",
+                className="kpi-card",
             ),
 
             # KPI 4: Peak Hour
@@ -219,9 +215,7 @@ def _create_top_kpis() -> html.Div:
                     comp_factory.create_icon(IconID.TIME, cls="icon icon-small"),
                     html.P(children="Peak Hour", className="kpi-card-title"),
 
-                ],
-                    className="card-header"
-                ),
+                ]),
 
                 dbc.CardBody(children=[
 
@@ -236,12 +230,9 @@ def _create_top_kpis() -> html.Div:
                         type="circle",
                         color=COLOR_BLUE_MAIN)
 
-                ],
-                    className="card-body",
-
-                )
+                ])
             ],
-                className="card kpi-card",
+                className="kpi-card",
             ),
 
         ],
@@ -271,8 +262,7 @@ def _create_middle_circle_diagrams() -> html.Div:
                 comp_factory.create_icon(IconID.GENDERS, cls="icon icon-small"),
                 html.P(children="Expenditures by Gender", className="graph-card-title"),
 
-            ],
-                className="card-header"),
+            ]),
 
             dbc.CardBody(children=[
                 dcc.Loading(children=[
@@ -282,7 +272,7 @@ def _create_middle_circle_diagrams() -> html.Div:
                         id=ID.HOME_GRAPH_EXPENDITURES_BY_GENDER,
                         responsive=True,
                         config=PIE_CONFIG,
-                        style={"height": "16vh", "minHeight": 0, "minWidth": 0}
+                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
                     )
 
                 ],
@@ -291,7 +281,7 @@ def _create_middle_circle_diagrams() -> html.Div:
             ])
 
         ],
-            className="card graph-card"),
+            className="graph-card"),
 
         dbc.Card(children=[
 
@@ -300,8 +290,7 @@ def _create_middle_circle_diagrams() -> html.Div:
                 comp_factory.create_icon(IconID.CART, cls="icon icon-small"),
                 html.P(children="Expenditures by Channel", className="graph-card-title"),
 
-            ],
-                className="card-header"),
+            ]),
 
             dbc.CardBody(children=[
                 dcc.Loading(children=[
@@ -311,7 +300,7 @@ def _create_middle_circle_diagrams() -> html.Div:
                         id=ID.HOME_GRAPH_EXPENDITURES_BY_CHANNEL,
                         responsive=True,
                         config=PIE_CONFIG,
-                        style={"height": "16vh", "minHeight": 0, "minWidth": 0}
+                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
                     )
 
                 ],
@@ -320,7 +309,7 @@ def _create_middle_circle_diagrams() -> html.Div:
             ])
 
         ],
-            className="card graph-card"),
+            className="graph-card"),
 
         dbc.Card(children=[
 
@@ -329,9 +318,7 @@ def _create_middle_circle_diagrams() -> html.Div:
                 comp_factory.create_icon(IconID.CAKE, cls="icon icon-small"),
                 html.P(children="Expenditures by Age", className="graph-card-title"),
 
-            ],
-                className="card-header"
-            ),
+            ]),
 
             dbc.CardBody(children=[
                 dcc.Loading(children=[
@@ -341,7 +328,7 @@ def _create_middle_circle_diagrams() -> html.Div:
                         id=ID.HOME_GRAPH_EXPENDITURES_BY_AGE,
                         responsive=True,
                         config=PIE_CONFIG,
-                        style={"height": "16vh", "minHeight": 0, "minWidth": 0}
+                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
                     )
                 ],
                     type="circle",
@@ -350,11 +337,67 @@ def _create_middle_circle_diagrams() -> html.Div:
             ])
 
         ],
-            className="card graph-card"),
+            className="graph-card"),
 
     ],
         className="flex-wrapper"
     )
+
+
+def _create_bottom_bar_diagrams() -> html.Div:
+    """
+    Creates a bottom bar diagram component.
+
+    This function generates a layout for a bottom bar diagram using Dash and Dash Bootstrap
+    Components. It includes a card with a dropdown for selecting KPIs and a loading component
+    that displays a bar chart. The bar chart is customizable with provided options and is
+    styled for responsiveness.
+
+    Returns:
+        html.Div: A Dash HTML Div containing the entire layout for the bottom bar diagram.
+    """
+    return html.Div(children=[
+
+        dbc.Card(children=[
+
+            dbc.CardHeader(children=[
+
+                comp_factory.create_icon(IconID.BAR_CHART_LINE_FILL, cls="icon icon-small"),
+                html.Div(children=[
+                    dcc.Dropdown(className="settings-dropdown settings-text-centered",
+                                 options=BAR_CHART_OPTIONS,
+                                 id=ID.HOME_TAB_BAR_CHART_DROPDOWN,
+                                 placeholder="Select a KPI...",
+                                 style={"width": "100%"},
+                                 value=BAR_CHART_OPTIONS[0]["value"],
+                                 clearable=False
+                                 ),
+                ],
+                    className="settings-item mt-2")
+            ]
+            ),
+
+            dbc.CardBody(children=[
+
+                dcc.Loading(children=[
+                    dcc.Graph(
+                        figure=Figure(),
+                        className="bar-chart",
+                        id=ID.HOME_GRAPH_BAR_CHART,
+                        config={"responsive": True},
+                        responsive=True,
+                        style={"height": "19vh"}
+                    )
+                ],
+                    type="circle",
+                    color=COLOR_BLUE_MAIN)
+
+            ])
+        ],
+            className="graph-card")
+
+    ],
+        className="flex-wrapper flex-fill")
 
 
 def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label", showlegend: bool = True,
@@ -385,7 +428,7 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label", s
             A Plotly Figure object representing the pie chart visualization.
     """
     if colors is None:
-        colors = ["#c65ed4", "#5d9cf8"]  # Female = pink, Male = blue
+        colors = [FEMALE_PINK, "#5d9cf8"]  # Female = pink, Male = blue
 
     textcolor = "white" if dark_mode else "black"
 
@@ -551,3 +594,179 @@ def get_peak_hour_details(state: str = None) -> list:
                  className="kpi-card-value kpi-number-value")
 
     return [one, two]
+
+
+def get_most_valuable_merchant_bar_chart(state: str = None):
+    """
+    Generate a bar chart visualizing the top 10 most valuable merchants' information.
+
+    This function retrieves the top 10 merchants with the highest transactional values
+    from a specific state or from all states if no state is specified. It generates an
+    interactive bar chart displaying merchant category codes (MCC) on the x-axis and
+    transactional sums on the y-axis. Hovering over the bars reveals additional information
+    about the MCC description and merchant ID.
+
+    Parameters:
+    state: str
+        Optional. The state for which to retrieve the top 10 most valuable merchants. If not
+        provided, data from all states is used.
+
+    Returns:
+    plotly.graph_objects.Figure
+        An interactive bar chart showing the top 10 merchants and their respective
+        transactional values.
+    """
+    df = dm.get_merchant_values_by_state(state=state).head(10)
+
+    fig = px.bar(
+        df,
+        x="mcc",
+        y="merchant_sum",
+        hover_data=["mcc_desc", "merchant_id"],
+        title=f"TOP 10 MOST VALUABLE MERCHANTS IN {state.upper() if state is not None else "ALL STATES"}"
+    )
+
+    # Handle x-axis values as category as they're numerical
+    fig.update_xaxes(type="category")
+
+    # Sort categories -> merchant_sum descending
+    fig.update_layout(xaxis=dict(categoryorder="total descending"),
+                      margin=dict(l=0, t=30, r=0, b=0),
+                      title_x=0.5  # center title horizontally
+                      )
+
+    # Set bar color
+    fig.update_traces(marker_color=COLOR_BLUE_MAIN)
+
+    return fig
+
+
+def get_peak_hour_bar_chart(state: str = None):
+    """
+    Generates a bar chart visualizing the peak transaction hours for a specified state or for all states.
+
+    The bar chart provides insights into the most active hours based on transaction counts.
+    Each bar represents an hour range formatted as "hh – hh+1". The data can be filtered
+    to focus on a specific state or include all states.
+
+    Args:
+        state (str, optional): The name of the state to limit the data to. If not provided
+            or set to None, the data will include transaction counts for all states.
+
+    Returns:
+        plotly.graph_objects.Figure: A bar chart figure, detailing transaction counts
+        by hour range with styling and labeled axes.
+    """
+    df = dm.get_transaction_counts_by_hour(state=state)
+
+    # Only hours with > 0 transactions
+    df = df[df["transaction_count"] > 0]
+
+    # New column with "07 - 08", "08 - 09" …
+    df = df.copy()
+    df["hour_range"] = df["hour"].apply(
+        lambda h: f"{h:02d} – {(h + 1) % 24:02d}"
+    )
+
+    fig = px.bar(
+        df,
+        x="hour_range",
+        y="transaction_count",
+        title=f"MOST ACTIVE HOURS IN {state.upper() if state is not None else "ALL STATES"}",
+        labels={
+            "hour_range": "Hour Range",
+            "transaction_count": "Number of Transactions"
+        },
+    )
+
+    fig.update_xaxes(type="category")
+
+    # Styling
+    fig.update_traces(marker_color=COLOR_BLUE_MAIN)
+    fig.update_layout(margin=dict(l=20, r=20, t=30, b=20),
+                      title_x=0.5  # center title horizontally
+                      )
+
+    return fig
+
+
+def get_spending_by_user_bar_chart(state: str = None) -> Figure:
+    """
+    Generate a bar chart visualization showing the top 10 spending users.
+
+    This function retrieves the spending data for users, optionally filtered by a specific
+    state. The spending data is then merged with user demographic details such as gender
+    and age. A bar chart is generated to show the top 10 users with the highest spending,
+    with bars color-coded based on gender. The visualization includes hover data for
+    more details about each user and is styled for clarity.
+
+    Args:
+        state (str, optional): The state for which user spending data should be fetched.
+            If None, spending data for all states will be used.
+
+    Returns:
+        plotly.graph_objects.Figure: A bar chart figure visualizing the top 10 spending
+        users.
+    """
+    df = dm.get_spending_by_user(state).head(10)
+
+    # Connect to user details
+    df = df.merge(
+        dm.df_users[["id", "gender", "current_age"]],
+        left_on="client_id", right_on="id"
+    ).drop(columns=["id"])
+
+    fig = px.bar(
+        df,
+        x="client_id",
+        y="spending",
+        color="gender",
+        color_discrete_map={"Female": FEMALE_PINK, "Male": COLOR_BLUE_MAIN},
+        hover_data=["gender", "current_age", "spending"],
+        title=f"TOP 10 MOST SPENDING USERS IN {state.upper() if state is not None else "ALL STATES"}",
+        labels={
+            "client_id": "User ID",
+            "spending": "Total Spending",
+            "gender": "Gender",
+            "current_age": "Age"
+        }
+    )
+
+    fig.update_xaxes(type="category", categoryorder="total descending")
+
+    # Styling
+    fig.update_layout(margin=dict(l=0, r=0, t=30, b=0), title_x=0.5, showlegend=False)
+
+    return fig
+
+
+def get_most_visited_merchants_bar_chart(state: str = None) -> Figure:
+    """
+    Generates a bar chart for the top 10 most visited merchants.
+
+    This function retrieves merchant visit data, filters the top 10 most visited
+    merchants, and generates a bar chart using the Plotly library. The chart
+    displays merchant IDs on the x-axis and the number of visits on the y-axis.
+    Additional hover information such as merchant category code (MCC), MCC
+    description, and visit count is included. The chart is customizable by state.
+
+    Parameters:
+        state (str, optional): The state to filter merchant visit data. If None,
+            data from all states is used. Defaults to None.
+
+    Returns:
+        plotly.graph_objects.Figure: A Plotly Figure object representing the bar chart.
+    """
+    df = dm.get_visits_by_merchant(state).head(10)
+    fig = px.bar(
+        df,
+        x="merchant_id",
+        y="visits",
+        hover_data=["mcc", "mcc_desc", "visits"],
+        title=f"TOP 10 MOST VISITED MERCHANTS IN {state.upper() if state is not None else "ALL STATES"}",
+        labels={"merchant_id": "Merchant ID", "visits": "Visits"}
+    )
+    fig.update_xaxes(type="category", categoryorder="total descending")
+    fig.update_traces(marker_color=COLOR_BLUE_MAIN)
+    fig.update_layout(margin=dict(l=0, r=0, t=30, b=0), title_x=0.5)
+    return fig

@@ -14,6 +14,7 @@ class IconID(str, Enum):
     GENDERS = "genders"
     CART = "cart"
     CAKE = "cake"
+    BAR_CHART_LINE_FILL = "bar-chart-line-fill"
 
 
 class Icons:

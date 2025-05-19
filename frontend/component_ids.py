@@ -50,6 +50,10 @@ class ID(str, Enum):
     HOME_TAB_STATE_HEADING = "home-tab-state-heading"
     HOME_TAB_BUTTON_TOGGLE_ALL_STATES = "home-tab-button-toggle-all-states"
     HOME_TAB_INFO_ICON = "home-tab-info-icon"
+    HOME_TAB_BAR_CHART_DROPDOWN = "home-tab-bar-chart-dropdown"
+    HOME_GRAPH_BAR_CHART = "home-graph-bar-chart"
+
+    # Fraud Tab
 
     # Cluster Tab
     CLUSTER_DROPDOWN = "cluster-dropdown"
@@ -59,6 +63,10 @@ class ID(str, Enum):
     CLUSTER_INFO_ICON = "cluster-info-icon"
     CLUSTER_DEFAULT_SWITCH = "cluster-default-switch"
     CLUSTER_DEFAULT_SWITCH_CONTAINER = "cluster-default-switch-container" #needed for invisibility
+
+    # User Tab
+    # TODO @Son: Add IDs here
+    USER_TAB_INFO_ICON = "user-tab-info-icon"
 
     # Merchant Tab
     MERCHANT_ID_SEARCH = "merchant-id-search"

@@ -31,12 +31,14 @@ def create_map_setting_color_scale() -> html.Div:
     return html.Div(
         [
             html.Label("Color Scale", className="settings-label"),
-            dcc.Dropdown(className="settings-dropdown",
+            dcc.Dropdown(className="settings-dropdown settings-text-centered",
                          options=color_options,
                          id=ID.SETTING_MAP_COLOR_SCALE.value,
                          placeholder="Select a color scale...",
                          style={"width": "100%"},
-                         value="blues"),
+                         value="blues",
+                         clearable=False
+                         ),
         ],
         className="settings-item"
     )
@@ -67,12 +69,14 @@ def create_general_setting_position() -> html.Div:
     return html.Div(
         [
             html.Label("Settings Position", className="settings-label"),
-            dcc.Dropdown(className="settings-dropdown",
+            dcc.Dropdown(className="settings-dropdown settings-text-centered",
                          options=placement_options,
                          id=ID.SETTING_GENERAL_CANVAS_PLACEMENT.value,
                          placeholder="Select a placement...",
                          style={"width": "100%"},
-                         value="start"),
+                         value="start",
+                         clearable=False
+                         ),
         ],
         className="settings-item"
     )
@@ -96,7 +100,8 @@ def create_general_setting_toggle_tooltips() -> html.Div:
             html.Label("Show Tooltips", className="settings-label"),
             dbc.Switch(id=ID.SETTING_GENERAL_SHOW_TOOLTIPS.value,
                        value=True,
-                       className="settings-switch")
+                       className="settings-switch"
+                       )
         ],
         className="settings-item"
     )

@@ -1,42 +1,50 @@
-from dash import html, dcc
-from frontend.component_ids import ID
 import dash_bootstrap_components as dbc
+from dash import html, dcc
+
+from frontend.component_ids import ID
+from components.factories import component_factory as comp_factory
+
 """
 appearance of tab cluster
 """
+
+
 # TODO: @Yannic
 # TODO: Darkmode
 def create_cluster_heading():
     return html.Div(
         children=[
-                dbc.Col(width=4),
-                dbc.Col(html.H4("Cluster", id=ID.CLUSTER_HEADING, className="text-center"),
-                        width=4),
-                dbc.Col(
-                    html.Div([
-                        html.I(className="bi bi-info-circle-fill", id=ID.CLUSTER_INFO_ICON),
-                        dbc.Tooltip(
-                            children=[
-                                "Click on dropdown",
-                                html.Br(),
-                                "to choose Cluster"
-                            ],
-                            target=ID.CLUSTER_INFO_ICON,
-                            placement="bottom-end"
-                        )
-                    ], className="d-flex justify-content-end"),
-                    width=4
-                )
+            dbc.Col(width=4),
+            dbc.Col(html.H4("Cluster", id=ID.CLUSTER_HEADING, className="text-center"),
+                    width=4),
+            dbc.Col(
+                html.Div([
+                    comp_factory.create_info_icon(ID.CLUSTER_INFO_ICON),
+                    dbc.Tooltip(
+                        children=[
+                            "Click on dropdown",
+                            html.Br(),
+                            "to choose Cluster"
+                        ],
+                        target=ID.CLUSTER_INFO_ICON,
+                        placement="bottom-end"
+                    )
+                ], className="d-flex justify-content-end"),
+                width=4
+            )
         ],
         # TODO: maybe custom css class
         className="tab-home-heading-wrapper"
     )
+
+
 def create_cluster_content():
     return html.Div(
         [
             create_cluster_heading(),
             # TODO Names
-            dcc.Dropdown(['Default','Age Group','Income vs Expenditures','Test'],'Default',id=ID.CLUSTER_DROPDOWN),
+            dcc.Dropdown(['Default', 'Age Group', 'Income vs Expenditures', 'Test'], 'Default',
+                         id=ID.CLUSTER_DROPDOWN),
             html.Hr(),
             html.Div(
                 dcc.RadioItems(
@@ -66,4 +74,3 @@ def create_cluster_content():
         ],
         className="tab-content-inner"
     )
-
