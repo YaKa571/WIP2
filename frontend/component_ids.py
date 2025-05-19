@@ -54,6 +54,8 @@ class ID(str, Enum):
     HOME_GRAPH_BAR_CHART = "home-graph-bar-chart"
 
     # Fraud Tab
+    FRAUD_TAB_INFO_ICON = "fraud-tab-info-icon"
+    FRAUD_TAB_HEADING = "fraud-tab-heading"
 
     # Cluster Tab
     CLUSTER_DROPDOWN = "cluster-dropdown"
@@ -67,6 +69,7 @@ class ID(str, Enum):
     # User Tab
     # TODO @Son: Add IDs here
     USER_TAB_INFO_ICON = "user-tab-info-icon"
+    USER_TAB_HEADING = "user-tab-heading"
 
     # Merchant Tab
     MERCHANT_ID_SEARCH = "merchant-id-search"
