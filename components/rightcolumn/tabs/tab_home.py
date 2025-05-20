@@ -672,7 +672,6 @@ def create_bar_chart(
     """
     text_color = "white" if dark_mode else "black"
     transparent_color = "rgba(0,0,0,0)"
-    plot_bg = "rgba(25,25,25,100)" if dark_mode else "rgba(255,255,255,100)"
     grid_color = "rgba(255,255,255,100)" if dark_mode else "rgba(25,25,25,100)"
 
     fig = px.bar(
@@ -696,7 +695,7 @@ def create_bar_chart(
 
     fig.update_layout(
         paper_bgcolor=transparent_color,
-        plot_bgcolor=plot_bg,
+        plot_bgcolor=transparent_color,
         margin=margin or dict(l=0, r=20, t=32, b=20),
         title_x=0.5,
         showlegend=showlegend,
