@@ -14,6 +14,10 @@ PIE_CONFIG = {
     "displayModeBar": True,
     "displaylogo": False
 }
+MODEBAR_CONFIG = dict(
+    displayModeBar=True,
+    displaylogo=False
+)
 COLOR_BLUE_MAIN = "#0d6efd"
 FEMALE_PINK = "#c65ed4"
 BAR_CHART_OPTIONS = [
@@ -42,7 +46,7 @@ def create_home_content() -> html.Div:
         content.
     """
     return html.Div(
-        className="tab-content-inner",
+        className="tab-content-inner home-tab",
         children=[
 
             _create_heading(),
@@ -71,7 +75,7 @@ def _create_heading() -> html.Div:
         icon with an interactive tooltip, and necessary CSS classes.
     """
     return html.Div(
-        className="tab-home-heading-wrapper",
+        className="tab-heading-wrapper",
         children=[
 
             html.Button(
@@ -139,19 +143,13 @@ def _create_top_kpis() -> html.Div:
                     dbc.CardBody(
                         children=[
 
-                            dcc.Loading(
-                                type="circle",
-                                color=COLOR_BLUE_MAIN,
+                            html.Div(
+                                id=ID.HOME_KPI_MOST_VALUABLE_MERCHANT,
                                 children=[
 
-                                    html.Div(
-                                        id=ID.HOME_KPI_MOST_VALUABLE_MERCHANT,
-                                        children=[
+                                    html.P("", className="kpi-card-value"),
+                                    html.P("", className="kpi-card-value kpi-number-value")
 
-                                            html.P("", className="kpi-card-value"),
-                                            html.P("", className="kpi-card-value kpi-number-value")
-
-                                        ])
                                 ])
 
                         ])
@@ -174,19 +172,13 @@ def _create_top_kpis() -> html.Div:
                     dbc.CardBody(
                         children=[
 
-                            dcc.Loading(
-                                type="circle",
-                                color=COLOR_BLUE_MAIN,
+                            html.Div(
+                                id=ID.HOME_KPI_MOST_VISITED_MERCHANT,
                                 children=[
 
-                                    html.Div(
-                                        id=ID.HOME_KPI_MOST_VISITED_MERCHANT,
-                                        children=[
+                                    html.P("", className="kpi-card-value"),
+                                    html.P("", className="kpi-card-value kpi-number-value")
 
-                                            html.P("", className="kpi-card-value"),
-                                            html.P("", className="kpi-card-value kpi-number-value")
-
-                                        ])
                                 ])
 
                         ])
@@ -209,19 +201,13 @@ def _create_top_kpis() -> html.Div:
                     dbc.CardBody(
                         children=[
 
-                            dcc.Loading(
-                                type="circle",
-                                color=COLOR_BLUE_MAIN,
+                            html.Div(
+                                id=ID.HOME_KPI_TOP_SPENDING_USER,
                                 children=[
 
-                                    html.Div(
-                                        id=ID.HOME_KPI_TOP_SPENDING_USER,
-                                        children=[
+                                    html.P("", className="kpi-card-value"),
+                                    html.P("", className="kpi-card-value kpi-number-value")
 
-                                            html.P("", className="kpi-card-value"),
-                                            html.P("", className="kpi-card-value kpi-number-value")
-
-                                        ])
                                 ])
 
                         ])
@@ -243,19 +229,13 @@ def _create_top_kpis() -> html.Div:
                     dbc.CardBody(
                         children=[
 
-                            dcc.Loading(
-                                type="circle",
-                                color=COLOR_BLUE_MAIN,
+                            html.Div(
+                                id=ID.HOME_KPI_PEAK_HOUR,
                                 children=[
 
-                                    html.Div(
-                                        id=ID.HOME_KPI_PEAK_HOUR,
-                                        children=[
+                                    html.P("", className="kpi-card-value"),
+                                    html.P("", className="kpi-card-value kpi-number-value")
 
-                                            html.P("", className="kpi-card-value"),
-                                            html.P("", className="kpi-card-value kpi-number-value")
-
-                                        ])
                                 ])
 
                         ])
@@ -295,21 +275,15 @@ def _create_middle_circle_diagrams() -> html.Div:
                     dbc.CardBody(
                         children=[
 
-                            dcc.Loading(
-                                type="circle",
-                                color=COLOR_BLUE_MAIN,
-                                children=[
+                            dcc.Graph(
+                                figure=Figure(),
+                                className="circle-diagram",
+                                id=ID.HOME_GRAPH_EXPENDITURES_BY_GENDER,
+                                responsive=True,
+                                config=PIE_CONFIG,
+                                style={"height": "100%"}
+                            )
 
-                                    dcc.Graph(
-                                        figure=Figure(),
-                                        className="circle-diagram",
-                                        id=ID.HOME_GRAPH_EXPENDITURES_BY_GENDER,
-                                        responsive=True,
-                                        config=PIE_CONFIG,
-                                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
-                                    )
-
-                                ])
                         ])
 
                 ]),
@@ -329,21 +303,15 @@ def _create_middle_circle_diagrams() -> html.Div:
                     dbc.CardBody(
                         children=[
 
-                            dcc.Loading(
-                                type="circle",
-                                color=COLOR_BLUE_MAIN,
-                                children=[
+                            dcc.Graph(
+                                figure=Figure(),
+                                className="circle-diagram",
+                                id=ID.HOME_GRAPH_EXPENDITURES_BY_CHANNEL,
+                                responsive=True,
+                                config=PIE_CONFIG,
+                                style={"height": "100%"}
+                            )
 
-                                    dcc.Graph(
-                                        figure=Figure(),
-                                        className="circle-diagram",
-                                        id=ID.HOME_GRAPH_EXPENDITURES_BY_CHANNEL,
-                                        responsive=True,
-                                        config=PIE_CONFIG,
-                                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
-                                    )
-
-                                ])
                         ])
 
                 ]),
@@ -363,21 +331,14 @@ def _create_middle_circle_diagrams() -> html.Div:
                     dbc.CardBody(
                         children=[
 
-                            dcc.Loading(
-                                type="circle",
-                                color=COLOR_BLUE_MAIN,
-                                children=[
-
-                                    dcc.Graph(
-                                        figure=Figure(),
-                                        className="circle-diagram",
-                                        id=ID.HOME_GRAPH_EXPENDITURES_BY_AGE,
-                                        responsive=True,
-                                        config=PIE_CONFIG,
-                                        style={"height": "15vh", "minHeight": 0, "minWidth": 0}
-                                    )
-
-                                ])
+                            dcc.Graph(
+                                figure=Figure(),
+                                className="circle-diagram",
+                                id=ID.HOME_GRAPH_EXPENDITURES_BY_AGE,
+                                responsive=True,
+                                config=PIE_CONFIG,
+                                style={"height": "100%"}
+                            )
 
                         ])
 
@@ -430,21 +391,18 @@ def _create_bottom_bar_diagrams() -> html.Div:
                     dbc.CardBody(
                         children=[
 
-                            dcc.Loading(
-                                type="circle",
-                                color=COLOR_BLUE_MAIN,
-                                children=[
-
-                                    dcc.Graph(
-                                        figure=Figure(),
-                                        className="bar-chart",
-                                        id=ID.HOME_GRAPH_BAR_CHART,
-                                        config={"responsive": True},
-                                        responsive=True,
-                                        style={"height": "19vh"}
-                                    )
-
-                                ])
+                            dcc.Graph(
+                                figure=Figure(),
+                                className="bar-chart",
+                                config=MODEBAR_CONFIG,
+                                id=ID.HOME_GRAPH_BAR_CHART,
+                                responsive=True,
+                                style={
+                                    "height": "100%",
+                                    "minHeight": 0,
+                                    "minWidth": 0
+                                }
+                            )
 
                         ])
                 ])
@@ -690,7 +648,8 @@ def get_most_valuable_merchant_bar_chart(state: str = None):
     # Sort categories -> merchant_sum descending
     fig.update_layout(xaxis=dict(categoryorder="total descending"),
                       margin=dict(l=0, t=30, r=0, b=0),
-                      title_x=0.5  # center title horizontally
+                      title_x=0.5,
+                      modebar={"orientation": "v"}  # center title horizontally
                       )
 
     # Set bar color
@@ -741,8 +700,9 @@ def get_peak_hour_bar_chart(state: str = None):
 
     # Styling
     fig.update_traces(marker_color=COLOR_BLUE_MAIN)
-    fig.update_layout(margin=dict(l=20, r=20, t=30, b=20),
-                      title_x=0.5  # center title horizontally
+    fig.update_layout(margin=dict(l=0, r=0, t=30, b=0),
+                      title_x=0.5,  # center title horizontally
+                      modebar={"orientation": "v"}
                       )
 
     return fig
@@ -793,7 +753,8 @@ def get_spending_by_user_bar_chart(state: str = None) -> Figure:
     fig.update_xaxes(type="category", categoryorder="total descending")
 
     # Styling
-    fig.update_layout(margin=dict(l=0, r=0, t=30, b=0), title_x=0.5, showlegend=False)
+    fig.update_layout(margin=dict(l=0, r=0, t=30, b=0), title_x=0.5, showlegend=True,
+                      modebar={"orientation": "v"})
 
     return fig
 
@@ -826,5 +787,7 @@ def get_most_visited_merchants_bar_chart(state: str = None) -> Figure:
     )
     fig.update_xaxes(type="category", categoryorder="total descending")
     fig.update_traces(marker_color=COLOR_BLUE_MAIN)
-    fig.update_layout(margin=dict(l=0, r=0, t=30, b=0), title_x=0.5)
+    fig.update_layout(margin=dict(l=0, r=0, t=30, b=0), title_x=0.5,
+                      modebar={"orientation": "v"})
+
     return fig

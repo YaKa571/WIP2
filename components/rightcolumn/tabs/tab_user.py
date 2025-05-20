@@ -6,6 +6,9 @@ from frontend.component_ids import ID
 from frontend.icon_manager import IconID, Icons
 
 
+# Info: Edit grid layout in assets/css/tabs.css
+
+
 def create_user_content() -> html.Div:
     """
     Creates the main content structure for the user tab of the dashboard.
@@ -16,28 +19,55 @@ def create_user_content() -> html.Div:
         A Div element containing the formatted components for the user tab content.
     """
     return html.Div(
+        className="tab-content-inner user-tab",
         children=[
-            _create_user_heading(),
+
+            _create_heading(),
+            _create_search_bars(),
             _create_top_kpis(),
             _create_middle_kpis(),
             _create_bottom_merchant_diagram()
-        ],
-        className="tab-content-inner"
-    )
+
+        ])
 
 
-def _create_user_heading() -> html.Div:
+def _create_heading() -> html.Div:
+    return html.Div(
+        className="tab-heading-wrapper",
+        children=[
+
+            html.P(),  # Dummy element
+            html.H4("User", id=ID.USER_TAB_HEADING),
+            comp_factory.create_info_icon(ID.USER_TAB_INFO_ICON),
+            dbc.Tooltip(
+                target=ID.USER_TAB_INFO_ICON,
+                is_open=False,
+                placement="bottom-end",
+                children=[
+                    "Enter a User ID or",
+                    html.Br(),
+                    "Card ID to update the",
+                    html.Br(),
+                    "information for the selected",
+                    html.Br(),
+                    "user or card"
+                ])
+
+        ])
+
+
+def _create_search_bars() -> html.Div:
     """
     Returns heading with two search bars and an info box.
     """
     return html.Div(
+        className="d-flex align-items-center mb-3",
         children=[
+
             _create_single_search_bar("user-id-search-input", "Search by User ID"),
-            _create_single_search_bar("card-id-search-input", "Search by Card ID"),
-            _create_info_icon_with_tooltip()
-        ],
-        className="d-flex align-items-center mb-4"
-    )
+            _create_single_search_bar("card-id-search-input", "Search by Card ID")
+
+        ])
 
 
 def _create_single_search_bar(input_id: str, placeholder: str) -> html.Div:
@@ -45,35 +75,18 @@ def _create_single_search_bar(input_id: str, placeholder: str) -> html.Div:
     Returns a single search bar with a magnifier icon.
     """
     return html.Div(
-        [
+        className="search-wrapper p-2 flex-grow-1 me-2 flex-shrink-1",
+        children=[
+
             html.Img(src=Icons.get_icon(IconID.LENS_SEARCH), className="search-icon"),
             dcc.Input(
                 id=input_id,
                 type='text',
                 placeholder=placeholder,
-                className='search-input',
+                className='search-input'
             )
-        ],
-        className="search-wrapper p-2 flex-grow-1 me-2"
-    )
 
-
-def _create_info_icon_with_tooltip() -> html.Div:
-    """
-    Returns an info icon with a tooltip explaining the usage.
-    """
-    return html.Div(children=[
-
-        comp_factory.create_info_icon(ID.USER_TAB_INFO_ICON),
-        dbc.Tooltip(
-            "Enter a User ID or Card ID to update the information for the selected user or card.",
-            target="user-tab-info-icon",
-            placement="bottom",
-            className="user-info-tooltip"
-        )
-
-    ]
-    )
+        ])
 
 
 def _create_top_kpis() -> html.Div:
@@ -82,14 +95,15 @@ def _create_top_kpis() -> html.Div:
     The values update when a User ID or Card ID is entered.
     """
     return html.Div(
-        [
+        className="user-kpi-row",
+        children=[
+
             html.Div(id="kpi-user-tx-count", className="user-kpi-box"),
             html.Div(id="kpi-user-tx-sum", className="user-kpi-box"),
             html.Div(id="kpi-user-tx-avg", className="user-kpi-box"),
             html.Div(id="kpi-user-card-count", className="user-kpi-box"),
-        ],
-        className="user-kpi-row"
-    )
+
+        ])
 
 
 def _create_middle_kpis() -> html.Div:
@@ -97,11 +111,12 @@ def _create_middle_kpis() -> html.Div:
     Creates the centered credit limit box.
     """
     return html.Div(
+        className="user-kreditlimit-row",
         children=[
+
             html.Div(id="user-credit-limit-box", className="user-credit-limit-box")
-        ],
-        className="user-kreditlimit-row"
-    )
+
+        ])
 
 
 def _create_bottom_merchant_diagram() -> html.Div:
@@ -109,25 +124,27 @@ def _create_bottom_merchant_diagram() -> html.Div:
     Creates the merchant bar chart (incl. dropdown) for the bottom section.
     """
     return html.Div(
+        className="user-bottom-merchant-chart-container",
         children=[
+
             dcc.Dropdown(
                 id="merchant-sort-dropdown",
-                options=[
-                    {"label": "Total Amount", "value": "amount"},
-                    {"label": "Transaction Count", "value": "count"},
-                ],
                 value="amount",
                 clearable=False,
                 style={"width": "240px", "marginBottom": "10px"},
-            ),
+                options=[
+                    {"label": "Total Amount", "value": "amount"},
+                    {"label": "Transaction Count", "value": "count"},
+                ]),
+
             dcc.Graph(
                 id="user-merchant-bar-chart",
                 config={"displayModeBar": False},
                 style={"height": "340px"},
             )
-        ],
-        className="user-bottom-merchant-chart-container",
-        style={
+
+        ]
+        , style={
             "background": "#fff",
             "borderRadius": "16px",
             "boxShadow": "0 2px 8px rgba(0,0,0,0.07)",
