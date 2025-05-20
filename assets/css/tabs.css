@@ -3,7 +3,7 @@
    ============================================================ */
 
 .tab-content-inner.home-tab {
-    grid-template-rows: auto auto 3fr 4fr !important; /* 4 rows: heading, KPIs, pies, bar */
+    grid-template-rows: auto auto 6fr 9fr !important; /* 4 rows: heading, KPIs, pies, bar */
     align-items: start;
     align-content: start;
 }
@@ -194,7 +194,8 @@
 .tab-content-inner .flex-wrapper .kpi-card .card-header {
     background-color: var(--kpi-card-header-bg);
     border-bottom: 1px solid var(--kpi-card-splitline);
-    height: 50%
+    height: 50%;
+    padding: 1rem;
 }
 
 .tab-content-inner .flex-wrapper .kpi-card .card-body {
@@ -237,7 +238,7 @@
     align-items: center;
     text-align: center;
     margin: 0;
-    padding: 0.5rem;
+    padding: 1rem;
     background-color: var(--kpi-card-header-bg);
     border-bottom: 1px solid var(--kpi-card-splitline);
     min-height: fit-content;
