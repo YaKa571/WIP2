@@ -1,6 +1,4 @@
 import dash_bootstrap_components as dbc
-import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from dash import html, dcc
 from plotly.graph_objs._figure import Figure
@@ -11,10 +9,7 @@ from frontend.component_ids import ID
 from frontend.icon_manager import IconID
 
 dm: DataManager = DataManager.get_instance()
-PIE_CONFIG = {
-    "displayModeBar": True,
-    "displaylogo": False
-}
+
 MODEBAR_CONFIG = dict(
     displayModeBar=True,
     displaylogo=False
@@ -127,119 +122,33 @@ def _create_top_kpis() -> html.Div:
         className="flex-wrapper",
         children=[
 
-            # KPI 1: Most Value Merchant
-            dbc.Card(
-                className="kpi-card",
-                children=[
+            # KPI Most Valuable Merchant
+            comp_factory.create_kpi_card(
+                icon_id=IconID.TROPHY,
+                title="Most Valuable Merchant",
+                div_id=ID.HOME_KPI_MOST_VALUABLE_MERCHANT
+            ),
 
-                    dbc.CardHeader(
-                        children=[
+            # KPI Most Visited Merchant
+            comp_factory.create_kpi_card(
+                icon_id=IconID.REPEAT,
+                title="Most Visited Merchant",
+                div_id=ID.HOME_KPI_MOST_VISITED_MERCHANT
+            ),
 
-                            comp_factory.create_icon(IconID.TROPHY, cls="icon icon-small"),
-                            html.P("Most Valuable Merchant", className="kpi-card-title")
+            # KPI Top Spending User
+            comp_factory.create_kpi_card(
+                icon_id=IconID.USER_PAYING,
+                title="Top Spending User",
+                div_id=ID.HOME_KPI_TOP_SPENDING_USER
+            ),
 
-                        ]),
-
-                    dbc.CardBody(
-                        children=[
-
-                            html.Div(
-                                id=ID.HOME_KPI_MOST_VALUABLE_MERCHANT,
-                                children=[
-
-                                    html.P("", className="kpi-card-value"),
-                                    html.P("", className="kpi-card-value kpi-number-value")
-
-                                ])
-
-                        ])
-
-                ]),
-
-            # KPI 2: Most Visited Merchant
-            dbc.Card(
-                className="kpi-card",
-                children=[
-
-                    dbc.CardHeader(
-                        children=[
-
-                            comp_factory.create_icon(IconID.REPEAT, cls="icon icon-small"),
-                            html.P("Most Visited Merchant", className="kpi-card-title"),
-
-                        ]),
-
-                    dbc.CardBody(
-                        children=[
-
-                            html.Div(
-                                id=ID.HOME_KPI_MOST_VISITED_MERCHANT,
-                                children=[
-
-                                    html.P("", className="kpi-card-value"),
-                                    html.P("", className="kpi-card-value kpi-number-value")
-
-                                ])
-
-                        ])
-
-                ]),
-
-            # KPI 3: Top Spending User
-            dbc.Card(
-                className="kpi-card",
-                children=[
-
-                    dbc.CardHeader(
-                        children=[
-
-                            comp_factory.create_icon(IconID.USER_PAYING, cls="icon icon-small"),
-                            html.P(children="Top Spending User", className="kpi-card-title"),
-
-                        ]),
-
-                    dbc.CardBody(
-                        children=[
-
-                            html.Div(
-                                id=ID.HOME_KPI_TOP_SPENDING_USER,
-                                children=[
-
-                                    html.P("", className="kpi-card-value"),
-                                    html.P("", className="kpi-card-value kpi-number-value")
-
-                                ])
-
-                        ])
-                ]),
-
-            # KPI 4: Peak Hour
-            dbc.Card(
-                className="kpi-card",
-                children=[
-
-                    dbc.CardHeader(
-                        children=[
-
-                            comp_factory.create_icon(IconID.TIME, cls="icon icon-small"),
-                            html.P(children="Peak Hour", className="kpi-card-title"),
-
-                        ]),
-
-                    dbc.CardBody(
-                        children=[
-
-                            html.Div(
-                                id=ID.HOME_KPI_PEAK_HOUR,
-                                children=[
-
-                                    html.P("", className="kpi-card-value"),
-                                    html.P("", className="kpi-card-value kpi-number-value")
-
-                                ])
-
-                        ])
-                ])
+            # KPI Peak Hour
+            comp_factory.create_kpi_card(
+                icon_id=IconID.TIME,
+                title="Peak Hour",
+                div_id=ID.HOME_KPI_PEAK_HOUR
+            )
 
         ])
 
@@ -260,89 +169,26 @@ def _create_middle_circle_diagrams() -> html.Div:
         className="flex-wrapper",
         children=[
 
-            dbc.Card(
-                className="graph-card",
-                children=[
+            # Pie Chart Expenditures by Gender
+            comp_factory.create_circle_diagram_card(
+                icon_id=IconID.GENDERS,
+                title="Expenditures by Gender",
+                graph_id=ID.HOME_GRAPH_EXPENDITURES_BY_GENDER,
+            ),
 
-                    dbc.CardHeader(
-                        children=[
+            # Pie Chart Expenditures by Channel
+            comp_factory.create_circle_diagram_card(
+                icon_id=IconID.CART,
+                title="Expenditures by Channel",
+                graph_id=ID.HOME_GRAPH_EXPENDITURES_BY_CHANNEL,
+            ),
 
-                            comp_factory.create_icon(IconID.GENDERS, cls="icon icon-small"),
-                            html.P(children="Expenditures by Gender", className="graph-card-title"),
-
-                        ]),
-
-                    dbc.CardBody(
-                        children=[
-
-                            dcc.Graph(
-                                figure=Figure(),
-                                className="circle-diagram",
-                                id=ID.HOME_GRAPH_EXPENDITURES_BY_GENDER,
-                                responsive=True,
-                                config=PIE_CONFIG,
-                                style={"height": "100%"}
-                            )
-
-                        ])
-
-                ]),
-
-            dbc.Card(
-                className="graph-card",
-                children=[
-
-                    dbc.CardHeader(
-                        children=[
-
-                            comp_factory.create_icon(IconID.CART, cls="icon icon-small"),
-                            html.P(children="Expenditures by Channel", className="graph-card-title"),
-
-                        ]),
-
-                    dbc.CardBody(
-                        children=[
-
-                            dcc.Graph(
-                                figure=Figure(),
-                                className="circle-diagram",
-                                id=ID.HOME_GRAPH_EXPENDITURES_BY_CHANNEL,
-                                responsive=True,
-                                config=PIE_CONFIG,
-                                style={"height": "100%"}
-                            )
-
-                        ])
-
-                ]),
-
-            dbc.Card(
-                className="graph-card",
-                children=[
-
-                    dbc.CardHeader(
-                        children=[
-
-                            comp_factory.create_icon(IconID.CAKE, cls="icon icon-small"),
-                            html.P(children="Expenditures by Age", className="graph-card-title"),
-
-                        ]),
-
-                    dbc.CardBody(
-                        children=[
-
-                            dcc.Graph(
-                                figure=Figure(),
-                                className="circle-diagram",
-                                id=ID.HOME_GRAPH_EXPENDITURES_BY_AGE,
-                                responsive=True,
-                                config=PIE_CONFIG,
-                                style={"height": "100%"}
-                            )
-
-                        ])
-
-                ])
+            # Pie Chart Expenditures by Age
+            comp_factory.create_circle_diagram_card(
+                icon_id=IconID.CAKE,
+                title="Expenditures by Age",
+                graph_id=ID.HOME_GRAPH_EXPENDITURES_BY_AGE,
+            )
 
         ])
 
@@ -612,106 +458,6 @@ def get_peak_hour_details(state: str = None) -> list:
     return [one, two]
 
 
-def create_bar_chart(
-        df: pd.DataFrame,
-        x: str,
-        y: str,
-        title: str,
-        hover_data: list = None,
-        color: str = None,
-        color_discrete_map: dict = None,
-        labels: dict = None,
-        x_category_order: str = "total descending",
-        bar_color: str = None,
-        margin: dict = None,
-        showlegend: bool = False,
-        dark_mode: bool = False,
-) -> go.Figure:
-    """
-    Creates a bar chart visualization using Plotly.
-
-    This function generates a bar chart based on the provided DataFrame and configuration
-    parameters. It allows customization of the x and y axes, hover data, colors, labels,
-    category ordering, and layout settings. The function returns a Plotly Figure object
-    representing the bar chart.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        The DataFrame containing the data to be plotted.
-    x : str
-        The column name in the DataFrame to be used for the x-axis.
-    y : str
-        The column name in the DataFrame to be used for the y-axis.
-    title : str
-        The title of the bar chart.
-    hover_data : list, optional
-        A list of column names from the DataFrame to display as additional information
-        when hovering over a bar.
-    color : str, optional
-        The column name in the DataFrame to be used for the color grouping.
-    color_discrete_map : dict, optional
-        A dictionary mapping data values to specific colors for the bars.
-    labels : dict, optional
-        A dictionary mapping column names or axis titles to custom labels.
-    x_category_order : str, optional
-        The order in which categories should appear on the x-axis. Defaults
-        to "total descending".
-    bar_color : str, optional
-        The color to apply to all bars if no `color` parameter is specified.
-    margin : dict, optional
-        A dictionary specifying the margins of the plot, with keys "l", "r", "t", and "b"
-        for left, right, top, and bottom margins, respectively.
-    showlegend : bool, optional
-        Whether to display the legend on the chart. Defaults to False.
-
-    Returns
-    -------
-    go.Figure
-        A Plotly Figure object representing the bar chart.
-    """
-    text_color = "white" if dark_mode else "black"
-    transparent_color = "rgba(0,0,0,0)"
-    grid_color = "rgba(255,255,255,100)" if dark_mode else "rgba(25,25,25,100)"
-
-    fig = px.bar(
-        df,
-        x=x,
-        y=y,
-        hover_data=hover_data,
-        color=color,
-        color_discrete_map=color_discrete_map,
-        title=title,
-        labels=labels
-    )
-
-    fig.update_xaxes(type="category", categoryorder=x_category_order,
-                     linecolor=grid_color, gridcolor=transparent_color)
-
-    fig.update_yaxes(showline=False, linecolor=grid_color, gridcolor=grid_color)
-
-    if bar_color and not color:
-        fig.update_traces(marker_color=bar_color)
-
-    fig.update_layout(
-        paper_bgcolor=transparent_color,
-        plot_bgcolor=transparent_color,
-        margin=margin or dict(l=0, r=20, t=32, b=20),
-        title_x=0.5,
-        showlegend=showlegend,
-        modebar={"orientation": "h"},
-        font=dict(color=text_color),
-        xaxis=dict(title_font=dict(color=text_color), tickfont=dict(color=text_color)),
-        yaxis=dict(title_font=dict(color=text_color), tickfont=dict(color=text_color)),
-        legend=dict(font=dict(color=text_color),
-                    x=1, xanchor="right", y=1.05, yanchor="top"),
-        title=dict(font=dict(color=text_color)),
-        barcornerradius="16%"
-    )
-
-    return fig
-
-
 def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = False):
     """
     Generates a bar chart to visualize the top 10 most valuable merchants based on their total
@@ -735,7 +481,7 @@ def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = Fa
                                       is provided.
     """
     df = dm.get_merchant_values_by_state(state=state).head(10)
-    return create_bar_chart(
+    return comp_factory.create_bar_chart(
         df=df,
         x="mcc",
         y="merchant_sum",
@@ -773,7 +519,7 @@ def get_peak_hour_bar_chart(state: str = None, dark_mode: bool = False):
     df = dm.get_transaction_counts_by_hour(state=state)
     df = df[df["transaction_count"] > 0].copy()
     df["hour_range"] = df["hour"].apply(lambda h: f"{h:02d} – {(h + 1) % 24:02d}")
-    return create_bar_chart(
+    return comp_factory.create_bar_chart(
         df=df,
         x="hour_range",
         y="transaction_count",
@@ -799,7 +545,7 @@ def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = False):
     """
     df = dm.get_spending_by_user(state).head(10)
     df = df.merge(dm.df_users[["id", "gender", "current_age"]], left_on="client_id", right_on="id").drop(columns=["id"])
-    return create_bar_chart(
+    return comp_factory.create_bar_chart(
         df=df,
         x="client_id",
         y="spending",
@@ -831,7 +577,7 @@ def get_most_visited_merchants_bar_chart(state: str = None, dark_mode: bool = Fa
         specified parameters.
     """
     df = dm.get_visits_by_merchant(state).head(10)
-    return create_bar_chart(
+    return comp_factory.create_bar_chart(
         df=df,
         x="merchant_id",
         y="visits",
