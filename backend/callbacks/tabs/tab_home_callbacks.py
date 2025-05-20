@@ -24,9 +24,10 @@ CHART_BUILDERS = {
     Input(ID.HOME_TAB_SELECTED_STATE_STORE, "data"),
     Input(ID.HOME_TAB_BAR_CHART_DROPDOWN, "value"),
     Input(ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES, "n_clicks"),
+    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks"),
     prevent_initial_call=True
 )
-def update_bar_chart(selected_state, chart_option, n_clicks_toggle):
+def update_bar_chart(selected_state, chart_option, n_clicks_toggle, n_clicks_dark):
     trigger = ctx.triggered_id
 
     if trigger == ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES:
@@ -34,12 +35,15 @@ def update_bar_chart(selected_state, chart_option, n_clicks_toggle):
     else:
         state = selected_state
 
+    # Determine dark mode
+    dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
+
     # Validate chart_option
     builder = CHART_BUILDERS.get(chart_option)
     if builder is None:
         raise PreventUpdate
 
-    fig = builder(state=state)
+    fig = builder(state=state, dark_mode=dark_mode)
     return fig
 
 
