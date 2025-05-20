@@ -681,7 +681,7 @@ class DataManager:
         self._cache_expenditures_by_channel[state] = result
         return result
 
-    def _pre_cache_home_tab_data(self) -> None:
+    def _pre_cache_home_tab_data(self, log_state_times: bool = True) -> None:
         """
         Pre-caches data for the Home-Tab view by performing data aggregation and calculations for
         both overall data and state-specific data. This method is intended to optimize subsequent
@@ -703,9 +703,11 @@ class DataManager:
         -------
         None
         """
-        bm = Benchmark("Pre-caching Home-Tab data")
+        bm_pre_cache_full = Benchmark("Pre-caching Home-Tab data")
         logger.log("🔄 Pre-caching Home-Tab data...", indent_level=2)
+
         # First for overall (state=None)
+        bm_usa_wide = Benchmark("Pre-caching of USA-wide data")
         self.get_merchant_values_by_state(state=None)
         self.get_transaction_counts_by_hour(state=None)
         self.get_spending_by_user(state=None)
@@ -713,10 +715,14 @@ class DataManager:
         self.get_expenditures_by_gender(state=None)
         self.get_expenditures_by_age(state=None)
         self.get_expenditures_by_channel(state=None)
+        bm_usa_wide.print_time(level=3)
 
         # Then for each individual state
         states = self.df_transactions['state_name'].dropna().unique().tolist()
+        counter = 1
+
         for st in states:
+            bm_state = Benchmark("(" + str(counter) + ") Pre-caching of state " + st)
             self.get_merchant_values_by_state(state=st)
             self.get_transaction_counts_by_hour(state=st)
             self.get_spending_by_user(state=st)
@@ -725,11 +731,14 @@ class DataManager:
             self.get_expenditures_by_age(state=st)
             self.get_expenditures_by_channel(state=st)
 
-        bm.print_time(level=3)
+            if log_state_times:
+                bm_state.print_time(level=3)
+                counter += 1
+
+        bm_pre_cache_full.print_time(level=3)
 
     # TODO: @SonPhạm: Tab User - User/Card KPIs
     # In deiner DataManager-Klasse (data_manager.py):
-
     def get_user_kpis(self, user_id: int) -> dict:
         """
         Gibt KPIs für einen bestimmten User korrekt zurück.

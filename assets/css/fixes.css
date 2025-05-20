@@ -22,6 +22,16 @@
     transition: opacity 0.2s ease-in-out;
 }
 
+.graph-card.with-bar-chart .js-plotly-plot .modebar {
+    top: 26px !important;
+    right: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%);
+    opacity: 0 !important;
+    pointer-events: none; /* Prevents clicks as long as modebar is invisible */
+    transition: opacity 0.2s ease-in-out;
+}
+
 /* When hovering over diagram show modebar */
 .graph-card .js-plotly-plot:hover .modebar {
     opacity: 1 !important;
@@ -33,7 +43,7 @@
     background-color: transparent !important;
 }
 
-/* Remove gray area around camera button */
+/* Remove gray area around buttons */
 .graph-card .js-plotly-plot .modebar-btn {
     background-color: transparent !important;
     box-shadow: none !important;
@@ -41,13 +51,17 @@
 }
 
 /* Filter icon */
-.graph-card .js-plotly-plot .modebar-btn[data-title="Download plot as a png"] .icon {
+.graph-card .js-plotly-plot .modebar-btn .icon {
     opacity: 1 !important;
     filter: var(--modebar-icon-filter) !important;
-
+    height: 22px !important;
+    width: 22px !important;
+    font-size: 22px !important;
+    max-width: 22px !important;
+    max-height: 22px !important;
 }
 
-/* Optional: No hover background */
+/* No hover background */
 .graph-card .js-plotly-plot .modebar-btn:hover {
     background-color: transparent !important;
 }

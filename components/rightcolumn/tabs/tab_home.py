@@ -1,4 +1,5 @@
 import dash_bootstrap_components as dbc
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dash import html, dcc
@@ -29,7 +30,6 @@ BAR_CHART_OPTIONS = [
 
 
 # TODO: @Diego
-# TODO: Add dark mode to bar charts
 def create_home_content() -> html.Div:
     """
     Creates the main content structure for the home tab of a dashboard.
@@ -364,7 +364,7 @@ def _create_bottom_bar_diagrams() -> html.Div:
         children=[
 
             dbc.Card(
-                className="graph-card",
+                className="graph-card with-bar-chart",
                 children=[
 
                     dbc.CardHeader(
@@ -612,182 +612,232 @@ def get_peak_hour_details(state: str = None) -> list:
     return [one, two]
 
 
-def get_most_valuable_merchant_bar_chart(state: str = None):
+def create_bar_chart(
+        df: pd.DataFrame,
+        x: str,
+        y: str,
+        title: str,
+        hover_data: list = None,
+        color: str = None,
+        color_discrete_map: dict = None,
+        labels: dict = None,
+        x_category_order: str = "total descending",
+        bar_color: str = None,
+        margin: dict = None,
+        showlegend: bool = False,
+        dark_mode: bool = False,
+) -> go.Figure:
     """
-    Generate a bar chart visualizing the top 10 most valuable merchants' information.
+    Creates a bar chart visualization using Plotly.
 
-    This function retrieves the top 10 merchants with the highest transactional values
-    from a specific state or from all states if no state is specified. It generates an
-    interactive bar chart displaying merchant category codes (MCC) on the x-axis and
-    transactional sums on the y-axis. Hovering over the bars reveals additional information
-    about the MCC description and merchant ID.
+    This function generates a bar chart based on the provided DataFrame and configuration
+    parameters. It allows customization of the x and y axes, hover data, colors, labels,
+    category ordering, and layout settings. The function returns a Plotly Figure object
+    representing the bar chart.
 
-    Parameters:
-    state: str
-        Optional. The state for which to retrieve the top 10 most valuable merchants. If not
-        provided, data from all states is used.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame containing the data to be plotted.
+    x : str
+        The column name in the DataFrame to be used for the x-axis.
+    y : str
+        The column name in the DataFrame to be used for the y-axis.
+    title : str
+        The title of the bar chart.
+    hover_data : list, optional
+        A list of column names from the DataFrame to display as additional information
+        when hovering over a bar.
+    color : str, optional
+        The column name in the DataFrame to be used for the color grouping.
+    color_discrete_map : dict, optional
+        A dictionary mapping data values to specific colors for the bars.
+    labels : dict, optional
+        A dictionary mapping column names or axis titles to custom labels.
+    x_category_order : str, optional
+        The order in which categories should appear on the x-axis. Defaults
+        to "total descending".
+    bar_color : str, optional
+        The color to apply to all bars if no `color` parameter is specified.
+    margin : dict, optional
+        A dictionary specifying the margins of the plot, with keys "l", "r", "t", and "b"
+        for left, right, top, and bottom margins, respectively.
+    showlegend : bool, optional
+        Whether to display the legend on the chart. Defaults to False.
 
-    Returns:
-    plotly.graph_objects.Figure
-        An interactive bar chart showing the top 10 merchants and their respective
-        transactional values.
+    Returns
+    -------
+    go.Figure
+        A Plotly Figure object representing the bar chart.
     """
-    df = dm.get_merchant_values_by_state(state=state).head(10)
+    text_color = "white" if dark_mode else "black"
+    transparent_color = "rgba(0,0,0,0)"
+    grid_color = "rgba(255,255,255,100)" if dark_mode else "rgba(25,25,25,100)"
 
     fig = px.bar(
         df,
+        x=x,
+        y=y,
+        hover_data=hover_data,
+        color=color,
+        color_discrete_map=color_discrete_map,
+        title=title,
+        labels=labels
+    )
+
+    fig.update_xaxes(type="category", categoryorder=x_category_order,
+                     linecolor=grid_color, gridcolor=transparent_color)
+
+    fig.update_yaxes(showline=False, linecolor=grid_color, gridcolor=grid_color)
+
+    if bar_color and not color:
+        fig.update_traces(marker_color=bar_color)
+
+    fig.update_layout(
+        paper_bgcolor=transparent_color,
+        plot_bgcolor=transparent_color,
+        margin=margin or dict(l=0, r=20, t=32, b=20),
+        title_x=0.5,
+        showlegend=showlegend,
+        modebar={"orientation": "h"},
+        font=dict(color=text_color),
+        xaxis=dict(title_font=dict(color=text_color), tickfont=dict(color=text_color)),
+        yaxis=dict(title_font=dict(color=text_color), tickfont=dict(color=text_color)),
+        legend=dict(font=dict(color=text_color),
+                    x=1, xanchor="right", y=1.05, yanchor="top"),
+        title=dict(font=dict(color=text_color)),
+        barcornerradius="16%"
+    )
+
+    return fig
+
+
+def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = False):
+    """
+    Generates a bar chart to visualize the top 10 most valuable merchants based on their total
+    transaction values for a given state or all states.
+
+    This function retrieves the merchant transaction values, sorts them, and selects the top
+    10 merchants. It then generates a bar chart displaying the Merchant Category Code (MCC)
+    against the total transaction values. Additional information such as merchant descriptions
+    and IDs is available as hover data. The chart's appearance can be customized for light or
+    dark mode rendering.
+
+    Parameters:
+        state (str, optional): The state code for which the top merchants are to be analyzed. If not
+                               specified, the analysis includes all states.
+        dark_mode (bool, optional): Determines the visual style of the chart. If True, the chart
+                                    is displayed in dark mode. Defaults to False.
+
+    Returns:
+        plotly.graph_objects.Figure: A bar chart displaying the top 10 most valuable merchants
+                                      for the specified state, or across all states when no state
+                                      is provided.
+    """
+    df = dm.get_merchant_values_by_state(state=state).head(10)
+    return create_bar_chart(
+        df=df,
         x="mcc",
         y="merchant_sum",
         hover_data=["mcc_desc", "merchant_id"],
-        title=f"TOP 10 MOST VALUABLE MERCHANTS IN {state.upper() if state is not None else "ALL STATES"}"
+        title=f"TOP 10 MOST VALUABLE MERCHANTS IN {state.upper() if state else 'ALL STATES'}",
+        labels={"mcc": "MCC", "merchant_sum": "Sum"},
+        bar_color=COLOR_BLUE_MAIN,
+        dark_mode=dark_mode
     )
 
-    # Handle x-axis values as category as they're numerical
-    fig.update_xaxes(type="category")
 
-    # Sort categories -> merchant_sum descending
-    fig.update_layout(xaxis=dict(categoryorder="total descending"),
-                      margin=dict(l=0, t=30, r=0, b=0),
-                      title_x=0.5,
-                      modebar={"orientation": "v"}  # center title horizontally
-                      )
-
-    # Set bar color
-    fig.update_traces(marker_color=COLOR_BLUE_MAIN)
-
-    return fig
-
-
-def get_peak_hour_bar_chart(state: str = None):
+def get_peak_hour_bar_chart(state: str = None, dark_mode: bool = False):
     """
-    Generates a bar chart visualizing the peak transaction hours for a specified state or for all states.
+    Returns a bar chart visualizing the peak transaction hours for a specific state
+    or for all states if no state is specified.
 
-    The bar chart provides insights into the most active hours based on transaction counts.
-    Each bar represents an hour range formatted as "hh – hh+1". The data can be filtered
-    to focus on a specific state or include all states.
+    The function retrieves transaction counts grouped by hour from the database
+    and filters out hours with zero transactions. It formats the hour data
+    to display as a range ("HH – HH") and creates a bar chart using
+    this processed data. The color scheme of the chart can be adjusted
+    by specifying the dark_mode parameter.
 
-    Args:
-        state (str, optional): The name of the state to limit the data to. If not provided
-            or set to None, the data will include transaction counts for all states.
+    Parameters:
+        state: str, optional
+            The specific state for which transaction data is to be visualized.
+            Defaults to None, in which case data for all states is used.
+        dark_mode: bool, optional
+            A flag to determine if the chart should use a dark color scheme.
+            Defaults to False.
 
     Returns:
-        plotly.graph_objects.Figure: A bar chart figure, detailing transaction counts
-        by hour range with styling and labeled axes.
+        plotly.graph_objects.Figure
+            A bar chart displaying the number of transactions for each hour range.
     """
     df = dm.get_transaction_counts_by_hour(state=state)
-
-    # Only hours with > 0 transactions
-    df = df[df["transaction_count"] > 0]
-
-    # New column with "07 - 08", "08 - 09" …
-    df = df.copy()
-    df["hour_range"] = df["hour"].apply(
-        lambda h: f"{h:02d} – {(h + 1) % 24:02d}"
-    )
-
-    fig = px.bar(
-        df,
+    df = df[df["transaction_count"] > 0].copy()
+    df["hour_range"] = df["hour"].apply(lambda h: f"{h:02d} – {(h + 1) % 24:02d}")
+    return create_bar_chart(
+        df=df,
         x="hour_range",
         y="transaction_count",
-        title=f"MOST ACTIVE HOURS IN {state.upper() if state is not None else "ALL STATES"}",
-        labels={
-            "hour_range": "Hour Range",
-            "transaction_count": "Number of Transactions"
-        },
+        title=f"MOST ACTIVE HOURS IN {state.upper() if state else 'ALL STATES'}",
+        labels={"hour_range": "Hour Range", "transaction_count": "Number of Transactions"},
+        bar_color=COLOR_BLUE_MAIN,
+        dark_mode=dark_mode
     )
 
-    fig.update_xaxes(type="category")
 
-    # Styling
-    fig.update_traces(marker_color=COLOR_BLUE_MAIN)
-    fig.update_layout(margin=dict(l=0, r=0, t=30, b=0),
-                      title_x=0.5,  # center title horizontally
-                      modebar={"orientation": "v"}
-                      )
-
-    return fig
-
-
-def get_spending_by_user_bar_chart(state: str = None) -> Figure:
+def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = False):
     """
-    Generate a bar chart visualization showing the top 10 spending users.
+    Generate a bar chart visualizing the top 10 most spending users. Users can be filtered by state, and the chart
+    supports dark mode styling.
 
-    This function retrieves the spending data for users, optionally filtered by a specific
-    state. The spending data is then merged with user demographic details such as gender
-    and age. A bar chart is generated to show the top 10 users with the highest spending,
-    with bars color-coded based on gender. The visualization includes hover data for
-    more details about each user and is styled for clarity.
-
-    Args:
-        state (str, optional): The state for which user spending data should be fetched.
-            If None, spending data for all states will be used.
+    Arguments:
+        state (str, optional): The state for which the top users should be filtered. If not provided, includes all states.
+        dark_mode (bool, optional): Determines whether the bar chart should be rendered in dark mode. Defaults to False.
 
     Returns:
-        plotly.graph_objects.Figure: A bar chart figure visualizing the top 10 spending
-        users.
+        Bar chart visualization showcasing the top 10 spending users, with data categorized by gender and additional
+        hover information such as gender, age, and spending.
     """
     df = dm.get_spending_by_user(state).head(10)
-
-    # Connect to user details
-    df = df.merge(
-        dm.df_users[["id", "gender", "current_age"]],
-        left_on="client_id", right_on="id"
-    ).drop(columns=["id"])
-
-    fig = px.bar(
-        df,
+    df = df.merge(dm.df_users[["id", "gender", "current_age"]], left_on="client_id", right_on="id").drop(columns=["id"])
+    return create_bar_chart(
+        df=df,
         x="client_id",
         y="spending",
         color="gender",
         color_discrete_map={"Female": FEMALE_PINK, "Male": COLOR_BLUE_MAIN},
         hover_data=["gender", "current_age", "spending"],
-        title=f"TOP 10 MOST SPENDING USERS IN {state.upper() if state is not None else "ALL STATES"}",
-        labels={
-            "client_id": "User ID",
-            "spending": "Total Spending",
-            "gender": "Gender",
-            "current_age": "Age"
-        }
+        title=f"TOP 10 MOST SPENDING USERS IN {state.upper() if state else 'ALL STATES'}",
+        labels={"client_id": "User ID", "spending": "Total Spending", "gender": "Gender", "current_age": "Age"},
+        showlegend=True,
+        dark_mode=dark_mode
     )
 
-    fig.update_xaxes(type="category", categoryorder="total descending")
 
-    # Styling
-    fig.update_layout(margin=dict(l=0, r=0, t=30, b=0), title_x=0.5, showlegend=True,
-                      modebar={"orientation": "v"})
-
-    return fig
-
-
-def get_most_visited_merchants_bar_chart(state: str = None) -> Figure:
+def get_most_visited_merchants_bar_chart(state: str = None, dark_mode: bool = False):
     """
-    Generates a bar chart for the top 10 most visited merchants.
+    Generates a bar chart visualization for the top 10 most visited merchants. The chart
+    displays merchant IDs on the x-axis and the number of visits on the y-axis, with
+    additional hover data for merchant category code (MCC) and description. The state
+    can be optionally specified to filter data for a specific region.
 
-    This function retrieves merchant visit data, filters the top 10 most visited
-    merchants, and generates a bar chart using the Plotly library. The chart
-    displays merchant IDs on the x-axis and the number of visits on the y-axis.
-    Additional hover information such as merchant category code (MCC), MCC
-    description, and visit count is included. The chart is customizable by state.
-
-    Parameters:
-        state (str, optional): The state to filter merchant visit data. If None,
-            data from all states is used. Defaults to None.
+    Args:
+        state (str, optional): The state for which to filter the merchant data.
+            If None, data from all states is used. Defaults to None.
+        dark_mode (bool, optional): Determines the color scheme of the chart. If True,
+            the chart will use a dark theme. Defaults to False.
 
     Returns:
-        plotly.graph_objects.Figure: A Plotly Figure object representing the bar chart.
+        A bar chart representation of the top 10 most visited merchants based on the
+        specified parameters.
     """
     df = dm.get_visits_by_merchant(state).head(10)
-    fig = px.bar(
-        df,
+    return create_bar_chart(
+        df=df,
         x="merchant_id",
         y="visits",
         hover_data=["mcc", "mcc_desc", "visits"],
-        title=f"TOP 10 MOST VISITED MERCHANTS IN {state.upper() if state is not None else "ALL STATES"}",
-        labels={"merchant_id": "Merchant ID", "visits": "Visits"}
+        title=f"TOP 10 MOST VISITED MERCHANTS IN {state.upper() if state else 'ALL STATES'}",
+        labels={"merchant_id": "Merchant ID", "visits": "Visits"},
+        bar_color=COLOR_BLUE_MAIN,
+        dark_mode=dark_mode
     )
-    fig.update_xaxes(type="category", categoryorder="total descending")
-    fig.update_traces(marker_color=COLOR_BLUE_MAIN)
-    fig.update_layout(margin=dict(l=0, r=0, t=30, b=0), title_x=0.5,
-                      modebar={"orientation": "v"})
-
-    return fig
