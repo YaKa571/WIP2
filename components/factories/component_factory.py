@@ -8,6 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import us
 from dash import dash_table, html, dcc
+from plotly.graph_objs._figure import Figure
 from shapely.geometry import shape
 
 from backend.data_manager import DataManager
@@ -15,6 +16,12 @@ from frontend.component_ids import ID
 from frontend.icon_manager import IconID, Icons
 
 dm: DataManager = DataManager.get_instance()
+
+# Config for pie graphs
+CIRCLE_DIAGRAM_CONFIG = {
+    "displayModeBar": True,
+    "displaylogo": False
+}
 
 # GLOBAL DICT that holds all DataFrames
 DATASETS: dict[str, pd.DataFrame] = {}
@@ -244,3 +251,209 @@ def create_info_icon(icon_id: ID) -> html.I:
     html.I: HTML <i> element with specified id and predefined classes.
     """
     return html.I(className="bi bi-info-circle-fill info-icon", id=icon_id)
+
+
+def create_circle_diagram_card(
+        icon_id: IconID,
+        title: str,
+        graph_id: str,
+        figure: Figure = None,
+        config: dict = None
+) -> dbc.Card:
+    """
+    Creates a card component that contains a circular diagram graph with a header.
+
+    This function constructs a Dash Bootstrap Card component to display a circular
+    diagram graph. It includes a customizable icon and title in the header, and
+    renders a Dash Core Component (dcc.Graph) in the card body. A user can specify
+    the graph data, its configuration, and other parameters through the function
+    arguments.
+
+    Args:
+        icon_id (IconID): The ID of the icon to be displayed in the card header.
+        title (str): The title for the card header.
+        graph_id (str): The unique identifier for the graph component.
+        figure (Figure, optional): The figure object containing data for the
+            circular diagram. Defaults to an empty Figure instance.
+        config (dict, optional): Configuration dictionary for the graph. If not
+            provided, a default configuration (PIE_CONFIG) will be used.
+
+    Returns:
+        dbc.Card: A Dash Bootstrap card component containing the circular diagram
+            graph with the specified header and configuration.
+    """
+    return dbc.Card(
+        className="graph-card",
+        children=[
+
+            dbc.CardHeader(
+                children=[
+
+                    create_icon(icon_id, cls="icon icon-small"),
+                    html.P(children=title, className="graph-card-title")
+
+                ]),
+
+            dbc.CardBody(
+                children=[
+
+                    dcc.Graph(
+                        figure=figure or Figure(),
+                        className="circle-diagram",
+                        id=graph_id,
+                        responsive=True,
+                        config=config or CIRCLE_DIAGRAM_CONFIG,
+                        style={"height": "100%"}
+                    )
+
+                ])
+        ])
+
+
+def create_kpi_card(icon_id: IconID, title: str, div_id: str) -> dbc.Card:
+    """
+    Creates a KPI (Key Performance Indicator) card component.
+
+    This function generates a customizable KPI card designed for displaying key
+    metrics or indicators. The card includes an icon, title, and a space to
+    display dynamic values. It allows for designation of an HTML division ID to
+    enable targeted modifications or updates to the card's content.
+
+    Parameters:
+    icon_id (IconID): The identifier for the icon to be displayed in the card
+                      header. Determines the visual representation of the icon.
+    title (str): The title text to be displayed on the card's header.
+    div_id (str): The HTML ID of the division containing the dynamic contents of
+                  the card's body.
+
+    Returns:
+    dbc.Card: A Dash Bootstrap component representing the KPI card with the
+              specified attributes and layout.
+    """
+    return dbc.Card(
+        className="kpi-card",
+        children=[
+
+            dbc.CardHeader(
+                children=[
+
+                    create_icon(icon_id, cls="icon icon-small"),
+                    html.P(title, className="kpi-card-title"),
+
+                ]),
+
+            dbc.CardBody(
+                children=[
+
+                    html.Div(
+                        id=div_id,
+                        children=[
+
+                            html.P("", className="kpi-card-value"),
+                            html.P("", className="kpi-card-value kpi-number-value")
+
+                        ])
+                ])
+        ])
+
+
+def create_bar_chart(
+        df: pd.DataFrame,
+        x: str,
+        y: str,
+        title: str,
+        hover_data: list = None,
+        color: str = None,
+        color_discrete_map: dict = None,
+        labels: dict = None,
+        x_category_order: str = "total descending",
+        bar_color: str = None,
+        margin: dict = None,
+        showlegend: bool = False,
+        dark_mode: bool = False,
+) -> go.Figure:
+    """
+    Creates a bar chart visualization using Plotly.
+
+    This function generates a bar chart based on the provided DataFrame and configuration
+    parameters. It allows customization of the x and y axes, hover data, colors, labels,
+    category ordering, and layout settings. The function returns a Plotly Figure object
+    representing the bar chart.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame containing the data to be plotted.
+    x : str
+        The column name in the DataFrame to be used for the x-axis.
+    y : str
+        The column name in the DataFrame to be used for the y-axis.
+    title : str
+        The title of the bar chart.
+    hover_data : list, optional
+        A list of column names from the DataFrame to display as additional information
+        when hovering over a bar.
+    color : str, optional
+        The column name in the DataFrame to be used for the color grouping.
+    color_discrete_map : dict, optional
+        A dictionary mapping data values to specific colors for the bars.
+    labels : dict, optional
+        A dictionary mapping column names or axis titles to custom labels.
+    x_category_order : str, optional
+        The order in which categories should appear on the x-axis. Defaults
+        to "total descending".
+    bar_color : str, optional
+        The color to apply to all bars if no `color` parameter is specified.
+    margin : dict, optional
+        A dictionary specifying the margins of the plot, with keys "l", "r", "t", and "b"
+        for left, right, top, and bottom margins, respectively.
+    showlegend : bool, optional
+        Whether to display the legend on the chart. Defaults to False.
+
+    Returns
+    -------
+    go.Figure
+        A Plotly Figure object representing the bar chart.
+    """
+    text_color = "white" if dark_mode else "black"
+    transparent_color = "rgba(0,0,0,0)"
+    grid_color = "rgba(230,230,230,100)" if dark_mode else "rgba(25,25,25,100)"
+    legend_background = "rgba(25,25,25,100)" if dark_mode else "white"
+
+    fig = px.bar(
+        df,
+        x=x,
+        y=y,
+        hover_data=hover_data,
+        color=color,
+        color_discrete_map=color_discrete_map,
+        title=title,
+        labels=labels
+    )
+
+    fig.update_xaxes(type="category", categoryorder=x_category_order,
+                     linecolor=grid_color, gridcolor=transparent_color)
+
+    fig.update_yaxes(showline=False, linecolor=grid_color, gridcolor=grid_color)
+
+    if bar_color and not color:
+        fig.update_traces(marker_color=bar_color)
+
+    fig.update_layout(
+        paper_bgcolor=transparent_color,
+        plot_bgcolor=transparent_color,
+        margin=margin or dict(l=0, r=20, t=32, b=20),
+        title_x=0.5,
+        showlegend=showlegend,
+        modebar={"orientation": "h"},
+        font=dict(color=text_color),
+        xaxis=dict(title_font=dict(color=text_color), tickfont=dict(color=text_color)),
+        yaxis=dict(title_font=dict(color=text_color), tickfont=dict(color=text_color)),
+        legend=dict(font=dict(color=text_color),
+                    x=1.00275, xanchor="right", y=1.0625, yanchor="top",
+                    orientation="h"),
+        title=dict(font=dict(color=text_color)),
+        barcornerradius="16%"
+    )
+
+    return fig
