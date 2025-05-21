@@ -16,7 +16,13 @@ my_mcc["mcc"] = my_mcc["mcc"].astype(int)
 # print(my_mcc.head())
 # join transactions and mcc_codes
 my_transactions_mcc=my_transactions.merge(my_mcc, how="left", on="mcc")
-# print(my_transactions_mcc[["id", "mcc", "merchant_group"]].head())
+
+my_transactions_mcc_agg = my_transactions_mcc.groupby('merchant_group').agg(
+    transaction_count=('merchant_group','count')
+).reset_index()
+
+def get_merchant_group_overview():
+    return my_transactions_mcc_agg
 
 def get_most_frequently_used_merchant_group():
     """
