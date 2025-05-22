@@ -130,3 +130,37 @@ def get_highest_value_merchant_group():
     group_return = my_value.loc[0, "merchant_group"]
     value_return = my_value.loc[0, "amount"]
     return group_return, value_return
+
+# Merchant Group
+def get_most_frequently_used_merchant_in_group(merchant_group):
+    # TODO
+    return -1,-1
+
+def get_highest_value_merchant_in_group(merchant_group):
+    # TODO
+    return -1,-1
+
+def get_user_with_most_transactions_in_group(merchant_group):
+    # TODO
+    return -1,-1
+
+def get_user_with_highest_expenditure_in_group(merchant_group):
+    # TODO
+    return -1,-1
+
+# single Merchant
+def get_merchant_transactions(merchant):
+    # TODO
+    return -2
+
+def get_merchant_value(merchant):
+    # TODO
+    return -2
+
+def get_user_with_most_transactions_at_merchant(merchant):
+    # TODO
+    return -2,-2
+
+def get_user_with_highest_expenditure_at_merchant(merchant):
+    # TODO
+    return -2,-2
