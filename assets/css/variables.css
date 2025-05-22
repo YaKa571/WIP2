@@ -59,8 +59,10 @@
 
     /* Tab KPI Cards */
     --kpi-card-header-bg: #f3f7fa;
-    --kpi-card-splitline: #e5ebf4;
+    --kpi-card-splitline: rgba(0, 0, 0, 0.175);
     --kpi-card-body-bg: #fff;
+    --kpi-graph-card-outline: 1px solid var(--kpi-card-splitline);
+
 
     /* Settings Button Text */
     --settings-button-text-border: 1px solid var(--text-main);
@@ -121,8 +123,9 @@
 
     /* Tab KPI Cards */
     --kpi-card-header-bg: #1b1b22;
-    --kpi-card-splitline: #2e3347;
-    --kpi-card-body-bg: #23232a;
+    --kpi-card-splitline: #333333;
+    --kpi-card-body-bg: #1e1f24;
+    --kpi-graph-card-outline: 1px solid var(--kpi-card-splitline);
 
     /* Settings Button Text */
     --settings-button-text-border: 1px solid var(--text-main);

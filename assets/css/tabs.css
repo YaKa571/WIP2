@@ -177,6 +177,8 @@
 .tab-content-inner .flex-wrapper .kpi-card {
     flex: 1 1 0;
     min-width: auto;
+    outline: var(--kpi-graph-card-outline);
+    border: none !important;
 }
 
 .tab-content-inner .flex-wrapper .kpi-card .card-header,
@@ -229,6 +231,8 @@
     flex-direction: column;
     flex: 1 1 0;
     min-width: 0;
+    outline: var(--kpi-graph-card-outline);
+    border: none !important;
 }
 
 .tab-content-inner .flex-wrapper .graph-card .card-header {
