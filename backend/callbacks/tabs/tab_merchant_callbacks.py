@@ -1,5 +1,11 @@
 from frontend.component_ids import ID
-from dash import html, Output, Input, callback
+from dash import html, Output, Input, callback, dcc
+import dash_bootstrap_components as dbc
+import plotly.express as px
+from backend.data_setup.tabs import tab_merchant_data_setup
+from components.factories import component_factory as comp_factory
+from frontend.icon_manager import Icons, IconID
+COLOR_BLUE_MAIN = "#2563eb"
 """
 callbacks of tab Merchant
 """
@@ -8,6 +14,7 @@ callbacks of tab Merchant
     Output(ID.MERCHANT_BTN_ALL_MERCHANTS, 'className'),
     Output(ID.MERCHANT_BTN_MERCHANT_GROUP, 'className'),
     Output(ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT, 'className'),
+    Output(ID.MERCHANT_KPI_CONTAINER, 'children'),
     Input(ID.MERCHANT_BTN_ALL_MERCHANTS, 'n_clicks'),
     Input(ID.MERCHANT_BTN_MERCHANT_GROUP, 'n_clicks'),
     Input(ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT, 'n_clicks'),
@@ -18,4 +25,79 @@ def update_merchant(n1, n2, n3):
 
     def cls(opt): return 'option-btn selected' if selected == opt else 'option-btn'
 
-    return f' {selected}', cls('opt1'), cls('opt2'), cls('opt3')
+    if selected == 'opt1':
+        kpi_content = create_all_merchant_kpis()
+    else:
+        kpi_content = html.Div()
+
+    return f' {selected}', cls('opt1'), cls('opt2'), cls('opt3'), kpi_content
+
+def create_all_merchant_kpis():
+    group_1, count_1 = tab_merchant_data_setup.get_most_frequently_used_merchant_group()
+    count_1 = str(count_1) + " Transactions"
+    group_2, value_2 = tab_merchant_data_setup.get_highest_value_merchant_group()
+    value_2 = "$" + str(value_2)
+    return html.Div(children=[
+        html.Div(children=[
+            # KPI 1: Most frequently used merchant group
+            dbc.Card(children=[
+                dbc.CardHeader(children=[
+                    comp_factory.create_icon(IconID.REPEAT, cls="icon icon-small"),
+                    html.P("Most frequently used merchant group", className="kpi-card-title")
+
+                ],
+                    className="card-header"
+                ),
+
+                dbc.CardBody(children=[
+
+                    dcc.Loading(children=[
+                        html.Div(children=[
+                            html.P(group_1, className="kpi-card-value"),
+                            html.P(count_1, className="kpi-card-value kpi-number-value")
+                        ],
+                            id=ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP
+                        )
+                    ],
+                        type="circle",
+                        color=COLOR_BLUE_MAIN)
+
+                ],
+                    className="card-body",
+                )
+            ],
+                className="card kpi-card",
+            ),
+            # KPI 2: Merchant group with the highest total transfers
+            dbc.Card(children=[
+                dbc.CardHeader(children=[
+                    comp_factory.create_icon(IconID.USER_PAYING, cls="icon icon-small"),
+                    html.P("Merchant group with the highest total transfers", className="kpi-card-title")
+
+                ],
+                    className="card-header"
+                ),
+
+                dbc.CardBody(children=[
+
+                    dcc.Loading(children=[
+                        html.Div(children=[
+                            html.P(group_2, className="kpi-card-value"),
+                            html.P(value_2, className="kpi-card-value kpi-number-value")
+                        ],
+                            id=ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP
+                        )
+                    ],
+                        type="circle",
+                        color=COLOR_BLUE_MAIN)
+
+                ],
+                    className="card-body",
+                )
+            ],
+                className="card kpi-card",
+            ),
+        ],
+            className="flex-wrapper"
+        )
+    ])

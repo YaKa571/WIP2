@@ -2,6 +2,7 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 from dash import html, dcc, Output, Input, callback
 
+from backend.callbacks.tabs import tab_merchant_callbacks
 from backend.data_setup.tabs import tab_merchant_data_setup
 from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
@@ -9,20 +10,16 @@ from frontend.icon_manager import Icons, IconID
 
 COLOR_BLUE_MAIN = "#2563eb"
 
-
 # Info: Edit grid layout in assets/css/tabs.css
 
-# TODO: Free...(Yannic): Idee untere Teil der Seite wie in Skizze, oben Verteilung der Händlerkategorien und
-# Aufschlüsselung (evtl. als Popup)
+
 def create_merchant_content():
     return html.Div(
         className="tab-content-inner merchant-tab",
         children=[
 
             _create_merchant_heading(),
-            # top: general data
             create_merchant_kpi(),
-            # bottom: individual merchant data
             create_merchant_graph()
 
         ])
@@ -74,11 +71,7 @@ def _create_merchant_heading() -> html.Div:
         ])
 
 def create_merchant_kpi():
-    return dbc.Row([
-        html.P("general merchant data"),
-#        create_merchant_group_distribution_pie_chart(),
-       create_merchant_kpis()
-    ])
+    return html.Div(id=ID.MERCHANT_KPI_CONTAINER)
 
 
 def create_merchant_graph():
@@ -140,84 +133,4 @@ def create_merchant_group_distribution_pie_chart():
         ]
     )
 
-def create_merchant_kpis():
-    """
-       Creates a Dash HTML Div containing two KPI cards related to merchant groups.
 
-       KPI 1: Displays the most frequently used merchant group and its transaction count.
-       KPI 2: Displays the merchant group with the highest total transfer value and the value.
-
-       Each KPI card includes an icon, a descriptive title, and values wrapped in loading
-       components for asynchronous data updates.
-
-       Returns:
-           html.Div: A Dash HTML Div component containing two KPI cards laid out in a flexbox.
-       """
-    group_1, count_1 = tab_merchant_data_setup.get_most_frequently_used_merchant_group()
-    count_1 = str(count_1) + " Transactions"
-    group_2, value_2 = tab_merchant_data_setup.get_highest_value_merchant_group()
-    value_2 = "$" + str(value_2)
-    return html.Div(children=[
-        html.Div(children=[
-            # KPI 1: Most frequently used merchant group
-            dbc.Card(children=[
-                dbc.CardHeader(children=[
-                    comp_factory.create_icon(IconID.REPEAT, cls="icon icon-small"),
-                    html.P("Most frequently used merchant group", className="kpi-card-title")
-
-                ],
-                    className="card-header"
-                ),
-
-                dbc.CardBody(children=[
-
-                    dcc.Loading(children=[
-                        html.Div(children=[
-                            html.P(group_1, className="kpi-card-value"),
-                            html.P(count_1, className="kpi-card-value kpi-number-value")
-                        ],
-                            id=ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP
-                        )
-                    ],
-                        type="circle",
-                        color=COLOR_BLUE_MAIN)
-
-                ],
-                    className="card-body",
-                )
-            ],
-                className="card kpi-card",
-            ),
-            # KPI 2: Merchant group with the highest total transfers
-            dbc.Card(children=[
-                dbc.CardHeader(children=[
-                    comp_factory.create_icon(IconID.USER_PAYING, cls="icon icon-small"),
-                    html.P("Merchant group with the highest total transfers", className="kpi-card-title")
-
-                ],
-                    className="card-header"
-                ),
-
-                dbc.CardBody(children=[
-
-                    dcc.Loading(children=[
-                        html.Div(children=[
-                            html.P(group_2, className="kpi-card-value"),
-                            html.P(value_2, className="kpi-card-value kpi-number-value")
-                        ],
-                            id=ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP
-                        )
-                    ],
-                        type="circle",
-                        color=COLOR_BLUE_MAIN)
-
-                ],
-                    className="card-body",
-                )
-            ],
-                className="card kpi-card",
-            ),
-        ],
-            className="flex-wrapper"
-        )
-    ])
