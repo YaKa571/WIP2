@@ -273,3 +273,36 @@ h1, h2, h3, h4, h5, h6, p, label, div {
 .settings-button-text:active {
     transform: scale(0.95);
 }
+
+/* ============================================================
+   Custom Radio Button
+   ============================================================ */
+.button-radio-wrapper {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.option-btn {
+    padding: 10px 24px;
+    border: 2px solid #cccccc;
+    border-radius: 10px;
+    background-color: #ffffff;
+    color: #1f2937; /* dunkles Grau, gut lesbar */
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+
+.option-btn:hover {
+    background-color: #f3f4f6; /* leichtes Hellgrau */
+}
+
+.option-btn.selected {
+    background-color: #2563eb; /* Hauptakzentfarbe */
+    color: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+}
