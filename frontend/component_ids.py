@@ -89,3 +89,7 @@ class ID(str, Enum):
     MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP = "merchant-kpi-highest-value-merchant-in-group"
     MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP = "merchant-kpi-user-most-transactions-in-group"
     MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP = "merchant-kpi-user-high-value-in-group"
+    MERCHANT_KPI_MERCHANT_TRANSACTIONS = "merchant-kpi-merchant-transactions"
+    MERCHANT_KPI_MERCHANT_VALUE = "merchant-kpi-merchant-value"
+    MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS = "merchant-kpi-merchant-user-most-transactions-all"
+    MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE = "merchant-kpi-merchant-user-high-value-all"
