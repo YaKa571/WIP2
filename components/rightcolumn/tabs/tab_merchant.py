@@ -97,6 +97,9 @@ def create_merchant_group_distribution_pie_chart():
         title="Merchant Group Distribution"
     )
 
+    my_pie_fig.update_traces(textinfo='percent+label')
+    my_pie_fig.update_layout(showlegend=False)
+
     return html.Div(
         className="flex-wrapper",
         style={"display": "flex", "justifyContent": "center", "alignItems": "center", "height": "450px"},
