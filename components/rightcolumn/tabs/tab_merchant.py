@@ -21,9 +21,9 @@ def create_merchant_content():
 
             _create_merchant_heading(),
             # top: general data
-            create_merchant_general(),
+            create_merchant_kpi(),
             # bottom: individual merchant data
-            create_merchant_individual()
+            create_merchant_graph()
 
         ])
 
@@ -42,34 +42,51 @@ def _create_merchant_heading() -> html.Div:
     return html.Div(
         className="tab-heading-wrapper",
         children=[
+            dbc.Row([
+                dbc.Col([
+                    dbc.ButtonGroup(
+                        [
+                            dbc.Button("Option 1", id="btn-1", color="primary", outline=True),
+                            dbc.Button("Option 2", id="btn-2", color="primary", outline=True),
+                            dbc.Button("Option 3", id="btn-3", color="primary", outline=True),
+                        ],
+                        id="button-group",
+                        className="mb-3"
+                    ),
+                    html.Div(id="output")
+                ]),
+                dbc.Col([
+
+                ]),
+                dbc.Col([
+                    comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
+                    dbc.Tooltip(
+                        target=ID.MERCHANT_INFO_ICON,
+                        is_open=False,
+                        placement="bottom-end",
+                        children=[
+                            "Placeholder for",
+                            html.Br(),
+                            "the tooltip",
+                            html.Br(),
+                            "..."
+                        ]),
+                ])
+            ]),
 
             html.P(),  # Dummy element
-            html.H4("Merchant", id=ID.MERCHANT_HEADING),
-            comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
-            dbc.Tooltip(
-                target=ID.MERCHANT_INFO_ICON,
-                is_open=False,
-                placement="bottom-end",
-                children=[
-                    "Placeholder for",
-                    html.Br(),
-                    "the tooltip",
-                    html.Br(),
-                    "..."
-                ])
-
         ])
 
 
-def create_merchant_general():
+def create_merchant_kpi():
     return dbc.Row([
         html.P("general merchant data"),
-        create_merchant_group_distribution_pie_chart(),
+#        create_merchant_group_distribution_pie_chart(),
        create_merchant_kpis()
     ])
 
 
-def create_merchant_individual():
+def create_merchant_graph():
     return dbc.Row([
         html.P("individual merchant data"),
         # searchbar for Merchant ID
@@ -77,7 +94,7 @@ def create_merchant_individual():
             [
                 html.Img(src=Icons.get_icon(IconID.LENS_SEARCH), className="search-icon"),
                 dcc.Input(
-                    id=ID.MERCHANT_ID_SEARCH,
+                    id=ID.MERCHANT_CHART_SEARCH,
                     type='text',
                     placeholder='Search by Merchant ID',
                     className='search-input',
