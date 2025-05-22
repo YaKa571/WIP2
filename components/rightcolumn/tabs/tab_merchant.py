@@ -88,6 +88,21 @@ def create_merchant_individual():
     ])
 
 def create_merchant_group_distribution_pie_chart():
+    """
+        Creates a Dash HTML Div containing a pie chart that visualizes the distribution
+        of merchant groups based on transaction counts.
+
+        The pie chart displays merchant groups whose transaction counts meet or exceed
+        a threshold (hardcoded as 1000 in this function). Smaller groups are grouped
+        together into an "Other" category by the underlying data function.
+
+        The pie chart shows both the percentage and merchant group label on each slice,
+        and the chart legend is hidden for cleaner visualization.
+
+        Returns:
+            html.Div: A Dash HTML Div component containing the pie chart wrapped in a
+                      flexbox container for centered display.
+        """
     my_pie_df = tab_merchant_data_setup.get_merchant_group_overview(1000)
 
     my_pie_fig = px.pie(
@@ -114,6 +129,18 @@ def create_merchant_group_distribution_pie_chart():
     )
 
 def create_merchant_kpis():
+    """
+       Creates a Dash HTML Div containing two KPI cards related to merchant groups.
+
+       KPI 1: Displays the most frequently used merchant group and its transaction count.
+       KPI 2: Displays the merchant group with the highest total transfer value and the value.
+
+       Each KPI card includes an icon, a descriptive title, and values wrapped in loading
+       components for asynchronous data updates.
+
+       Returns:
+           html.Div: A Dash HTML Div component containing two KPI cards laid out in a flexbox.
+       """
     group_1, count_1 = tab_merchant_data_setup.get_most_frequently_used_merchant_group()
     count_1 = str(count_1) + " Transactions"
     group_2, value_2 = tab_merchant_data_setup.get_highest_value_merchant_group()
