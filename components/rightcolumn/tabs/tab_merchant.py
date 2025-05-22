@@ -1,6 +1,6 @@
 import dash_bootstrap_components as dbc
 import plotly.express as px
-from dash import html, dcc
+from dash import html, dcc, Output, Input, callback
 
 from backend.data_setup.tabs import tab_merchant_data_setup
 from components.factories import component_factory as comp_factory
@@ -44,20 +44,18 @@ def _create_merchant_heading() -> html.Div:
         children=[
             dbc.Row([
                 dbc.Col([
-                    dbc.ButtonGroup(
-                        [
-                            dbc.Button("Option 1", id="btn-1", color="primary", outline=True),
-                            dbc.Button("Option 2", id="btn-2", color="primary", outline=True),
-                            dbc.Button("Option 3", id="btn-3", color="primary", outline=True),
-                        ],
-                        id="button-group",
-                        className="mb-3"
-                    ),
-                    html.Div(id="output")
-                ]),
-                dbc.Col([
+                    html.Div([
+                        html.Button('Option 1', id='btn-opt1', n_clicks=0, className='option-btn'),
+                        html.Button('Option 2', id='btn-opt2', n_clicks=0, className='option-btn'),
+                        html.Button('Option 3', id='btn-opt3', n_clicks=0, className='option-btn'),
+                    ], className='button-radio-wrapper'),
 
-                ]),
+
+
+                ], width = 10),
+                dbc.Col([
+                    html.Div(id='radio-output', style={'marginTop': '20px'}),
+                ], width=1),
                 dbc.Col([
                     comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
                     dbc.Tooltip(
@@ -71,12 +69,30 @@ def _create_merchant_heading() -> html.Div:
                             html.Br(),
                             "..."
                         ]),
-                ])
+                ], width = 1),
             ]),
 
-            html.P(),  # Dummy element
-        ])
 
+        ])
+# todo delete
+@callback(
+    Output('radio-output', 'children'),
+    Output('btn-opt1', 'className'),
+    Output('btn-opt2', 'className'),
+    Output('btn-opt3', 'className'),
+    Input('btn-opt1', 'n_clicks'),
+    Input('btn-opt2', 'n_clicks'),
+    Input('btn-opt3', 'n_clicks'),
+)
+def update_buttons(n1, n2, n3):
+    buttons = {'opt1': n1, 'opt2': n2, 'opt3': n3}
+    selected = max(buttons, key=buttons.get)
+
+    def cls(opt): return 'option-btn selected' if selected == opt else 'option-btn'
+
+    return f' {selected}', cls('opt1'), cls('opt2'), cls('opt3')
+
+# todo end delete
 
 def create_merchant_kpi():
     return dbc.Row([
