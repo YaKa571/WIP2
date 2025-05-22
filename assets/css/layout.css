@@ -59,6 +59,14 @@ html, body, #react-entry-point, .dash-application {
 }
 
 /* ==========================================================================
+   Text
+   ========================================================================== */
+
+h1, h2, h3, h4, h5, h6, p, label, div {
+    user-select: none;
+}
+
+/* ==========================================================================
    Top Cards (KPI)
    ========================================================================== */
 
@@ -128,6 +136,11 @@ html, body, #react-entry-point, .dash-application {
 
 .info-icon {
     font-size: 1.4rem !important;
+    transition: transform 0.25s ease-in-out;
+}
+
+.info-icon:hover {
+    transform: rotate(360deg) scale(1.15);
 }
 
 /* ==========================================================================
@@ -254,7 +267,6 @@ html, body, #react-entry-point, .dash-application {
 }
 
 .settings-button-text:hover {
-    background-color: var(--settings-button-text-bg-hover);
     transform: scale(1.02);
 }
 

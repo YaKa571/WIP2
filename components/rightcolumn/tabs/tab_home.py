@@ -14,7 +14,7 @@ MODEBAR_CONFIG = dict(
     displayModeBar=True,
     displaylogo=False
 )
-COLOR_BLUE_MAIN = "#0d6efd"
+COLOR_BLUE_MAIN = "#2563eb"
 FEMALE_PINK = "#c65ed4"
 BAR_CHART_OPTIONS = [
     {"label": "MOST VALUABLE MERCHANTS", "value": "most_valuable_merchants"},
@@ -228,7 +228,8 @@ def _create_bottom_bar_diagrams() -> html.Div:
                                         placeholder="Select a KPI...",
                                         style={"width": "100%"},
                                         value=BAR_CHART_OPTIONS[0]["value"],
-                                        clearable=False
+                                        clearable=False,
+                                        searchable=False,
                                     )
 
                                 ])
@@ -256,7 +257,8 @@ def _create_bottom_bar_diagrams() -> html.Div:
         ])
 
 
-def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label", showlegend: bool = True,
+def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
+                     hover_template: str = None, showlegend: bool = True,
                      dark_mode: bool = False) -> go.Figure:
     """
     Create a pie graph visualization.
@@ -284,7 +286,7 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label", s
             A Plotly Figure object representing the pie chart visualization.
     """
     if colors is None:
-        colors = [FEMALE_PINK, "#5d9cf8"]  # Female = pink, Male = blue
+        colors = [FEMALE_PINK, COLOR_BLUE_MAIN]  # Female = pink, Male = blue
 
     textcolor = "white" if dark_mode else "black"
 
@@ -301,7 +303,7 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label", s
                 marker=dict(colors=colors),
                 textinfo=textinfo,
                 textfont=dict(color=textcolor),
-                hovertemplate="%{label}<br>%{percent}<br>$%{value:,.2f}"
+                hovertemplate=hover_template
             )
         ],
         layout=go.Layout(
@@ -356,9 +358,9 @@ def get_most_valuable_merchant_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_1"},
         target=ID.HOME_KPI_MOST_VALUABLE_MERCHANT,
         children=[
-            f"Merchant ID: {dm.get_most_valuable_merchant(state).id}",
+            f"🆔 Merchant ID: {dm.get_most_valuable_merchant(state).id}",
             html.Br(),
-            f"MCC: {dm.get_most_valuable_merchant(state).mcc}"
+            f"🏷️ MCC: {dm.get_most_valuable_merchant(state).mcc}"
         ])
 
     return [one, two, tooltip]
@@ -394,9 +396,9 @@ def get_most_visited_merchant_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_2"},
         target=ID.HOME_KPI_MOST_VISITED_MERCHANT,
         children=[
-            f"Merchant ID: {dm.get_most_visited_merchant(state).id}",
+            f"🆔 Merchant ID: {dm.get_most_visited_merchant(state).id}",
             html.Br(),
-            f"MCC: {dm.get_most_visited_merchant(state).mcc}"
+            f"🏷️MCC: {dm.get_most_visited_merchant(state).mcc}"
         ])
 
     return [one, two, tooltip]
@@ -431,7 +433,7 @@ def get_top_spending_user_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_3"},
         target=ID.HOME_KPI_TOP_SPENDING_USER,
         children=[
-            f"User ID: {dm.get_top_spending_user(state).id}"
+            f"🆔 User ID: {dm.get_top_spending_user(state).id}"
         ])
 
     return [one, two, tooltip]
@@ -481,11 +483,21 @@ def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = Fa
                                       is provided.
     """
     df = dm.get_merchant_values_by_state(state=state).head(10)
+
+    hover_template = (
+        "🏷️ <b>MCC:</b> %{x}<br>"
+        "📝 <b>Description:</b> %{customdata[0]}<br>"
+        "🆔 <b>Merchant ID:</b> %{customdata[1]}<br>"
+        "💰 <b>Sum:</b> $%{y:,.2f}<br>"
+        "<extra></extra>"
+    )
+
     return comp_factory.create_bar_chart(
         df=df,
         x="mcc",
         y="merchant_sum",
-        hover_data=["mcc_desc", "merchant_id"],
+        custom_data=["mcc_desc", "merchant_id"],
+        hover_template=hover_template,
         title=f"TOP 10 MOST VALUABLE MERCHANTS IN {state.upper() if state else 'ALL STATES'}",
         labels={"mcc": "MCC", "merchant_sum": "Sum"},
         bar_color=COLOR_BLUE_MAIN,
@@ -518,11 +530,20 @@ def get_peak_hour_bar_chart(state: str = None, dark_mode: bool = False):
     """
     df = dm.get_transaction_counts_by_hour(state=state)
     df = df[df["transaction_count"] > 0].copy()
-    df["hour_range"] = df["hour"].apply(lambda h: f"{h:02d} – {(h + 1) % 24:02d}")
+    df["hour_range"] = df["hour"].apply(lambda h: f"{h:02d}:00 – {(h + 1) % 24:02d}:00")
+
+    hover_template = (
+        "⏰ <b>Hour:</b> %{customdata[0]}<br>"
+        "💳 <b>Transactions:</b> %{customdata[1]:,}<br>"
+        "<extra></extra>"
+    )
+
     return comp_factory.create_bar_chart(
         df=df,
         x="hour_range",
         y="transaction_count",
+        custom_data=["hour_range", "transaction_count"],
+        hover_template=hover_template,
         title=f"MOST ACTIVE HOURS IN {state.upper() if state else 'ALL STATES'}",
         labels={"hour_range": "Hour Range", "transaction_count": "Number of Transactions"},
         bar_color=COLOR_BLUE_MAIN,
@@ -545,13 +566,23 @@ def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = False):
     """
     df = dm.get_spending_by_user(state).head(10)
     df = df.merge(dm.df_users[["id", "gender", "current_age"]], left_on="client_id", right_on="id").drop(columns=["id"])
+
+    hover_template = (
+        "🆔 <b>User ID:</b> %{x}<br>"
+        "🧑‍🤝‍🧑 <b>Gender:</b> %{customdata[0]}<br>"
+        "🎂 <b>Age:</b> %{customdata[1]}<br>"
+        "💸 <b>Spending:</b> $%{customdata[2]:,.2f}<br>"
+        "<extra></extra>"
+    )
+
     return comp_factory.create_bar_chart(
         df=df,
         x="client_id",
         y="spending",
         color="gender",
         color_discrete_map={"Female": FEMALE_PINK, "Male": COLOR_BLUE_MAIN},
-        hover_data=["gender", "current_age", "spending"],
+        custom_data=["gender", "current_age", "spending"],
+        hover_template=hover_template,
         title=f"TOP 10 MOST SPENDING USERS IN {state.upper() if state else 'ALL STATES'}",
         labels={"client_id": "User ID", "spending": "Total Spending", "gender": "Gender", "current_age": "Age"},
         showlegend=True,
@@ -577,11 +608,21 @@ def get_most_visited_merchants_bar_chart(state: str = None, dark_mode: bool = Fa
         specified parameters.
     """
     df = dm.get_visits_by_merchant(state).head(10)
+
+    hover_template = (
+        "🏷️ <b>MCC:</b> %{customdata[0]}<br>"
+        "📝 <b>Description:</b> %{customdata[1]}<br>"
+        "🆔 <b>Merchant ID:</b> %{x}<br>"
+        "👣 <b>Visits:</b> %{customdata[2]:,}<br>"
+        "<extra></extra>"
+    )
+
     return comp_factory.create_bar_chart(
         df=df,
         x="merchant_id",
         y="visits",
-        hover_data=["mcc", "mcc_desc", "visits"],
+        custom_data=["mcc", "mcc_desc", "visits"],
+        hover_template=hover_template,
         title=f"TOP 10 MOST VISITED MERCHANTS IN {state.upper() if state else 'ALL STATES'}",
         labels={"merchant_id": "Merchant ID", "visits": "Visits"},
         bar_color=COLOR_BLUE_MAIN,
