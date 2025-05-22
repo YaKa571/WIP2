@@ -81,3 +81,4 @@ class ID(str, Enum):
     MERCHANT_BTN_MERCHANT_GROUP = "merchant-btn-merchant-group"
     MERCHANT_BTN_INDIVIDUAL_MERCHANT = "merchant-btn-individual-merchant"
     MERCHANT_KPI_CONTAINER = "merchant-kpi-container"
+    MERCHANT_GRAPH_CONTAINER = "merchant-graph-container"
