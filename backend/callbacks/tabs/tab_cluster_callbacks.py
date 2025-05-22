@@ -66,6 +66,8 @@ my_age_group_clustered_result = pd.concat([my_age_group_clustered_result, dummy_
 """
 Callback
 """
+
+
 @callback(
     Output(ID.CLUSTER_GRAPH, 'figure'),
     Output(ID.CLUSTER_LEGEND, 'children'),
@@ -106,13 +108,13 @@ def update_cluster(value, default_switch_value):
     }
     # Default
     if value == "Default":
-        default_switch_container = {'display' : 'block'}
+        default_switch_container = {'display': 'block'}
         if default_switch_value == 'total_value':
             fig = px.scatter(my_transactions_agg, x="transaction_count", y="total_value",
-                            color="cluster_str",
-                            color_discrete_map=cluster_colors,
-                            hover_data=['client_id', 'transaction_count', 'total_value','average_value'],
-                            title='Cluster: transaction amount/total value')
+                             color="cluster_str",
+                             color_discrete_map=cluster_colors,
+                             hover_data=['client_id', 'transaction_count', 'total_value', 'average_value'],
+                             title='Cluster: transaction amount/total value')
             fig.update_layout(showlegend=False)
         elif default_switch_value == 'average_value':
             fig = px.scatter(my_transactions_agg, x="transaction_count", y="average_value",
@@ -122,10 +124,10 @@ def update_cluster(value, default_switch_value):
                              title='Cluster: transaction amount/average value')
             fig.update_layout(showlegend=False)
         else:
-            fig=px.scatter()
+            fig = px.scatter()
         legend = get_legend_default(cluster_colors)
     elif value == "Test":
-        default_switch_container = {'display' : 'none'}
+        default_switch_container = {'display': 'none'}
         cluster_colors = {
             "0": "red",
             "1": "blue",
@@ -143,7 +145,7 @@ def update_cluster(value, default_switch_value):
         ])
     # Age Group
     elif value == "Age Group":
-        default_switch_container = {'display' : 'block'}
+        default_switch_container = {'display': 'block'}
         if default_switch_value == 'total_value':
             fig = px.scatter(my_age_group_clustered_result,
                              x="transaction_count",
@@ -177,15 +179,16 @@ def update_cluster(value, default_switch_value):
             fig = px.scatter()
         legend = get_legend_age_group(cluster_colors)
     elif value == "Income vs Expenditures":
-        default_switch_container = {'display' : 'none'}
+        default_switch_container = {'display': 'none'}
         fig = px.scatter()
         legend = get_legend_income_expenditure(cluster_colors)
     # in case something went wrong
     else:
-        default_switch_container = {'display' : 'none'}
+        default_switch_container = {'display': 'none'}
         fig = px.scatter()
         legend = html.Div("no legend available")
-    return fig, html.Div([html.H5("Legend:"),html.Br(), legend]), default_switch_container
+    return fig, html.Div([html.H5("Legend:"), html.Br(), legend]), default_switch_container
+
 
 def get_legend_default(cluster_colors):
     """
@@ -203,30 +206,31 @@ def get_legend_default(cluster_colors):
         """
     legend = html.Ul([
         html.Li([
-            html.Span("Cluster 0", style={"color": cluster_colors["0"], "font-weight": "bold"}),
+            html.Span("Cluster 0", style={"color": cluster_colors["0"], "fontWeight": "bold"}),
             html.Br(),
             html.Span("Few, low-value transactions", style={"color": "#555"}),
-        ], style={"margin-bottom": "12px"}),
+        ], style={"marginBottom": "12px"}),
 
         html.Li([
-            html.Span("Cluster 1", style={"color": cluster_colors["1"], "font-weight": "bold"}),
+            html.Span("Cluster 1", style={"color": cluster_colors["1"], "fontWeight": "bold"}),
             html.Br(),
             html.Span("Frequent transactions with moderate amounts", style={"color": "#555"}),
-        ], style={"margin-bottom": "12px"}),
+        ], style={"marginBottom": "12px"}),
 
         html.Li([
-            html.Span("Cluster 2", style={"color": cluster_colors["2"], "font-weight": "bold"}),
+            html.Span("Cluster 2", style={"color": cluster_colors["2"], "fontWeight": "bold"}),
             html.Br(),
             html.Span("Few but very large transactions", style={"color": "#555"}),
-        ], style={"margin-bottom": "12px"}),
+        ], style={"marginBottom": "12px"}),
 
         html.Li([
-            html.Span("Cluster 3", style={"color": cluster_colors["3"], "font-weight": "bold"}),
+            html.Span("Cluster 3", style={"color": cluster_colors["3"], "fontWeight": "bold"}),
             html.Br(),
             html.Span("High frequency and high value", style={"color": "#555"}),
-        ], style={"margin-bottom": "12px"}),
+        ], style={"marginBottom": "12px"}),
     ])
     return legend
+
 
 def get_legend_age_group(cluster_colors):
     """
@@ -243,35 +247,36 @@ def get_legend_age_group(cluster_colors):
        """
     legend_items = [
         html.Li([
-            html.Span("Cluster 0", style={"color": cluster_colors["0"], "font-weight": "bold"}),
+            html.Span("Cluster 0", style={"color": cluster_colors["0"], "fontWeight": "bold"}),
             html.Br(),
             html.Span("Few, low-value transactions", style={"color": "#555"}),
-        ], style={"margin-bottom": "12px"}),
+        ], style={"marginBottom": "12px"}),
         html.Li([
-            html.Span("Cluster 1", style={"color": cluster_colors["1"], "font-weight": "bold"}),
+            html.Span("Cluster 1", style={"color": cluster_colors["1"], "fontWeight": "bold"}),
             html.Br(),
             html.Span("Frequent transactions with moderate amounts", style={"color": "#555"}),
-        ], style={"margin-bottom": "12px"}),
+        ], style={"marginBottom": "12px"}),
         html.Li([
-            html.Span("Cluster 2", style={"color": cluster_colors["2"], "font-weight": "bold"}),
+            html.Span("Cluster 2", style={"color": cluster_colors["2"], "fontWeight": "bold"}),
             html.Br(),
             html.Span("Few but very large transactions", style={"color": "#555"}),
-        ], style={"margin-bottom": "12px"}),
+        ], style={"marginBottom": "12px"}),
         html.Li([
-            html.Span("Cluster 3", style={"color": cluster_colors["3"], "font-weight": "bold"}),
+            html.Span("Cluster 3", style={"color": cluster_colors["3"], "fontWeight": "bold"}),
             html.Br(),
             html.Span("High frequency and high value", style={"color": "#555"}),
-        ], style={"margin-bottom": "12px"}),
+        ], style={"marginBottom": "12px"}),
     ]
     # adds text for missing age groups
     if missing_groups:
         legend_items.append(html.Li([
-            html.Span("no data for following age groups:", style={"font-weight": "bold", "color": "red"}),
+            html.Span("no data for following age groups:", style={"fontWeight": "bold", "color": "red"}),
             html.Br(),
             html.Span(", ".join(missing_groups), style={"color": "red"}),
-        ], style={"margin-top": "20px"}))
+        ], style={"marginTop": "20px"}))
 
     return html.Ul(legend_items)
+
 
 def get_legend_income_expenditure(cluster_colors):
     # TODO
