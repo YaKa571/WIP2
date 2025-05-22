@@ -4,24 +4,24 @@
 
 :root {
     /* — Light Mode — */
-    --bg-page: #f5f7fa;
-    --text-main: #2e3a4a;
-    --card-bg: #ffffff;
-    --blue-main: #0d6efd;
+    --bg-page: #f7f9fb;
+    --text-main: #222c3a;
+    --card-bg: #fff;
+    --blue-main: #2563eb;
 
     /* Icon-Filter trick */
-    --icon-filter: invert(18%) sepia(11%) saturate(1631%) hue-rotate(175deg) brightness(95%) contrast(86%);
+    --icon-filter: invert(13%) sepia(44%) saturate(449%) hue-rotate(176deg) brightness(95%) contrast(91%);
 
-    /* Dark shadows for the light-mode */
-    --card-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.08);
-    --card-shadow-2: 0 4px 6px rgba(0, 0, 0, 0.04);
-    --card-shadow-hover-1: 0 4px 8px rgba(0, 0, 0, 0.10);
-    --card-shadow-hover-2: 0 8px 15px rgba(0, 0, 0, 0.06);
+    /* Card Shadows */
+    --card-shadow-1: 0 1px 3px rgba(20, 50, 120, 0.06);
+    --card-shadow-2: 0 4px 8px rgba(20, 50, 120, 0.04);
+    --card-shadow-hover-1: 0 4px 8px rgba(20, 50, 120, 0.09);
+    --card-shadow-hover-2: 0 8px 16px rgba(20, 50, 120, 0.07);
 
     /* Offcanvas Settings */
-    --offcanvas-settings-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
-    --offcanvas-backdrop: rgba(0, 0, 0, 0.5);
-    --offcanvas-bg: rgba(240, 242, 245, 0.86);
+    --offcanvas-settings-shadow: 0 -4px 20px rgba(20, 50, 120, 0.07);
+    --offcanvas-backdrop: rgba(40, 50, 90, 0.09);
+    --offcanvas-bg: rgba(250, 251, 253, 0.98);
 
     /* Layout */
     --gutter: 0.75rem;
@@ -30,102 +30,105 @@
     --bugfix-border-radius: calc(var(--outer-border-radius) + 4px);
 
     /* Tab */
-    --tab-text: #6b7280;
-    --tab-text-hover: #efefef;
-    --tab-text-active: #ffffff;
+    --tab-text: #5e6a7d;
+    --tab-text-hover: #fff;
+    --tab-text-active: #fff;
     --tab-background-active: var(--blue-main);
-    --tab-background-inactive-hover: #2a81ff;
-    --tab-background-active-hover: #0d59fd;
-    --tab-underline-color: #d1d5db;
-    --tab-underline-color-hover: #9ca3af;
-    --tab-underline-color-active: #ffffff;
+    --tab-background-inactive-hover: #316cf4;
+    --tab-background-active-hover: #1744b3;
+    --tab-underline-color: #c2d1e7;
+    --tab-underline-color-hover: #8fb2e6;
+    --tab-underline-color-active: #2563eb;
 
     /* Table */
-    --table-bg-even: #f2f2f2;
+    --table-bg-even: #f5f7fa;
     --table-bg-odd: #ffffff;
-    --table-border-color: #b8b8b8;
-    --table-header-text-color: white;
-    --table-scrollbar-thumb-color: #9ca3af;
+    --table-border-color: #dde3ec;
+    --table-header-text-color: #213148;
+    --table-scrollbar-thumb-color: #b7c3d8;
     --table-button-radius: 7px;
 
     /* Dropdown */
-    --dropdown-body-color: #333333;
-    --dropdown-body-bg: #ffffff;
+    --dropdown-body-color: #233045;
+    --dropdown-body-bg: #f9f9f9;
+    --dropdown-border-color: rgba(0, 0, 0, 0.175);
+    --dropdown-border-radius: 12px;
 
     /* Spinner */
-    --spinner-bg: rgba(0, 0, 0, 0.15);
+    --spinner-bg: rgba(20, 50, 120, 0.12);
 
     /* Tab KPI Cards */
-    --kpi-card-header-bg: #f9f9f9;
-    --kpi-card-splitline: #dfdfdf;
-    --kpi-card-body-bg: #ffffff;
+    --kpi-card-header-bg: #f3f7fa;
+    --kpi-card-splitline: #e5ebf4;
+    --kpi-card-body-bg: #fff;
 
     /* Settings Button Text */
     --settings-button-text-border: 1px solid var(--text-main);
-    --settings-button-text-bg-hover: #f9f9f9;
+    --settings-button-text-bg-hover: #f3f7fa;
 
     /* Etc. */
-    --kpi-number-value: #2E7D32;
+    --kpi-number-value: #259d60;
     --modebar-icon-filter: brightness(0%);
 }
 
 .dark-mode {
     /* — Dark Mode — */
-    --bg-page: #121212;
-    --text-main: #e5e5e5;
-    --card-bg: #1f1f1f;
+    --bg-page: #181a1b;
+    --text-main: #e0e6ed;
+    --card-bg: #20232a;
 
     /* Icon-Filter trick */
-    --icon-filter: invert(99%) sepia(86%) saturate(57%) hue-rotate(208deg) brightness(106%) contrast(80%);
+    --icon-filter: invert(98%) sepia(1%) saturate(3212%) hue-rotate(180deg) brightness(92%) contrast(101%);
 
-    /* White shadows for the dark-mode */
-    --card-shadow-1: 0 1px 3px rgba(255, 255, 255, 0.04);
-    --card-shadow-2: 0 4px 6px rgba(255, 255, 255, 0.02);
-    --card-shadow-hover-1: 0 4px 8px rgba(255, 255, 255, 0.06);
-    --card-shadow-hover-2: 0 8px 15px rgba(255, 255, 255, 0.03);
+    /* Card Shadows */
+    --card-shadow-1: 0 1px 4px rgba(0, 31, 63, 0.10);
+    --card-shadow-2: 0 4px 12px rgba(0, 31, 63, 0.06);
+    --card-shadow-hover-1: 0 4px 8px rgba(0, 40, 80, 0.15);
+    --card-shadow-hover-2: 0 8px 16px rgba(0, 31, 63, 0.08);
 
-    /* Off Canvas Settings */
-    --offcanvas-settings-shadow: 0 -4px 20px rgba(255, 255, 255, 0.04);
-    --offcanvas-backdrop: rgba(255, 255, 255, 0.08);
-    --offcanvas-bg: rgba(38, 38, 38, 0.94);
+    /* Offcanvas Settings */
+    --offcanvas-settings-shadow: 0 -4px 20px rgba(20, 28, 46, 0.14);
+    --offcanvas-backdrop: rgba(24, 26, 27, 0.75);
+    --offcanvas-bg: rgba(35, 39, 43, 0.98);
 
     /* Tab */
-    --tab-text: #ccd1d8;
-    --tab-text-hover: #efefef;
-    --tab-text-active: #ffffff;
-    --tab-background-active: var(--blue-main);
-    --tab-background-inactive-hover: #2a81ff;
-    --tab-background-active-hover: #0d59fd;
-    --tab-underline-color: #d1d5db;
-    --tab-underline-color-hover: #9ca3af;
-    --tab-underline-color-active: #ffffff;
+    --tab-text: #b2b8c3;
+    --tab-text-hover: #e0e6ed;
+    --tab-text-active: #f1f3f5;
+    --tab-background-active: #246bfd;
+    --tab-background-inactive-hover: #2e8fff;
+    --tab-background-active-hover: #1a54c8;
+    --tab-underline-color: #415a77;
+    --tab-underline-color-hover: #5876a3;
+    --tab-underline-color-active: #91b9f4;
 
     /* Table */
-    --table-bg-even: #1f1f1f;
-    --table-bg-odd: #2f2f2f;
-    --table-border-color: #404040;
+    --table-bg-even: #22272b;
+    --table-bg-odd: #23272b;
+    --table-border-color: #334155;
+    --table-header-text-color: #dbeafe;
+    --table-scrollbar-thumb-color: #425a6d;
 
     /* Dropdown */
-    --dropdown-body-bg: #292929;
-    --dropdown-body-color: #e5e5e5;
-    --dropdown-border-color: #444;
-    --dropdown-secondary-bg: #2a2a2a;
-    --dropdown-primary: #0d6efd;
+    --dropdown-body-bg: #23272b;
+    --dropdown-body-color: #e0e6ed;
+    --dropdown-border-color: #334155;
+    --dropdown-secondary-bg: #242a36;
+    --dropdown-primary: #246bfd;
 
     /* Spinner */
-    --spinner-bg: rgba(255, 255, 255, 0.2);
+    --spinner-bg: rgba(36, 107, 253, 0.17);
 
     /* Tab KPI Cards */
-    --kpi-card-header-bg: #161616;
-    --kpi-card-splitline: #2c2a2a;
-    --kpi-card-body-bg: #191919;
+    --kpi-card-header-bg: #1b1b22;
+    --kpi-card-splitline: #2e3347;
+    --kpi-card-body-bg: #23232a;
 
     /* Settings Button Text */
     --settings-button-text-border: 1px solid var(--text-main);
-    --settings-button-text-bg-hover: #161616;
+    --settings-button-text-bg-hover: #1e2226;
 
     /* Etc. */
     --kpi-number-value: #81C784;
-    --modebar-icon-filter: brightness(1000%);
-
+    --modebar-icon-filter: brightness(900%);
 }
