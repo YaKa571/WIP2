@@ -7,7 +7,7 @@ from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
 from frontend.icon_manager import Icons, IconID
 
-COLOR_BLUE_MAIN = "#0d6efd"
+COLOR_BLUE_MAIN = "#2563eb"
 
 
 # Info: Edit grid layout in assets/css/tabs.css
