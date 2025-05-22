@@ -257,7 +257,8 @@ def _create_bottom_bar_diagrams() -> html.Div:
         ])
 
 
-def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label", showlegend: bool = True,
+def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
+                     hover_template: str = None, showlegend: bool = True,
                      dark_mode: bool = False) -> go.Figure:
     """
     Create a pie graph visualization.
@@ -288,12 +289,6 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label", s
         colors = [FEMALE_PINK, COLOR_BLUE_MAIN]  # Female = pink, Male = blue
 
     textcolor = "white" if dark_mode else "black"
-
-    hover_template = (
-        "🧑‍🤝‍🧑 <b>Gender:</b> %{label}<br>"
-        "📊 <b>Share:</b> %{percent}<br>"
-        "💰 <b>Sum:</b> $%{value:,.2f}"
-    )
 
     labels = list(data.keys())
     values = list(data.values())

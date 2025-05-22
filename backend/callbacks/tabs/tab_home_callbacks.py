@@ -105,11 +105,33 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
     age_sums = dm.get_expenditures_by_age(state=state)
 
     # Build figures
-    fig_gender = create_pie_graph(data=gender_sums, dark_mode=dark_mode, showlegend=False)
+
+    hover_template_gender = (
+        "🧑‍🤝‍🧑 <b>Gender:</b> %{label}<br>"
+        "📊 <b>Share:</b> %{percent}<br>"
+        "💰 <b>Sum:</b> $%{value:,.2f}"
+    )
+
+    fig_gender = create_pie_graph(data=gender_sums, dark_mode=dark_mode, showlegend=False,
+                                  hover_template=hover_template_gender)
+
+    hover_template_channel = (
+        "🛒‍ <b>Channel:</b> %{label}<br>"
+        "📊 <b>Share:</b> %{percent}<br>"
+        "💰 <b>Sum:</b> $%{value:,.2f}"
+    )
+
     fig_channel = create_pie_graph(data=channel_sums, dark_mode=dark_mode, showlegend=False,
-                                   colors=["#FFCD00", "#81C784"])
+                                   colors=["#FFCD00", "#81C784"], hover_template=hover_template_channel)
+
+    hover_template_age = (
+        "🎂 <b>Age:</b> %{label}<br>"
+        "📊 <b>Share:</b> %{percent}<br>"
+        "💰 <b>Sum:</b> $%{value:,.2f}"
+    )
+
     fig_age = create_pie_graph(data=age_sums, dark_mode=dark_mode, showlegend=False,
-                               textinfo="label")
+                               textinfo="label", hover_template=hover_template_age)
 
     # Heading and KPI details
     heading = "All States" if state is None else f"State: {state}"
