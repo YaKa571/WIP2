@@ -17,7 +17,7 @@
 
 /* Cluster Tab Grid Layout */
 .tab-content-inner.cluster-tab {
-    grid-template-rows: auto !important;
+    grid-template-rows: auto auto 1fr !important;
     align-items: start;
     align-content: start;
 }
