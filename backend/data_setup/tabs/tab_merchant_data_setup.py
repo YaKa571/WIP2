@@ -1,5 +1,6 @@
 import pandas as pd
 from backend.data_manager import DataManager
+from backend.data_setup.tabs.tab_cluster_data_setup import prepare_default_data
 import json
 """
 contains data setup for Merchant tab
@@ -20,6 +21,11 @@ my_transactions_mcc=my_transactions.merge(my_mcc, how="left", on="mcc")
 my_transactions_mcc_agg = my_transactions_mcc.groupby('merchant_group').agg(
     transaction_count=('merchant_group','count')
 ).reset_index()
+
+my_transactions_agg_by_user = my_transactions.groupby('client_id').agg(
+        transaction_count=('amount', 'count'),
+        total_value=('amount', 'sum')
+    ).reset_index()
 
 def get_merchant_group_overview(threshold):
     """
@@ -49,6 +55,44 @@ def get_merchant_group_overview(threshold):
         }])
         large_groups = pd.concat([large_groups, other_df], ignore_index=True)
     return large_groups
+
+def get_most_user_with_most_transactions_all_merchants():
+    """
+        Identify the user with the highest number of transactions across all merchant groups.
+
+        This function sorts the transaction data aggregated by user in descending order
+        based on transaction count, then selects the user with the most transactions.
+
+        Returns:
+            tuple: (user_id, transaction_count)
+                user_id (int): ID of the user with the most transactions.
+                transaction_count (int): Number of transactions made by this user.
+        """
+    my_df = my_transactions_agg_by_user.reset_index().sort_values(by='transaction_count',
+                                                                                        ascending=False)
+
+    user_return = int(my_df.iloc[0]["client_id"])
+    count_return = int(my_df.iloc[0]["transaction_count"])
+    return user_return, count_return
+
+def get_user_with_highest_expenditure_all_merchants():
+    """
+       Identify the user with the highest total expenditure across all merchant groups.
+
+       This function sorts the transaction data aggregated by user in descending order
+       based on total transaction value, then selects the user with the highest spending.
+
+       Returns:
+           tuple: (user_id, total_value)
+               user_id (int): ID of the user with the highest total expenditure.
+               total_value (float): Sum of all transaction amounts by this user.
+       """
+    my_df = my_transactions_agg_by_user.reset_index().sort_values(by='total_value',
+                                                                                        ascending=False)
+
+    user_return = int(my_df.iloc[0]["client_id"])
+    value_return = my_df.iloc[0]["total_value"]
+    return user_return, value_return
 
 def get_most_frequently_used_merchant_group():
     """
