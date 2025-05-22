@@ -29,7 +29,7 @@ def update_merchant(n1, n2, n3):
 
     if selected == 'opt1':
         kpi_content = create_all_merchant_kpis()
-        graph_content = create_merchant_group_distribution_heat_map()
+        graph_content = create_merchant_group_distribution_tree_map()
     elif selected == 'opt2':
         merchant_group = "Parameter Merchant Group" #TODO
         kpi_content = create_merchant_group_kpi(merchant_group)
@@ -194,9 +194,9 @@ def create_all_merchant_kpis():
         )
     ])
 
-def create_merchant_group_distribution_heat_map():
+def create_merchant_group_distribution_tree_map():
     """
-           Generate a heat map (treemap) showing the distribution of merchant groups by transaction volume.
+           Generate a treemap showing the distribution of merchant groups by transaction volume.
 
            The function uses a predefined transaction threshold to separate large merchant groups
            from smaller ones. Groups below the threshold are aggregated under an "Other" category.
