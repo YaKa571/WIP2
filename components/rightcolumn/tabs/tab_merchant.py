@@ -21,9 +21,9 @@ def create_merchant_content():
 
             _create_merchant_heading(),
             # top: general data
-            create_merchant_general(),
+            create_merchant_kpi(),
             # bottom: individual merchant data
-            create_merchant_individual()
+            create_merchant_graph()
 
         ])
 
@@ -61,15 +61,15 @@ def _create_merchant_heading() -> html.Div:
         ])
 
 
-def create_merchant_general():
+def create_merchant_kpi():
     return dbc.Row([
         html.P("general merchant data"),
-        create_merchant_group_distribution_pie_chart(),
+#        create_merchant_group_distribution_pie_chart(),
        create_merchant_kpis()
     ])
 
 
-def create_merchant_individual():
+def create_merchant_graph():
     return dbc.Row([
         html.P("individual merchant data"),
         # searchbar for Merchant ID
@@ -77,7 +77,7 @@ def create_merchant_individual():
             [
                 html.Img(src=Icons.get_icon(IconID.LENS_SEARCH), className="search-icon"),
                 dcc.Input(
-                    id=ID.MERCHANT_ID_SEARCH,
+                    id=ID.MERCHANT_CHART_SEARCH,
                     type='text',
                     placeholder='Search by Merchant ID',
                     className='search-input',
