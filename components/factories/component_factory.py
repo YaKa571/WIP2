@@ -363,6 +363,8 @@ def create_bar_chart(
         y: str,
         title: str,
         hover_data: list = None,
+        custom_data: list = None,
+        hover_template: str = None,
         color: str = None,
         color_discrete_map: dict = None,
         labels: dict = None,
@@ -418,10 +420,9 @@ def create_bar_chart(
     text_color = "white" if dark_mode else "black"
     transparent_color = "rgba(0,0,0,0)"
     grid_color = "rgba(230,230,230,100)" if dark_mode else "rgba(25,25,25,100)"
-    legend_background = "rgba(25,25,25,100)" if dark_mode else "white"
 
-    fig = px.bar(
-        df,
+    px_bar_kwargs = dict(
+        data_frame=df,
         x=x,
         y=y,
         hover_data=hover_data,
@@ -431,6 +432,11 @@ def create_bar_chart(
         labels=labels
     )
 
+    if custom_data:
+        px_bar_kwargs["custom_data"] = custom_data
+
+    fig = px.bar(**px_bar_kwargs)
+
     fig.update_xaxes(type="category", categoryorder=x_category_order,
                      linecolor=grid_color, gridcolor=transparent_color)
 
@@ -439,11 +445,18 @@ def create_bar_chart(
     if bar_color and not color:
         fig.update_traces(marker_color=bar_color)
 
+    fig.update_traces(marker_line_width=0,
+                      opacity=0.95)
+
+    if hover_template:
+        fig.update_traces(hovertemplate=hover_template)
+
     fig.update_layout(
         paper_bgcolor=transparent_color,
         plot_bgcolor=transparent_color,
         margin=margin or dict(l=0, r=20, t=32, b=20),
         title_x=0.5,
+        title_y=0.975,
         showlegend=showlegend,
         modebar={"orientation": "h"},
         font=dict(color=text_color),
