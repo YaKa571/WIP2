@@ -1,5 +1,6 @@
 import pandas as pd
 from backend.data_manager import DataManager
+from backend.data_setup.tabs.tab_cluster_data_setup import prepare_default_data
 import json
 """
 contains data setup for Merchant tab
@@ -20,6 +21,8 @@ my_transactions_mcc=my_transactions.merge(my_mcc, how="left", on="mcc")
 my_transactions_mcc_agg = my_transactions_mcc.groupby('merchant_group').agg(
     transaction_count=('merchant_group','count')
 ).reset_index()
+
+my_transactions_agg_by_user = prepare_default_data(my_transactions)
 
 def get_merchant_group_overview(threshold):
     """
@@ -49,6 +52,26 @@ def get_merchant_group_overview(threshold):
         }])
         large_groups = pd.concat([large_groups, other_df], ignore_index=True)
     return large_groups
+
+# TODO: calculation
+def get_most_user_with_most_transactions_all_merchants():
+    my_transactions_agg_by_user = prepare_default_data(my_transactions)
+    my_transactions_agg_by_user = my_transactions_agg_by_user.reset_index().sort_values(by='transaction_count',
+                                                                                        ascending=False)
+
+    group_return = my_transactions_agg_by_user.loc[0, "client_id"]
+    count_return = my_transactions_agg_by_user.loc[0, "transaction_count"]
+    return group_return, count_return
+
+# TODO: calculation
+def get_user_with_highest_expenditure_all_merchants():
+    my_transactions_agg_by_user = prepare_default_data(my_transactions)
+    my_transactions_agg_by_user = my_transactions_agg_by_user.reset_index().sort_values(by='total_value',
+                                                                                        ascending=False)
+
+    group_return = my_transactions_agg_by_user.loc[0, "client_id"]
+    count_return = my_transactions_agg_by_user.loc[0, "total_value"]
+    return group_return, count_return
 
 def get_most_frequently_used_merchant_group():
     """

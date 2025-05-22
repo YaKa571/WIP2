@@ -27,16 +27,6 @@ def create_merchant_content():
 
 
 def create_merchant_heading() -> html.Div:
-    """
-    Creates and returns a `html.Div` element specifically styled for a merchant section
-    heading in a user interface. The returned `html.Div` includes a dummy paragraph
-    element, a heading with the text "Merchant", an info icon, and a tooltip describing
-    the info icon.
-
-    Returns:
-        html.Div: A Div element containing the merchant section heading and supplementary UI
-        elements.
-    """
     return html.Div(
         className="tab-heading-wrapper",
         children=[

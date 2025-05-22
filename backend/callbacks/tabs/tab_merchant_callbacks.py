@@ -41,10 +41,9 @@ def create_all_merchant_kpis():
     count_1 = str(count_1) + " Transactions"
     group_2, value_2 = tab_merchant_data_setup.get_highest_value_merchant_group()
     value_2 = "$" + str(value_2)
-    group_3 = "3"
-    value_3 = 3
-    group_4 = "4"
-    value_4 = 4
+    group_3, value_3 = tab_merchant_data_setup.get_most_user_with_most_transactions_all_merchants()
+    group_4, value_4 = tab_merchant_data_setup.get_user_with_highest_expenditure_all_merchants()
+
     return html.Div(children=[
         html.Div(children=[
             # KPI 1: Most frequently used merchant group
