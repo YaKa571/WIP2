@@ -73,7 +73,6 @@ class ID(str, Enum):
 
     # Merchant Tab
     MERCHANT_CHART_SEARCH = "merchant-chart-search"
-    MERCHANT_HEADING = "merchant-heading"
     MERCHANT_INFO_ICON = "merchant-info-icon"
     MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP = "merchant-kpi-most-frequently-merchant"
     MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP = "merchant-kpi-high-value-merchant"

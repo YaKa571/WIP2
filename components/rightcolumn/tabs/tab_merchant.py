@@ -42,22 +42,39 @@ def _create_merchant_heading() -> html.Div:
     return html.Div(
         className="tab-heading-wrapper",
         children=[
+            dbc.Row([
+                dbc.Col([
+                    dbc.ButtonGroup(
+                        [
+                            dbc.Button("Option 1", id="btn-1", color="primary", outline=True),
+                            dbc.Button("Option 2", id="btn-2", color="primary", outline=True),
+                            dbc.Button("Option 3", id="btn-3", color="primary", outline=True),
+                        ],
+                        id="button-group",
+                        className="mb-3"
+                    ),
+                    html.Div(id="output")
+                ]),
+                dbc.Col([
+
+                ]),
+                dbc.Col([
+                    comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
+                    dbc.Tooltip(
+                        target=ID.MERCHANT_INFO_ICON,
+                        is_open=False,
+                        placement="bottom-end",
+                        children=[
+                            "Placeholder for",
+                            html.Br(),
+                            "the tooltip",
+                            html.Br(),
+                            "..."
+                        ]),
+                ])
+            ]),
 
             html.P(),  # Dummy element
-            html.H4("Merchant", id=ID.MERCHANT_HEADING),
-            comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
-            dbc.Tooltip(
-                target=ID.MERCHANT_INFO_ICON,
-                is_open=False,
-                placement="bottom-end",
-                children=[
-                    "Placeholder for",
-                    html.Br(),
-                    "the tooltip",
-                    html.Br(),
-                    "..."
-                ])
-
         ])
 
 
