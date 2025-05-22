@@ -16,7 +16,39 @@ my_mcc["mcc"] = my_mcc["mcc"].astype(int)
 # print(my_mcc.head())
 # join transactions and mcc_codes
 my_transactions_mcc=my_transactions.merge(my_mcc, how="left", on="mcc")
-# print(my_transactions_mcc[["id", "mcc", "merchant_group"]].head())
+
+my_transactions_mcc_agg = my_transactions_mcc.groupby('merchant_group').agg(
+    transaction_count=('merchant_group','count')
+).reset_index()
+
+def get_merchant_group_overview(threshold):
+    """
+        Aggregates merchant groups by transaction count, grouping smaller groups into 'Other'.
+
+        This function takes a threshold value and separates merchant groups into "large" groups
+        (with transaction counts greater than or equal to the threshold) and "small" groups
+        (with counts below the threshold). It then sums the transaction counts of all small
+        groups and adds them as a single 'Other' group to the large groups if the sum is greater than zero.
+
+        Args:
+            threshold (int): The minimum transaction count for a merchant group to be considered "large".
+
+        Returns:
+            pandas.DataFrame: A DataFrame containing merchant groups with transaction counts,
+                              where groups below the threshold are combined into an 'Other' group.
+                              The DataFrame has columns 'merchant_group' and 'transaction_count'.
+        """
+    my_df = my_transactions_mcc_agg.copy()
+    large_groups = my_df[my_df['transaction_count'] >= threshold]
+    small_groups = my_df[my_df['transaction_count'] < threshold]
+    other_sum = small_groups['transaction_count'].sum()
+    if other_sum > 0:
+        other_df = pd.DataFrame([{
+            'merchant_group': 'Other',
+            'transaction_count': other_sum
+        }])
+        large_groups = pd.concat([large_groups, other_df], ignore_index=True)
+    return large_groups
 
 def get_most_frequently_used_merchant_group():
     """

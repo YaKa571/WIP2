@@ -77,3 +77,4 @@ class ID(str, Enum):
     MERCHANT_INFO_ICON = "merchant-info-icon"
     MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP = "merchant-kpi-most-frequently-merchant"
     MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP = "merchant-kpi-high-value-merchant"
+    MERCHANT_PIE_CHART_DISTRIBUTION = "pie-chart-distribution"
