@@ -191,8 +191,9 @@
 .settings-dropdown .Select-control {
     background-color: var(--dropdown-body-bg);
     color: var(--dropdown-body-color);
-    border: 1px solid var(--dropdown-border-color, #ccc);
+    border: 1px solid var(--dropdown-border-color);
     transition: all 0.2s ease;
+    border-radius: var(--dropdown-border-radius);
 }
 
 .settings-dropdown .Select-control,
@@ -250,6 +251,15 @@
     background-color: var(--dropdown-body-bg) !important;
     display: flex;
     justify-content: center;
+    border-radius: var(--dropdown-border-radius);
+    border: 1px solid var(--dropdown-border-color);
+}
+
+.settings-dropdown.is-open .Select-value,
+.settings-dropdown.is-open .Select-multi-value-wrapper,
+.settings-dropdown.is-open .Select-control {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .settings-text-centered .VirtualizedSelectOption {
