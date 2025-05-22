@@ -1,4 +1,5 @@
 import dash_bootstrap_components as dbc
+import plotly.express as px
 from dash import html, dcc
 
 from backend.data_setup.tabs import tab_merchant_data_setup
@@ -63,7 +64,8 @@ def _create_merchant_heading() -> html.Div:
 def create_merchant_general():
     return dbc.Row([
         html.P("general merchant data"),
-        create_merchant_kpis()
+        create_merchant_group_distribution_pie_chart(),
+       create_merchant_kpis()
     ])
 
 
@@ -85,6 +87,28 @@ def create_merchant_individual():
         ),
     ])
 
+def create_merchant_group_distribution_pie_chart():
+    my_pie_df = tab_merchant_data_setup.get_merchant_group_overview(1000)
+
+    my_pie_fig = px.pie(
+        my_pie_df,
+        names='merchant_group',
+        values='transaction_count',
+        title="Merchant Group Distribution"
+    )
+
+    return html.Div(
+        className="flex-wrapper",
+        style={"display": "flex", "justifyContent": "center", "alignItems": "center", "height": "450px"},
+        children=[
+            dcc.Graph(
+                id=ID.MERCHANT_PIE_CHART_DISTRIBUTION,
+                figure=my_pie_fig,
+                config={"displayModeBar": True, "displaylogo": False},
+                style={"width": "400px", "height": "400px"}
+            )
+        ]
+    )
 
 def create_merchant_kpis():
     group_1, count_1 = tab_merchant_data_setup.get_most_frequently_used_merchant_group()

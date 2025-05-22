@@ -21,8 +21,18 @@ my_transactions_mcc_agg = my_transactions_mcc.groupby('merchant_group').agg(
     transaction_count=('merchant_group','count')
 ).reset_index()
 
-def get_merchant_group_overview():
-    return my_transactions_mcc_agg
+def get_merchant_group_overview(threshold):
+    my_df = my_transactions_mcc_agg.copy()
+    large_groups = my_df[my_df['transaction_count'] >= threshold]
+    small_groups = my_df[my_df['transaction_count'] < threshold]
+    other_sum = small_groups['transaction_count'].sum()
+    if other_sum > 0:
+        other_df = pd.DataFrame([{
+            'merchant_group': 'Other',
+            'transaction_count': other_sum
+        }])
+        large_groups = pd.concat([large_groups, other_df], ignore_index=True)
+    return large_groups
 
 def get_most_frequently_used_merchant_group():
     """
