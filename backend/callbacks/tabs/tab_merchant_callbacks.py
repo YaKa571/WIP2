@@ -30,6 +30,9 @@ def update_merchant(n1, n2, n3):
     if selected == 'opt1':
         kpi_content = create_all_merchant_kpis()
         graph_content = create_merchant_group_distribution_heat_map()
+    elif selected == 'opt2':
+        kpi_content = create_merchant_group_kpi()
+        graph_content = go.Figure()
     else:
         kpi_content = html.Div()
         graph_content = go.Figure()
@@ -217,3 +220,142 @@ def create_merchant_group_distribution_heat_map():
     )
 
     return my_treemap_fig
+
+def create_merchant_group_kpi():
+    merchant_group = "Parameter Merchant Group"
+    merchant_1, count_1 = tab_merchant_data_setup.get_most_frequently_used_merchant_in_group(merchant_group)
+    merchant_1 = "ID " + str(merchant_1)
+    count_1 = str(count_1) + " Transactions"
+    merchant_2, value_2 = tab_merchant_data_setup.get_highest_value_merchant_in_group(merchant_group)
+    merchant_2 = "ID " + str(merchant_2)
+    value_2 = "$" + str(value_2)
+    user_3, count_3 = tab_merchant_data_setup.get_most_frequently_used_merchant_in_group(merchant_group)
+    user_3 = "ID " + str(user_3)
+    count_3 = str(count_3) + " Transactions"
+    user_4, value_4 = tab_merchant_data_setup.get_highest_value_merchant_in_group(merchant_group)
+    user_4 = "ID " + str(user_4)
+    value_4 = "$" + str(value_4)
+
+    return html.Div(children=[
+        html.Div(children=[
+            # KPI 1: Most frequently used merchant in group
+            dbc.Card(children=[
+                dbc.CardHeader(children=[
+                    comp_factory.create_icon(IconID.REPEAT, cls="icon icon-small"),
+                    html.P("Most frequently used merchant in merchant group", className="kpi-card-title")
+
+                ],
+                    className="card-header"
+                ),
+
+                dbc.CardBody(children=[
+
+                    dcc.Loading(children=[
+                        html.Div(children=[
+                            html.P(merchant_1, className="kpi-card-value"),
+                            html.P(count_1, className="kpi-card-value kpi-number-value")
+                        ],
+                            id=ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP
+                        )
+                    ],
+                        type="circle",
+                        color=COLOR_BLUE_MAIN)
+
+                ],
+                    className="card-body",
+                )
+            ],
+                className="card kpi-card",
+            ),
+            # KPI 2: Merchant in group with the highest total transfers
+            dbc.Card(children=[
+                dbc.CardHeader(children=[
+                    comp_factory.create_icon(IconID.USER_PAYING, cls="icon icon-small"),
+                    html.P("Merchant in merchant group with the highest total transfers", className="kpi-card-title")
+
+                ],
+                    className="card-header"
+                ),
+
+                dbc.CardBody(children=[
+
+                    dcc.Loading(children=[
+                        html.Div(children=[
+                            html.P(merchant_2, className="kpi-card-value"),
+                            html.P(value_2, className="kpi-card-value kpi-number-value")
+                        ],
+                            id=ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP
+                        )
+                    ],
+                        type="circle",
+                        color=COLOR_BLUE_MAIN)
+
+                ],
+                    className="card-body",
+                )
+            ],
+                className="card kpi-card",
+            ),
+            # KPI 3: User with most transactions in group
+            dbc.Card(children=[
+                dbc.CardHeader(children=[
+                    comp_factory.create_icon(IconID.REPEAT, cls="icon icon-small"),
+                    html.P("User with most transactions in merchant group", className="kpi-card-title")
+
+                ],
+                    className="card-header"
+                ),
+
+                dbc.CardBody(children=[
+
+                    dcc.Loading(children=[
+                        html.Div(children=[
+                            html.P(user_3, className="kpi-card-value"),
+                            html.P(count_3, className="kpi-card-value kpi-number-value")
+                        ],
+                            id=ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP
+                        )
+                    ],
+                        type="circle",
+                        color=COLOR_BLUE_MAIN)
+
+                ],
+                    className="card-body",
+                )
+            ],
+                className="card kpi-card",
+            ),
+            # KPI 4: User with the highest value in group
+            dbc.Card(children=[
+                dbc.CardHeader(children=[
+                    comp_factory.create_icon(IconID.USER_PAYING, cls="icon icon-small"),
+                    html.P("User with highest Expenditure in merchant group", className="kpi-card-title")
+
+                ],
+                    className="card-header"
+                ),
+
+                dbc.CardBody(children=[
+
+                    dcc.Loading(children=[
+                        html.Div(children=[
+                            html.P(user_4, className="kpi-card-value"),
+                            html.P(value_4, className="kpi-card-value kpi-number-value")
+                        ],
+                            id=ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP
+                        )
+                    ],
+                        type="circle",
+                        color=COLOR_BLUE_MAIN)
+
+                ],
+                    className="card-body",
+                )
+            ],
+                className="card kpi-card",
+            ),
+        ],
+            className="flex-wrapper"
+        )
+    ])
+
