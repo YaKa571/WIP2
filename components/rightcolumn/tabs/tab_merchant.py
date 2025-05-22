@@ -2,6 +2,7 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 from dash import html, dcc, Output, Input, callback
 
+
 from backend.callbacks.tabs import tab_merchant_callbacks
 from backend.data_setup.tabs import tab_merchant_data_setup
 from components.factories import component_factory as comp_factory
