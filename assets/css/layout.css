@@ -277,6 +277,7 @@ h1, h2, h3, h4, h5, h6, p, label, div {
 /* ============================================================
    Custom Radio Button
    ============================================================ */
+
 .button-radio-wrapper {
     display: flex;
     gap: 12px;
@@ -289,7 +290,7 @@ h1, h2, h3, h4, h5, h6, p, label, div {
     border: 2px solid #cccccc;
     border-radius: 10px;
     background-color: #ffffff;
-    color: #1f2937; /* dunkles Grau, gut lesbar */
+    color: #1f2937;
     cursor: pointer;
     font-weight: 500;
     transition: all 0.2s ease-in-out;
@@ -297,11 +298,11 @@ h1, h2, h3, h4, h5, h6, p, label, div {
 }
 
 .option-btn:hover {
-    background-color: #f3f4f6; /* leichtes Hellgrau */
+    background-color: #f3f4f6;
 }
 
 .option-btn.selected {
-    background-color: #2563eb; /* Hauptakzentfarbe */
+    background-color: #2563eb;
     color: #ffffff;
     border-color: #2563eb;
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
