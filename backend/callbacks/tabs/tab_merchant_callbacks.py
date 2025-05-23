@@ -13,49 +13,102 @@ COLOR_BLUE_MAIN = "#2563eb"
 """
 callbacks of tab Merchant
 """
+def cls(opt, selected):
+    return 'option-btn selected' if selected == opt else 'option-btn'
+
 @callback(
     Output(ID.MERCHANT_BTN_ALL_MERCHANTS, 'className'),
     Output(ID.MERCHANT_BTN_MERCHANT_GROUP, 'className'),
     Output(ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT, 'className'),
-    Output(ID.MERCHANT_INPUT_CONTAINER, 'children'),
+    Output("merchant-group-input-wrapper", 'style'),
+    Output("merchant-input-wrapper", 'style'),
     Output(ID.MERCHANT_KPI_CONTAINER, 'children'),
     Output(ID.MERCHANT_GRAPH_CONTAINER, 'figure'),
     Output(ID.MERCHANT_GRAPH_TITLE, 'children'),
     Input(ID.MERCHANT_BTN_ALL_MERCHANTS, 'n_clicks'),
     Input(ID.MERCHANT_BTN_MERCHANT_GROUP, 'n_clicks'),
     Input(ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT, 'n_clicks'),
+    Input(ID.MERCHANT_INPUT_GROUP_DROPDOWN, 'value'),
+    Input(ID.MERCHANT_INPUT_MERCHANT_ID, 'value'),
 )
-def update_merchant(n1, n2, n3):
-    buttons = {'opt1': n1, 'opt2': n2, 'opt3': n3}
-    selected = max(buttons, key=buttons.get)
+def update_merchant(n_all, n_group, n_indiv, selected_group, selected_merchant_id):
+    """
+    Callback to update the Merchant tab view based on user interactions.
 
-    def cls(opt): return 'option-btn selected' if selected == opt else 'option-btn'
+    This function manages the state of the three main merchant view options:
+    - All Merchants
+    - Merchant Group
+    - Individual Merchant
 
+    It updates button styles to reflect the selected option, toggles visibility of
+    input containers for merchant group and individual merchant ID inputs, and
+    dynamically generates KPI content, graphs, and titles depending on the current
+    selection and user inputs.
+
+    Args:
+        n_all (int): Number of clicks on the "All Merchants" button.
+        n_group (int): Number of clicks on the "Merchant Group" button.
+        n_indiv (int): Number of clicks on the "Individual Merchant" button.
+        selected_group (str or None): Currently selected merchant group from dropdown.
+        selected_merchant_id (str or None): Currently entered merchant ID in input field.
+
+    Returns:
+        tuple:
+            - className for "All Merchants" button (str)
+            - className for "Merchant Group" button (str)
+            - className for "Individual Merchant" button (str)
+            - CSS style dict to control visibility of merchant group input container (dict)
+            - CSS style dict to control visibility of individual merchant input container (dict)
+            - Dash HTML component with KPI content (html.Div or similar)
+            - Plotly Figure object for the merchant graph (plotly.graph_objs.Figure)
+            - String title for the merchant graph (str)
+    """
+    clicks = {'opt1': n_all or 0, 'opt2': n_group or 0, 'opt3': n_indiv or 0}
+    selected = max(clicks, key=clicks.get) if any(clicks.values()) else 'opt1'
+
+    # Toggle input container visibility
+    group_style = {"display": "block"} if selected == 'opt2' else {"display": "none"}
+    indiv_style = {"display": "block"} if selected == 'opt3' else {"display": "none"}
+
+    # Prepare KPI content, graph, and title based on selection and input values
     if selected == 'opt1':
-        merchant_input_container = html.P("")
+        merchant_input_container_style = {"display": "none"}  # not used here anyway
         kpi_content = create_all_merchant_kpis()
         graph_content = create_merchant_group_distribution_tree_map()
         graph_title = "Merchant Group Distribution"
     elif selected == 'opt2':
-        merchant_input_container = get_merchant_group_input_container()
-        merchant_group = "Grocery Stores, Supermarkets" # mcc: 5411 ID.MERCHANT_INPUT TODO
-        kpi_content = create_merchant_group_kpi(merchant_group)
-        graph_content = create_merchant_group_line_chart(merchant_group)
-        graph_title = f"History for Merchant Group: {merchant_group}"
+        merchant_group = selected_group or (tab_merchant_data_setup.get_all_merchant_groups()[0] if tab_merchant_data_setup.get_all_merchant_groups() else None)
+        kpi_content = create_merchant_group_kpi(merchant_group) if merchant_group else html.Div("No merchant groups available.")
+        graph_content = create_merchant_group_line_chart(merchant_group) if merchant_group else go.Figure()
+        graph_title = f"History for Merchant Group: {merchant_group}" if merchant_group else "No Merchant Group Selected"
     elif selected == 'opt3':
-        merchant_input_container = get_merchant_input_container()
-        merchant = 50783 # ID.MERCHANT_INPUT TODO
-        kpi_content = create_individual_merchant_kpi(merchant)
-        graph_content = create_individual_merchant_line_chart(merchant)
-        graph_title = f"History for Merchant: {merchant}"
+        try:
+            merchant = int(selected_merchant_id)
+        except (ValueError, TypeError):
+            merchant = None
+        if merchant:
+            kpi_content = create_individual_merchant_kpi(merchant)
+            graph_content = create_individual_merchant_line_chart(merchant)
+            graph_title = f"History for Merchant: {merchant}"
+        else:
+            kpi_content = html.Div("Invalid or no Merchant ID entered.")
+            graph_content = go.Figure()
+            graph_title = "Invalid Merchant ID"
     else:
-        merchant_input_container = html.P("No Input Container")
         kpi_content = html.Div()
         graph_content = go.Figure()
         graph_title = ""
 
-    return cls('opt1'), cls('opt2'), cls('opt3'),merchant_input_container, kpi_content, graph_content, graph_title
-
+    return (
+        cls('opt1', selected),
+        cls('opt2', selected),
+        cls('opt3', selected),
+        group_style,
+        indiv_style,
+        kpi_content,
+        graph_content,
+        graph_title
+    )
 # input for opt2
 def get_merchant_group_input_container():
     """
