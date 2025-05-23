@@ -361,7 +361,7 @@ def create_bar_chart(
         df: pd.DataFrame,
         x: str,
         y: str,
-        title: str,
+        title: str = None,
         hover_data: list = None,
         custom_data: list = None,
         hover_template: str = None,
@@ -428,9 +428,11 @@ def create_bar_chart(
         hover_data=hover_data,
         color=color,
         color_discrete_map=color_discrete_map,
-        title=title,
         labels=labels
     )
+
+    if title:
+        px_bar_kwargs["title"] = title
 
     if custom_data:
         px_bar_kwargs["custom_data"] = custom_data
@@ -469,4 +471,24 @@ def create_bar_chart(
         barcornerradius="16%"
     )
 
+    return fig
+
+
+def create_empty_figure():
+    """
+    Creates an empty Plotly figure with a transparent background, invisible axes, and
+    minimal margins. This function is useful as a placeholder or for initializing a
+    template figure with specific layout settings.
+
+    Returns:
+        go.Figure: A Plotly figure object with predefined layout settings.
+    """
+    fig = go.Figure()
+    fig.update_layout(
+        xaxis={'visible': False},
+        yaxis={'visible': False},
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=0, r=0, t=0, b=0)
+    )
     return fig
