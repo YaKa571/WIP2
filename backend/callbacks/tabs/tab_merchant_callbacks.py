@@ -1,3 +1,5 @@
+from backend.data_setup.tabs.tab_merchant_data_setup import create_merchant_group_line_chart, \
+    create_individual_merchant_line_chart
 from frontend.component_ids import ID
 from dash import html, Output, Input, callback, dcc
 import dash_bootstrap_components as dbc
@@ -31,13 +33,13 @@ def update_merchant(n1, n2, n3):
         kpi_content = create_all_merchant_kpis()
         graph_content = create_merchant_group_distribution_tree_map()
     elif selected == 'opt2':
-        merchant_group = "Book Stores" #TODO
+        merchant_group = "Grocery Stores, Supermarkets" # mcc: 5411 TODO
         kpi_content = create_merchant_group_kpi(merchant_group)
-        graph_content = go.Figure() #TODO
+        graph_content = create_merchant_group_line_chart(merchant_group)
     elif selected == 'opt3':
-        merchant = 61195 #TODO
+        merchant = 50783 #TODO
         kpi_content = create_individual_merchant_kpi(merchant)
-        graph_content = go.Figure() #TODO
+        graph_content = create_individual_merchant_line_chart(merchant)
     else:
         kpi_content = html.Div()
         graph_content = go.Figure()
@@ -526,3 +528,7 @@ def create_individual_merchant_kpi(merchant):
             className="flex-wrapper"
         )
     ])
+
+
+
+
