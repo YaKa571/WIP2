@@ -17,6 +17,7 @@ class IconID(str, Enum):
     BAR_CHART_LINE_FILL = "bar-chart-line-fill"
     LEGEND = "legend"
     CLUSTER = "cluster"
+    CREDITCARD = "creditcard"
 
 
 class Icons:
