@@ -54,6 +54,11 @@
     --dropdown-border-color: rgba(0, 0, 0, 0.175);
     --dropdown-border-radius: 12px;
 
+    /* Search-Bar */
+    --searchbar-bg: #f9f9f9;
+    --searchbar-outline: 1px solid rgba(0, 0, 0, 0.175);
+    --searchbar-border-radius: 12px;
+
     /* Spinner */
     --spinner-bg: rgba(20, 50, 120, 0.12);
 
@@ -117,6 +122,10 @@
     --dropdown-border-color: #334155;
     --dropdown-secondary-bg: #242a36;
     --dropdown-primary: #246bfd;
+
+    /* Search-Bar */
+    --searchbar-bg: #23272b;
+    --searchbar-outline: 1px solid #334155;
 
     /* Spinner */
     --spinner-bg: rgba(36, 107, 253, 0.17);

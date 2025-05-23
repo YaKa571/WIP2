@@ -65,3 +65,14 @@
 .graph-card .js-plotly-plot .modebar-btn:hover {
     background-color: transparent !important;
 }
+
+/* Search Bar remove up and down arrow */
+input.no-spinner::-webkit-outer-spin-button,
+input.no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input.no-spinner {
+    -moz-appearance: textfield;
+}

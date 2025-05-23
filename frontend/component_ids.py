@@ -67,9 +67,17 @@ class ID(str, Enum):
     CLUSTER_DEFAULT_SWITCH_CONTAINER = "cluster-default-switch-container" #needed for invisibility
 
     # User Tab
-    # TODO @Son: Add IDs here
     USER_TAB_INFO_ICON = "user-tab-info-icon"
     USER_TAB_HEADING = "user-tab-heading"
+    USER_ID_SEARCH_INPUT = "user-id-search-input"
+    CARD_ID_SEARCH_INPUT = "card-id-search-input"
+    USER_KPI_TX_COUNT = "kpi-user-tx-count"
+    USER_KPI_TX_SUM = "kpi-user-tx-sum"
+    USER_KPI_TX_AVG = "kpi-user-tx-avg"
+    USER_KPI_CARD_COUNT = "kpi-user-card-count"
+    USER_CREDIT_LIMIT_BOX = "user-credit-limit-box"
+    USER_MERCHANT_BAR_CHART = "user-merchant-bar-chart"
+    USER_MERCHANT_SORT_DROPDOWN = "merchant-sort-dropdown"
 
     # Merchant Tab
     MERCHANT_HEADING = "merchant-heading"
