@@ -239,7 +239,7 @@ def _create_bottom_bar_diagrams() -> html.Div:
                         children=[
 
                             dcc.Graph(
-                                figure=Figure(),
+                                figure=comp_factory.create_empty_figure(),
                                 className="bar-chart",
                                 config=MODEBAR_CONFIG,
                                 id=ID.HOME_GRAPH_BAR_CHART,
