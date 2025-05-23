@@ -15,6 +15,15 @@ COLOR_BLUE_MAIN = "#2563eb"
 
 
 def create_merchant_content():
+    """
+        Creates the main content container for the Merchant tab.
+
+        This includes the tab heading with option buttons, the input containers
+        (dropdown and text input), the KPI display area, and the graph area.
+
+        Returns:
+            dash.html.Div: A Div containing all main components of the Merchant tab.
+        """
     return html.Div(
         className="tab-content-inner merchant-tab",
         children=[
@@ -28,6 +37,15 @@ def create_merchant_content():
 
 
 def create_merchant_heading() -> html.Div:
+    """
+        Creates the header section of the Merchant tab with option buttons and an info icon.
+
+        Includes buttons to select between "All Merchants", "Merchant Group", and "Merchant" views,
+        a placeholder area for a "Button Map", and an info icon with a tooltip.
+
+        Returns:
+            dash.html.Div: A Div containing the tab heading row with buttons and info tooltip.
+        """
     return html.Div(
         className="tab-heading-wrapper",
         children=[
@@ -63,15 +81,44 @@ def create_merchant_heading() -> html.Div:
 
         ])
 def create_merchant_input_container():
+    """
+        Creates the input section container for the Merchant tab.
+
+        This container holds two separate input wrappers:
+        - A dropdown for selecting a merchant group (initially hidden).
+        - A text input for entering an individual merchant ID (initially hidden).
+
+        Returns:
+            dash.html.Div: A Div containing input containers for merchant group and individual merchant.
+        """
     return html.Div(
         dbc.Row([
             dbc.Col([
-                html.Div(id=ID.MERCHANT_INPUT_CONTAINER)
+                # Container for Merchant Group dropdown input
+                html.Div(
+                    children=[tab_merchant_callbacks.get_merchant_group_input_container()],
+                    id="merchant-group-input-wrapper",
+                    style={"display": "none"}  # initially hidden
+                ),
+                # Container for Individual Merchant ID input
+                html.Div(
+                    children=[tab_merchant_callbacks.get_merchant_input_container()],
+                    id="merchant-input-wrapper",
+                    style={"display": "none"}  # initially hidden
+                ),
             ])
         ])
     )
 
 def create_merchant_kpi():
+    """
+        Creates the KPI display container for the Merchant tab.
+
+        This is a placeholder Div where dynamic KPI content will be injected via callbacks.
+
+        Returns:
+            dash.dbc.Row: A Bootstrap row containing the KPI container Div.
+        """
     return dbc.Row([
         html.Div(id=ID.MERCHANT_KPI_CONTAINER)
     ])
