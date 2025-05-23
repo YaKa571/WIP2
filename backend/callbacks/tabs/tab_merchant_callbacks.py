@@ -32,7 +32,7 @@ def update_merchant(n1, n2, n3):
     def cls(opt): return 'option-btn selected' if selected == opt else 'option-btn'
 
     if selected == 'opt1':
-        merchant_input_container = html.P("Input Container")
+        merchant_input_container = html.P("")
         kpi_content = create_all_merchant_kpis()
         graph_content = create_merchant_group_distribution_tree_map()
         graph_title = "Merchant Group Distribution"
@@ -58,6 +58,16 @@ def update_merchant(n1, n2, n3):
 
 # input for opt2
 def get_merchant_group_input_container():
+    """
+        Creates a dropdown input container for selecting a merchant group.
+
+        Retrieves all merchant groups using the tab_merchant_data_setup module, and
+        generates a dropdown component with these groups as selectable options.
+        The first merchant group is set as the default selected value if available.
+
+        Returns:
+            html.Div: A Div containing a label and a Dash Dropdown component for merchant groups.
+        """
     my_merchant_groups = tab_merchant_data_setup.get_all_merchant_groups()
     options = [{'label': group, 'value': group} for group in my_merchant_groups]
 
@@ -80,6 +90,15 @@ def get_merchant_group_input_container():
 
 # input for opt3
 def get_merchant_input_container():
+    """
+        Creates a text input container for entering a merchant ID.
+
+        Provides a labeled text input field pre-filled with a default merchant ID value.
+        The user can enter or modify the merchant ID as needed.
+
+        Returns:
+            html.Div: A Div containing a label and a Dash Input component for merchant ID.
+        """
     default_merchant_id = 50783  # Default ID
 
     return html.Div([
