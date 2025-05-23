@@ -32,7 +32,7 @@ def update_merchant(n1, n2, n3):
     def cls(opt): return 'option-btn selected' if selected == opt else 'option-btn'
 
     if selected == 'opt1':
-        merchant_input_container = html.P("hallo")
+        merchant_input_container = html.P("")
         kpi_content = create_all_merchant_kpis()
         graph_content = create_merchant_group_distribution_tree_map()
         graph_title = "Merchant Group Distribution"
