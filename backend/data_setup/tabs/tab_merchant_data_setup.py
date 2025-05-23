@@ -9,6 +9,7 @@ contains data setup for Merchant tab
 # Data Files
 dm: DataManager = DataManager.get_instance()
 my_transactions = dm.df_transactions
+my_users = dm.df_users
 # mcc code
 with open("assets/data/mcc_codes.json", "r", encoding="utf-8") as file:
     data = json.load(file)
@@ -26,6 +27,10 @@ my_transactions_agg_by_user = my_transactions.groupby('client_id').agg(
         transaction_count=('amount', 'count'),
         total_value=('amount', 'sum')
     ).reset_index()
+
+# Transactions join MCC(mcc,mcc) join Users(client_id,id)
+my_transactions_mcc_users = my_transactions_mcc.merge(my_users, how="left", left_on='client_id', right_on='id')
+
 
 def get_merchant_group_overview(threshold):
     """
@@ -133,34 +138,148 @@ def get_highest_value_merchant_group():
 
 # Merchant Group
 def get_most_frequently_used_merchant_in_group(merchant_group):
-    # TODO
-    return -1,-1
+    """
+        Find the merchant within the specified merchant group with the highest number of transactions.
+
+        Args:
+            merchant_group (str): The name of the merchant group.
+
+        Returns:
+            tuple: (merchant_id, transaction_count)
+                merchant_id (int): ID of the merchant with the most transactions.
+                transaction_count (int): Number of transactions for this merchant.
+                Returns (-1, -1) if no transactions exist for the group.
+        """
+    my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_group'] == merchant_group]
+    my_agg_df = my_df.groupby('merchant_id').size().reset_index(name='transaction_count')
+    if my_agg_df.empty:
+        return -1, -1
+    top_row = my_agg_df.sort_values(by='transaction_count', ascending=False).iloc[0]
+    return int(top_row['merchant_id']), int(top_row['transaction_count'])
 
 def get_highest_value_merchant_in_group(merchant_group):
-    # TODO
-    return -1,-1
+    """
+       Find the merchant within the specified merchant group with the highest total transaction value.
+
+       Args:
+           merchant_group (str): The name of the merchant group.
+
+       Returns:
+           tuple: (merchant_id, total_value)
+               merchant_id (int): ID of the merchant with the highest total transaction amount.
+               total_value (float): Sum of transaction amounts for this merchant.
+               Returns (-1, -1) if no transactions exist for the group.
+       """
+    my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_group'] == merchant_group]
+    my_agg_df = my_df.groupby('merchant_id')['amount'].sum().reset_index(name='total_value')
+    if my_agg_df.empty:
+        return -1, -1
+    top_row = my_agg_df.sort_values(by='total_value', ascending=False).iloc[0]
+    return int(top_row['merchant_id']), float(top_row['total_value'])
 
 def get_user_with_most_transactions_in_group(merchant_group):
-    # TODO
-    return -1,-1
+    """
+       Identify the user with the most transactions within the specified merchant group.
+
+       Args:
+           merchant_group (str): The name of the merchant group.
+
+       Returns:
+           tuple: (client_id, transaction_count)
+               client_id (int): ID of the user with the most transactions.
+               transaction_count (int): Number of transactions by this user.
+               Returns (-1, -1) if no transactions exist for the group.
+       """
+    my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_group'] == merchant_group]
+    my_agg_df = my_df.groupby('client_id').size().reset_index(name='transaction_count')
+    if my_agg_df.empty:
+        return -1, -1
+    top_row = my_agg_df.sort_values(by='transaction_count', ascending=False).iloc[0]
+    return int(top_row['client_id']), int(top_row['transaction_count'])
 
 def get_user_with_highest_expenditure_in_group(merchant_group):
-    # TODO
-    return -1,-1
+    """
+       Identify the user with the highest total expenditure within the specified merchant group.
 
-# single Merchant
+       Args:
+           merchant_group (str): The name of the merchant group.
+
+       Returns:
+           tuple: (client_id, total_value)
+               client_id (int): ID of the user with the highest total spending.
+               total_value (float): Sum of all transaction amounts by this user.
+               Returns (-1, -1) if no transactions exist for the group.
+       """
+    my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_group'] == merchant_group]
+    my_agg_df = my_df.groupby('client_id')['amount'].sum().reset_index(name='total_value')
+    if my_agg_df.empty:
+        return -1, -1
+    top_row = my_agg_df.sort_values(by='total_value', ascending=False).iloc[0]
+    return int(top_row['client_id']), float(top_row['total_value'])
+
+# Individual Merchant
 def get_merchant_transactions(merchant):
-    # TODO
-    return -2
+    """
+       Calculate the total number of transactions for a given merchant.
+
+       Args:
+           merchant (int): The merchant ID.
+
+       Returns:
+           int: The number of transactions for this merchant.
+       """
+    my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_id'] == merchant]
+    return len(my_df)
 
 def get_merchant_value(merchant):
-    # TODO
-    return -2
+    """
+        Calculate the total transaction value for a given merchant.
+
+        Args:
+            merchant (int): The merchant ID.
+
+        Returns:
+            float: The sum of all transaction amounts for this merchant.
+        """
+    my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_id'] == merchant]
+    return my_df['amount'].sum()
 
 def get_user_with_most_transactions_at_merchant(merchant):
-    # TODO
-    return -2,-2
+    """
+       Identify the user with the most transactions at a specific merchant.
+
+       Args:
+           merchant (int): The merchant ID.
+
+       Returns:
+           tuple: (client_id, transaction_count)
+               client_id (int): ID of the user with the most transactions at this merchant.
+               transaction_count (int): Number of transactions by this user.
+               Returns (-2, -2) if no transactions exist for this merchant.
+       """
+    my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_id'] == merchant]
+    my_agg_df = my_df.groupby('client_id').size().reset_index(name='transaction_count')
+    if my_agg_df.empty:
+        return -2, -2
+    top_row = my_agg_df.sort_values(by='transaction_count', ascending=False).iloc[0]
+    return int(top_row['client_id']), int(top_row['transaction_count'])
 
 def get_user_with_highest_expenditure_at_merchant(merchant):
-    # TODO
-    return -2,-2
+    """
+       Identify the user with the highest total expenditure at a specific merchant.
+
+       Args:
+           merchant (int): The merchant ID.
+
+       Returns:
+           tuple: (client_id, total_value)
+               client_id (int): ID of the user with the highest spending at this merchant.
+               total_value (float): Sum of all transaction amounts by this user.
+               Returns (-2, -2) if no transactions exist for this merchant.
+       """
+    my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_id'] == merchant]
+    my_agg_df = my_df.groupby('client_id')['amount'].sum().reset_index(name='total_value')
+    if my_agg_df.empty:
+        return -2, -2
+    top_row = my_agg_df.sort_values(by='total_value', ascending=False).iloc[0]
+    return int(top_row['client_id']), float(top_row['total_value'])

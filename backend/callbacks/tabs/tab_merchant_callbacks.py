@@ -31,11 +31,11 @@ def update_merchant(n1, n2, n3):
         kpi_content = create_all_merchant_kpis()
         graph_content = create_merchant_group_distribution_tree_map()
     elif selected == 'opt2':
-        merchant_group = "Parameter Merchant Group" #TODO
+        merchant_group = "Book Stores" #TODO
         kpi_content = create_merchant_group_kpi(merchant_group)
         graph_content = go.Figure() #TODO
     elif selected == 'opt3':
-        merchant = "Parameter Merchant" #TODO
+        merchant = 61195 #TODO
         kpi_content = create_individual_merchant_kpi(merchant)
         graph_content = go.Figure() #TODO
     else:
@@ -252,7 +252,7 @@ def create_merchant_group_kpi(merchant_group):
     user_3, count_3 = tab_merchant_data_setup.get_user_with_most_transactions_in_group(merchant_group)
     user_3 = "ID " + str(user_3)
     count_3 = str(count_3) + " Transactions"
-    user_4, value_4 = tab_merchant_data_setup.get_highest_value_merchant_in_group(merchant_group)
+    user_4, value_4 = tab_merchant_data_setup.get_user_with_highest_expenditure_in_group(merchant_group)
     user_4 = "ID " + str(user_4)
     value_4 = "$" + str(value_4)
 
