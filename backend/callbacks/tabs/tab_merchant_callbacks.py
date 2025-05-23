@@ -19,6 +19,7 @@ callbacks of tab Merchant
     Output(ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT, 'className'),
     Output(ID.MERCHANT_KPI_CONTAINER, 'children'),
     Output(ID.MERCHANT_GRAPH_CONTAINER, 'figure'),
+    Output(ID.MERCHANT_GRAPH_TITLE, 'children'),
     Input(ID.MERCHANT_BTN_ALL_MERCHANTS, 'n_clicks'),
     Input(ID.MERCHANT_BTN_MERCHANT_GROUP, 'n_clicks'),
     Input(ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT, 'n_clicks'),
@@ -32,19 +33,23 @@ def update_merchant(n1, n2, n3):
     if selected == 'opt1':
         kpi_content = create_all_merchant_kpis()
         graph_content = create_merchant_group_distribution_tree_map()
+        graph_title = "Merchant Group Distribution"
     elif selected == 'opt2':
         merchant_group = "Grocery Stores, Supermarkets" # mcc: 5411 TODO
         kpi_content = create_merchant_group_kpi(merchant_group)
         graph_content = create_merchant_group_line_chart(merchant_group)
+        graph_title = f"Transaction for Merchant Group: {merchant_group}"
     elif selected == 'opt3':
         merchant = 50783 #TODO
         kpi_content = create_individual_merchant_kpi(merchant)
         graph_content = create_individual_merchant_line_chart(merchant)
+        graph_title = f"History for Merchant: {merchant}"
     else:
         kpi_content = html.Div()
         graph_content = go.Figure()
+        graph_title = ""
 
-    return cls('opt1'), cls('opt2'), cls('opt3'), kpi_content, graph_content
+    return cls('opt1'), cls('opt2'), cls('opt3'), kpi_content, graph_content, graph_title
 
 def create_all_merchant_kpis():
     """
@@ -213,7 +218,7 @@ def create_merchant_group_distribution_tree_map():
         my_treemap_df,
         path=["merchant_group"],
         values="transaction_count",
-        title="Merchant Group Distribution",
+        # title="Merchant Group Distribution",
     )
 
     my_treemap_fig.update_traces(

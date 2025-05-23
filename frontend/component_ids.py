@@ -101,3 +101,4 @@ class ID(str, Enum):
     MERCHANT_KPI_MERCHANT_VALUE = "merchant-kpi-merchant-value"
     MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS = "merchant-kpi-merchant-user-most-transactions-all"
     MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE = "merchant-kpi-merchant-user-high-value-all"
+    MERCHANT_GRAPH_TITLE = "merchant-graph-title"

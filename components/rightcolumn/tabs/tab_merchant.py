@@ -68,11 +68,49 @@ def create_merchant_kpi():
 
 
 def create_merchant_graph():
-    return dbc.Row([
-        dcc.Graph(
-            id=ID.MERCHANT_GRAPH_CONTAINER,
-            style={"height": "100%", "minHeight": "300px", "width": "100%"}
-        )
-    ])
+    """
+    Creates a styled card container for displaying the merchant transaction graph.
+
+    This function returns a Dash HTML Div that contains a Bootstrap card layout.
+    The card includes a header with a dynamic title and an icon, and a body section
+    with a Dash Graph component. The actual graph content is expected to be
+    updated dynamically via a callback.
+
+    Returns:
+        dash.html.Div: A styled card layout with a placeholder for a merchant transaction graph.
+    """
+    return html.Div(
+        className="flex-wrapper flex-fill",
+        children=[
+            dbc.Card(
+                className="graph-card with-bar-chart",
+                style={"flex": "1 1 0", "height": "100%", "minHeight": "400px"},
+                children=[
+                    dbc.CardHeader(
+                        children=[
+                            comp_factory.create_icon(IconID.CLUSTER, cls="icon icon-small"),
+                            html.H3(id=ID.MERCHANT_GRAPH_TITLE, className="graph-title")
+                        ]
+                    ),
+                    dbc.CardBody(
+                        style={"height": "100%", "padding": "1rem"},
+                        children=[
+                            dcc.Graph(
+                                id=ID.MERCHANT_GRAPH_CONTAINER,
+                                className="bar-chart",
+                                config={"displayModeBar": True, "displaylogo": False},
+                                style={
+                                    "height": "350px",  # fix height to ensure rendering
+                                    "width": "100%"
+                                }
+                            )
+                        ]
+                    )
+                ]
+            )
+        ]
+    )
+
+
 
 
