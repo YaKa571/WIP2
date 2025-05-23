@@ -103,3 +103,4 @@ class ID(str, Enum):
     MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE = "merchant-kpi-merchant-user-high-value-all"
     MERCHANT_GRAPH_TITLE = "merchant-graph-title"
     MERCHANT_INPUT_CONTAINER = "merchant-input-container"
+    MERCHANT_INPUT = "merchant-input"

@@ -37,24 +37,32 @@ def update_merchant(n1, n2, n3):
         graph_content = create_merchant_group_distribution_tree_map()
         graph_title = "Merchant Group Distribution"
     elif selected == 'opt2':
-        merchant_input_container = html.P("Input Container")
-        merchant_group = "Grocery Stores, Supermarkets" # mcc: 5411 TODO
+        merchant_input_container = get_merchant_group_input_container()
+        merchant_group = "Grocery Stores, Supermarkets" # mcc: 5411 ID.MERCHANT_INPUT TODO
         kpi_content = create_merchant_group_kpi(merchant_group)
         graph_content = create_merchant_group_line_chart(merchant_group)
         graph_title = f"History for Merchant Group: {merchant_group}"
     elif selected == 'opt3':
-        merchant_input_container = html.P("Input Container")
-        merchant = 50783 #TODO
+        merchant_input_container = get_merchant_input_container()
+        merchant = 50783 # ID.MERCHANT_INPUT TODO
         kpi_content = create_individual_merchant_kpi(merchant)
         graph_content = create_individual_merchant_line_chart(merchant)
         graph_title = f"History for Merchant: {merchant}"
     else:
-        merchant_input_container = html.P("Input Container")
+        merchant_input_container = html.P("No Input Container")
         kpi_content = html.Div()
         graph_content = go.Figure()
         graph_title = ""
 
     return cls('opt1'), cls('opt2'), cls('opt3'),merchant_input_container, kpi_content, graph_content, graph_title
+
+# TODO
+def get_merchant_group_input_container():
+    return html.Div([])
+
+# TODO
+def get_merchant_input_container():
+    return html.Div([html.P("Input Container")])
 
 def create_all_merchant_kpis():
     """
