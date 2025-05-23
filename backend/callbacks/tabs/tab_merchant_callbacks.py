@@ -38,7 +38,7 @@ def update_merchant(n1, n2, n3):
         merchant_group = "Grocery Stores, Supermarkets" # mcc: 5411 TODO
         kpi_content = create_merchant_group_kpi(merchant_group)
         graph_content = create_merchant_group_line_chart(merchant_group)
-        graph_title = f"Transaction for Merchant Group: {merchant_group}"
+        graph_title = f"History for Merchant Group: {merchant_group}"
     elif selected == 'opt3':
         merchant = 50783 #TODO
         kpi_content = create_individual_merchant_kpi(merchant)
