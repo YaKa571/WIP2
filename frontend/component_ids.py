@@ -102,3 +102,7 @@ class ID(str, Enum):
     MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS = "merchant-kpi-merchant-user-most-transactions-all"
     MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE = "merchant-kpi-merchant-user-high-value-all"
     MERCHANT_GRAPH_TITLE = "merchant-graph-title"
+    MERCHANT_INPUT_CONTAINER = "merchant-input-container"
+    MERCHANT_INPUT = "merchant-input"
+    MERCHANT_INPUT_GROUP_DROPDOWN = "merchant-input-group-dropdown"
+    MERCHANT_INPUT_MERCHANT_ID = "merchant-input-merchant-id"
