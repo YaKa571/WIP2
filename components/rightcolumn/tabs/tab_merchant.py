@@ -57,6 +57,9 @@ def create_merchant_heading() -> html.Div:
                         ]),
                 ], width = 1),
             ]),
+            dbc.Row([
+                    html.Div(id=ID.MERCHANT_INPUT_CONTAINER)
+            ])
 
 
         ])
