@@ -2,6 +2,8 @@ import pandas as pd
 from backend.data_manager import DataManager
 from backend.data_setup.tabs.tab_cluster_data_setup import prepare_default_data
 import json
+import plotly.graph_objects as go
+import plotly.express as px
 """
 contains data setup for Merchant tab
 """
@@ -9,7 +11,11 @@ contains data setup for Merchant tab
 # Data Files
 dm: DataManager = DataManager.get_instance()
 my_transactions = dm.df_transactions
+print("Ausgabe my_transactions")
+print(my_transactions["date"].min(), my_transactions["date"].max())
+
 my_users = dm.df_users
+
 # mcc code
 with open("assets/data/mcc_codes.json", "r", encoding="utf-8") as file:
     data = json.load(file)
@@ -31,6 +37,9 @@ my_transactions_agg_by_user = my_transactions.groupby('client_id').agg(
 # Transactions join MCC(mcc,mcc) join Users(client_id,id)
 my_transactions_mcc_users = my_transactions_mcc.merge(my_users, how="left", left_on='client_id', right_on='id')
 
+#############################################################################
+# All Merchants
+#############################################################################
 
 def get_merchant_group_overview(threshold):
     """
@@ -136,7 +145,10 @@ def get_highest_value_merchant_group():
     value_return = my_value.loc[0, "amount"]
     return group_return, value_return
 
+#############################################################################
 # Merchant Group
+#############################################################################
+
 def get_most_frequently_used_merchant_in_group(merchant_group):
     """
         Find the merchant within the specified merchant group with the highest number of transactions.
@@ -217,7 +229,42 @@ def get_user_with_highest_expenditure_in_group(merchant_group):
     top_row = my_agg_df.sort_values(by='total_value', ascending=False).iloc[0]
     return int(top_row['client_id']), float(top_row['total_value'])
 
+def create_merchant_group_line_chart(merchant_group):
+    my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_group'] == merchant_group].copy()
+    if my_df.empty:
+        return go.Figure()
+
+    my_df['date'] = pd.to_datetime(my_df['date'])
+    my_df['date_only'] = my_df['date'].dt.normalize()
+
+    my_grouped = my_df.groupby('date_only').agg(
+        transaction_count=('amount', 'count'),
+        total_value=('amount', 'sum')
+    ).reset_index()
+
+    # Debug-Ausgabe
+    print("Merchant Group: Date in df from:", my_grouped['date_only'].min(), "till:", my_grouped['date_only'].max())
+
+    start_date = my_grouped['date_only'].min()
+    end_date = my_grouped['date_only'].max()
+
+    fig = px.line(my_grouped, x='date_only', y=['transaction_count', 'total_value'],
+                  labels={'value': 'Count / Value', 'date_only': 'Date'},
+                  title=f"Transaction for Merchant Group: {merchant_group}")
+
+    fig.update_layout(
+        xaxis=dict(
+            type='date',
+            range=[start_date, end_date]
+        )
+    )
+
+    return fig
+
+#############################################################################
 # Individual Merchant
+#############################################################################
+
 def get_merchant_transactions(merchant):
     """
        Calculate the total number of transactions for a given merchant.
@@ -283,3 +330,25 @@ def get_user_with_highest_expenditure_at_merchant(merchant):
         return -2, -2
     top_row = my_agg_df.sort_values(by='total_value', ascending=False).iloc[0]
     return int(top_row['client_id']), float(top_row['total_value'])
+
+def create_individual_merchant_line_chart(merchant):
+    my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_id'] == merchant].copy()
+    if my_df.empty:
+        return go.Figure()
+
+    my_df['date'] = pd.to_datetime(my_df['date'])
+    # group by date, no time
+    my_df['date_only'] = my_df['date'].dt.date
+
+    # aggregate
+    my_grouped = my_df.groupby('date_only').agg(
+        transaction_count=('amount', 'count'),
+        total_value=('amount', 'sum')
+    ).reset_index()
+
+
+    fig = px.line(my_grouped, x='date_only', y=['transaction_count', 'total_value'],
+                  labels={'value': 'Count / Value', 'date_only': 'Date'},
+                  title=f"Transaction for Merchant: {merchant}")
+
+    return fig
