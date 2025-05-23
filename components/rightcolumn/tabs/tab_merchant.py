@@ -20,6 +20,7 @@ def create_merchant_content():
         children=[
 
             create_merchant_heading(),
+            create_merchant_input_container(),
             create_merchant_kpi(),
             create_merchant_graph()
 
@@ -57,12 +58,18 @@ def create_merchant_heading() -> html.Div:
                         ]),
                 ], width = 1),
             ]),
-            dbc.Row([
-                    html.Div(id=ID.MERCHANT_INPUT_CONTAINER)
-            ])
+
 
 
         ])
+def create_merchant_input_container():
+    return html.Div(
+        dbc.Row([
+            dbc.Col([
+                html.Div(id=ID.MERCHANT_INPUT_CONTAINER)
+            ])
+        ])
+    )
 
 def create_merchant_kpi():
     return dbc.Row([

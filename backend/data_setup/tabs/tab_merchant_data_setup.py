@@ -34,6 +34,10 @@ my_transactions_agg_by_user = my_transactions.groupby('client_id').agg(
 # Transactions join MCC(mcc,mcc) join Users(client_id,id)
 my_transactions_mcc_users = my_transactions_mcc.merge(my_users, how="left", left_on='client_id', right_on='id')
 
+def get_all_merchant_groups():
+    my_df = my_mcc
+    return sorted(my_df['merchant_group'].unique().tolist())
+
 #############################################################################
 # All Merchants
 #############################################################################

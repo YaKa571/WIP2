@@ -1,7 +1,7 @@
 from backend.data_setup.tabs.tab_merchant_data_setup import create_merchant_group_line_chart, \
     create_individual_merchant_line_chart
 from frontend.component_ids import ID
-from dash import html, Output, Input, callback, dcc
+from dash import html, Output, Input, callback, dcc, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 from backend.data_setup.tabs import tab_merchant_data_setup
@@ -56,13 +56,44 @@ def update_merchant(n1, n2, n3):
 
     return cls('opt1'), cls('opt2'), cls('opt3'),merchant_input_container, kpi_content, graph_content, graph_title
 
-# TODO
+# input for opt2
 def get_merchant_group_input_container():
-    return html.Div([])
+    my_merchant_groups = tab_merchant_data_setup.get_all_merchant_groups()
+    options = [{'label': group, 'value': group} for group in my_merchant_groups]
 
-# TODO
+    default_value = my_merchant_groups[0] if my_merchant_groups else None
+
+    return html.Div([
+        html.Label("Select Merchant Group:", className="dropdown-label"),
+        dcc.Dropdown(
+            id=ID.MERCHANT_INPUT_GROUP_DROPDOWN,
+            options=options,
+            value=default_value,
+            placeholder="Choose a merchant group...",
+            searchable=True,
+            multi=False,
+            style={"width": "100%"}
+        )
+    ],
+        className="dropdown-container"
+    )
+
+# input for opt3
 def get_merchant_input_container():
-    return html.Div([html.P("Input Container")])
+    default_merchant_id = 50783  # Default ID
+
+    return html.Div([
+        html.Label("Enter Merchant ID:", className="input-label"),
+        dcc.Input(
+            id=ID.MERCHANT_INPUT_MERCHANT_ID,
+            type="text",
+            value=str(default_merchant_id),
+            placeholder="Enter Merchant ID...",
+            style={"width": "100%", "padding": "5px", "fontSize": "16px"}
+        )
+    ],
+        className="input-container"
+    )
 
 def create_all_merchant_kpis():
     """
