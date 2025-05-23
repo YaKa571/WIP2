@@ -202,6 +202,10 @@ li span:nth-of-type(2) {
     color: var(--kpi-number-value) !important;
 }
 
+.kpi-card-value.kpi-number-value.red-text {
+    color: red !important;
+}
+
 /* ============================================================
    Fancy Mode Toggle Button & Settings Button
    ============================================================ */
@@ -311,4 +315,20 @@ li span:nth-of-type(2) {
     color: #ffffff;
     border-color: #2563eb;
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+}
+
+
+/* ============================================================
+   Search Bar Inputs
+   ============================================================ */
+
+.search-bar-input {
+    color: var(--text-main);
+    height: 36px;
+    border-radius: var(--searchbar-border-radius);
+    border: none;
+    outline: var(--searchbar-outline) !important;
+    width: 100%;
+    background-color: var(--searchbar-bg);
+    padding-left: 0.5rem !important;
 }

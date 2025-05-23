@@ -24,7 +24,7 @@
 
 /* User Tab Grid Layout */
 .tab-content-inner.user-tab {
-    grid-template-rows: auto !important;
+    grid-template-rows: auto auto auto auto 1fr !important;
     align-items: start;
     align-content: start;
 }
@@ -189,7 +189,7 @@
     align-items: center;
     text-align: center;
     margin: 0;
-    padding: 0.5rem;
+    padding: 1rem;
     height: 50%;
 }
 
@@ -306,64 +306,3 @@
 }
 
 /* Graph Cards END */
-
-/* ============================================================
-   User Tab - KPI Boxes
-   ============================================================ */
-
-.user-kpi-row {
-    display: flex;
-    flex-direction: row;
-    gap: 1.2rem;
-    align-items: stretch;
-    width: 100%;
-    margin-bottom: 1.5rem;
-}
-
-.user-kpi-box {
-    flex: 1 1 0;
-    background: #fff;
-    border-radius: 18px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-    padding: 1.6rem 1.2rem;
-    min-width: 0;
-    min-height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1.15rem;
-    text-align: center;
-    border: 1px solid #e1e4e8;
-    transition: box-shadow 0.18s, background 0.2s;
-}
-
-.user-kpi-box:hover {
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.13);
-    background: #f7fafd;
-}
-
-/* --- Kreditlimit Box unter den KPIs --- */
-.user-credit-limit-box {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: #fff;
-    border: 1px solid #e1e4e8;
-    border-radius: 18px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-    font-weight: 700;
-    font-size: 1.15rem;
-    padding: 1.7rem;
-    margin: 0 auto 0 auto;
-    width: 48%; /* So breit wie zwei KPI-Boxen nebeneinander */
-    min-width: 340px;
-    max-width: 600px;
-    text-align: center;
-}
-
-.user-credit-limit-box:hover {
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.13);
-    background: #f7fafd;
-}
