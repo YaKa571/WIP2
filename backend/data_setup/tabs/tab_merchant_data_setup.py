@@ -281,7 +281,7 @@ def create_merchant_group_line_chart(merchant_group):
     ))
 
     fig.update_layout(
-        title=f"Transaction for Merchant Group: {merchant_group}",
+        # title=f"Transaction for Merchant Group: {merchant_group}",
         xaxis=dict(
             title='Date',
             range=[start_date, end_date]
@@ -428,7 +428,7 @@ def create_individual_merchant_line_chart(merchant):
     ))
 
     fig.update_layout(
-        title=f"Transaction for Merchant: {merchant}",
+        # title=f"Transaction for Merchant: {merchant}",
         xaxis=dict(
             title='Date',
             range=[start_date, end_date]
