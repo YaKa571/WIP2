@@ -67,14 +67,21 @@ def create_merchant_heading() -> html.Div:
                         target=ID.MERCHANT_INFO_ICON,
                         is_open=False,
                         placement="bottom-end",
+                        className="enhanced-tooltip",
                         children=[
-                            "Placeholder for",
+                            "Click on All Merchants",
+                            html.Div(),
+                            "to show Treemap of all Merchants",
                             html.Br(),
-                            "the tooltip",
+                            "Click on Merchant Group",
                             html.Br(),
-                            "..."
+                            "and choose from Dropdown",
+                            html.Br(),
+                            "Click on Merchant",
+                            html.Br(),
+                            "and fill in Merchant ID"
                         ]),
-                ], width = 1),
+                ]),
             ]),
 
 
