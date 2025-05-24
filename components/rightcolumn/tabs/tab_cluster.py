@@ -135,5 +135,5 @@ def create_cluster_visualization():
                             )
 
                         ])
-                ])
+                ]),
         ])

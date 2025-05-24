@@ -100,26 +100,52 @@ def make_cluster_plot(df_agg: pd.DataFrame, mode='total_value', age_group_mode='
     fig.update_layout(showlegend=False)
     return fig
 
-def create_cluster_legend(df=None, cluster_col='cluster_total_str'):
-    # shows all colors as default
-    if df is None:
-        clusters = sorted(cluster_colors.keys())
-    else:
-        clusters = sorted(df[cluster_col].unique())
+def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
+    cluster_col = {
+        'total_value': 'cluster_total',
+        'average_value': 'cluster_avg',
+        'inc_vs_exp': 'cluster_inc_vs_exp'
+    }[mode]
 
+    text_map = {
+        'total_value': "Transaktionen (x) vs Gesamtwert (y)",
+        'average_value': "Transaktionen (x) vs Durchschnittswert (y)",
+        'inc_vs_exp': "Einkommen (x) vs Ausgaben (y)"
+    }
+
+    clusters = sorted(df[cluster_col].unique())
     items = []
-    for cluster_id in clusters:
-        color = cluster_colors.get(cluster_id, "#999999")  # fallback grey
+
+    for cl in clusters:
+        sub_df = df[df[cluster_col] == cl]
+
+        # Berechne Schwerpunkt
+        if mode == 'total_value':
+            x, y = sub_df['transaction_count'].mean(), sub_df['total_value'].mean()
+        elif mode == 'average_value':
+            x, y = sub_df['transaction_count'].mean(), sub_df['average_value'].mean()
+        elif mode == 'inc_vs_exp':
+            x, y = sub_df['yearly_income'].mean(), sub_df['total_expenses'].mean()
+        else:
+            x, y = 0, 0
+
+        interpretation = f"{text_map[mode]} | x: {x:.0f}, y: {y:.0f}"
+        color = cluster_colors.get(str(cl), "#000000")
+
         items.append(
             html.Div(
                 style={"display": "flex", "alignItems": "center", "marginBottom": "6px"},
                 children=[
-                    html.Div(style={"width": "20px", "height": "20px", "backgroundColor": color, "marginRight": "8px"}),
-                    html.Span(f"Cluster {cluster_id}")
+                    html.Div(style={
+                        "width": "20px", "height": "20px", "backgroundColor": color, "marginRight": "8px"
+                    }),
+                    html.Span(f"Cluster {cl}: {interpretation}")
                 ]
             )
         )
+
     return html.Div(items)
+
 
 def prepare_inc_vs_exp_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
     # Filtering
@@ -162,3 +188,4 @@ def make_inc_vs_exp_plot(df_agg: pd.DataFrame, age_group_mode='all'):
     )
     fig.update_layout(showlegend=False)
     return fig
+

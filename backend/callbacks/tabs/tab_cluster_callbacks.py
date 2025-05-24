@@ -37,36 +37,36 @@ def update_cluster(n_total_value, n_average_value, n_inc_vs_exp,n_all_ages,n_age
         print('1 4')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='total_value', age_group_mode='not grouped')
-        legend = create_cluster_legend(df_clustered, cluster_col='cluster_total_str')
+        legend = create_cluster_legend(mode='total_value', df=df_clustered)
     elif selected_1 == 'opt1' and selected_2 == 'opt5':
         print('1 5')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='total_value', age_group_mode='grouped')
-        legend = create_cluster_legend(df_clustered, cluster_col='cluster_total_str')
+        legend = create_cluster_legend(mode='total_value', df=df_clustered)
     elif selected_1 == 'opt2' and selected_2 == 'opt4':
         print('2 4')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='average_value', age_group_mode='not grouped')
-        legend = create_cluster_legend(df_clustered, cluster_col='cluster_avg_str')
+        legend = create_cluster_legend(mode='average_value', df=df_clustered)
     elif selected_1 == 'opt2' and selected_2 == 'opt5':
         print('2 5')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='average_value', age_group_mode='grouped')
-        legend = create_cluster_legend(df_clustered, cluster_col='cluster_avg_str')
+        legend = create_cluster_legend(mode='average_value', df=df_clustered)
     elif selected_1 == 'opt3' and selected_2 == 'opt4':
         print('3 4')
         df_clustered = prepare_inc_vs_exp_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_inc_vs_exp_plot(df_clustered, age_group_mode='not grouped')
-        legend = create_cluster_legend(df_clustered, cluster_col='cluster_inc_vs_exp_str')
+        legend = create_cluster_legend(mode='inc_vs_exp', df=df_clustered)
     elif selected_1 == 'opt3' and selected_2 == 'opt5':
         print('3 5')
         df_clustered = prepare_inc_vs_exp_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_inc_vs_exp_plot(df_clustered, age_group_mode='grouped')
-        legend = create_cluster_legend(df_clustered, cluster_col='cluster_inc_vs_exp_str')
+        legend = create_cluster_legend(mode='inc_vs_exp', df=df_clustered)
     else:
         print('else')
         fig = px.scatter()
-        legend = create_cluster_legend()
+        legend = html.Div([html.P('No Legend')])
     return (
         cls_1('opt1', selected_1),
         cls_1('opt2', selected_1),
@@ -76,10 +76,6 @@ def update_cluster(n_total_value, n_average_value, n_inc_vs_exp,n_all_ages,n_age
         fig,
         legend
     )
-
-
-
-
 
 def get_cluster_merchant_group_input_container():
     my_merchant_groups = tab_cluster_data_setup.get_cluster_merchant_group_dropdown()
