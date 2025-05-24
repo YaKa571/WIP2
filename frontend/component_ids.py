@@ -4,6 +4,7 @@ class ID(str, Enum):
 
     APP_STATE_STORE = "app-state-store"
     ANIMATION_STATE_STORE = "animation-state-store"
+    ACTIVE_TAB_STORE = "active-tab-store"
 
     KPI_CARD_AMT_TRANSACTIONS = "kpi-card-amt-transactions"
     KPI_CARD_SUM_OF_TRANSACTIONS = "kpi-card-sum-of-transactions"
