@@ -236,7 +236,7 @@ def create_icon(icon_id: IconID, cls: str = "icon") -> html.Img:
     return html.Img(src=Icons.get_icon(icon_id), className=cls, draggable="False")
 
 
-def create_info_icon(icon_id: ID) -> html.I:
+def create_info_icon(icon_id: ID, style: dict = None) -> html.I:
     """
     Creates an HTML info icon element with the specified ID.
 
@@ -250,7 +250,7 @@ def create_info_icon(icon_id: ID) -> html.I:
     Returns:
     html.I: HTML <i> element with specified id and predefined classes.
     """
-    return html.I(className="bi bi-info-circle-fill info-icon", id=icon_id)
+    return html.I(className="bi bi-info-circle-fill info-icon", id=icon_id, style=style)
 
 
 def create_circle_diagram_card(
