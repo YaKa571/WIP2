@@ -100,9 +100,16 @@ def make_cluster_plot(df_agg: pd.DataFrame, mode='total_value', age_group_mode='
     fig.update_layout(showlegend=False)
     return fig
 
-def create_cluster_legend():
+def create_cluster_legend(df=None, cluster_col='cluster_total_str'):
+    # Wenn df None ist, zeige alle Farben (z.B. beim Start)
+    if df is None:
+        clusters = sorted(cluster_colors.keys())
+    else:
+        clusters = sorted(df[cluster_col].unique())
+
     items = []
-    for cluster_id, color in cluster_colors.items():
+    for cluster_id in clusters:
+        color = cluster_colors.get(cluster_id, "#999999")  # fallback grau
         items.append(
             html.Div(
                 style={"display": "flex", "alignItems": "center", "marginBottom": "6px"},

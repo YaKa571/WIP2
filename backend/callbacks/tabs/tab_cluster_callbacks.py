@@ -37,18 +37,22 @@ def update_cluster(n_total_value, n_average_value, n_inc_vs_exp,n_all_ages,n_age
         print('1 4')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='total_value', age_group_mode='not grouped')
+        legend = create_cluster_legend(df_clustered, cluster_col='cluster_total_str')
     elif selected_1 == 'opt1' and selected_2 == 'opt5':
         print('1 5')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='total_value', age_group_mode='grouped')
+        legend = create_cluster_legend(df_clustered, cluster_col='cluster_total_str')
     elif selected_1 == 'opt2' and selected_2 == 'opt4':
         print('2 4')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='average_value', age_group_mode='not grouped')
+        legend = create_cluster_legend(df_clustered, cluster_col='cluster_avg_str')
     elif selected_1 == 'opt2' and selected_2 == 'opt5':
         print('2 5')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='average_value', age_group_mode='grouped')
+        legend = create_cluster_legend(df_clustered, cluster_col='cluster_avg_str')
     elif selected_1 == 'opt3' and selected_2 == 'opt4':
         print('3 4')
         fig = px.scatter()
@@ -58,7 +62,7 @@ def update_cluster(n_total_value, n_average_value, n_inc_vs_exp,n_all_ages,n_age
     else:
         print('else')
         fig = px.scatter()
-    legend = create_cluster_legend()
+        legend = create_cluster_legend()
     return (
         cls_1('opt1', selected_1),
         cls_1('opt2', selected_1),
