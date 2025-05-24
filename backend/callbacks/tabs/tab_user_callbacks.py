@@ -131,7 +131,6 @@ def update_credit_limit_bar(user_id, card_id):
     import plotly.graph_objects as go
     from backend.data_manager import DataManager
     dm = DataManager.get_instance()
-    # Card ID hat Priorität
     if card_id and str(card_id).strip():
         card_df = dm.df_cards[dm.df_cards["id"] == int(card_id)]
         if card_df.empty:
@@ -152,12 +151,18 @@ def update_credit_limit_bar(user_id, card_id):
     card_labels = [f"Card {i+1}: ${limit:,.2f}" for i, limit in enumerate(credit_limits)]
 
     # Farben für die Karten
-    colors = ["#2ecc71", "#5d9cf8", "#e74c3c", "#f1b44c", "#8e44ad", "#c65ed4"]  # erweitern falls nötig
+    colors = [
+        "#36c36a",  # Grün
+        "#5d9cf8",  # Blau
+        "#f1b44c",  # Gelb-Orange
+        "#e74c3c",  # Rot
+        "#8e44ad",  # Lila
+        "#16a085",  # Türkis/Dunkelgrün
+    ]
 
     fig = go.Figure()
     prev = 0
     for i, (label, limit) in enumerate(zip(card_labels, credit_limits)):
-        # Nutze "inside" für Text und setze Textfarbe schwarz für hellere Balken, weiß für dunklere:
         fig.add_trace(go.Bar(
             x=[limit],
             y=["Credit Limit"],
