@@ -67,6 +67,12 @@ class ID(str, Enum):
     CLUSTER_INFO_ICON = "cluster-info-icon"
     CLUSTER_DEFAULT_SWITCH = "cluster-default-switch"
     CLUSTER_DEFAULT_SWITCH_CONTAINER = "cluster-default-switch-container" #needed for invisibility
+    CLUSTER_BTN_TRANSACTIONS = "cluster-button-transactions"
+    CLUSTER_BTN_VALUE = "cluster-button-value"
+    CLUSTER_BTN_INC_VS_EXP = "cluster-button-inc-vs-exp"
+    CLUSTER_BTN_ALL_AGES ="cluster-button-all-ages"
+    CLUSTER_BTN_AGE_GROUP = "cluster-button-age-group"
+    CLUSTER_CONTROL_MERCHANT_GROUP_DROPDOWN = "cluster-control-merchant-group-dropdown"
 
     # User Tab
     USER_TAB_INFO_ICON = "user-tab-info-icon"
@@ -108,3 +114,5 @@ class ID(str, Enum):
     MERCHANT_INPUT = "merchant-input"
     MERCHANT_INPUT_GROUP_DROPDOWN = "merchant-input-group-dropdown"
     MERCHANT_INPUT_MERCHANT_ID = "merchant-input-merchant-id"
+    MERCHANT_GROUP_INPUT_WRAPPER = "merchant-group-input-wrapper"
+    MERCHANT_INPUT_WRAPPER = "merchant-input-wrapper"

@@ -1,6 +1,6 @@
 import pandas as pd
 from backend.data_manager import DataManager
-from backend.data_setup.tabs.tab_cluster_data_setup import prepare_default_data
+#from backend.data_setup.tabs.tab_cluster_data_setup import prepare_default_data
 import json
 import plotly.graph_objects as go
 import plotly.express as px
