@@ -24,6 +24,7 @@ def create_cluster_content():
         className="tab-content-inner cluster-tab",
         children=[
             #create_cluster_heading(),
+            #create_cluster_control_merchant_group(),
             _create_heading(),
             _create_cluster_controls(),
             _create_cluster_visualization()
@@ -81,6 +82,18 @@ def create_cluster_heading():
                 ]),
 
         ])
+
+def create_cluster_control_merchant_group():
+    return html.Div(
+        dbc.Row([
+            dbc.Col([
+                html.Div(
+                    children=[], # todo
+                    id=ID.CLUSTER_CONTROL_MERCHANT_GROUP,
+                )
+            ])
+        ])
+    )
 
 def _create_heading() -> html.Div:
     """

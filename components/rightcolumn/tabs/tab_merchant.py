@@ -101,13 +101,13 @@ def create_merchant_input_container():
                 # Container for Merchant Group dropdown input
                 html.Div(
                     children=[tab_merchant_callbacks.get_merchant_group_input_container()],
-                    id="merchant-group-input-wrapper",
+                    id=ID.MERCHANT_GROUP_INPUT_WRAPPER,
                     style={"display": "none"}  # initially hidden
                 ),
                 # Container for Individual Merchant ID input
                 html.Div(
                     children=[tab_merchant_callbacks.get_merchant_input_container()],
-                    id="merchant-input-wrapper",
+                    id=ID.MERCHANT_INPUT_WRAPPER,
                     style={"display": "none"}  # initially hidden
                 ),
             ])

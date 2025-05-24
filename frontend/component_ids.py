@@ -72,6 +72,7 @@ class ID(str, Enum):
     CLUSTER_BTN_INC_VS_EXP = "cluster-button-inc-vs-exp"
     CLUSTER_BTN_ALL ="cluster-button-all"
     CLUSTER_BTN_AGE_GROUP = "cluster-button-age-group"
+    CLUSTER_CONTROL_MERCHANT_GROUP = "cluster-control-merchant-group"
 
     # User Tab
     USER_TAB_INFO_ICON = "user-tab-info-icon"
@@ -113,3 +114,5 @@ class ID(str, Enum):
     MERCHANT_INPUT = "merchant-input"
     MERCHANT_INPUT_GROUP_DROPDOWN = "merchant-input-group-dropdown"
     MERCHANT_INPUT_MERCHANT_ID = "merchant-input-merchant-id"
+    MERCHANT_GROUP_INPUT_WRAPPER = "merchant-group-input-wrapper"
+    MERCHANT_INPUT_WRAPPER = "merchant-input-wrapper"
