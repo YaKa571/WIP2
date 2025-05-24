@@ -8,19 +8,57 @@ from frontend.icon_manager import IconID
 from components.constants import COLOR_BLUE_MAIN
 
 def create_cluster_content():
+    """
+        Creates the main container Div for the cluster tab content,
+        including heading, age group switch, merchant group filter,
+        and cluster visualization components.
+
+        Returns:
+            html.Div: The complete cluster tab content layout.
+        """
     return html.Div(
         className="tab-content-inner cluster-tab",
         children=[
-            html.P("Cluster Tab wird neu aufgesetzt, Finger weg"),
 
             create_cluster_heading(),
+            create_cluster_age_group_switch(),
             create_cluster_control_merchant_group(),
             create_cluster_visualization()
 
         ]
     )
+def create_cluster_age_group_switch():
+    """
+        Creates a UI component with buttons to toggle between viewing
+        data for all ages or segmented by age groups.
+
+        Returns:
+            html.Div: A Div containing the age group toggle buttons.
+        """
+    return html.Div(
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    html.Button('All Ages', id=ID.CLUSTER_BTN_ALL_AGES, n_clicks=0,
+                                className='option-btn'),
+                    html.Button('Age Groups', id=ID.CLUSTER_BTN_AGE_GROUP, n_clicks=0,
+                                className='option-btn'),
+                ], className='button-radio-wrapper'),
+
+            ]),
+        ])
+
+    )
 
 def create_cluster_heading():
+    """
+        Creates the header section of the cluster tab including buttons
+        for selecting the clustering mode (Total Value, Average Value,
+        Income vs Expenses) and an info icon with tooltip explaining usage.
+
+        Returns:
+            html.Div: The cluster tab header layout.
+        """
     return html.Div(
         className="tab-heading-wrapper",
         children=[
@@ -35,16 +73,8 @@ def create_cluster_heading():
                                     className='option-btn'),
                     ], className='button-radio-wrapper'),
 
-                ], width=6),
-                dbc.Col([
-                    html.Div([
-                        html.Button('All', id=ID.CLUSTER_BTN_ALL_AGES, n_clicks=0,
-                                    className='option-btn'),
-                        html.Button('Age Groups', id=ID.CLUSTER_BTN_AGE_GROUP, n_clicks=0,
-                                    className='option-btn'),
-                    ], className='button-radio-wrapper'),
+                ], width=10),
 
-                ], width=4),
                 dbc.Col([
                     html.Div(html.P("Button Map")),
                 ], width=2),
@@ -57,14 +87,31 @@ def create_cluster_heading():
                 placement="bottom-end",
                 className="enhanced-tooltip",
                 children=[
-                    "TODO",
+                    "Switch between plotting ",
                     html.Br(),
-                    "based on new design",
+                    "Total Value/Average Value",
+                    html.Br(),
+                    "or choose Income vs. Expenses",
+                    html.Hr(),
+                    "choose to show Plot for all Ages",
+                    html.Br(),
+                    "or show Plot for different Age Groups",
+                    html.Hr(),
+                    "Choose Filter for Merchant Groups",
+                    html.Br(),
+                    "using Dropdown"
                 ]),
 
         ])
 
 def create_cluster_control_merchant_group():
+    """
+        Creates the container Div that holds the merchant group filter dropdown.
+        This allows filtering cluster data by merchant groups.
+
+        Returns:
+            html.Div: The container for merchant group dropdown control.
+        """
     return html.Div(
         dbc.Row([
             dbc.Col([
@@ -77,6 +124,13 @@ def create_cluster_control_merchant_group():
     )
 
 def create_cluster_visualization():
+    """
+        Creates the visualization layout for the cluster tab including two cards:
+        one for the cluster scatter plot graph and one for the cluster legend.
+
+        Returns:
+            html.Div: The visualization container with graph and legend cards.
+        """
     return html.Div(
         className="flex-wrapper flex-fill",
         children=[
@@ -135,5 +189,5 @@ def create_cluster_visualization():
                             )
 
                         ])
-                ])
+                ]),
         ])
