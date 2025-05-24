@@ -23,9 +23,11 @@ def create_cluster_content():
         children=[
             html.P("Cluster Tab wird neu aufgesetzt, Finger weg"),
 
-            #create_cluster_heading(),
+            create_cluster_heading(),
             create_cluster_control_merchant_group(),
 
+            dcc.Graph(id=ID.CLUSTER_GRAPH),
+            html.Div(id=ID.CLUSTER_LEGEND)
         ]
     )
 
@@ -35,23 +37,23 @@ def create_cluster_heading():
         children=[
             dbc.Row([
                 dbc.Col([
-                    html.Div([
-                        html.Button('Transactions', id=ID.CLUSTER_BTN_TRANSACTIONS, n_clicks=0,
-                                    className='option-btn'),
-                        html.Button('Value', id=ID.CLUSTER_BTN_VALUE, n_clicks=0,
-                                    className='option-btn'),
-                        html.Button('Inc vs Exp', id=ID.CLUSTER_BTN_INC_VS_EXP, n_clicks=0,
-                                    className='option-btn'),
-                    ], className='button-radio-wrapper'),
+                    # html.Div([
+                    #     html.Button('Transactions', id=ID.CLUSTER_BTN_TRANSACTIONS, n_clicks=0,
+                    #                 className='option-btn'),
+                    #     html.Button('Value', id=ID.CLUSTER_BTN_VALUE, n_clicks=0,
+                    #                 className='option-btn'),
+                    #     html.Button('Inc vs Exp', id=ID.CLUSTER_BTN_INC_VS_EXP, n_clicks=0,
+                    #                 className='option-btn'),
+                    # ], className='button-radio-wrapper'),
 
                 ], width=6),
                 dbc.Col([
-                    html.Div([
-                        html.Button('All', id=ID.CLUSTER_BTN_ALL_AGES, n_clicks=0,
-                                    className='option-btn'),
-                        html.Button('Age Groups', id=ID.CLUSTER_BTN_AGE_GROUP, n_clicks=0,
-                                    className='option-btn'),
-                    ], className='button-radio-wrapper'),
+                    # html.Div([
+                    #     html.Button('All', id=ID.CLUSTER_BTN_ALL_AGES, n_clicks=0,
+                    #                 className='option-btn'),
+                    #     html.Button('Age Groups', id=ID.CLUSTER_BTN_AGE_GROUP, n_clicks=0,
+                    #                 className='option-btn'),
+                    # ], className='button-radio-wrapper'),
 
                 ], width=4),
                 dbc.Col([
@@ -59,9 +61,9 @@ def create_cluster_heading():
                 ], width=2),
 
             ]),
-            comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
+            comp_factory.create_info_icon(ID.CLUSTER_INFO_ICON),
             dbc.Tooltip(
-                target=ID.MERCHANT_INFO_ICON,
+                target=ID.CLUSTER_INFO_ICON,
                 is_open=False,
                 placement="bottom-end",
                 className="enhanced-tooltip",

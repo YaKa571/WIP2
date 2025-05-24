@@ -17,7 +17,6 @@ from backend.callbacks.settings_callbacks import *  # noqa: F401
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401
 from backend.callbacks.tabs.tab_buttons_callbacks import update_tabs  # noqa: F401
 #from backend.callbacks.tabs.tab_cluster_callbacks import update_cluster  # noqa: F401
-#from backend.callbacks.tabs.tab_cluster_callbacks import update_cluster_new  # noqa: F401
 from backend.callbacks.tabs.tab_user_callbacks import (update_user_kpis, update_credit_limit,  # noqa: F401
                                                        update_merchant_bar_chart)  # noqa: F401
 from backend.callbacks.tabs.tab_home_callbacks import (store_selected_state, update_all_pies,  # noqa: F401
