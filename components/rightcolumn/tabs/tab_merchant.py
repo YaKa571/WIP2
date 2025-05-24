@@ -70,16 +70,16 @@ def create_merchant_heading() -> html.Div:
                 className="enhanced-tooltip",
                 children=[
                     "Click on All Merchants",
-                    html.Div(),
-                    "to show Treemap of all Merchants",
                     html.Br(),
+                    "to show Treemap of all Merchants",
+                    html.Hr(),
                     "Click on Merchant Group",
                     html.Br(),
                     "and choose from Dropdown",
-                    html.Br(),
+                    html.Hr(),
                     "Click on Merchant",
                     html.Br(),
-                    "and fill in Merchant ID"
+                    "and type in Merchant ID"
                 ]),
 
 

@@ -23,8 +23,11 @@ def create_cluster_content():
     return html.Div(
         className="tab-content-inner cluster-tab",
         children=[
+            # NEW
             #create_cluster_heading(),
             #create_cluster_control_merchant_group(),
+
+            # OLD
             _create_heading(),
             _create_cluster_controls(),
             _create_cluster_visualization()
@@ -71,14 +74,6 @@ def create_cluster_heading():
                     "TODO",
                     html.Br(),
                     "based on new design",
-                    html.Br(),
-                    "Click on Merchant Group",
-                    html.Br(),
-                    "and choose from Dropdown",
-                    html.Br(),
-                    "Click on Merchant",
-                    html.Br(),
-                    "and fill in Merchant ID"
                 ]),
 
         ])
