@@ -161,6 +161,7 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
 @callback(
     Output(ID.USER_ID_SEARCH_INPUT, "value"),
     Output(ID.ACTIVE_TAB_STORE, "data"),
+    Output(ID.HOME_GRAPH_BAR_CHART, "clickData"),
     Input(ID.HOME_GRAPH_BAR_CHART, "clickData"),
     State(ID.HOME_TAB_BAR_CHART_DROPDOWN, "value"),
     prevent_initial_call=True
@@ -194,6 +195,8 @@ def bridge_home_to_user_tab(clickData, chart_option):
 
     # Top Spending User -> User Tab
     if chart_option == BAR_CHART_OPTIONS[2]["value"]:
-        return clickData["points"][0]["x"], ID.TAB_USER
+        return clickData["points"][0]["x"], ID.TAB_USER, None
 
-    return no_update, no_update
+    # TODO: Add other chart options here if needed
+
+    return no_update, no_update, no_update
