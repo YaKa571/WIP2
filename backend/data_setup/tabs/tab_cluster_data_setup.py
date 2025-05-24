@@ -101,7 +101,7 @@ def make_cluster_plot(df_agg: pd.DataFrame, mode='total_value', age_group_mode='
     return fig
 
 def create_cluster_legend(df=None, cluster_col='cluster_total_str'):
-    # Wenn df None ist, zeige alle Farben (z.B. beim Start)
+    # shows all colors as default
     if df is None:
         clusters = sorted(cluster_colors.keys())
     else:
@@ -109,7 +109,7 @@ def create_cluster_legend(df=None, cluster_col='cluster_total_str'):
 
     items = []
     for cluster_id in clusters:
-        color = cluster_colors.get(cluster_id, "#999999")  # fallback grau
+        color = cluster_colors.get(cluster_id, "#999999")  # fallback grey
         items.append(
             html.Div(
                 style={"display": "flex", "alignItems": "center", "marginBottom": "6px"},
@@ -120,3 +120,45 @@ def create_cluster_legend(df=None, cluster_col='cluster_total_str'):
             )
         )
     return html.Div(items)
+
+def prepare_inc_vs_exp_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
+    # Filtering
+    if merchant_group != 'All Merchant Groups':
+        df = df[df['merchant_group'] == merchant_group].copy()
+
+    # Aggregation per client_id
+    agg = df.groupby('client_id').agg(
+        total_expenses=('amount', 'sum'),
+        yearly_income=('yearly_income', 'first'),
+        age_group=('age_group', 'first')
+    ).reset_index()
+
+    # drop NaNs
+    agg = agg.dropna(subset=['total_expenses', 'yearly_income'])
+
+    n_samples = len(agg)
+    n_clusters = min(4, n_samples)
+
+    if n_clusters >= 1:
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=30)
+        agg['cluster_inc_vs_exp'] = kmeans.fit_predict(agg[['yearly_income', 'total_expenses']])
+    else:
+        agg['cluster_inc_vs_exp'] = 0
+
+    agg['cluster_inc_vs_exp_str'] = agg['cluster_inc_vs_exp'].astype(str)
+    return agg
+
+def make_inc_vs_exp_plot(df_agg: pd.DataFrame, age_group_mode='all'):
+    fig = px.scatter(
+        df_agg,
+        x='yearly_income',
+        y='total_expenses',
+        color='cluster_inc_vs_exp_str',
+        color_discrete_map=cluster_colors,
+        hover_data=['client_id', 'yearly_income', 'total_expenses'],
+        title='Clustering: Income vs Expenses',
+        facet_col='age_group' if age_group_mode == 'grouped' else None,
+        category_orders={"age_group": ['<25', '26–35', '36–45', '46–55', '56–65', '65+']}
+    )
+    fig.update_layout(showlegend=False)
+    return fig

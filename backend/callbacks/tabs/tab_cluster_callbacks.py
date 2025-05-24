@@ -2,7 +2,7 @@ from backend.data_setup.tabs import tab_cluster_data_setup
 from dash import dcc, html, callback, Input, Output
 
 from backend.data_setup.tabs.tab_cluster_data_setup import prepare_cluster_data, make_cluster_plot, my_data_file, \
-    create_cluster_legend
+    create_cluster_legend, prepare_inc_vs_exp_cluster_data, make_inc_vs_exp_plot
 from frontend.component_ids import ID
 import plotly.express as px
 
@@ -55,10 +55,14 @@ def update_cluster(n_total_value, n_average_value, n_inc_vs_exp,n_all_ages,n_age
         legend = create_cluster_legend(df_clustered, cluster_col='cluster_avg_str')
     elif selected_1 == 'opt3' and selected_2 == 'opt4':
         print('3 4')
-        fig = px.scatter()
+        df_clustered = prepare_inc_vs_exp_cluster_data(my_data_file, merchant_group=selected_merchant_group)
+        fig = make_inc_vs_exp_plot(df_clustered, age_group_mode='not grouped')
+        legend = create_cluster_legend(df_clustered, cluster_col='cluster_inc_vs_exp_str')
     elif selected_1 == 'opt3' and selected_2 == 'opt5':
         print('3 5')
-        fig = px.scatter()
+        df_clustered = prepare_inc_vs_exp_cluster_data(my_data_file, merchant_group=selected_merchant_group)
+        fig = make_inc_vs_exp_plot(df_clustered, age_group_mode='grouped')
+        legend = create_cluster_legend(df_clustered, cluster_col='cluster_inc_vs_exp_str')
     else:
         print('else')
         fig = px.scatter()
