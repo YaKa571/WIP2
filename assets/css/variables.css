@@ -54,6 +54,15 @@
     --dropdown-border-color: rgba(0, 0, 0, 0.175);
     --dropdown-border-radius: 12px;
 
+    /* Button */
+    --button-bg: #f9f9f9;
+    --button-color: #233045;
+
+    /* Scrollbar */
+    --dropdown-scrollbar-thumb: var(--blue-main, #2563eb);
+    --dropdown-scrollbar-thumb-hover: #3d68b1;
+    --dropdown-scrollbar-track: #f9f9f9;
+
     /* Search-Bar */
     --searchbar-bg: #f9f9f9;
     --searchbar-outline: 1px solid rgba(0, 0, 0, 0.175);
@@ -70,7 +79,7 @@
 
 
     /* Settings Button Text */
-    --settings-button-text-border: 1px solid var(--text-main);
+    --settings-button-text-border: var(--searchbar-outline);
     --settings-button-text-bg-hover: #f3f7fa;
 
     /* Etc. */
@@ -123,6 +132,15 @@
     --dropdown-secondary-bg: #242a36;
     --dropdown-primary: #246bfd;
 
+    /* Button */
+    --button-bg: #23272b;
+    --button-color: #e0e6ed;
+
+    /* Scrollbar */
+    --dropdown-scrollbar-thumb: #246bfd;
+    --dropdown-scrollbar-thumb-hover: #3d68b1;
+    --dropdown-scrollbar-track: #23272b;
+
     /* Search-Bar */
     --searchbar-bg: #23272b;
     --searchbar-outline: 1px solid #334155;
@@ -137,7 +155,7 @@
     --kpi-graph-card-outline: 1px solid var(--kpi-card-splitline);
 
     /* Settings Button Text */
-    --settings-button-text-border: 1px solid var(--text-main);
+    --settings-button-text-border: var(--searchbar-outline);
     --settings-button-text-bg-hover: #1e2226;
 
     /* Etc. */
