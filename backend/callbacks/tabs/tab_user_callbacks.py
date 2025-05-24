@@ -130,8 +130,8 @@ def update_credit_limit(user_id, card_id):
 def update_credit_limit_bar(user_id, card_id):
     import plotly.graph_objects as go
     from backend.data_manager import DataManager
-
     dm = DataManager.get_instance()
+    # Card ID hat Priorität
     if card_id and str(card_id).strip():
         card_df = dm.df_cards[dm.df_cards["id"] == int(card_id)]
         if card_df.empty:
@@ -146,17 +146,18 @@ def update_credit_limit_bar(user_id, card_id):
     if user_cards.empty:
         return go.Figure()
 
-    # --- Card 1 soll links! Reihenfolge wird wie im DataFrame gelassen ---
+    # Nach Kreditlimit sortieren (größte zuerst)
+    user_cards = user_cards.sort_values("credit_limit", ascending=False).reset_index(drop=True)
     credit_limits = user_cards["credit_limit"].tolist()
-    n = len(credit_limits)
     card_labels = [f"Card {i+1}: ${limit:,.2f}" for i, limit in enumerate(credit_limits)]
-    colors = ["#c65ed4", "#5d9cf8", "#f1b44c", "#2ecc71", "#e74c3c", "#8e44ad"]  # ggf. erweitern
-    # Schneide Farben auf Anzahl Karten zu (reicht immer aus, da modulo)
-    colors = colors[:n]
+
+    # Farben für die Karten
+    colors = ["#2ecc71", "#5d9cf8", "#e74c3c", "#f1b44c", "#8e44ad", "#c65ed4"]  # erweitern falls nötig
 
     fig = go.Figure()
     prev = 0
     for i, (label, limit) in enumerate(zip(card_labels, credit_limits)):
+        # Nutze "inside" für Text und setze Textfarbe schwarz für hellere Balken, weiß für dunklere:
         fig.add_trace(go.Bar(
             x=[limit],
             y=["Credit Limit"],
@@ -164,33 +165,34 @@ def update_credit_limit_bar(user_id, card_id):
             orientation="h",
             marker_color=colors[i % len(colors)],
             hovertemplate=f"{label}<extra></extra>",
-            text=f"${limit:,.2f}",  # Wert als Text
-            textposition="outside",
+            text=label,
+            textposition="inside",
+            insidetextanchor="middle",
+            textfont=dict(size=15, color="black"),
             offsetgroup=0,
             base=prev
         ))
         prev += limit
 
+    total_limit = sum(credit_limits)
     fig.update_layout(
         barmode="stack",
-        showlegend=True,
+        showlegend=False,
         margin=dict(l=0, r=0, t=0, b=0),
-        height=60,
-        width=None,
+        height=100,
         plot_bgcolor="white",
         paper_bgcolor="rgba(0,0,0,0)",
-        xaxis=dict(showticklabels=False, visible=False, range=[0, prev*1.01]),
+        xaxis=dict(
+            showticklabels=False,
+            visible=False,
+            range=[0, total_limit]  # X-Achse fixiert
+        ),
         yaxis=dict(showticklabels=False, visible=False),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.25,
-            xanchor="center",
-            x=0.5,
-            font=dict(size=11)
-        )
     )
+
     return fig
+
+
 
 # === Callback: Merchant Bar Chart (bottom) ===
 @callback(

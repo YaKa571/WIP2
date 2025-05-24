@@ -201,8 +201,11 @@ def _create_credit_limit_kpi() -> html.Div:
                             dcc.Graph(
                                 id=ID.USER_CREDIT_LIMIT_BAR,
                                 config={"displayModeBar": False},
-                                style={"height": "60px", "marginTop": "14px", "width": "100%", "overflow": "hidden"},
-                            ),
+                                style={
+                                    "height": "120px", "marginTop": "14px", "width": "100%", "overflow": "hidden"
+                                }
+                            )
+                            ,
                         ],
                         className="card-body"
                     )
