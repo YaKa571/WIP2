@@ -67,6 +67,11 @@ class ID(str, Enum):
     CLUSTER_INFO_ICON = "cluster-info-icon"
     CLUSTER_DEFAULT_SWITCH = "cluster-default-switch"
     CLUSTER_DEFAULT_SWITCH_CONTAINER = "cluster-default-switch-container" #needed for invisibility
+    CLUSTER_BTN_TRANSACTIONS = "cluster-button-transactions"
+    CLUSTER_BTN_VALUE = "cluster-button-value"
+    CLUSTER_BTN_INC_VS_EXP = "cluster-button-inc-vs-exp"
+    CLUSTER_BTN_ALL ="cluster-button-all"
+    CLUSTER_BTN_AGE_GROUP = "cluster-button-age-group"
 
     # User Tab
     USER_TAB_INFO_ICON = "user-tab-info-icon"

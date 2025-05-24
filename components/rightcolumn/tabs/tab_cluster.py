@@ -23,14 +23,64 @@ def create_cluster_content():
     return html.Div(
         className="tab-content-inner cluster-tab",
         children=[
-
+            #create_cluster_heading(),
             _create_heading(),
             _create_cluster_controls(),
             _create_cluster_visualization()
 
         ]
     )
+def create_cluster_heading():
+    return html.Div(
+        className="tab-heading-wrapper",
+        children=[
+            dbc.Row([
+                dbc.Col([
+                    html.Div([
+                        html.Button('Transactions', id=ID.CLUSTER_BTN_TRANSACTIONS, n_clicks=0,
+                                    className='option-btn'),
+                        html.Button('Value', id=ID.CLUSTER_BTN_VALUE, n_clicks=0,
+                                    className='option-btn'),
+                        html.Button('Inc vs Exp', id=ID.CLUSTER_BTN_INC_VS_EXP, n_clicks=0,
+                                    className='option-btn'),
+                    ], className='button-radio-wrapper'),
 
+                ], width=6),
+                dbc.Col([
+                    html.Div([
+                        html.Button('All', id=ID.CLUSTER_BTN_ALL, n_clicks=0,
+                                    className='option-btn'),
+                        html.Button('Age Groups', id=ID.CLUSTER_BTN_AGE_GROUP, n_clicks=0,
+                                    className='option-btn'),
+                    ], className='button-radio-wrapper'),
+
+                ], width=4),
+                dbc.Col([
+                    html.Div(html.P("Button Map")),
+                ], width=2),
+
+            ]),
+            comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
+            dbc.Tooltip(
+                target=ID.MERCHANT_INFO_ICON,
+                is_open=False,
+                placement="bottom-end",
+                className="enhanced-tooltip",
+                children=[
+                    "TODO",
+                    html.Br(),
+                    "based on new design",
+                    html.Br(),
+                    "Click on Merchant Group",
+                    html.Br(),
+                    "and choose from Dropdown",
+                    html.Br(),
+                    "Click on Merchant",
+                    html.Br(),
+                    "and fill in Merchant ID"
+                ]),
+
+        ])
 
 def _create_heading() -> html.Div:
     """
