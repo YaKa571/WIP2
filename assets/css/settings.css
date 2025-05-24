@@ -269,3 +269,8 @@
     width: 100%;
     border: none !important;
 }
+
+/* Text when typing (searching) */
+.settings-dropdown .Select-input > input {
+    color: var(--text-main) !important;
+}
