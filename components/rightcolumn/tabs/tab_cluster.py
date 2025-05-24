@@ -4,8 +4,7 @@ from dash import html, dcc
 from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID
-
-COLOR_BLUE_MAIN = "#2563eb"
+from components.constants import COLOR_BLUE_MAIN
 
 
 # TODO: Dark-Mode for the Graph, style Radio-Buttons
