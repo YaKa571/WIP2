@@ -71,12 +71,24 @@ def prepare_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
 
 def make_cluster_plot(df_agg: pd.DataFrame, mode='total_value', age_group_mode='all'):
     cluster_column = 'cluster_total_str' if mode == 'total_value' else 'cluster_avg_str'
-
+    cluster_colors = {
+        "0": "#56B4E9",  # light blue
+        "1": "#D55E00",  # reddish brown
+        "2": "#009E73",  # teal green
+        "3": "#E69F00",  # orange
+        "4": "#0072B2",  # dark blue
+        "5": "#F0E442",  # yellow
+        "6": "#CC79A7",  # pink/magenta
+        "7": "#999999",  # grey
+        "8": "#ADFF2F",  # light green
+        "9": "#87CEEB"  # sky blue
+    }
     fig = px.scatter(
         df_agg,
         x='transaction_count',
         y='total_value' if mode == 'total_value' else 'average_value',
-        color=cluster_column,
+        color="cluster_total_str",
+        color_discrete_map=cluster_colors,
         hover_data=['client_id', 'transaction_count', 'total_value', 'average_value'],
         title=f'Clustering: {"Total Value" if mode == "total_value" else "Average Value"}',
         facet_col='age_group' if age_group_mode == 'grouped' else None,
