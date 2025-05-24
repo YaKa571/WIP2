@@ -134,6 +134,10 @@
     transform: scale(1.4);
 }
 
+.Select-control {
+    outline: none !important;
+}
+
 .settings-canvas.offcanvas-start {
     border-radius: 0 var(--outer-border-radius) var(--outer-border-radius) 0;
 }
