@@ -22,7 +22,7 @@ from backend.callbacks.tabs.tab_user_callbacks import (update_user_kpis, update_
                                                        update_merchant_bar_chart)  # noqa: F401
 from backend.callbacks.tabs.tab_home_callbacks import (store_selected_state, update_all_pies,  # noqa: F401
                                                        update_bar_chart, bridge_home_to_user_tab)  # noqa: F401
-from backend.callbacks.tabs.tab_merchant_callbacks import update_merchant  # noqa: F401
+from backend.callbacks.tabs.tab_merchant_callbacks import update_merchant, set_merchant_tab  # noqa: F401
 
 from components.leftcolumn.left_column import create_left_column
 from components.rightcolumn.right_column import create_right_column
@@ -47,6 +47,7 @@ def create_app():
             dcc.Store(id=ID.ANIMATION_STATE_STORE.value),
             dcc.Store(id=ID.HOME_TAB_SELECTED_STATE_STORE, data=None),
             dcc.Store(id=ID.ACTIVE_TAB_STORE, data=ID.TAB_HOME),
+            dcc.Store(id=ID.MERCHANT_SELECTED_BUTTON_STORE, data="opt1"),
             html.Div(id="app-init-trigger", style={"display": "none"}),
             html.Div(id="layout-ready-signal", style={"display": "none"}),
 
