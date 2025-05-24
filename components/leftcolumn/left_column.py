@@ -5,6 +5,8 @@ from components.factories.kpi_card_factory import create_kpi_card
 from frontend.component_ids import ID
 
 
+# TODO: Cache calculated Map values for faster loading when changing theme
+
 def create_kpi_cards() -> html.Div:
     """
     Creates a collection of KPI cards in a dashboard layout.
