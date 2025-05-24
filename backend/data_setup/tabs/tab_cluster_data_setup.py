@@ -118,7 +118,7 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
     else:
         x_col, y_col = None, None
 
-    # Quantile für Kategorisierung
+    # Quantiles for categorization
     x_quantiles = df[x_col].quantile([0.33, 0.66]) if x_col else None
     y_quantiles = df[y_col].quantile([0.33, 0.66]) if y_col else None
 
@@ -130,7 +130,7 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
         else:
             return 'high'
 
-    # Basisbeschreibungen
+    # basic description
     base_desc_map = {
         ('low', 'low'): "Low {} and low {}",
         ('low', 'medium'): "Low {} and moderate {}",
@@ -143,20 +143,20 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
         ('high', 'high'): "High {} and high {}"
     }
 
-    # Hilfsfunktion für Vergleich zweier Werte
+
     def compare_values(val1, val2, threshold_ratio=0.05):
         diff = val2 - val1
-        if abs(diff) / max(abs(val1), 1e-6) < threshold_ratio:  # Unterschied zu klein
+        if abs(diff) / max(abs(val1), 1e-6) < threshold_ratio:
             return "approximately equal"
         elif diff > 0:
             return "slightly higher"
         else:
             return "slightly lower"
 
-    descriptions = {}  # Cluster ID -> Basisbeschreibung (ohne Zusatz)
+    descriptions = {}
     means = {}         # Cluster ID -> (x_mean, y_mean)
 
-    # Erster Durchgang: Basisbeschreibung generieren
+    # first round, generate descriptions
     for cl in sorted(df[cluster_col].unique()):
         sub_df = df[df[cluster_col] == cl]
 
@@ -171,7 +171,7 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
         base_desc_filled = base_desc.format(x_col.replace('_', ' '), y_col.replace('_', ' '))
         descriptions[cl] = base_desc_filled
 
-    # Wir prüfen, ob es mehrfach dieselbe Beschreibung gibt
+    # check if description already exists
     desc_to_clusters = {}
     for cl, desc in descriptions.items():
         desc_to_clusters.setdefault(desc, []).append(cl)
@@ -179,7 +179,7 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
     items = []
     for desc, clusters_with_desc in desc_to_clusters.items():
         if len(clusters_with_desc) == 1:
-            # Ein Cluster mit dieser Beschreibung, keine Zusatzinfo nötig
+            # if description does not exist yet
             cl = clusters_with_desc[0]
             color = cluster_colors.get(str(cl), "#000000")
             items.append(
@@ -192,15 +192,14 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
                 )
             )
         else:
-            # Mehrere Cluster mit gleicher Beschreibung, jetzt feinere Differenzierung
-            # Sortiere Cluster nach x_mean (transaction_count etc.) für konsistente Reihenfolge
+           # more detailed description, if description already exists
             clusters_sorted = sorted(clusters_with_desc, key=lambda c: means[c][0])
             base_desc = desc
             for i, cl in enumerate(clusters_sorted):
                 color = cluster_colors.get(str(cl), "#000000")
                 suffix = ""
                 if i > 0:
-                    # Vergleiche mit vorherigem Cluster
+
                     prev_cl = clusters_sorted[i-1]
                     prev_x, prev_y = means[prev_cl]
                     x_mean, y_mean = means[cl]
@@ -208,7 +207,7 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
                     x_comp = compare_values(prev_x, x_mean)
                     y_comp = compare_values(prev_y, y_mean)
 
-                    # Baue Zusatztext basierend auf der Richtung des Unterschieds
+
                     add_parts = []
                     if x_comp != "approximately equal":
                         add_parts.append(f"{x_comp} {x_col.replace('_', ' ')}")
@@ -231,9 +230,6 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
                 )
 
     return html.Div(items)
-
-
-
 
 
 def prepare_inc_vs_exp_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
