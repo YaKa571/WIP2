@@ -21,6 +21,7 @@ my_data_file['age_group'] = pd.cut(my_data_file['current_age'], bins=bins, label
 
 print(my_data_file.head())
 print(my_data_file.dtypes)
+
 #---------------------------------------------------------
 
 def get_cluster_merchant_group_dropdown():
