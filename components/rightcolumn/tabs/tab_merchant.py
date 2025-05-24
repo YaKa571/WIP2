@@ -56,33 +56,31 @@ def create_merchant_heading() -> html.Div:
                         html.Button('Merchant', id=ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT, n_clicks=0, className='option-btn'),
                     ], className='button-radio-wrapper'),
 
-                ], width = 9),
+                ], width = 10),
                 dbc.Col([
                     html.Div(html.P("Button Map")),
                 ], width=2),
-                dbc.Col([
-                    comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
-                    dbc.Tooltip(
-                        target=ID.MERCHANT_INFO_ICON,
-                        is_open=False,
-                        placement="bottom-end",
-                        className="enhanced-tooltip",
-                        children=[
-                            "Click on All Merchants",
-                            html.Div(),
-                            "to show Treemap of all Merchants",
-                            html.Br(),
-                            "Click on Merchant Group",
-                            html.Br(),
-                            "and choose from Dropdown",
-                            html.Br(),
-                            "Click on Merchant",
-                            html.Br(),
-                            "and fill in Merchant ID"
-                        ]),
-                ]),
-            ]),
 
+            ]),
+            comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
+            dbc.Tooltip(
+                target=ID.MERCHANT_INFO_ICON,
+                is_open=False,
+                placement="bottom-end",
+                className="enhanced-tooltip",
+                children=[
+                    "Click on All Merchants",
+                    html.Div(),
+                    "to show Treemap of all Merchants",
+                    html.Br(),
+                    "Click on Merchant Group",
+                    html.Br(),
+                    "and choose from Dropdown",
+                    html.Br(),
+                    "Click on Merchant",
+                    html.Br(),
+                    "and fill in Merchant ID"
+                ]),
 
 
         ])
