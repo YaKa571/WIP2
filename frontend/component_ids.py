@@ -99,6 +99,7 @@ class ID(str, Enum):
     MERCHANT_BTN_ALL_MERCHANTS = "merchant-btn-all-merchants"
     MERCHANT_BTN_MERCHANT_GROUP = "merchant-btn-merchant-group"
     MERCHANT_BTN_INDIVIDUAL_MERCHANT = "merchant-btn-individual-merchant"
+    MERCHANT_BTN_MAP = "merchant-btn-map"
     MERCHANT_KPI_CONTAINER = "merchant-kpi-container"
     MERCHANT_GRAPH_CONTAINER = "merchant-graph-container"
     MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP = "merchant-kpi-most-frequently-merchant-in-group"
@@ -116,3 +117,5 @@ class ID(str, Enum):
     MERCHANT_INPUT_MERCHANT_ID = "merchant-input-merchant-id"
     MERCHANT_GROUP_INPUT_WRAPPER = "merchant-group-input-wrapper"
     MERCHANT_INPUT_WRAPPER = "merchant-input-wrapper"
+    MERCHANT_SETTINGS_WRAPPER = "merchant-settings-wrapper"
+    MERCHANT_SELECTED_BUTTON_STORE = "merchant-selected-button-store"
