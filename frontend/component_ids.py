@@ -73,6 +73,7 @@ class ID(str, Enum):
     CLUSTER_BTN_ALL_AGES ="cluster-button-all-ages"
     CLUSTER_BTN_AGE_GROUP = "cluster-button-age-group"
     CLUSTER_CONTROL_MERCHANT_GROUP_DROPDOWN = "cluster-control-merchant-group-dropdown"
+    CLUSTER_MERCHANT_INPUT_GROUP_DROPDOWN = "cluster-control-merchant-input-group-dropdown"
 
     # User Tab
     USER_TAB_INFO_ICON = "user-tab-info-icon"
