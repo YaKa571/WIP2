@@ -4,7 +4,7 @@ from dash import html
 
 import components.factories.component_factory as comp_factory
 from backend.data_manager import DataManager
-from components.constants import COLOR_BLUE_MAIN, FEMALE_PINK
+from components.constants import COLOR_BLUE_MAIN, COLOR_FEMALE_PINK
 from frontend.component_ids import ID
 
 dm: DataManager = DataManager.get_instance()
@@ -39,7 +39,7 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
             A Plotly Figure object representing the pie chart visualization.
     """
     if colors is None:
-        colors = [FEMALE_PINK, COLOR_BLUE_MAIN]  # Female = pink, Male = blue
+        colors = [COLOR_FEMALE_PINK, COLOR_BLUE_MAIN]  # Female = pink, Male = blue
 
     textcolor = "white" if dark_mode else "black"
 
@@ -330,7 +330,7 @@ def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = False):
         x="client_id",
         y="spending",
         color="gender",
-        color_discrete_map={"Female": FEMALE_PINK, "Male": COLOR_BLUE_MAIN},
+        color_discrete_map={"Female": COLOR_FEMALE_PINK, "Male": COLOR_BLUE_MAIN},
         custom_data=["gender", "current_age", "spending"],
         hover_template=hover_template,
         title=f"TOP 10 MOST SPENDING USERS IN {state.upper() if state else 'ALL STATES'}",
