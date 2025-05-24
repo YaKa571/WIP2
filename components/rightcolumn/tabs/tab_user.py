@@ -198,7 +198,6 @@ def _create_credit_limit_kpi() -> html.Div:
                     dbc.CardBody(
                         children=[
                             html.Div(id=ID.USER_CREDIT_LIMIT_BOX, className="kpi-card-value kpi-number-value"),
-                            # HIER füge das dcc.Graph hinzu!
                             dcc.Graph(
                                 id=ID.USER_CREDIT_LIMIT_BAR,
                                 config={"displayModeBar": False},
