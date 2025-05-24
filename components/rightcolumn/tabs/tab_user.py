@@ -183,17 +183,22 @@ def _create_credit_limit_kpi() -> html.Div:
              KPI card.
     """
     return html.Div(
-        className="flex-wrapper",
         children=[
-
-            # Credit Limit Card
-            comp_factory.create_kpi_card(
-                icon_id=IconID.MONEY_DOLLAR,
-                title="Credit Limit",
-                div_id=ID.USER_CREDIT_LIMIT_BOX
+            html.Div(
+                comp_factory.create_kpi_card(
+                    icon_id=IconID.MONEY_DOLLAR,
+                    title="Credit Limit",
+                    div_id=ID.USER_CREDIT_LIMIT_BOX
+                ),
+                className="flex-wrapper",
+            ),
+            html.Div(
+                id=ID.USER_CREDIT_LIMIT_CARD_ROW,
+                className="credit-limit-card-row mt-2",
+                style={"width": "100%"}
             )
-
-        ])
+        ]
+    )
 
 
 def _create_bottom_merchant_diagram() -> html.Div:

@@ -120,6 +120,56 @@ def update_credit_limit(user_id, card_id):
         print("Error (Credit Limit):", str(e))
         return create_kpi_value_text("INVALID", True)
 
+@callback(
+    Output(ID.USER_CREDIT_LIMIT_CARD_ROW, "children"),
+    Input(ID.USER_ID_SEARCH_INPUT, "value"),
+    Input(ID.CARD_ID_SEARCH_INPUT, "value"),
+)
+def update_credit_limit_cards(user_id, card_id):
+    """
+    Shows each card (for the selected user) as a box with its individual credit limit.
+    """
+    dm = DataManager.get_instance()
+    import dash_bootstrap_components as dbc
+    from dash import html
+
+    # Welche User-ID?
+    if card_id and str(card_id).strip():
+        card_row = dm.df_cards[dm.df_cards["id"] == int(card_id)]
+        if card_row.empty:
+            return []
+        user_id = int(card_row.iloc[0]["client_id"])
+    elif user_id and str(user_id).strip():
+        user_id = int(user_id)
+    else:
+        return []
+
+    cards = dm.df_cards[dm.df_cards["client_id"] == user_id]
+    if cards.empty:
+        return []
+
+    # Erzeuge ein Card-Element pro Karte
+    card_boxes = [
+        dbc.Card(
+            class_name="kpi-card small-kpi-card credit-limit-card",
+            children=[
+                dbc.CardHeader(
+                    html.P(f"Card #{int(row['id'])}", className="kpi-card-title small"),
+                    class_name="card-header small"
+                ),
+                dbc.CardBody(
+                    html.P(f"${row['credit_limit']:,.2f}", className="kpi-card-value kpi-number-value"),
+                    class_name="card-body"
+                )
+            ],
+            style={"minWidth": "120px", "maxWidth": "180px", "margin": "0 8px 8px 0"}
+        )
+        for _, row in cards.iterrows()
+    ]
+
+    # Dynamisch im flex-row-Layout (geht in der Zeile weiter, wenn viele Karten da sind)
+    return html.Div(card_boxes, style={"display": "flex", "flexWrap": "wrap"})
+
 
 # === Callback: Merchant Bar Chart (bottom) ===
 @callback(
