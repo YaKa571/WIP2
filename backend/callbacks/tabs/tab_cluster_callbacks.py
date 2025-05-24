@@ -1,7 +1,8 @@
 from backend.data_setup.tabs import tab_cluster_data_setup
 from dash import dcc, html, callback, Input, Output
 
-from backend.data_setup.tabs.tab_cluster_data_setup import prepare_cluster_data, make_cluster_plot, my_data_file
+from backend.data_setup.tabs.tab_cluster_data_setup import prepare_cluster_data, make_cluster_plot, my_data_file, \
+    create_cluster_legend
 from frontend.component_ids import ID
 import plotly.express as px
 
@@ -57,7 +58,7 @@ def update_cluster(n_total_value, n_average_value, n_inc_vs_exp,n_all_ages,n_age
     else:
         print('else')
         fig = px.scatter()
-    legend = html.Div([html.P('Legend')])
+    legend = create_cluster_legend()
     return (
         cls_1('opt1', selected_1),
         cls_1('opt2', selected_1),

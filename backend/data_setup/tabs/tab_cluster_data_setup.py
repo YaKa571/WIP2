@@ -1,6 +1,6 @@
 import json
 import pandas as pd
-import datetime
+from dash import html
 import plotly.express as px
 from sklearn.cluster import KMeans
 from backend.data_setup.tabs.tab_merchant_data_setup import get_my_transactions_mcc_users
@@ -23,6 +23,19 @@ print(my_data_file.head())
 print(my_data_file.dtypes)
 
 #---------------------------------------------------------
+cluster_colors = {
+        "0": "#56B4E9",  # light blue
+        "1": "#D55E00",  # reddish brown
+        "2": "#009E73",  # teal green
+        "3": "#E69F00",  # orange
+        "4": "#0072B2",  # dark blue
+        "5": "#F0E442",  # yellow
+        "6": "#CC79A7",  # pink/magenta
+        "7": "#999999",  # grey
+        "8": "#ADFF2F",  # light green
+        "9": "#87CEEB"  # sky blue
+    }
+
 
 def get_cluster_merchant_group_dropdown():
     my_df = my_mcc
@@ -71,18 +84,7 @@ def prepare_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
 
 def make_cluster_plot(df_agg: pd.DataFrame, mode='total_value', age_group_mode='all'):
     cluster_column = 'cluster_total_str' if mode == 'total_value' else 'cluster_avg_str'
-    cluster_colors = {
-        "0": "#56B4E9",  # light blue
-        "1": "#D55E00",  # reddish brown
-        "2": "#009E73",  # teal green
-        "3": "#E69F00",  # orange
-        "4": "#0072B2",  # dark blue
-        "5": "#F0E442",  # yellow
-        "6": "#CC79A7",  # pink/magenta
-        "7": "#999999",  # grey
-        "8": "#ADFF2F",  # light green
-        "9": "#87CEEB"  # sky blue
-    }
+
     fig = px.scatter(
         df_agg,
         x='transaction_count',
@@ -97,3 +99,17 @@ def make_cluster_plot(df_agg: pd.DataFrame, mode='total_value', age_group_mode='
 
     fig.update_layout(showlegend=False)
     return fig
+
+def create_cluster_legend():
+    items = []
+    for cluster_id, color in cluster_colors.items():
+        items.append(
+            html.Div(
+                style={"display": "flex", "alignItems": "center", "marginBottom": "6px"},
+                children=[
+                    html.Div(style={"width": "20px", "height": "20px", "backgroundColor": color, "marginRight": "8px"}),
+                    html.Span(f"Cluster {cluster_id}")
+                ]
+            )
+        )
+    return html.Div(items)
