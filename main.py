@@ -45,7 +45,7 @@ def create_app():
             dcc.Store(id=ID.APP_STATE_STORE.value),
             dcc.Store(id=ID.ANIMATION_STATE_STORE.value),
             dcc.Store(id=ID.HOME_TAB_SELECTED_STATE_STORE, data=None),
-            dcc.Store(id=ID.ACTIVE_TAB_STORE, data="home-tab"),
+            dcc.Store(id=ID.ACTIVE_TAB_STORE, data=ID.TAB_HOME),
             html.Div(id="app-init-trigger", style={"display": "none"}),
             html.Div(id="layout-ready-signal", style={"display": "none"}),
 
