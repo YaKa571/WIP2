@@ -11,7 +11,6 @@ def create_cluster_content():
     return html.Div(
         className="tab-content-inner cluster-tab",
         children=[
-            html.P("Cluster Tab wird neu aufgesetzt, Finger weg"),
 
             create_cluster_heading(),
             create_cluster_control_merchant_group(),

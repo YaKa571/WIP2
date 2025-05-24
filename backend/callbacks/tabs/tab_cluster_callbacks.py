@@ -34,37 +34,37 @@ def update_cluster(n_total_value, n_average_value, n_inc_vs_exp,n_all_ages,n_age
     selected_2 = max(clicks_2, key=clicks_2.get) if any(clicks_2.values()) else 'opt4'
 
     if selected_1 == 'opt1' and selected_2 == 'opt4':
-        print('1 4')
+        #print('1 4')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='total_value', age_group_mode='not grouped')
         legend = create_cluster_legend(mode='total_value', df=df_clustered)
     elif selected_1 == 'opt1' and selected_2 == 'opt5':
-        print('1 5')
+        #print('1 5')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='total_value', age_group_mode='grouped')
         legend = create_cluster_legend(mode='total_value', df=df_clustered)
     elif selected_1 == 'opt2' and selected_2 == 'opt4':
-        print('2 4')
+        #print('2 4')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='average_value', age_group_mode='not grouped')
         legend = create_cluster_legend(mode='average_value', df=df_clustered)
     elif selected_1 == 'opt2' and selected_2 == 'opt5':
-        print('2 5')
+        #print('2 5')
         df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_cluster_plot(df_clustered, mode='average_value', age_group_mode='grouped')
         legend = create_cluster_legend(mode='average_value', df=df_clustered)
     elif selected_1 == 'opt3' and selected_2 == 'opt4':
-        print('3 4')
+        #print('3 4')
         df_clustered = prepare_inc_vs_exp_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_inc_vs_exp_plot(df_clustered, age_group_mode='not grouped')
         legend = create_cluster_legend(mode='inc_vs_exp', df=df_clustered)
     elif selected_1 == 'opt3' and selected_2 == 'opt5':
-        print('3 5')
+        #print('3 5')
         df_clustered = prepare_inc_vs_exp_cluster_data(my_data_file, merchant_group=selected_merchant_group)
         fig = make_inc_vs_exp_plot(df_clustered, age_group_mode='grouped')
         legend = create_cluster_legend(mode='inc_vs_exp', df=df_clustered)
     else:
-        print('else')
+        #print('else')
         fig = px.scatter()
         legend = html.Div([html.P('No Legend')])
     return (
