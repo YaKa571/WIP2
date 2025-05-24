@@ -107,44 +107,133 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
         'inc_vs_exp': 'cluster_inc_vs_exp'
     }[mode]
 
-    text_map = {
-        'total_value': "Transaktionen (x) vs Gesamtwert (y)",
-        'average_value': "Transaktionen (x) vs Durchschnittswert (y)",
-        'inc_vs_exp': "Einkommen (x) vs Ausgaben (y)"
-    }
-
-    clusters = sorted(df[cluster_col].unique())
     items = []
 
-    for cl in clusters:
+    if mode == 'total_value':
+        x_col, y_col = 'transaction_count', 'total_value'
+    elif mode == 'average_value':
+        x_col, y_col = 'transaction_count', 'average_value'
+    elif mode == 'inc_vs_exp':
+        x_col, y_col = 'yearly_income', 'total_expenses'
+    else:
+        x_col, y_col = None, None
+
+    # Quantile für Kategorisierung
+    x_quantiles = df[x_col].quantile([0.33, 0.66]) if x_col else None
+    y_quantiles = df[y_col].quantile([0.33, 0.66]) if y_col else None
+
+    def categorize(value, quantiles):
+        if value <= quantiles.iloc[0]:
+            return 'low'
+        elif value <= quantiles.iloc[1]:
+            return 'medium'
+        else:
+            return 'high'
+
+    # Basisbeschreibungen
+    base_desc_map = {
+        ('low', 'low'): "Low {} and low {}",
+        ('low', 'medium'): "Low {} and moderate {}",
+        ('low', 'high'): "Low {} and high {}",
+        ('medium', 'low'): "Moderate {} and low {}",
+        ('medium', 'medium'): "Moderate {} and moderate {}",
+        ('medium', 'high'): "Moderate {} and high {}",
+        ('high', 'low'): "High {} and low {}",
+        ('high', 'medium'): "High {} and moderate {}",
+        ('high', 'high'): "High {} and high {}"
+    }
+
+    # Hilfsfunktion für Vergleich zweier Werte
+    def compare_values(val1, val2, threshold_ratio=0.05):
+        diff = val2 - val1
+        if abs(diff) / max(abs(val1), 1e-6) < threshold_ratio:  # Unterschied zu klein
+            return "approximately equal"
+        elif diff > 0:
+            return "slightly higher"
+        else:
+            return "slightly lower"
+
+    descriptions = {}  # Cluster ID -> Basisbeschreibung (ohne Zusatz)
+    means = {}         # Cluster ID -> (x_mean, y_mean)
+
+    # Erster Durchgang: Basisbeschreibung generieren
+    for cl in sorted(df[cluster_col].unique()):
         sub_df = df[df[cluster_col] == cl]
 
-        # Berechne Schwerpunkt
-        if mode == 'total_value':
-            x, y = sub_df['transaction_count'].mean(), sub_df['total_value'].mean()
-        elif mode == 'average_value':
-            x, y = sub_df['transaction_count'].mean(), sub_df['average_value'].mean()
-        elif mode == 'inc_vs_exp':
-            x, y = sub_df['yearly_income'].mean(), sub_df['total_expenses'].mean()
-        else:
-            x, y = 0, 0
+        x_mean = sub_df[x_col].mean()
+        y_mean = sub_df[y_col].mean()
+        means[cl] = (x_mean, y_mean)
 
-        interpretation = f"{text_map[mode]} | x: {x:.0f}, y: {y:.0f}"
-        color = cluster_colors.get(str(cl), "#000000")
+        x_cat = categorize(x_mean, x_quantiles)
+        y_cat = categorize(y_mean, y_quantiles)
 
-        items.append(
-            html.Div(
-                style={"display": "flex", "alignItems": "center", "marginBottom": "6px"},
-                children=[
-                    html.Div(style={
-                        "width": "20px", "height": "20px", "backgroundColor": color, "marginRight": "8px"
-                    }),
-                    html.Span(f"Cluster {cl}: {interpretation}")
-                ]
+        base_desc = base_desc_map.get((x_cat, y_cat), "Cluster characteristics unknown")
+        base_desc_filled = base_desc.format(x_col.replace('_', ' '), y_col.replace('_', ' '))
+        descriptions[cl] = base_desc_filled
+
+    # Wir prüfen, ob es mehrfach dieselbe Beschreibung gibt
+    desc_to_clusters = {}
+    for cl, desc in descriptions.items():
+        desc_to_clusters.setdefault(desc, []).append(cl)
+
+    items = []
+    for desc, clusters_with_desc in desc_to_clusters.items():
+        if len(clusters_with_desc) == 1:
+            # Ein Cluster mit dieser Beschreibung, keine Zusatzinfo nötig
+            cl = clusters_with_desc[0]
+            color = cluster_colors.get(str(cl), "#000000")
+            items.append(
+                html.Div(
+                    style={"display": "flex", "alignItems": "center", "marginBottom": "6px"},
+                    children=[
+                        html.Div(style={"width": "20px", "height": "20px", "backgroundColor": color, "marginRight": "8px"}),
+                        html.Span(f"Cluster {cl}: {desc}")
+                    ]
+                )
             )
-        )
+        else:
+            # Mehrere Cluster mit gleicher Beschreibung, jetzt feinere Differenzierung
+            # Sortiere Cluster nach x_mean (transaction_count etc.) für konsistente Reihenfolge
+            clusters_sorted = sorted(clusters_with_desc, key=lambda c: means[c][0])
+            base_desc = desc
+            for i, cl in enumerate(clusters_sorted):
+                color = cluster_colors.get(str(cl), "#000000")
+                suffix = ""
+                if i > 0:
+                    # Vergleiche mit vorherigem Cluster
+                    prev_cl = clusters_sorted[i-1]
+                    prev_x, prev_y = means[prev_cl]
+                    x_mean, y_mean = means[cl]
+
+                    x_comp = compare_values(prev_x, x_mean)
+                    y_comp = compare_values(prev_y, y_mean)
+
+                    # Baue Zusatztext basierend auf der Richtung des Unterschieds
+                    add_parts = []
+                    if x_comp != "approximately equal":
+                        add_parts.append(f"{x_comp} {x_col.replace('_', ' ')}")
+                    if y_comp != "approximately equal":
+                        add_parts.append(f"{y_comp} {y_col.replace('_', ' ')}")
+
+                    if add_parts:
+                        suffix = " (" + ", ".join(add_parts) + ")"
+                    else:
+                        suffix = " (similar characteristics)"
+
+                items.append(
+                    html.Div(
+                        style={"display": "flex", "alignItems": "center", "marginBottom": "6px"},
+                        children=[
+                            html.Div(style={"width": "20px", "height": "20px", "backgroundColor": color, "marginRight": "8px"}),
+                            html.Span(f"Cluster {cl}: {base_desc}{suffix}")
+                        ]
+                    )
+                )
 
     return html.Div(items)
+
+
+
 
 
 def prepare_inc_vs_exp_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
