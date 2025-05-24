@@ -83,21 +83,29 @@ def prepare_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
 
 def make_cluster_plot(df_agg: pd.DataFrame, mode='total_value', age_group_mode='all'):
     cluster_column = 'cluster_total_str' if mode == 'total_value' else 'cluster_avg_str'
+    y_column = 'total_value' if mode == 'total_value' else 'average_value'
 
     fig = px.scatter(
         df_agg,
         x='transaction_count',
-        y='total_value' if mode == 'total_value' else 'average_value',
-        color="cluster_total_str",
+        y=y_column,
+        color=cluster_column,
         color_discrete_map=cluster_colors,
         hover_data=['client_id', 'transaction_count', 'total_value', 'average_value'],
-        title=f'Clustering: {"Total Value" if mode == "total_value" else "Average Value"}',
+        title=f'Cluster per age group {"total value" if mode == "total_value" else "average value"}',
         facet_col='age_group' if age_group_mode == 'grouped' else None,
-        category_orders={"age_group": ['<25', '26–35', '36–45', '46–55', '56–65', '65+']}
+        facet_col_wrap=3,
+        category_orders={"age_group": ['<25', '26–35', '36–45', '46–55', '56–65', '65+']},
+        labels={"age_group": " "}
     )
 
+
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+
     fig.update_layout(showlegend=False)
+
     return fig
+
 
 def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
     cluster_col = {
@@ -266,10 +274,14 @@ def make_inc_vs_exp_plot(df_agg: pd.DataFrame, age_group_mode='all'):
         color='cluster_inc_vs_exp_str',
         color_discrete_map=cluster_colors,
         hover_data=['client_id', 'yearly_income', 'total_expenses'],
-        title='Clustering: Income vs Expenses',
+        title='Cluster per age group Income vs Expenses',
         facet_col='age_group' if age_group_mode == 'grouped' else None,
-        category_orders={"age_group": ['<25', '26–35', '36–45', '46–55', '56–65', '65+']}
+        facet_col_wrap=3,
+        category_orders={"age_group": ['<25', '26–35', '36–45', '46–55', '56–65', '65+']},
+        labels={"age_group": " "}
     )
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+
     fig.update_layout(showlegend=False)
     return fig
 
