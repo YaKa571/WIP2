@@ -1,5 +1,7 @@
 from backend.data_setup.tabs import tab_cluster_data_setup
 from dash import dcc, html, callback, Input, Output
+
+from backend.data_setup.tabs.tab_cluster_data_setup import prepare_cluster_data, make_cluster_plot, my_data_file
 from frontend.component_ids import ID
 import plotly.express as px
 
@@ -9,22 +11,22 @@ def cls_2(opt, selected):
     return 'option-btn selected' if selected == opt else 'option-btn'
 
 @callback(
-    Output(ID.CLUSTER_BTN_TRANSACTIONS, 'className'),
-    Output(ID.CLUSTER_BTN_VALUE, 'className'),
+    Output(ID.CLUSTER_BTN_TOTAL_VALUE, 'className'),
+    Output(ID.CLUSTER_BTN_AVERAGE_VALUE, 'className'),
     Output(ID.CLUSTER_BTN_INC_VS_EXP, 'className'),
     Output(ID.CLUSTER_BTN_ALL_AGES, 'className'),
     Output(ID.CLUSTER_BTN_AGE_GROUP, 'className'),
     Output(ID.CLUSTER_GRAPH, 'figure'),
     Output(ID.CLUSTER_LEGEND, 'children'),
-    Input(ID.CLUSTER_BTN_TRANSACTIONS,'n_clicks'),
-    Input(ID.CLUSTER_BTN_VALUE,'n_clicks'),
+    Input(ID.CLUSTER_BTN_TOTAL_VALUE,'n_clicks'),
+    Input(ID.CLUSTER_BTN_AVERAGE_VALUE,'n_clicks'),
     Input(ID.CLUSTER_BTN_INC_VS_EXP,'n_clicks'),
     Input(ID.CLUSTER_BTN_ALL_AGES,'n_clicks'),
     Input(ID.CLUSTER_BTN_AGE_GROUP,'n_clicks'),
     Input(ID.CLUSTER_MERCHANT_INPUT_GROUP_DROPDOWN,'value'),
 )
-def update_cluster(n_transactions, n_value, n_inc_vs_exp,n_all_ages,n_age_groups, selected_merchant_group):
-    clicks_1 = {'opt1': n_transactions or 0, 'opt2': n_value or 0, 'opt3': n_inc_vs_exp or 0}
+def update_cluster(n_total_value, n_average_value, n_inc_vs_exp,n_all_ages,n_age_groups, selected_merchant_group):
+    clicks_1 = {'opt1': n_total_value or 0, 'opt2': n_average_value or 0, 'opt3': n_inc_vs_exp or 0}
     selected_1 = max(clicks_1, key=clicks_1.get) if any(clicks_1.values()) else 'opt1'
 
     clicks_2 = {'opt4': n_all_ages or 0, 'opt5': n_age_groups or 0}
@@ -32,20 +34,30 @@ def update_cluster(n_transactions, n_value, n_inc_vs_exp,n_all_ages,n_age_groups
 
     if selected_1 == 'opt1' and selected_2 == 'opt4':
         print('1 4')
+        df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
+        fig = make_cluster_plot(df_clustered, mode='total_value', age_group_mode='not grouped')
     elif selected_1 == 'opt1' and selected_2 == 'opt5':
         print('1 5')
+        df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
+        fig = make_cluster_plot(df_clustered, mode='total_value', age_group_mode='grouped')
     elif selected_1 == 'opt2' and selected_2 == 'opt4':
         print('2 4')
+        df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
+        fig = make_cluster_plot(df_clustered, mode='average_value', age_group_mode='not grouped')
     elif selected_1 == 'opt2' and selected_2 == 'opt5':
         print('2 5')
+        df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
+        fig = make_cluster_plot(df_clustered, mode='average_value', age_group_mode='grouped')
     elif selected_1 == 'opt3' and selected_2 == 'opt4':
         print('3 4')
+        fig = px.scatter()
     elif selected_1 == 'opt3' and selected_2 == 'opt5':
         print('3 5')
+        fig = px.scatter()
     else:
         print('else')
-    fig = px.scatter()
-    legend = html.Div([html.P('Legende')])
+        fig = px.scatter()
+    legend = html.Div([html.P('Legend')])
     return (
         cls_1('opt1', selected_1),
         cls_1('opt2', selected_1),

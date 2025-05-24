@@ -27,9 +27,9 @@ def create_cluster_heading():
             dbc.Row([
                 dbc.Col([
                     html.Div([
-                        html.Button('Transactions', id=ID.CLUSTER_BTN_TRANSACTIONS, n_clicks=0,
+                        html.Button('Total Value', id=ID.CLUSTER_BTN_TOTAL_VALUE, n_clicks=0,
                                     className='option-btn'),
-                        html.Button('Value', id=ID.CLUSTER_BTN_VALUE, n_clicks=0,
+                        html.Button('Average Value', id=ID.CLUSTER_BTN_AVERAGE_VALUE, n_clicks=0,
                                     className='option-btn'),
                         html.Button('Inc vs Exp', id=ID.CLUSTER_BTN_INC_VS_EXP, n_clicks=0,
                                     className='option-btn'),
@@ -103,7 +103,7 @@ def create_cluster_visualization():
                                 className="bar-chart",
                                 config={"displayModeBar": True, "displaylogo": False},
                                 responsive=True,
-                                style={"height": "100%"}
+                                style={"minHeight": "400px", "height": "100%"}
                             )
 
                         ]
@@ -130,7 +130,8 @@ def create_cluster_visualization():
 
                             html.Div(
                                 id=ID.CLUSTER_LEGEND,
-                                className="p-2"
+                                className="p-2",
+                                style={"minHeight": "400px", "height": "100%"}
                             )
 
                         ])
