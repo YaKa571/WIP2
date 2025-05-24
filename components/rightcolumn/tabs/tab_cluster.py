@@ -13,10 +13,26 @@ def create_cluster_content():
         children=[
 
             create_cluster_heading(),
+            create_cluster_age_group_switch(),
             create_cluster_control_merchant_group(),
             create_cluster_visualization()
 
         ]
+    )
+def create_cluster_age_group_switch():
+    return html.Div(
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    html.Button('All Ages', id=ID.CLUSTER_BTN_ALL_AGES, n_clicks=0,
+                                className='option-btn'),
+                    html.Button('Age Groups', id=ID.CLUSTER_BTN_AGE_GROUP, n_clicks=0,
+                                className='option-btn'),
+                ], className='button-radio-wrapper'),
+
+            ]),
+        ])
+
     )
 
 def create_cluster_heading():
@@ -34,16 +50,8 @@ def create_cluster_heading():
                                     className='option-btn'),
                     ], className='button-radio-wrapper'),
 
-                ], width=6),
-                dbc.Col([
-                    html.Div([
-                        html.Button('All', id=ID.CLUSTER_BTN_ALL_AGES, n_clicks=0,
-                                    className='option-btn'),
-                        html.Button('Age Groups', id=ID.CLUSTER_BTN_AGE_GROUP, n_clicks=0,
-                                    className='option-btn'),
-                    ], className='button-radio-wrapper'),
+                ], width=10),
 
-                ], width=4),
                 dbc.Col([
                     html.Div(html.P("Button Map")),
                 ], width=2),
@@ -56,9 +64,19 @@ def create_cluster_heading():
                 placement="bottom-end",
                 className="enhanced-tooltip",
                 children=[
-                    "TODO",
+                    "Switch between plotting ",
                     html.Br(),
-                    "based on new design",
+                    "Total Value/Average Value",
+                    html.Br(),
+                    "or choose Income vs. Expenses",
+                    html.Hr(),
+                    "choose to show Plot for all Ages",
+                    html.Br(),
+                    "or show Plot for different Age Groups",
+                    html.Hr(),
+                    "Choose Filter for Merchant Groups",
+                    html.Br(),
+                    "using Dropdown"
                 ]),
 
         ])
