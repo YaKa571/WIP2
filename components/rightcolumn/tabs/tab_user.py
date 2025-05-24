@@ -1,6 +1,5 @@
 import dash_bootstrap_components as dbc
 from dash import html, dcc
-from plotly.graph_objs._figure import Figure
 
 from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
@@ -11,6 +10,11 @@ MODEBAR_CONFIG = dict(
     displayModeBar=True,
     displaylogo=False
 )
+
+BAR_CHART_OPTIONS = [
+    {"label": "TOTAL AMOUNT", "value": "amount"},
+    {"label": "TRANSACTION COUNT", "value": "count"},
+]
 
 
 # TODO: Instead of only showing credit limit also show a horizontal bar chart with
@@ -225,10 +229,7 @@ def _create_bottom_merchant_diagram() -> html.Div:
                                         value="amount",
                                         clearable=False,
                                         searchable=False,
-                                        options=[
-                                            {"label": "TOTAL AMOUNT", "value": "amount"},
-                                            {"label": "TRANSACTION COUNT", "value": "count"},
-                                        ]
+                                        options=BAR_CHART_OPTIONS
                                     )
                                 ])
                         ]),
@@ -237,7 +238,7 @@ def _create_bottom_merchant_diagram() -> html.Div:
                         children=[
 
                             dcc.Graph(
-                                figure=Figure(),
+                                figure=comp_factory.create_empty_figure(),
                                 className="bar-chart",
                                 config=MODEBAR_CONFIG,
                                 id=ID.USER_MERCHANT_BAR_CHART,

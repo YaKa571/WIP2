@@ -8,8 +8,7 @@ from backend.data_setup.tabs import tab_merchant_data_setup
 from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
 from frontend.icon_manager import Icons, IconID
-
-COLOR_BLUE_MAIN = "#2563eb"
+from components.constants import COLOR_BLUE_MAIN
 
 # Info: Edit grid layout in assets/css/tabs.css
 

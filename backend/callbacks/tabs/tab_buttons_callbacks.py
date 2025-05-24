@@ -4,14 +4,16 @@ from dash import callback, callback_context
 from dash.dependencies import Input, Output, ALL
 
 from components.rightcolumn.right_column import TABS
+from frontend.component_ids import ID
 
 
 @callback(
     Output({"type": "custom-tab", "index": ALL}, "className"),
     Output({"type": "tab-content", "index": ALL}, "className"),
     Input({"type": "custom-tab", "index": ALL}, "n_clicks"),
+    Input(ID.ACTIVE_TAB_STORE, "data")
 )
-def update_tabs(n_clicks_list):
+def update_tabs(n_clicks_list, active_from_store):
     """
     Updates the classes of tab buttons and tab content based on user interaction.
 
@@ -40,7 +42,10 @@ def update_tabs(n_clicks_list):
     None
     """
     ctx = callback_context
-    if not ctx.triggered:
+
+    if ctx.triggered and ID.ACTIVE_TAB_STORE in ctx.triggered[0]["prop_id"]:
+        active = active_from_store
+    elif not ctx.triggered:
         active = TABS[0][1]
     else:
         triggered = json.loads(ctx.triggered[0]["prop_id"].split(".")[0])

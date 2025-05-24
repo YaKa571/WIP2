@@ -23,7 +23,7 @@
 }
 
 .graph-card.with-bar-chart .js-plotly-plot .modebar {
-    top: 26px !important;
+    top: 32px !important;
     right: auto !important;
     left: 50% !important;
     transform: translateX(-50%);

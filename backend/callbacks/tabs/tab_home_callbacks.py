@@ -1,11 +1,12 @@
-from dash import callback, Output, Input, ctx, no_update
+from dash import callback, Output, Input, ctx, no_update, State
 from dash.exceptions import PreventUpdate
 
 from backend.data_manager import DataManager
-from components.rightcolumn.tabs.tab_home import create_pie_graph, get_most_valuable_merchant_details, \
-    get_most_visited_merchant_details, get_top_spending_user_details, get_peak_hour_details
-from components.rightcolumn.tabs.tab_home import get_most_valuable_merchant_bar_chart, get_peak_hour_bar_chart, \
-    get_spending_by_user_bar_chart, get_most_visited_merchants_bar_chart
+from backend.data_setup.tabs.tab_home_data_setup import get_most_valuable_merchant_bar_chart, \
+    get_most_visited_merchants_bar_chart, get_spending_by_user_bar_chart, get_peak_hour_bar_chart, create_pie_graph, \
+    get_most_valuable_merchant_details, get_most_visited_merchant_details, get_top_spending_user_details, \
+    get_peak_hour_details
+from components.rightcolumn.tabs.tab_home import BAR_CHART_OPTIONS
 from frontend.component_ids import ID
 
 dm: DataManager = DataManager.get_instance()
@@ -155,3 +156,47 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
         kpi4,
         button_cls
     )
+
+
+@callback(
+    Output(ID.USER_ID_SEARCH_INPUT, "value"),
+    Output(ID.ACTIVE_TAB_STORE, "data"),
+    Output(ID.HOME_GRAPH_BAR_CHART, "clickData"),
+    Input(ID.HOME_GRAPH_BAR_CHART, "clickData"),
+    State(ID.HOME_TAB_BAR_CHART_DROPDOWN, "value"),
+    prevent_initial_call=True
+)
+def bridge_home_to_user_tab(clickData, chart_option):
+    """
+    Updates the user input and active tab based on interactions with the bar chart
+    in the home tab. This callback bridges data between the home tab and
+    the user tab for smoother navigation and display updates.
+
+    Parameters:
+        clickData: dict
+            The data from the click event on the bar chart in the home tab.
+            It contains details about the clicked bar such as x and y coordinates.
+        chart_option: str
+            The selected chart option from the dropdown in the home tab.
+
+    Returns:
+        tuple
+            A tuple containing the new value for the user ID search input and
+            the identifier of the active tab. If no update is necessary
+            for either, the no_update constant is returned to preserve the current state.
+
+    Raises:
+        PreventUpdate
+            Raised when no click event data is available, interrupting updates
+            to prevent unnecessary computations and state changes.
+    """
+    if clickData is None:
+        raise PreventUpdate
+
+    # Top Spending User -> User Tab
+    if chart_option == BAR_CHART_OPTIONS[2]["value"]:
+        return clickData["points"][0]["x"], ID.TAB_USER, None
+
+    # TODO: Add other chart options here if needed
+
+    return no_update, no_update, no_update

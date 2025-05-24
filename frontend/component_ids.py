@@ -4,6 +4,7 @@ class ID(str, Enum):
 
     APP_STATE_STORE = "app-state-store"
     ANIMATION_STATE_STORE = "animation-state-store"
+    ACTIVE_TAB_STORE = "active-tab-store"
 
     KPI_CARD_AMT_TRANSACTIONS = "kpi-card-amt-transactions"
     KPI_CARD_SUM_OF_TRANSACTIONS = "kpi-card-sum-of-transactions"
@@ -50,6 +51,7 @@ class ID(str, Enum):
     HOME_TAB_STATE_HEADING = "home-tab-state-heading"
     HOME_TAB_BUTTON_TOGGLE_ALL_STATES = "home-tab-button-toggle-all-states"
     HOME_TAB_INFO_ICON = "home-tab-info-icon"
+    HOME_TAB_BAR_INFO_ICON = "home-tab-bar-info-icon"
     HOME_TAB_BAR_CHART_DROPDOWN = "home-tab-bar-chart-dropdown"
     HOME_GRAPH_BAR_CHART = "home-graph-bar-chart"
 

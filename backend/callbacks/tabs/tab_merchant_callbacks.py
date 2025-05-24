@@ -8,8 +8,8 @@ from backend.data_setup.tabs import tab_merchant_data_setup
 from components.factories import component_factory as comp_factory
 from frontend.icon_manager import Icons, IconID
 import plotly.graph_objects as go
+from components.constants import COLOR_BLUE_MAIN
 
-COLOR_BLUE_MAIN = "#2563eb"
 """
 callbacks of tab Merchant
 """
