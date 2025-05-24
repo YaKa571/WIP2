@@ -8,16 +8,6 @@ from frontend.icon_manager import IconID
 from components.constants import COLOR_BLUE_MAIN
 
 def create_cluster_content():
-    """
-    Generates the content layout for the cluster tab.
-
-    This function assembles and returns the Div element comprising the components
-    required to construct the cluster tab interface. The components are organized
-    as a heading, control elements, and visualization section within the Div.
-
-    Returns:
-        html.Div: A Div element containing all the components of the cluster tab.
-    """
     return html.Div(
         className="tab-content-inner cluster-tab",
         children=[
@@ -25,9 +15,8 @@ def create_cluster_content():
 
             create_cluster_heading(),
             create_cluster_control_merchant_group(),
+            create_cluster_visualization()
 
-            dcc.Graph(id=ID.CLUSTER_GRAPH),
-            html.Div(id=ID.CLUSTER_LEGEND)
         ]
     )
 
@@ -86,3 +75,64 @@ def create_cluster_control_merchant_group():
             ])
         ])
     )
+
+def create_cluster_visualization():
+    return html.Div(
+        className="flex-wrapper flex-fill",
+        children=[
+
+            dbc.Card(
+                className="graph-card with-bar-chart",
+                style={"flex": "2 1 0"},
+                children=[
+
+                    dbc.CardHeader(
+                        children=[
+
+                            comp_factory.create_icon(IconID.CLUSTER, cls="icon icon-small"),
+                            html.P("Cluster Visualization", className="graph-card-title")
+
+                        ]
+                    ),
+
+                    dbc.CardBody(
+                        children=[
+
+                            dcc.Graph(
+                                id=ID.CLUSTER_GRAPH,
+                                className="bar-chart",
+                                config={"displayModeBar": True, "displaylogo": False},
+                                responsive=True,
+                                style={"height": "100%"}
+                            )
+
+                        ]
+                    )
+                ]
+            ),
+
+            dbc.Card(
+                className="graph-card",
+                style={"flex": "1 1 0"},
+                children=[
+
+                    dbc.CardHeader(
+                        children=[
+
+                            comp_factory.create_icon(IconID.LEGEND, cls="icon icon-small"),
+                            html.P("Cluster Legend", className="graph-card-title")
+
+                        ]
+                    ),
+
+                    dbc.CardBody(
+                        children=[
+
+                            html.Div(
+                                id=ID.CLUSTER_LEGEND,
+                                className="p-2"
+                            )
+
+                        ])
+                ])
+        ])
