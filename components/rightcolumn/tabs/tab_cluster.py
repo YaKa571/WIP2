@@ -52,7 +52,7 @@ def create_cluster_heading():
                 ], width=6),
                 dbc.Col([
                     html.Div([
-                        html.Button('All', id=ID.CLUSTER_BTN_ALL, n_clicks=0,
+                        html.Button('All', id=ID.CLUSTER_BTN_ALL_AGES, n_clicks=0,
                                     className='option-btn'),
                         html.Button('Age Groups', id=ID.CLUSTER_BTN_AGE_GROUP, n_clicks=0,
                                     className='option-btn'),
@@ -84,7 +84,7 @@ def create_cluster_control_merchant_group():
             dbc.Col([
                 html.Div(
                     children=[], # todo
-                    id=ID.CLUSTER_CONTROL_MERCHANT_GROUP,
+                    id=ID.CLUSTER_CONTROL_MERCHANT_GROUP_DROPDOWN,
                 )
             ])
         ])
