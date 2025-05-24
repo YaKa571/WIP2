@@ -246,7 +246,26 @@ def _create_bottom_bar_diagrams() -> html.Div:
                                     "minHeight": 0,
                                     "minWidth": 0
                                 }
-                            )
+                            ),
+
+                            comp_factory.create_info_icon(
+                                icon_id=ID.HOME_TAB_BAR_INFO_ICON,
+                                style={
+                                    "position": "absolute",
+                                    "top": "111px",
+                                    "left": "16px",
+                                    "zIndex": 100
+                                }),
+
+                            dbc.Tooltip(
+                                target=ID.HOME_TAB_BAR_INFO_ICON,
+                                is_open=False,
+                                placement="right",
+                                children=[
+                                    "Click any bar to explore",
+                                    html.Br(),
+                                    "further information"
+                                ])
 
                         ])
                 ])
