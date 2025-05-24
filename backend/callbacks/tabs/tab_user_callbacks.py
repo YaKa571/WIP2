@@ -7,6 +7,7 @@ from backend.data_setup.tabs.tab_user_data_setup import aggregate_transaction_da
     get_valid_user_id, configure_chart_parameters, create_bar_chart_figure
 from components.rightcolumn.tabs.tab_user import create_kpi_value_text
 from frontend.component_ids import ID
+import plotly.graph_objects as go
 
 dm = DataManager.get_instance()
 
@@ -120,56 +121,76 @@ def update_credit_limit(user_id, card_id):
         print("Error (Credit Limit):", str(e))
         return create_kpi_value_text("INVALID", True)
 
+
 @callback(
-    Output(ID.USER_CREDIT_LIMIT_CARD_ROW, "children"),
+    Output(ID.USER_CREDIT_LIMIT_BAR, "figure"),
     Input(ID.USER_ID_SEARCH_INPUT, "value"),
     Input(ID.CARD_ID_SEARCH_INPUT, "value"),
 )
-def update_credit_limit_cards(user_id, card_id):
-    """
-    Shows each card (for the selected user) as a box with its individual credit limit.
-    """
-    dm = DataManager.get_instance()
-    import dash_bootstrap_components as dbc
-    from dash import html
+def update_credit_limit_bar(user_id, card_id):
+    import plotly.graph_objects as go
+    from backend.data_manager import DataManager
 
-    # Welche User-ID?
+    dm = DataManager.get_instance()
     if card_id and str(card_id).strip():
-        card_row = dm.df_cards[dm.df_cards["id"] == int(card_id)]
-        if card_row.empty:
-            return []
-        user_id = int(card_row.iloc[0]["client_id"])
+        card_df = dm.df_cards[dm.df_cards["id"] == int(card_id)]
+        if card_df.empty:
+            return go.Figure()
+        user_id = int(card_df.iloc[0]["client_id"])
     elif user_id and str(user_id).strip():
         user_id = int(user_id)
     else:
-        return []
+        return go.Figure()
 
-    cards = dm.df_cards[dm.df_cards["client_id"] == user_id]
-    if cards.empty:
-        return []
+    user_cards = dm.df_cards[dm.df_cards["client_id"] == user_id]
+    if user_cards.empty:
+        return go.Figure()
 
-    # Erzeuge ein Card-Element pro Karte
-    card_boxes = [
-        dbc.Card(
-            class_name="kpi-card small-kpi-card credit-limit-card",
-            children=[
-                dbc.CardHeader(
-                    html.P(f"Card #{int(row['id'])}", className="kpi-card-title small"),
-                    class_name="card-header small"
-                ),
-                dbc.CardBody(
-                    html.P(f"${row['credit_limit']:,.2f}", className="kpi-card-value kpi-number-value"),
-                    class_name="card-body"
-                )
-            ],
-            style={"minWidth": "120px", "maxWidth": "180px", "margin": "0 8px 8px 0"}
+    # --- Card 1 soll links! Reihenfolge wird wie im DataFrame gelassen ---
+    credit_limits = user_cards["credit_limit"].tolist()
+    n = len(credit_limits)
+    card_labels = [f"Card {i+1}: ${limit:,.2f}" for i, limit in enumerate(credit_limits)]
+    colors = ["#c65ed4", "#5d9cf8", "#f1b44c", "#2ecc71", "#e74c3c", "#8e44ad"]  # ggf. erweitern
+    # Schneide Farben auf Anzahl Karten zu (reicht immer aus, da modulo)
+    colors = colors[:n]
+
+    fig = go.Figure()
+    prev = 0
+    for i, (label, limit) in enumerate(zip(card_labels, credit_limits)):
+        fig.add_trace(go.Bar(
+            x=[limit],
+            y=["Credit Limit"],
+            name=label,
+            orientation="h",
+            marker_color=colors[i % len(colors)],
+            hovertemplate=f"{label}<extra></extra>",
+            text=f"${limit:,.2f}",  # Wert als Text
+            textposition="outside",
+            offsetgroup=0,
+            base=prev
+        ))
+        prev += limit
+
+    fig.update_layout(
+        barmode="stack",
+        showlegend=True,
+        margin=dict(l=0, r=0, t=0, b=0),
+        height=60,
+        width=None,
+        plot_bgcolor="white",
+        paper_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(showticklabels=False, visible=False, range=[0, prev*1.01]),
+        yaxis=dict(showticklabels=False, visible=False),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.25,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=11)
         )
-        for _, row in cards.iterrows()
-    ]
-
-    # Dynamisch im flex-row-Layout (geht in der Zeile weiter, wenn viele Karten da sind)
-    return html.Div(card_boxes, style={"display": "flex", "flexWrap": "wrap"})
-
+    )
+    return fig
 
 # === Callback: Merchant Bar Chart (bottom) ===
 @callback(

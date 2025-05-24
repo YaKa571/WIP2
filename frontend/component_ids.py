@@ -87,7 +87,7 @@ class ID(str, Enum):
     USER_CREDIT_LIMIT_BOX = "user-credit-limit-box"
     USER_MERCHANT_BAR_CHART = "user-merchant-bar-chart"
     USER_MERCHANT_SORT_DROPDOWN = "merchant-sort-dropdown"
-    USER_CREDIT_LIMIT_CARD_ROW = "user-credit-limit-card-row"
+    USER_CREDIT_LIMIT_BAR = "user-credit-limit-bar"
 
     # Merchant Tab
     MERCHANT_HEADING = "merchant-heading"

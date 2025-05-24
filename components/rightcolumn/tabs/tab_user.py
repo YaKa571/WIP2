@@ -183,19 +183,31 @@ def _create_credit_limit_kpi() -> html.Div:
              KPI card.
     """
     return html.Div(
+        className="flex-wrapper",
         children=[
-            html.Div(
-                comp_factory.create_kpi_card(
-                    icon_id=IconID.MONEY_DOLLAR,
-                    title="Credit Limit",
-                    div_id=ID.USER_CREDIT_LIMIT_BOX
-                ),
-                className="flex-wrapper",
-            ),
-            html.Div(
-                id=ID.USER_CREDIT_LIMIT_CARD_ROW,
-                className="credit-limit-card-row mt-2",
-                style={"width": "100%"}
+            dbc.Card(
+                className="kpi-card kpi-credit-limit-card",
+                children=[
+                    dbc.CardHeader(
+                        children=[
+                            comp_factory.create_icon(IconID.MONEY_DOLLAR, cls="icon icon-small"),
+                            html.P("Credit Limit", className="kpi-card-title"),
+                        ],
+                        className="card-header"
+                    ),
+                    dbc.CardBody(
+                        children=[
+                            html.Div(id=ID.USER_CREDIT_LIMIT_BOX, className="kpi-card-value kpi-number-value"),
+                            # HIER füge das dcc.Graph hinzu!
+                            dcc.Graph(
+                                id=ID.USER_CREDIT_LIMIT_BAR,
+                                config={"displayModeBar": False},
+                                style={"height": "60px", "marginTop": "14px", "width": "100%", "overflow": "hidden"},
+                            ),
+                        ],
+                        className="card-body"
+                    )
+                ]
             )
         ]
     )
