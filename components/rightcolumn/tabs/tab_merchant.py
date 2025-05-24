@@ -1,73 +1,52 @@
 import dash_bootstrap_components as dbc
-import plotly.express as px
-from dash import html, dcc, Output, Input, callback
-
+from dash import html, dcc
 
 from backend.callbacks.tabs import tab_merchant_callbacks
-from backend.data_setup.tabs import tab_merchant_data_setup
 from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
-from frontend.icon_manager import Icons, IconID
-from components.constants import COLOR_BLUE_MAIN
+from frontend.icon_manager import IconID
+
 
 # Info: Edit grid layout in assets/css/tabs.css
 
-
 def create_merchant_content():
     """
-        Creates the main content container for the Merchant tab.
-
-        This includes the tab heading with option buttons, the input containers
-        (dropdown and text input), the KPI display area, and the graph area.
-
-        Returns:
-            dash.html.Div: A Div containing all main components of the Merchant tab.
-        """
+    Creates the main content container for the Merchant tab.
+    """
     return html.Div(
         className="tab-content-inner merchant-tab",
         children=[
 
-            create_merchant_heading(),
-            create_merchant_input_container(),
+            _create_heading(),
+            _create_button_row(),
+            _create_merchant_input_container(),
             create_merchant_kpi(),
             create_merchant_graph()
 
         ])
 
 
-def create_merchant_heading() -> html.Div:
+def _create_heading() -> html.Div:
     """
-        Creates the header section of the Merchant tab with option buttons and an info icon.
+    Creates a heading section for the tab layout.
 
-        Includes buttons to select between "All Merchants", "Merchant Group", and "Merchant" views,
-        a placeholder area for a "Button Map", and an info icon with a tooltip.
+    The heading consists of a title, an info icon, and a tooltip describing usage instructions
+    for merchant-related actions within the application interface.
 
-        Returns:
-            dash.html.Div: A Div containing the tab heading row with buttons and info tooltip.
-        """
+    Returns:
+        html.Div: A Dash HTML Div component containing the structured heading elements.
+    """
     return html.Div(
         className="tab-heading-wrapper",
         children=[
-            dbc.Row([
-                dbc.Col([
-                    html.Div([
-                        html.Button('All Merchants', id=ID.MERCHANT_BTN_ALL_MERCHANTS, n_clicks=0, className='option-btn'),
-                        html.Button('Merchant Group', id=ID.MERCHANT_BTN_MERCHANT_GROUP, n_clicks=0, className='option-btn'),
-                        html.Button('Merchant', id=ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT, n_clicks=0, className='option-btn'),
-                    ], className='button-radio-wrapper'),
 
-                ], width = 10),
-                dbc.Col([
-                    html.Div(html.P("Button Map")),
-                ], width=2),
-
-            ]),
+            html.P(),  # Dummy element for spacing
+            html.H4("Merchant", id=ID.MERCHANT_HEADING),
             comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
             dbc.Tooltip(
                 target=ID.MERCHANT_INFO_ICON,
                 is_open=False,
                 placement="bottom-end",
-                className="enhanced-tooltip",
                 children=[
                     "Click on All Merchants",
                     html.Br(),
@@ -81,97 +60,166 @@ def create_merchant_heading() -> html.Div:
                     html.Br(),
                     "and type in Merchant ID"
                 ]),
-
-
         ])
-def create_merchant_input_container():
+
+
+def _create_button_row() -> html.Div:
     """
-        Creates the input section container for the Merchant tab.
+    Creates a row of buttons wrapped inside an HTML div element. Each button is associated
+    with a unique identifier and a specific label or icon to specify its purpose in a user interface.
 
-        This container holds two separate input wrappers:
-        - A dropdown for selecting a merchant group (initially hidden).
-        - A text input for entering an individual merchant ID (initially hidden).
-
-        Returns:
-            dash.html.Div: A Div containing input containers for merchant group and individual merchant.
-        """
+    Returns
+    -------
+    html.Div
+        A div element containing four buttons: All Merchants, Merchant Group, Merchant,
+        and Map. Each button has a unique identifier and a corresponding icon and text.
+    """
     return html.Div(
-        dbc.Row([
-            dbc.Col([
-                # Container for Merchant Group dropdown input
-                html.Div(
-                    children=[tab_merchant_callbacks.get_merchant_group_input_container()],
-                    id=ID.MERCHANT_GROUP_INPUT_WRAPPER,
-                    style={"display": "none"}  # initially hidden
-                ),
-                # Container for Individual Merchant ID input
-                html.Div(
-                    children=[tab_merchant_callbacks.get_merchant_input_container()],
-                    id=ID.MERCHANT_INPUT_WRAPPER,
-                    style={"display": "none"}  # initially hidden
-                ),
-            ])
+        className="flex-wrapper",
+        children=[
+
+            html.Button(
+                className="settings-button-text option-btn",
+                id=ID.MERCHANT_BTN_ALL_MERCHANTS,
+                children=[
+
+                    html.I(className="bi bi-shop me-2"),
+                    "All Merchants"
+
+                ]),
+
+            html.Button(
+                className="settings-button-text option-btn",
+                id=ID.MERCHANT_BTN_MERCHANT_GROUP,
+                children=[
+
+                    html.I(className="bi bi-collection me-2"),
+                    "Merchant Group"
+
+                ]),
+
+            html.Button(
+                className="settings-button-text option-btn",
+                id=ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT,
+                children=[
+
+                    html.I(className="bi bi-shop-window me-2"),
+                    "Merchant"
+
+                ]),
+
+            html.Button(
+                className="settings-button-text option-btn",
+                id=ID.MERCHANT_BTN_MAP,
+                children=[
+
+                    html.I(className="bi bi-globe-americas me-2"),
+                    "Map"
+
+                ]),
+
         ])
-    )
 
-def create_merchant_kpi():
+
+def _create_merchant_input_container():
     """
-        Creates the KPI display container for the Merchant tab.
+    Creates a container for merchant input fields in a flexible layout.
 
-        This is a placeholder Div where dynamic KPI content will be injected via callbacks.
+    This function constructs a container element that contains input fields
+    for selecting merchant groups or individual merchant IDs. The container
+    is styled as a flexible wrapper, and its child elements are dynamically
+    hidden or displayed as required.
 
-        Returns:
-            dash.dbc.Row: A Bootstrap row containing the KPI container Div.
-        """
-    return dbc.Row([
-        html.Div(id=ID.MERCHANT_KPI_CONTAINER)
-    ])
+    Returns:
+        The HTML Div element containing the merchant input fields, organized
+        in a flexible wrapper structure for layout alignment.
+
+    """
+    return html.Div(
+        className="flex-wrapper",
+        children=[
+
+            # Merchant Group dropdown input
+            html.Div(
+                className="flex-wrapper",
+                children=[tab_merchant_callbacks.get_merchant_group_input()],
+                id=ID.MERCHANT_GROUP_INPUT_WRAPPER,
+                style={"display": "none"}
+            ),
+
+            # Individual Merchant ID input
+            html.Div(
+                className="flex-wrapper",
+                children=[tab_merchant_callbacks.get_merchant_id_input()],
+                id=ID.MERCHANT_INPUT_WRAPPER,
+                style={"display": "none"}
+            )
+
+        ])
+
+
+def create_merchant_kpi() -> html.Div:
+    """
+    Creates a container for the merchant KPI section.
+
+    This function generates a container element designed to encapsulate and
+    display key performance indicators (KPIs) related to merchants. The resulting
+    container is identified by a unique ID. It is used for rendering KPI elements
+    within a structured layout.
+
+    Returns:
+        html.Div: A container element with a predefined ID for displaying merchant
+        KPIs.
+    """
+    return html.Div(id=ID.MERCHANT_KPI_CONTAINER)
 
 
 def create_merchant_graph():
     """
-    Creates a styled card container for displaying the merchant transaction graph.
+    Creates a merchant graph component.
 
-    This function returns a Dash HTML Div that contains a Bootstrap card layout.
-    The card includes a header with a dynamic title and an icon, and a body section
-    with a Dash Graph component. The actual graph content is expected to be
-    updated dynamically via a callback.
+    The function constructs a Dash HTML Div element representing a UI section
+    displaying a merchant graph. It uses Dash Bootstrap Components (DBC) and
+    Dash Core Components (DCC) to organize and style the graph section. The
+    returned component includes a card header with an icon and title, and a card
+    body containing a bar chart rendered using Dash's graph component. The bar
+    chart is configured with custom mode bar options.
 
     Returns:
-        dash.html.Div: A styled card layout with a placeholder for a merchant transaction graph.
+        dash.html.Div: A Div component containing the merchant graph card.
     """
     return html.Div(
-        className="flex-wrapper flex-fill",
+        className="flex-wrapper",
         children=[
+
             dbc.Card(
-                className="graph-card with-bar-chart",
-                style={"flex": "1 1 0", "height": "100%", "minHeight": "400px"},
+                className="graph-card with-bar-chart lower-modebar",
                 children=[
+
                     dbc.CardHeader(
                         children=[
+
                             comp_factory.create_icon(IconID.CLUSTER, cls="icon icon-small"),
-                            html.H3(id=ID.MERCHANT_GRAPH_TITLE, className="graph-title")
+                            html.H3(id=ID.MERCHANT_GRAPH_TITLE, className="graph-card-title")
+
                         ]
                     ),
                     dbc.CardBody(
-                        style={"height": "100%", "padding": "1rem"},
                         children=[
+
                             dcc.Graph(
                                 id=ID.MERCHANT_GRAPH_CONTAINER,
                                 className="bar-chart",
                                 config={"displayModeBar": True, "displaylogo": False},
                                 style={
-                                    "height": "350px",  # fix height to ensure rendering
+                                    "height": "100%",
                                     "width": "100%"
                                 }
                             )
+
                         ]
                     )
                 ]
             )
         ]
     )
-
-
-
-
