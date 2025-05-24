@@ -8,6 +8,14 @@ from frontend.icon_manager import IconID
 from components.constants import COLOR_BLUE_MAIN
 
 def create_cluster_content():
+    """
+        Creates the main container Div for the cluster tab content,
+        including heading, age group switch, merchant group filter,
+        and cluster visualization components.
+
+        Returns:
+            html.Div: The complete cluster tab content layout.
+        """
     return html.Div(
         className="tab-content-inner cluster-tab",
         children=[
@@ -20,6 +28,13 @@ def create_cluster_content():
         ]
     )
 def create_cluster_age_group_switch():
+    """
+        Creates a UI component with buttons to toggle between viewing
+        data for all ages or segmented by age groups.
+
+        Returns:
+            html.Div: A Div containing the age group toggle buttons.
+        """
     return html.Div(
         dbc.Row([
             dbc.Col([
@@ -36,6 +51,14 @@ def create_cluster_age_group_switch():
     )
 
 def create_cluster_heading():
+    """
+        Creates the header section of the cluster tab including buttons
+        for selecting the clustering mode (Total Value, Average Value,
+        Income vs Expenses) and an info icon with tooltip explaining usage.
+
+        Returns:
+            html.Div: The cluster tab header layout.
+        """
     return html.Div(
         className="tab-heading-wrapper",
         children=[
@@ -82,6 +105,13 @@ def create_cluster_heading():
         ])
 
 def create_cluster_control_merchant_group():
+    """
+        Creates the container Div that holds the merchant group filter dropdown.
+        This allows filtering cluster data by merchant groups.
+
+        Returns:
+            html.Div: The container for merchant group dropdown control.
+        """
     return html.Div(
         dbc.Row([
             dbc.Col([
@@ -94,6 +124,13 @@ def create_cluster_control_merchant_group():
     )
 
 def create_cluster_visualization():
+    """
+        Creates the visualization layout for the cluster tab including two cards:
+        one for the cluster scatter plot graph and one for the cluster legend.
+
+        Returns:
+            html.Div: The visualization container with graph and legend cards.
+        """
     return html.Div(
         className="flex-wrapper flex-fill",
         children=[

@@ -37,12 +37,28 @@ cluster_colors = {
 
 
 def get_cluster_merchant_group_dropdown():
+    """
+        Generate a sorted list of unique merchant groups for a dropdown menu.
+
+        Returns:
+            list: Sorted list of merchant groups with 'All Merchant Groups' as the first option.
+        """
     my_df = my_mcc
     my_list = sorted(my_df['merchant_group'].unique().tolist())
     my_list.insert(0, 'All Merchant Groups')
     return my_list
 
 def prepare_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
+    """
+        Prepare and cluster transaction data based on transaction count and value.
+
+        Args:
+            df (pd.DataFrame): DataFrame containing transaction data.
+            merchant_group (str): Merchant group filter; if not 'All Merchant Groups', filter the data.
+
+        Returns:
+            pd.DataFrame: Aggregated data with cluster labels based on total and average transaction values.
+        """
     # Optional: Merchant Group filter
     if merchant_group != 'All Merchant Groups':
         df = df[df['merchant_group'] == merchant_group].copy()
@@ -82,6 +98,17 @@ def prepare_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
     return agg
 
 def make_cluster_plot(df_agg: pd.DataFrame, mode='total_value', age_group_mode='all'):
+    """
+        Create a scatter plot showing clusters based on transaction data.
+
+        Args:
+            df_agg (pd.DataFrame): Aggregated data with cluster labels.
+            mode (str): 'total_value' or 'average_value' to select which clustering to display.
+            age_group_mode (str): 'all' for no faceting, 'grouped' to facet by age group.
+
+        Returns:
+            plotly.graph_objs._figure.Figure: Plotly scatter plot figure.
+        """
     cluster_column = 'cluster_total_str' if mode == 'total_value' else 'cluster_avg_str'
     y_column = 'total_value' if mode == 'total_value' else 'average_value'
 
@@ -108,6 +135,16 @@ def make_cluster_plot(df_agg: pd.DataFrame, mode='total_value', age_group_mode='
 
 
 def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
+    """
+        Create an HTML legend describing clusters based on transaction or income vs expenses data.
+
+        Args:
+            mode (str): Mode of clustering, options include 'total_value', 'average_value', 'inc_vs_exp'.
+            df (pd.DataFrame): DataFrame containing clustering data.
+
+        Returns:
+            html.Div: Dash HTML Div containing legend items describing each cluster.
+        """
     cluster_col = {
         'total_value': 'cluster_total',
         'average_value': 'cluster_avg',
@@ -150,8 +187,19 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
         ('high', 'high'): "High {} and high {}"
     }
 
-
+    # support function
     def compare_values(val1, val2, threshold_ratio=0.05):
+        """
+                Compare two values and return a string indicating relative difference.
+
+                Args:
+                    val1 (float): First value.
+                    val2 (float): Second value.
+                    threshold_ratio (float): Threshold to consider values approximately equal.
+
+                Returns:
+                    str: Description of relative difference ('approximately equal', 'slightly higher', 'slightly lower').
+                """
         diff = val2 - val1
         if abs(diff) / max(abs(val1), 1e-6) < threshold_ratio:
             return "approximately equal"
@@ -240,6 +288,16 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
 
 
 def prepare_inc_vs_exp_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
+    """
+        Prepare and cluster data based on yearly income versus total expenses.
+
+        Args:
+            df (pd.DataFrame): DataFrame containing transaction data.
+            merchant_group (str): Merchant group filter; if not 'All Merchant Groups', filter the data.
+
+        Returns:
+            pd.DataFrame: Aggregated data with clusters for income vs expenses.
+        """
     # Filtering
     if merchant_group != 'All Merchant Groups':
         df = df[df['merchant_group'] == merchant_group].copy()
@@ -267,6 +325,16 @@ def prepare_inc_vs_exp_cluster_data(df: pd.DataFrame, merchant_group) -> pd.Data
     return agg
 
 def make_inc_vs_exp_plot(df_agg: pd.DataFrame, age_group_mode='all'):
+    """
+        Create a scatter plot for clusters of income versus expenses data.
+
+        Args:
+            df_agg (pd.DataFrame): Aggregated data with income vs expenses clusters.
+            age_group_mode (str): 'all' for no faceting, 'grouped' to facet by age group.
+
+        Returns:
+            plotly.graph_objs._figure.Figure: Plotly scatter plot figure.
+        """
     fig = px.scatter(
         df_agg,
         x='yearly_income',
