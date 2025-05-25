@@ -178,7 +178,8 @@ class DataManager:
             bm.print_time(level=3)
         else:
             logger.log("ℹ️ Latitude/Longitude already exist, skipping geocoding", 2)
-
+    def _process_fraud_data(self):
+      print();  
     def _process_transaction_states(self):
         """
         Processes transaction states by mapping state abbreviations to their full names. If the
@@ -826,7 +827,7 @@ class DataManager:
         self.df_cards, self.units_cards = clean_units(_read_parquet_data("cards_data.parquet"))
         self.df_mcc = json_to_data_frame("mcc_codes.json")
         # TODO: Too slow --> self.df_train_fraud = json_to_data_frame("train_fraud_labels.json")
-
+    
         # Process transaction_data.parquet file
         self._process_transaction_data()
 

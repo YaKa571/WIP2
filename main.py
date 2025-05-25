@@ -13,6 +13,13 @@ from dash import Dash, dcc
 import components.factories.component_factory as comp_factory
 import components.factories.settings_components_factory as settings_comp_factory
 
+from backend.callbacks.tabs.tab_fraud_callbacks import update_fraud_kpis  # noqa: F401 dynamische kpi berechnung
+from backend.callbacks.tabs.tab_fraud_map_dummy import update_fraud_map  # noqa: F401 map mit betrugsfällen
+from backend.callbacks.tabs.tab_fraud_table_dummy import update_dummy_fraud_table # fraud tabelle mit dummy werten noch
+from backend.callbacks.tabs.tab_fraud_subtabs import update_fraud_subtabs  # noqa: F401 sub tab auch noch alles dummy
+from backend.callbacks.tabs.tab_fraud_user_focus_dummy import show_fraud_detail  # noqa: F401 user details aufrufen
+
+
 from backend.callbacks.settings_callbacks import *  # noqa: F401
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401
 from backend.callbacks.tabs.tab_buttons_callbacks import update_tabs  # noqa: F401
