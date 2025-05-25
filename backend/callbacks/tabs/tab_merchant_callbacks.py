@@ -375,15 +375,17 @@ def create_merchant_group_distribution_tree_map(dark_mode: bool = False) -> px.t
     """
     text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
 
-    treemap_df = tab_merchant_data_setup.get_merchant_group_overview(1000)
+    treemap_df = tab_merchant_data_setup.get_merchant_group_overview(1000).copy()
+    treemap_df["merchant_group"] = treemap_df["merchant_group"].astype(str).str.upper()
+
     fig = px.treemap(
         treemap_df,
-        path=[px.Constant("Merchant Groups"), "merchant_group"],
+        path=[px.Constant("MERCHANT GROUPS"), "merchant_group"],
         values="transaction_count",
     )
     fig.update_traces(
-        texttemplate="<b>%{label}</b><br><br><b>Transactions:</b> %{value}<br><b>Share:</b> %{percentEntry:.2%}",
-        hovertemplate="<b>%{label}</b><br>💳 <b>Transactions:</b> %{value}<br><b>🔢 Share:</b> %{percentEntry:.2%}<extra></extra>",
+        texttemplate="<b>%{label}</b><br><br><b>TRANSACTIONS:</b> %{value}<br><b>SHARE:</b> %{percentEntry:.2%}",
+        hovertemplate="<b>%{label}</b><br>💳 <b>TRANSACTIONS:</b> %{value}<br><b>🔢 SHARE:</b> %{percentEntry:.2%}<extra></extra>",
         root_color="rgba(0,0,0,0)",
         tiling_pad=0
     )
