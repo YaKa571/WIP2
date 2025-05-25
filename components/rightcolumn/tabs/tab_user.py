@@ -17,10 +17,6 @@ BAR_CHART_OPTIONS = [
 ]
 
 
-# TODO: Instead of only showing credit limit also show a horizontal bar chart with
-#  single values of each credit card of the user:
-#  | Card 1  |    Card 2    | Card 3 |         Card 4         |
-#  ^ Something like that ^
 def create_user_content() -> html.Div:
     """
     Creates the user content section of a web application using Dash framework.
@@ -163,7 +159,7 @@ def _create_top_kpis() -> html.Div:
             # KPI Card Count
             comp_factory.create_kpi_card(
                 icon_id=IconID.CREDITCARD,
-                title="Cards",
+                title="Credit Cards",
                 div_id=ID.USER_KPI_CARD_COUNT
             ),
 
