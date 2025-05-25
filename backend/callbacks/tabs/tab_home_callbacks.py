@@ -88,6 +88,28 @@ def store_selected_state(clickData, n_clicks):
     prevent_initial_call=True
 )
 def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
+    """
+    Updates multiple pie chart figures, heading text, KPI details, and the class name of a toggle button
+    based on the user's interactions and selected state. Handles dark mode toggling and state selection
+    to update visual components and textual details dynamically based on the application's data.
+
+    Args:
+        n_clicks_toggle (int | None): Number of times the "Toggle All States" button has been clicked.
+        n_clicks_dark (int | None): Number of times the dark mode toggle button has been clicked.
+        selected_state (str | None): The state currently selected in the application, or None if in all-state mode.
+
+    Returns:
+        tuple: A tuple containing updated properties for the application interface:
+            - Figure for expenditures by gender.
+            - Figure for expenditures by channel.
+            - Figure for expenditures by age.
+            - Heading text displaying the current state being analyzed.
+            - Most valuable merchant as a KPI detail.
+            - Most visited merchant as a KPI detail.
+            - Top spending user as a KPI detail.
+            - Peak hour as a KPI detail.
+            - Updated class name for the "Toggle All States" button.
+    """
     # Get the context
     trigger = ctx.triggered_id
 
