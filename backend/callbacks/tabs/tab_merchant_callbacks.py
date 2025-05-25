@@ -1,3 +1,5 @@
+from enum import Enum
+
 import dash_bootstrap_components as dbc
 import plotly.express as px
 from dash import html, Output, Input, callback, dcc, ctx
@@ -13,25 +15,42 @@ from frontend.icon_manager import IconID
 """
 Callbacks and factories for tab Merchant.
 """
+
+
+class MerchantTab(str, Enum):
+    ALL = "all"
+    GROUP = "group"
+    INDIVIDUAL = "individual"
+
+
+ID_TO_MERCHANT_TAB = {
+    ID.MERCHANT_BTN_ALL_MERCHANTS: MerchantTab.ALL,
+    ID.MERCHANT_BTN_MERCHANT_GROUP: MerchantTab.GROUP,
+    ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT: MerchantTab.INDIVIDUAL,
+}
+
 OPTION_BUTTON_BASE_CLASS = "settings-button-text option-btn"
 
 
-def get_option_button_class(option_id: str, selected_option: str) -> str:
+def get_option_button_class(option: str, selected_option: str) -> str:
     """
-    Determines the appropriate CSS class for an option button based on whether it is selected.
+    Determines the CSS class for an option button based on its selection status.
 
-    Parameters:
-    opt : Any
-        The current option to evaluate against the selected option.
-    selected : bool
-        A boolean indicating whether the current option is the selected option.
+    This function evaluates whether the specified option matches the currently
+    selected option and assigns the appropriate CSS class to the button.
+
+    Args:
+        option (str): The option to evaluate.
+        selected_option (str): The currently selected option.
 
     Returns:
-    str
-        The CSS class to apply to the button, indicating its state as either selected
-        or not.
+        str: The CSS class for the option button.
     """
-    return f"{OPTION_BUTTON_BASE_CLASS} selected" if selected_option == option_id else OPTION_BUTTON_BASE_CLASS
+    return (
+        f"{OPTION_BUTTON_BASE_CLASS} selected active-button"
+        if selected_option == option else
+        OPTION_BUTTON_BASE_CLASS
+    )
 
 
 # === KPI Card Factory ===
@@ -356,25 +375,26 @@ def create_merchant_group_distribution_tree_map(dark_mode: bool = False) -> px.t
     """
     text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
 
-    my_treemap_df = tab_merchant_data_setup.get_merchant_group_overview(1000)
-    my_treemap_fig = px.treemap(
-        my_treemap_df,
+    treemap_df = tab_merchant_data_setup.get_merchant_group_overview(1000)
+    fig = px.treemap(
+        treemap_df,
         path=[px.Constant("Merchant Groups"), "merchant_group"],
         values="transaction_count",
     )
-    my_treemap_fig.update_traces(
-        textinfo="label+percent entry",
-        hovertemplate="<b>%{label}</b><br>Transactions: %{value}<br>Share: %{percentEntry:.2%}<extra></extra>",
-        root_color="rgba(0,0,0,0)"
+    fig.update_traces(
+        texttemplate="<b>%{label}</b><br><br><b>Transactions:</b> %{value}<br><b>Share:</b> %{percentEntry:.2%}",
+        hovertemplate="<b>%{label}</b><br>💳 <b>Transactions:</b> %{value}<br><b>🔢 Share:</b> %{percentEntry:.2%}<extra></extra>",
+        root_color="rgba(0,0,0,0)",
+        tiling_pad=0
     )
-    my_treemap_fig.update_layout(
+    fig.update_layout(
         font=dict(color=text_color),
-        margin=dict(t=0, l=0, r=0, b=0),
+        margin=dict(t=2, l=2, r=2, b=2),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        showlegend=False
+        showlegend=False,
     )
-    return my_treemap_fig
+    return fig
 
 
 # === CALLBACKS ===
@@ -388,30 +408,27 @@ def create_merchant_group_distribution_tree_map(dark_mode: bool = False) -> px.t
 )
 def set_merchant_tab(n_all, n_group, n_indiv):
     """
-    This function is a callback function used to update the data of a specific output
-    based on the triggering input. It determines which merchant tab (e.g., all merchants,
-    merchant group, or individual merchant) has been selected based on the triggering
-    button's click event and sets the output accordingly.
+    Set the merchant tab based on which button was clicked.
+
+    This callback function determines which merchant tab to activate when one of the merchant-related buttons is
+    clicked. The activated tab is returned based on the ID of the button triggering the callback.
 
     Parameters:
-        n_all: int
-            Number of clicks on the button for all merchants.
-        n_group: int
-            Number of clicks on the button for merchant groups.
-        n_indiv: int
-            Number of clicks on the button for individual merchants.
+    n_all: int | None
+        The number of times the "All Merchants" button has been clicked.
+    n_group: int | None
+        The number of times the "Merchant Group" button has been clicked.
+    n_indiv: int | None
+        The number of times the "Individual Merchant" button has been clicked.
 
     Returns:
-        str
-            A string indicating the selected merchant tab. Returns "opt2" for the merchant
-            group, "opt3" for the individual merchant, or "opt1" for all merchants.
+    str
+        The value of the merchant tab to activate, corresponding to the button
+        clicked. Defaults to the value for the "All Merchants" tab if the
+        trigger ID does not map to any specific merchant tab.
     """
-    if ctx.triggered_id == ID.MERCHANT_BTN_MERCHANT_GROUP:
-        return "opt2"
-    elif ctx.triggered_id == ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT:
-        return "opt3"
-    else:
-        return "opt1"
+    trigger_id = ctx.triggered_id
+    return ID_TO_MERCHANT_TAB.get(trigger_id, MerchantTab.ALL).value
 
 
 @callback(
@@ -430,58 +447,58 @@ def set_merchant_tab(n_all, n_group, n_indiv):
 )
 def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dark):
     """
-    Updates the UI components of the merchant section based on user input.
+    Updates the user interface components based on the currently selected merchant
+    tab, group, or individual merchant. This function updates visual elements like
+    button styles, visibility of input wrappers, KPI content, graph figures, and
+    graph titles depending on the selection. The function also considers dark mode
+    toggle state to adjust display content accordingly.
 
-    This callback function dynamically updates the appearance, content, and configuration
-    of several UI elements related to merchants. It adapts to the user's selection of specific
-    merchant types, merchant groups, or individual merchant IDs. Additionally, supports dark
-    mode toggling, which affects the appearance of graphs. The function computes display
-    styles, KPI contents, graphical data, and titles for various scenarios, including default
-    selections, specific group selections, or individual merchants.
+    Arguments:
+        selected (str): Identifier for the currently selected merchant type
+            (e.g., "all", "group", or "individual"). Defaults to "all" if not
+            provided.
+        selected_group (str): The currently selected merchant group from the
+            dropdown input. Can be None if no group is selected.
+        selected_merchant_id (str or int): The identifier or value for the
+            selected individual merchant. Can be None or an invalid input (e.g.,
+            empty string).
+        n_clicks_dark (int): Number of times the dark mode toggle button is
+            clicked. Odd values indicate dark mode is activated; even or zero
+            values indicate light mode.
 
-    Parameters
-    ----------
-    selected : str
-        The selected option representing the merchant type. Defaults to "opt1" if not provided.
-
-    selected_group : str
-        The name of the merchant group selected from the dropdown. Optional input that might
-        influence KPI content and graph data.
-
-    selected_merchant_id : str
-        The ID of the merchant as input by the user. Can be converted to an integer for further
-        processing.
-
-    n_clicks_dark : int
-        The number of clicks on the dark mode toggle button. Odd values indicate dark mode
-        should be active, even values indicate light mode.
-
-    Returns
-    -------
-    tuple
-        A tuple containing:
-        - className for the "All Merchants" button.
-        - className for the "Merchant Group" button.
-        - className for the "Individual Merchant" button.
-        - CSS style for the merchant group input wrapper.
-        - CSS style for the individual merchant input wrapper.
-        - Content of the KPI container (can be a table, message, or visualization).
-        - Figure data for the graph container (can be empty or populated with visualizations).
-        - Title of the current graph being displayed.
+    Returns:
+        tuple: Contains the following outputs:
+            - className (str): The CSS class name for the "All Merchants" button.
+            - className (str): The CSS class name for the "Merchant Group" button.
+            - className (str): The CSS class name for the "Individual Merchant"
+              button.
+            - style (dict): The style properties for the "Merchant Group" input
+              wrapper.
+            - style (dict): The style properties for the "Individual Merchant"
+              input wrapper.
+            - children: The content of the KPI container, usually dynamically
+              generated components or a placeholder message.
+            - figure: The figure content for the graph, rendered differently based
+              on the selected merchant type and data availability.
+            - children (str): The title of the graph, indicating its purpose or
+              scope based on the selection (e.g., merchant group, individual
+              merchant).
     """
     if not selected:
-        selected = "opt1"  # Default
+        selected = MerchantTab.ALL.value  # Default
 
     dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
 
-    group_style = {"display": "flex", "width": "100%"} if selected == "opt2" else {"display": "none", "width": "100%"}
-    indiv_style = {"display": "flex", "width": "100%"} if selected == "opt3" else {"display": "none", "width": "100%"}
+    group_style = {"display": "flex", "width": "100%"} if selected == MerchantTab.GROUP.value else {"display": "none",
+                                                                                                    "width": "100%"}
+    indiv_style = {"display": "flex", "width": "100%"} if selected == MerchantTab.INDIVIDUAL.value else {
+        "display": "none", "width": "100%"}
 
-    if selected == "opt1":
+    if selected == MerchantTab.ALL.value:
         kpi_content = create_all_merchant_kpis()
         graph_content = create_merchant_group_distribution_tree_map(dark_mode=dark_mode)
         graph_title = "Merchant Group Distribution"
-    elif selected == "opt2":
+    elif selected == MerchantTab.GROUP.value:
         merchant_group = selected_group or (
             tab_merchant_data_setup.get_all_merchant_groups()[0]
             if tab_merchant_data_setup.get_all_merchant_groups() else None)
@@ -490,7 +507,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
         graph_content = create_merchant_group_line_chart(
             merchant_group) if merchant_group else comp_factory.create_empty_figure()
         graph_title = f"History for Merchant Group: {merchant_group}" if merchant_group else "No Merchant Group Selected"
-    elif selected == "opt3":
+    elif selected == MerchantTab.INDIVIDUAL.value:
         try:
             merchant = int(selected_merchant_id)
         except (ValueError, TypeError):
@@ -509,9 +526,9 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
         graph_title = ""
 
     return (
-        get_option_button_class("opt1", selected),
-        get_option_button_class("opt2", selected),
-        get_option_button_class("opt3", selected),
+        get_option_button_class(MerchantTab.ALL.value, selected),
+        get_option_button_class(MerchantTab.GROUP.value, selected),
+        get_option_button_class(MerchantTab.INDIVIDUAL.value, selected),
         group_style,
         indiv_style,
         kpi_content,
