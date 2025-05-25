@@ -25,7 +25,7 @@ def create_map_setting_color_scale() -> html.Div:
         A Div component containing a dropdown menu for selecting a color scale with
         relevant labels and settings.
     """
-    color_options = [{"label": re.sub("_", " ", color), "value": color}
+    color_options = [{"label": re.sub("_", " ", color).upper(), "value": color}
                      for color in sorted(px.colors.named_colorscales())]
 
     return html.Div(
@@ -60,10 +60,10 @@ def create_general_setting_position() -> html.Div:
         setting positions.
     """
     placement_options = [
-        {"label": "Top", "value": "top"},
-        {"label": "Bottom", "value": "bottom"},
-        {"label": "Left", "value": "start"},
-        {"label": "Right", "value": "end"},
+        {"label": "TOP", "value": "top"},
+        {"label": "BOTTOM", "value": "bottom"},
+        {"label": "LEFT", "value": "start"},
+        {"label": "RIGHT", "value": "end"},
     ]
 
     return html.Div(
