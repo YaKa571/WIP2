@@ -14,6 +14,7 @@ from shapely.geometry import shape
 from backend.data_manager import DataManager
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID, Icons
+import components.constants as const
 
 dm: DataManager = DataManager.get_instance()
 
@@ -417,7 +418,7 @@ def create_bar_chart(
     go.Figure
         A Plotly Figure object representing the bar chart.
     """
-    text_color = "white" if dark_mode else "black"
+    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
     transparent_color = "rgba(0,0,0,0)"
     grid_color = "rgba(230,230,230,100)" if dark_mode else "rgba(25,25,25,100)"
 

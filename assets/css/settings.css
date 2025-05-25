@@ -111,7 +111,7 @@
     align-items: center;
     display: flex;
     flex-shrink: 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: bold;
     min-width: 50%;
     max-width: 50%;
@@ -132,10 +132,6 @@
     padding: 0;
     transform-origin: right center;
     transform: scale(1.4);
-}
-
-.Select-control {
-    outline: none !important;
 }
 
 .settings-canvas.offcanvas-start {
@@ -189,88 +185,92 @@
 }
 
 /* ================================
-   DROPDOWN
-================================ */
+   DASH / REACT-SELECT DROPDOWN
+   ================================ */
 
-.settings-dropdown .Select-control {
-    background-color: var(--dropdown-body-bg);
-    color: var(--dropdown-body-color);
-    outline: 1px solid var(--dropdown-border-color);
-    border: none !important;
-    transition: all 0.2s ease;
-    border-radius: var(--dropdown-border-radius);
+.settings-dropdown * {
+    padding: 1px 0 !important;
 }
 
 .settings-dropdown .Select-control,
+.settings-dropdown .Select-control:focus,
 .settings-dropdown .is-focused .Select-control,
-.settings-dropdown .Select,
-.settings-dropdown .is-focused .Select {
-    background-color: var(--dropdown-body-bg) !important;
-    color: var(--dropdown-body-color) !important;
-}
-
-.settings-dropdown .Select-value-label {
-    color: var(--dropdown-body-color) !important;
-    opacity: 1 !important;
-}
-
-.settings-dropdown .Select-input > input {
-    background-color: var(--dropdown-body-bg) !important;
-    color: var(--dropdown-body-color) !important;
-}
-
-.settings-dropdown .Select-menu-outer {
-    background-color: var(--dropdown-body-bg);
-    color: var(--dropdown-body-color);
-    outline: 1px solid var(--dropdown-border-color);
+.settings-dropdown .Select {
+    background-color: var(--dropdown-body-bg, #23263c) !important;
+    color: var(--dropdown-body-color, #f4f4f4) !important;
     border: none !important;
-}
-
-.settings-dropdown .Select-option {
-    background-color: var(--dropdown-body-bg);
-    color: var(--dropdown-body-color);
-}
-
-.settings-dropdown .Select-option.is-focused {
-    background-color: var(--dropdown-secondary-bg, #2a2a2a);
-}
-
-.settings-dropdown .Select-option.is-selected {
-    background-color: var(--dropdown-primary);
-    color: #fff;
-}
-
-.settings-dropdown .Select-placeholder {
-    color: var(--dropdown-body-color);
-    opacity: 0.7;
-    display: flex;
-    justify-content: center;
-}
-
-.settings-dropdown .Select-clear-zone,
-.settings-dropdown .Select-arrow-zone {
-    color: var(--dropdown-body-color);
+    outline: none !important;
+    border-radius: var(--dropdown-border-radius, 12px) !important;
+    box-sizing: border-box;
+    background-clip: padding-box !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease;
+    margin: 0 !important;
 }
 
 .settings-dropdown .Select-value,
 .settings-dropdown .Select-multi-value-wrapper {
-    background-color: var(--dropdown-body-bg) !important;
+    background-color: var(--dropdown-body-bg, #23263c) !important;
+    border-radius: var(--dropdown-border-radius, 12px) !important;
+    border: 1px solid var(--dropdown-border-color, #5d9cf8) !important;
+    outline: none !important;
     display: flex;
     justify-content: center;
-    border-radius: var(--dropdown-border-radius);
-    outline: 1px solid var(--dropdown-border-color);
-    border: none !important;
 }
 
-.settings-dropdown.is-open .Select-value,
-.settings-dropdown.is-open .Select-multi-value-wrapper,
-.settings-dropdown.is-open .Select-control {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+.settings-dropdown .Select-control {
+    font-size: 1.1rem;
 }
 
-.settings-text-centered .VirtualizedSelectOption {
+.settings-dropdown .Select-value-label {
+    color: var(--dropdown-body-color, #f4f4f4) !important;
+    opacity: 1 !important;
+}
+
+.settings-dropdown .Select-menu-outer {
+    background-color: var(--dropdown-body-bg, #23263c) !important;
+    color: var(--dropdown-body-color, #f4f4f4) !important;
+    border: 1px solid var(--dropdown-border-color, #5d9cf8) !important;
+    outline: none !important;
+    border-radius: var(--dropdown-border-radius, 12px) !important;
+    box-sizing: border-box;
+    background-clip: padding-box !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dropdown-scrollbar-thumb) var(--dropdown-scrollbar-track);
+}
+
+.settings-dropdown .Select-menu-outer::-webkit-scrollbar {
+    width: 8px;
+    border-radius: 8px;
+    background: var(--dropdown-scrollbar-track);
+}
+
+.settings-dropdown .Select-menu-outer::-webkit-scrollbar-thumb {
+    background: var(--dropdown-scrollbar-thumb);
+    border-radius: 8px;
+    border: 2px solid var(--dropdown-scrollbar-track);
+}
+
+.settings-dropdown .Select-menu-outer::-webkit-scrollbar-thumb:hover {
+    background: var(--dropdown-scrollbar-thumb-hover);
+}
+
+.settings-dropdown .Select-menu-outer::-webkit-scrollbar-track {
+    background: var(--dropdown-scrollbar-track);
+    border-radius: 8px;
+}
+
+/* Centered Text in Options */
+.settings-dropdown .VirtualizedSelectOption {
     display: flex;
     justify-content: center;
     width: 100%;
+    border: none !important;
+}
+
+/* Text when typing (searching) */
+.settings-dropdown .Select-input > input {
+    color: var(--text-main) !important;
 }

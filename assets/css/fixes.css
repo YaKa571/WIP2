@@ -32,6 +32,11 @@
     transition: opacity 0.2s ease-in-out;
 }
 
+/* Merchant Group Distribution */
+.graph-card.with-bar-chart.lower-modebar .js-plotly-plot .modebar {
+    top: -6px !important;
+}
+
 /* When hovering over diagram show modebar */
 .graph-card .js-plotly-plot:hover .modebar {
     opacity: 1 !important;

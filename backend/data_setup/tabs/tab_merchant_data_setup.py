@@ -1,9 +1,12 @@
-import pandas as pd
-from backend.data_manager import DataManager
-#from backend.data_setup.tabs.tab_cluster_data_setup import prepare_default_data
+# from backend.data_setup.tabs.tab_cluster_data_setup import prepare_default_data
 import json
+
+import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
+
+import components.factories.component_factory as comp_factory
+from backend.data_manager import DataManager
+
 """
 contains data setup for Merchant tab
 """
@@ -20,25 +23,27 @@ my_mcc = pd.DataFrame(list(data.items()), columns=["mcc", "merchant_group"])
 my_mcc["mcc"] = my_mcc["mcc"].astype(int)
 # print(my_mcc.head())
 # join transactions and mcc_codes
-my_transactions_mcc=my_transactions.merge(my_mcc, how="left", on="mcc")
+my_transactions_mcc = my_transactions.merge(my_mcc, how="left", on="mcc")
 
 my_transactions_mcc_agg = my_transactions_mcc.groupby('merchant_group').agg(
-    transaction_count=('merchant_group','count')
+    transaction_count=('merchant_group', 'count')
 ).reset_index()
 
 my_transactions_agg_by_user = my_transactions.groupby('client_id').agg(
-        transaction_count=('amount', 'count'),
-        total_value=('amount', 'sum')
-    ).reset_index()
+    transaction_count=('amount', 'count'),
+    total_value=('amount', 'sum')
+).reset_index()
 
 # Transactions join MCC(mcc,mcc) join Users(client_id,id)
 my_transactions_mcc_users = my_transactions_mcc.merge(my_users, how="left", left_on='client_id', right_on='id')
 def get_my_transactions_mcc_users():
     return my_transactions_mcc_users
 
+
 def get_all_merchant_groups():
     my_df = my_mcc
     return sorted(my_df['merchant_group'].unique().tolist())
+
 
 #############################################################################
 # All Merchants
@@ -73,6 +78,7 @@ def get_merchant_group_overview(threshold):
         large_groups = pd.concat([large_groups, other_df], ignore_index=True)
     return large_groups
 
+
 def get_most_user_with_most_transactions_all_merchants():
     """
         Identify the user with the highest number of transactions across all merchant groups.
@@ -86,11 +92,12 @@ def get_most_user_with_most_transactions_all_merchants():
                 transaction_count (int): Number of transactions made by this user.
         """
     my_df = my_transactions_agg_by_user.reset_index().sort_values(by='transaction_count',
-                                                                                        ascending=False)
+                                                                  ascending=False)
 
     user_return = int(my_df.iloc[0]["client_id"])
     count_return = int(my_df.iloc[0]["transaction_count"])
     return user_return, count_return
+
 
 def get_user_with_highest_expenditure_all_merchants():
     """
@@ -104,12 +111,12 @@ def get_user_with_highest_expenditure_all_merchants():
                user_id (int): ID of the user with the highest total expenditure.
                total_value (float): Sum of all transaction amounts by this user.
        """
-    my_df = my_transactions_agg_by_user.reset_index().sort_values(by='total_value',
-                                                                                        ascending=False)
+    my_df = my_transactions_agg_by_user.reset_index().sort_values(by='total_value', ascending=False)
 
     user_return = int(my_df.iloc[0]["client_id"])
     value_return = my_df.iloc[0]["total_value"]
     return user_return, value_return
+
 
 def get_most_frequently_used_merchant_group():
     """
@@ -126,9 +133,10 @@ def get_most_frequently_used_merchant_group():
         """
     my_freq_agg = my_transactions_mcc["merchant_group"].value_counts()
     my_freq = my_freq_agg.reset_index().sort_values(by="count", ascending=False)
-    group_return = my_freq.loc[0,"merchant_group"]
-    count_return = my_freq.loc[0,"count"]
+    group_return = my_freq.loc[0, "merchant_group"]
+    count_return = my_freq.loc[0, "count"]
     return group_return, count_return
+
 
 def get_highest_value_merchant_group():
     """
@@ -147,6 +155,7 @@ def get_highest_value_merchant_group():
     group_return = my_value.loc[0, "merchant_group"]
     value_return = my_value.loc[0, "amount"]
     return group_return, value_return
+
 
 #############################################################################
 # Merchant Group
@@ -172,6 +181,7 @@ def get_most_frequently_used_merchant_in_group(merchant_group):
     top_row = my_agg_df.sort_values(by='transaction_count', ascending=False).iloc[0]
     return int(top_row['merchant_id']), int(top_row['transaction_count'])
 
+
 def get_highest_value_merchant_in_group(merchant_group):
     """
        Find the merchant within the specified merchant group with the highest total transaction value.
@@ -191,6 +201,7 @@ def get_highest_value_merchant_in_group(merchant_group):
         return -1, -1
     top_row = my_agg_df.sort_values(by='total_value', ascending=False).iloc[0]
     return int(top_row['merchant_id']), float(top_row['total_value'])
+
 
 def get_user_with_most_transactions_in_group(merchant_group):
     """
@@ -212,6 +223,7 @@ def get_user_with_most_transactions_in_group(merchant_group):
     top_row = my_agg_df.sort_values(by='transaction_count', ascending=False).iloc[0]
     return int(top_row['client_id']), int(top_row['transaction_count'])
 
+
 def get_user_with_highest_expenditure_in_group(merchant_group):
     """
        Identify the user with the highest total expenditure within the specified merchant group.
@@ -231,6 +243,7 @@ def get_user_with_highest_expenditure_in_group(merchant_group):
         return -1, -1
     top_row = my_agg_df.sort_values(by='total_value', ascending=False).iloc[0]
     return int(top_row['client_id']), float(top_row['total_value'])
+
 
 def create_merchant_group_line_chart(merchant_group):
     """
@@ -253,7 +266,7 @@ def create_merchant_group_line_chart(merchant_group):
         """
     my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_group'] == merchant_group].copy()
     if my_df.empty:
-        return go.Figure()
+        return comp_factory.create_empty_figure()
 
     my_df['date'] = pd.to_datetime(my_df['date'])
     my_df['date_only'] = my_df['date'].dt.normalize()
@@ -309,6 +322,7 @@ def create_merchant_group_line_chart(merchant_group):
 
     return fig
 
+
 #############################################################################
 # Individual Merchant
 #############################################################################
@@ -326,6 +340,7 @@ def get_merchant_transactions(merchant):
     my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_id'] == merchant]
     return len(my_df)
 
+
 def get_merchant_value(merchant):
     """
         Calculate the total transaction value for a given merchant.
@@ -338,6 +353,7 @@ def get_merchant_value(merchant):
         """
     my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_id'] == merchant]
     return my_df['amount'].sum()
+
 
 def get_user_with_most_transactions_at_merchant(merchant):
     """
@@ -359,6 +375,7 @@ def get_user_with_most_transactions_at_merchant(merchant):
     top_row = my_agg_df.sort_values(by='transaction_count', ascending=False).iloc[0]
     return int(top_row['client_id']), int(top_row['transaction_count'])
 
+
 def get_user_with_highest_expenditure_at_merchant(merchant):
     """
        Identify the user with the highest total expenditure at a specific merchant.
@@ -378,6 +395,7 @@ def get_user_with_highest_expenditure_at_merchant(merchant):
         return -2, -2
     top_row = my_agg_df.sort_values(by='total_value', ascending=False).iloc[0]
     return int(top_row['client_id']), float(top_row['total_value'])
+
 
 def create_individual_merchant_line_chart(merchant):
     """
@@ -400,7 +418,7 @@ def create_individual_merchant_line_chart(merchant):
     """
     my_df = my_transactions_mcc_users[my_transactions_mcc_users['merchant_id'] == merchant].copy()
     if my_df.empty:
-        return go.Figure()
+        return comp_factory.create_empty_figure()
 
     my_df['date'] = pd.to_datetime(my_df['date'])
     my_df['date_only'] = my_df['date'].dt.normalize()

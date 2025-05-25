@@ -31,7 +31,7 @@
 
 /* Merchant Tab Grid Layout */
 .tab-content-inner.merchant-tab {
-    grid-template-rows: auto !important;
+    grid-template-rows: auto auto auto auto 1fr !important;
     align-items: start;
     align-content: start;
 }

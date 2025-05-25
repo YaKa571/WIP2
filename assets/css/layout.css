@@ -255,7 +255,7 @@ li span:nth-of-type(2) {
     border: var(--settings-button-text-border);
     font-size: 1.0rem;
     font-weight: 500;
-    border-radius: 5px;
+    border-radius: var(--outer-border-radius);
     background-color: transparent;
     color: var(--text-main);
     padding: 0.25rem 0.5rem;
@@ -271,7 +271,7 @@ li span:nth-of-type(2) {
 }
 
 .settings-button-text.hidden {
-    opacity: 0.33;
+    opacity: 0;
     pointer-events: none;
 }
 
@@ -287,34 +287,14 @@ li span:nth-of-type(2) {
    Custom Radio Button
    ============================================================ */
 
-.button-radio-wrapper {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-}
-
 .option-btn {
-    padding: 10px 24px;
-    border: 2px solid #cccccc;
-    border-radius: 10px;
-    background-color: #ffffff;
-    color: #1f2937;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.03);
-}
-
-.option-btn:hover {
-    background-color: #f3f4f6;
+    width: 100%;
 }
 
 .option-btn.selected {
-    background-color: #2563eb;
+    background-color: var(--blue-main);
     color: #ffffff;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+    border: none;
 }
 
 
