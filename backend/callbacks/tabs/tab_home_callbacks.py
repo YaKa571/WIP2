@@ -101,34 +101,34 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
     dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
 
     # Aggregate data (cached getters)
-    gender_sums = dm.get_expenditures_by_gender(state=state)
+    gender_sums = dm.get_expenditures_by_gender(state=state).copy()
     channel_sums = dm.get_expenditures_by_channel(state=state)
     age_sums = dm.get_expenditures_by_age(state=state)
 
     # Build figures
 
     hover_template_gender = (
-        "🧑‍🤝‍🧑 <b>Gender:</b> %{label}<br>"
-        "📊 <b>Share:</b> %{percent}<br>"
-        "💰 <b>Sum:</b> $%{value:,.2f}"
+        "🧑‍🤝‍🧑 <b>GENDER:</b> %{label}<br>"
+        "📊 <b>SHARE:</b> %{percent}<br>"
+        "💰 <b>SUM:</b> $%{value:,.2f}"
     )
 
     fig_gender = create_pie_graph(data=gender_sums, dark_mode=dark_mode, showlegend=False,
                                   hover_template=hover_template_gender)
 
     hover_template_channel = (
-        "🛒‍ <b>Channel:</b> %{label}<br>"
-        "📊 <b>Share:</b> %{percent}<br>"
-        "💰 <b>Sum:</b> $%{value:,.2f}"
+        "🛒‍ <b>CHANNEL:</b> %{label}<br>"
+        "📊 <b>SHARE:</b> %{percent}<br>"
+        "💰 <b>SUM:</b> $%{value:,.2f}"
     )
 
     fig_channel = create_pie_graph(data=channel_sums, dark_mode=dark_mode, showlegend=False,
                                    colors=["#FFCD00", "#81C784"], hover_template=hover_template_channel)
 
     hover_template_age = (
-        "🎂 <b>Age:</b> %{label}<br>"
-        "📊 <b>Share:</b> %{percent}<br>"
-        "💰 <b>Sum:</b> $%{value:,.2f}"
+        "🎂 <b>AGE:</b> %{label}<br>"
+        "📊 <b>SHARE:</b> %{percent}<br>"
+        "💰 <b>SUM:</b> $%{value:,.2f}"
     )
 
     fig_age = create_pie_graph(data=age_sums, dark_mode=dark_mode, showlegend=False,
