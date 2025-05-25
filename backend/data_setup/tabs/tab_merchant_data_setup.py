@@ -66,13 +66,13 @@ def get_merchant_group_overview(threshold):
                               where groups below the threshold are combined into an 'Other' group.
                               The DataFrame has columns 'merchant_group' and 'transaction_count'.
         """
-    my_df = my_transactions_mcc_agg.copy()
-    large_groups = my_df[my_df['transaction_count'] >= threshold]
-    small_groups = my_df[my_df['transaction_count'] < threshold]
+    df = my_transactions_mcc_agg.copy()
+    large_groups = df[df['transaction_count'] >= threshold]
+    small_groups = df[df['transaction_count'] < threshold]
     other_sum = small_groups['transaction_count'].sum()
     if other_sum > 0:
         other_df = pd.DataFrame([{
-            'merchant_group': 'Other',
+            'merchant_group': 'OTHER',
             'transaction_count': other_sum
         }])
         large_groups = pd.concat([large_groups, other_df], ignore_index=True)
