@@ -270,6 +270,11 @@ li span:nth-of-type(2) {
     -ms-user-select: none; /* IE10+ */
 }
 
+.settings-button-text.active-button {
+    outline: 2px solid var(--blue-main) !important;
+    outline-offset: 2px !important;
+}
+
 .settings-button-text.hidden {
     opacity: 0;
     pointer-events: none;
