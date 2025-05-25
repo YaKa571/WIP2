@@ -51,6 +51,22 @@ def create_tab_buttons():
 
 
 def create_right_column():
+    """
+    Creates the right column layout for the interface.
+
+    This function generates the right-side layout of the app interface. It consists
+    of tab buttons for navigation and corresponding tab content sections wrapped
+    inside a card structure. The function dynamically builds the tab content by
+    calling pre-defined builder functions for each tab type.
+
+    No parameters or exceptions are directly handled inside this function. The
+    returned layout structure is intended for direct use in the application.
+
+    Returns:
+        dash.development.base_component.Component: A Dash HTML Div component
+        representing the complete right column layout, including tab buttons and
+        dynamically populated tab content.
+    """
     tabs = create_tab_buttons()
 
     # Build a wrapper with pattern ID and base class for each tab content
