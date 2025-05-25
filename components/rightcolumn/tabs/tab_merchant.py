@@ -20,8 +20,8 @@ def create_merchant_content():
             _create_heading(),
             _create_button_row(),
             _create_merchant_input_container(),
-            create_merchant_kpi(),
-            create_merchant_graph()
+            _create_merchant_kpi(),
+            _create_merchant_graph()
 
         ])
 
@@ -116,7 +116,7 @@ def _create_button_row() -> html.Div:
                     html.I(className="bi bi-globe-americas me-2"),
                     "Map"
 
-                ]),
+                ])
 
         ])
 
@@ -144,7 +144,7 @@ def _create_merchant_input_container():
                 className="flex-wrapper",
                 children=[tab_merchant_callbacks.get_merchant_group_input()],
                 id=ID.MERCHANT_GROUP_INPUT_WRAPPER,
-                style={"display": "none"}
+                style={"display": "none", "width": "100%"}
             ),
 
             # Individual Merchant ID input
@@ -152,13 +152,13 @@ def _create_merchant_input_container():
                 className="flex-wrapper",
                 children=[tab_merchant_callbacks.get_merchant_id_input()],
                 id=ID.MERCHANT_INPUT_WRAPPER,
-                style={"display": "none"}
+                style={"display": "none", "width": "100%"}
             )
 
         ])
 
 
-def create_merchant_kpi() -> html.Div:
+def _create_merchant_kpi() -> html.Div:
     """
     Creates a container for the merchant KPI section.
 
@@ -174,7 +174,7 @@ def create_merchant_kpi() -> html.Div:
     return html.Div(id=ID.MERCHANT_KPI_CONTAINER)
 
 
-def create_merchant_graph():
+def _create_merchant_graph():
     """
     Creates a merchant graph component.
 
@@ -210,7 +210,17 @@ def create_merchant_graph():
                             dcc.Graph(
                                 id=ID.MERCHANT_GRAPH_CONTAINER,
                                 className="bar-chart",
-                                config={"displayModeBar": True, "displaylogo": False},
+                                config={
+                                    "displayModeBar": True,
+                                    "modeBarButtonsToRemove": ["zoom2d", "pan2d", "select2d", "lasso2d",
+                                                               "zoomIn2d", "zoomOut2d", "autoScale2d",
+                                                               "resetScale2d", "hoverClosestCartesian",
+                                                               "hoverCompareCartesian", "toggleSpikelines",
+                                                               "sendDataToCloud", "toggleHover", "resetViews",
+                                                               "resetViewMapbox"],
+                                    "modeBarButtonsToAdd": ["toImage"],
+                                    "displaylogo": False
+                                },
                                 style={
                                     "height": "100%",
                                     "width": "100%"
