@@ -111,7 +111,7 @@ def get_most_valuable_merchant_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_1"},
         target=ID.HOME_KPI_MOST_VALUABLE_MERCHANT,
         children=[
-            f"🆔 Merchant ID: {dm.get_most_valuable_merchant(state).id}",
+            f"🆔 MERCHANT ID: {dm.get_most_valuable_merchant(state).id}",
             html.Br(),
             f"🏷️ MCC: {dm.get_most_valuable_merchant(state).mcc}"
         ])
@@ -149,7 +149,7 @@ def get_most_visited_merchant_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_2"},
         target=ID.HOME_KPI_MOST_VISITED_MERCHANT,
         children=[
-            f"🆔 Merchant ID: {dm.get_most_visited_merchant(state).id}",
+            f"🆔 MERCHANT ID: {dm.get_most_visited_merchant(state).id}",
             html.Br(),
             f"🏷️MCC: {dm.get_most_visited_merchant(state).mcc}"
         ])
@@ -186,7 +186,7 @@ def get_top_spending_user_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_3"},
         target=ID.HOME_KPI_TOP_SPENDING_USER,
         children=[
-            f"🆔 User ID: {dm.get_top_spending_user(state).id}"
+            f"🆔 USER ID: {dm.get_top_spending_user(state).id}"
         ])
 
     return [one, two, tooltip]
@@ -236,23 +236,25 @@ def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = Fa
                                       is provided.
     """
     df = dm.get_merchant_values_by_state(state=state).head(10)
+    df = df.copy()
+    df["mcc_desc"] = df["mcc_desc"].astype(str).str.upper()
 
     hover_template = (
         "🏷️ <b>MCC:</b> %{x}<br>"
-        "📝 <b>Description:</b> %{customdata[0]}<br>"
-        "🆔 <b>Merchant ID:</b> %{customdata[1]}<br>"
-        "💰 <b>Sum:</b> $%{y:,.2f}<br>"
+        "📝 <b>DESCRIPTION:</b> %{customdata[0]}<br>"
+        "🆔 <b>MERCHANT ID:</b> %{customdata[1]}<br>"
+        "💰 <b>SUM:</b> $%{y:,.2f}<br>"
         "<extra></extra>"
     )
 
     return comp_factory.create_bar_chart(
         df=df,
-        x="mcc",
+        x="merchant_id",
         y="merchant_sum",
         custom_data=["mcc_desc", "merchant_id"],
         hover_template=hover_template,
         title=f"TOP 10 MOST VALUABLE MERCHANTS IN {state.upper() if state else 'ALL STATES'}",
-        labels={"mcc": "MCC", "merchant_sum": "Sum"},
+        labels={"merchant_id": "MERCHANT ID", "merchant_sum": "SUM"},
         bar_color=COLOR_BLUE_MAIN,
         dark_mode=dark_mode
     )
@@ -283,8 +285,8 @@ def get_peak_hour_bar_chart(state: str = None, dark_mode: bool = False):
     df["hour_range"] = df["hour"].apply(lambda h: f"{h:02d}:00 – {(h + 1) % 24:02d}:00")
 
     hover_template = (
-        "⏰ <b>Hour:</b> %{customdata[0]}<br>"
-        "💳 <b>Transactions:</b> %{customdata[1]:,}<br>"
+        "⏰ <b>HOUR:</b> %{customdata[0]}<br>"
+        "💳 <b>TRANSACTIONS:</b> %{customdata[1]:,}<br>"
         "<extra></extra>"
     )
 
@@ -295,7 +297,7 @@ def get_peak_hour_bar_chart(state: str = None, dark_mode: bool = False):
         custom_data=["hour_range", "transaction_count"],
         hover_template=hover_template,
         title=f"MOST ACTIVE HOURS IN {state.upper() if state else 'ALL STATES'}",
-        labels={"hour_range": "Hour Range", "transaction_count": "Number of Transactions"},
+        labels={"hour_range": "HOUR RANGE", "transaction_count": "TRANSACTIONS"},
         bar_color=COLOR_BLUE_MAIN,
         dark_mode=dark_mode
     )
@@ -316,12 +318,16 @@ def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = False):
     """
     df = dm.get_spending_by_user(state).head(10)
     df = df.merge(dm.df_users[["id", "gender", "current_age"]], left_on="client_id", right_on="id").drop(columns=["id"])
+    df = df.copy()
+
+    df["gender"] = df["gender"].astype(str).str.upper()
+    color_discrete_map = {"FEMALE": COLOR_FEMALE_PINK, "MALE": COLOR_BLUE_MAIN}
 
     hover_template = (
-        "🆔 <b>User ID:</b> %{x}<br>"
-        "🧑‍🤝‍🧑 <b>Gender:</b> %{customdata[0]}<br>"
-        "🎂 <b>Age:</b> %{customdata[1]}<br>"
-        "💸 <b>Spending:</b> $%{customdata[2]:,.2f}<br>"
+        "🆔 <b>USER ID:</b> %{x}<br>"
+        "🧑‍🤝‍🧑 <b>GENDER:</b> %{customdata[0]}<br>"
+        "🎂 <b>AGE:</b> %{customdata[1]}<br>"
+        "💸 <b>SPENDING:</b> $%{customdata[2]:,.2f}<br>"
         "<extra></extra>"
     )
 
@@ -330,11 +336,11 @@ def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = False):
         x="client_id",
         y="spending",
         color="gender",
-        color_discrete_map={"Female": COLOR_FEMALE_PINK, "Male": COLOR_BLUE_MAIN},
+        color_discrete_map=color_discrete_map,
         custom_data=["gender", "current_age", "spending"],
         hover_template=hover_template,
         title=f"TOP 10 MOST SPENDING USERS IN {state.upper() if state else 'ALL STATES'}",
-        labels={"client_id": "User ID", "spending": "Total Spending", "gender": "Gender", "current_age": "Age"},
+        labels={"client_id": "USER ID", "spending": "TOTAL SPENDING", "gender": "GENDER", "current_age": "AGE"},
         showlegend=True,
         dark_mode=dark_mode
     )
@@ -358,12 +364,14 @@ def get_most_visited_merchants_bar_chart(state: str = None, dark_mode: bool = Fa
         specified parameters.
     """
     df = dm.get_visits_by_merchant(state).head(10)
+    df = df.copy()
+    df["mcc_desc"] = df["mcc_desc"].astype(str).str.upper()
 
     hover_template = (
         "🏷️ <b>MCC:</b> %{customdata[0]}<br>"
-        "📝 <b>Description:</b> %{customdata[1]}<br>"
-        "🆔 <b>Merchant ID:</b> %{x}<br>"
-        "👣 <b>Visits:</b> %{customdata[2]:,}<br>"
+        "📝 <b>DESCRIPTION:</b> %{customdata[1]}<br>"
+        "🆔 <b>MERCHANT ID:</b> %{x}<br>"
+        "👣 <b>VISITS:</b> %{customdata[2]:,}<br>"
         "<extra></extra>"
     )
 
@@ -374,7 +382,7 @@ def get_most_visited_merchants_bar_chart(state: str = None, dark_mode: bool = Fa
         custom_data=["mcc", "mcc_desc", "visits"],
         hover_template=hover_template,
         title=f"TOP 10 MOST VISITED MERCHANTS IN {state.upper() if state else 'ALL STATES'}",
-        labels={"merchant_id": "Merchant ID", "visits": "Visits"},
+        labels={"merchant_id": "MERCHANT ID", "visits": "VISITS"},
         bar_color=COLOR_BLUE_MAIN,
         dark_mode=dark_mode
     )
