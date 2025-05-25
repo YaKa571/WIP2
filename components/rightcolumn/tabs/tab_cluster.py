@@ -5,7 +5,7 @@ from backend.callbacks.tabs import tab_cluster_callbacks
 from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID
-from components.constants import COLOR_BLUE_MAIN
+
 
 def create_cluster_content():
     """
@@ -20,73 +20,30 @@ def create_cluster_content():
         className="tab-content-inner cluster-tab",
         children=[
 
-            create_cluster_heading(),
-            create_cluster_age_group_switch(),
-            create_cluster_control_merchant_group(),
-            create_cluster_visualization()
+            _create_heading(),
+            _create_button_row(),
+            _create_cluster_age_group_switch(),
+            _create_cluster_control_merchant_group(),
+            _create_cluster_visualization()
 
         ]
     )
-def create_cluster_age_group_switch():
-    """
-        Creates a UI component with buttons to toggle between viewing
-        data for all ages or segmented by age groups.
 
-        Returns:
-            html.Div: A Div containing the age group toggle buttons.
-        """
-    return html.Div(
-        dbc.Row([
-            dbc.Col([
-                html.Div([
-                    html.Button('All Ages', id=ID.CLUSTER_BTN_ALL_AGES, n_clicks=0,
-                                className='option-btn'),
-                    html.Button('Age Groups', id=ID.CLUSTER_BTN_AGE_GROUP, n_clicks=0,
-                                className='option-btn'),
-                ], className='button-radio-wrapper'),
 
-            ]),
-        ])
-
-    )
-
-def create_cluster_heading():
-    """
-        Creates the header section of the cluster tab including buttons
-        for selecting the clustering mode (Total Value, Average Value,
-        Income vs Expenses) and an info icon with tooltip explaining usage.
-
-        Returns:
-            html.Div: The cluster tab header layout.
-        """
+def _create_heading() -> html.Div:
     return html.Div(
         className="tab-heading-wrapper",
         children=[
-            dbc.Row([
-                dbc.Col([
-                    html.Div([
-                        html.Button('Total Value', id=ID.CLUSTER_BTN_TOTAL_VALUE, n_clicks=0,
-                                    className='option-btn'),
-                        html.Button('Average Value', id=ID.CLUSTER_BTN_AVERAGE_VALUE, n_clicks=0,
-                                    className='option-btn'),
-                        html.Button('Inc vs Exp', id=ID.CLUSTER_BTN_INC_VS_EXP, n_clicks=0,
-                                    className='option-btn'),
-                    ], className='button-radio-wrapper'),
 
-                ], width=10),
-
-                dbc.Col([
-                    html.Div(html.P("Button Map")),
-                ], width=2),
-
-            ]),
+            html.P(),  # Dummy element for spacing
+            html.H4("Cluster Analysis", id=ID.CLUSTER_HEADING),
             comp_factory.create_info_icon(ID.CLUSTER_INFO_ICON),
             dbc.Tooltip(
                 target=ID.CLUSTER_INFO_ICON,
                 is_open=False,
                 placement="bottom-end",
-                className="enhanced-tooltip",
                 children=[
+
                     "Switch between plotting ",
                     html.Br(),
                     "Total Value/Average Value",
@@ -100,11 +57,103 @@ def create_cluster_heading():
                     "Choose Filter for Merchant Groups",
                     html.Br(),
                     "using Dropdown"
+
                 ]),
+        ])
+
+
+def _create_button_row():
+    """
+        Creates the header section of the cluster tab including buttons
+        for selecting the clustering mode (Total Value, Average Value,
+        Income vs Expenses) and an info icon with tooltip explaining usage.
+
+        Returns:
+            html.Div: The cluster tab header layout.
+        """
+    return html.Div(
+        className="flex-wrapper",
+        children=[
+
+            html.Button(
+                className="settings-button-text option-btn",
+                id=ID.CLUSTER_BTN_TOTAL_VALUE,
+                children=[
+
+                    html.I(className="bi bi-cash-stack me-2"),
+                    "Total Value"
+
+                ]),
+
+            html.Button(
+                className="settings-button-text option-btn",
+                id=ID.CLUSTER_BTN_AVERAGE_VALUE,
+                children=[
+
+                    html.I(className="bi bi-calculator-fill me-2"),
+                    "Average Value"
+
+                ]),
+
+            html.Button(
+                className="settings-button-text option-btn",
+                id=ID.CLUSTER_BTN_INC_VS_EXP,
+                children=[
+
+                    html.I(className="bi bi-bank me-2"),
+                    "Income vs. Expenses"
+
+                ]),
+
+            html.Button(
+                className="settings-button-text option-btn",
+                id=ID.CLUSTER_BTN_MAP,
+                children=[
+
+                    html.I(className="bi bi-globe-americas me-2"),
+                    "Map"
+
+                ])
 
         ])
 
-def create_cluster_control_merchant_group():
+
+def _create_cluster_age_group_switch():
+    """
+        Creates a UI component with buttons to toggle between viewing
+        data for all ages or segmented by age groups.
+
+        Returns:
+            html.Div: A Div containing the age group toggle buttons.
+        """
+    return html.Div(
+        className="flex-wrapper",
+        children=[
+
+            html.Button(
+                className="settings-button-text option-btn",
+                id=ID.CLUSTER_BTN_ALL_AGES,
+                children=[
+
+                    html.I(className="bi bi-people-fill me-2"),
+                    "All Ages"
+
+                ]),
+
+            html.Button(
+                className="settings-button-text option-btn",
+                id=ID.CLUSTER_BTN_AGE_GROUP,
+                children=[
+
+                    html.I(className="bi bi-balloon-fill me-2"),
+                    "Age Groups"
+
+                ])
+
+        ])
+
+
+def _create_cluster_control_merchant_group():
     """
         Creates the container Div that holds the merchant group filter dropdown.
         This allows filtering cluster data by merchant groups.
@@ -113,17 +162,21 @@ def create_cluster_control_merchant_group():
             html.Div: The container for merchant group dropdown control.
         """
     return html.Div(
-        dbc.Row([
-            dbc.Col([
-                html.Div(
-                    children=[tab_cluster_callbacks.get_cluster_merchant_group_input_container()],
-                    id=ID.CLUSTER_CONTROL_MERCHANT_GROUP_DROPDOWN,
-                )
-            ])
-        ])
+        className="flex-wrapper",
+        children=[
+
+            html.Div(
+                className="flex-wrapper",
+                children=[tab_cluster_callbacks.get_cluster_merchant_group_input()],
+                id=ID.CLUSTER_CONTROL_MERCHANT_GROUP_DROPDOWN,
+                style={"display": "flex", "width": "100%"}
+            )
+
+        ]
     )
 
-def create_cluster_visualization():
+
+def _create_cluster_visualization():
     """
         Creates the visualization layout for the cluster tab including two cards:
         one for the cluster scatter plot graph and one for the cluster legend.
@@ -132,7 +185,7 @@ def create_cluster_visualization():
             html.Div: The visualization container with graph and legend cards.
         """
     return html.Div(
-        className="flex-wrapper flex-fill",
+        className="flex-wrapper",
         children=[
 
             dbc.Card(
@@ -167,7 +220,6 @@ def create_cluster_visualization():
 
             dbc.Card(
                 className="graph-card",
-                style={"flex": "1 1 0"},
                 children=[
 
                     dbc.CardHeader(
