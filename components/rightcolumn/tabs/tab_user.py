@@ -185,15 +185,39 @@ def _create_credit_limit_kpi() -> html.Div:
     return html.Div(
         className="flex-wrapper",
         children=[
+            dbc.Card(
+                className="kpi-card kpi-credit-limit-card",
+                children=[
+                    dbc.CardHeader(
+                        children=[
+                            comp_factory.create_icon(IconID.MONEY_DOLLAR, cls="icon icon-small"),
+                            html.P("Credit Limit Breakdown", className="kpi-card-title"),
+                        ],
+                        className="card-header fit-content"
+                    ),
+                    dbc.CardBody(
+                        children=[
 
-            # Credit Limit Card
-            comp_factory.create_kpi_card(
-                icon_id=IconID.MONEY_DOLLAR,
-                title="Credit Limit",
-                div_id=ID.USER_CREDIT_LIMIT_BOX
+                            html.Div(id=ID.USER_CREDIT_LIMIT_BOX, className="kpi-card-value kpi-number-value"),
+                            html.Div(
+                                className="credit-limit-bar-wrapper",
+                                children=[
+
+                                    dcc.Graph(
+                                        id=ID.USER_CREDIT_LIMIT_BAR,
+                                        config={"displayModeBar": False},
+                                        style={
+                                            "height": "100%", "width": "100%",
+                                        }
+                                    )
+                                ])
+                        ],
+                        className="card-body fit-content"
+                    )
+                ]
             )
-
-        ])
+        ]
+    )
 
 
 def _create_bottom_merchant_diagram() -> html.Div:

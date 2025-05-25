@@ -738,7 +738,6 @@ class DataManager:
         bm_pre_cache_full.print_time(level=3)
 
     # TODO: @SonPhạm: Tab User - User/Card KPIs
-    # In deiner DataManager-Klasse (data_manager.py):
     def get_user_kpis(self, user_id: int) -> dict:
         """
         Gibt KPIs für einen bestimmten User korrekt zurück.

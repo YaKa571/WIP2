@@ -37,6 +37,18 @@
 }
 
 /* ============================================================
+   User Tab Components
+   ============================================================ */
+
+.credit-limit-bar-wrapper {
+    width: 100% !important;
+    margin-top: 10px;
+    border-radius: var(--inner-border-radius);
+    overflow: hidden;
+    height: 64px !important;
+}
+
+/* ============================================================
    Custom Tab Bar
    ============================================================ */
 
@@ -198,6 +210,11 @@
     border-bottom: 1px solid var(--kpi-card-splitline);
     height: 50%;
     padding: 1rem;
+}
+
+.tab-content-inner .flex-wrapper .kpi-card .card-header.fit-content,
+.tab-content-inner .flex-wrapper .kpi-card .card-body.fit-content {
+    height: fit-content !important;
 }
 
 .tab-content-inner .flex-wrapper .kpi-card .card-body {

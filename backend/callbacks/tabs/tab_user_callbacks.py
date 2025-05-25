@@ -1,4 +1,5 @@
 import pandas as pd
+import plotly.graph_objects as go
 from dash import Input, Output, callback
 
 import components.factories.component_factory as comp_factory
@@ -119,6 +120,84 @@ def update_credit_limit(user_id, card_id):
     except Exception as e:
         print("Error (Credit Limit):", str(e))
         return create_kpi_value_text("INVALID", True)
+
+
+@callback(
+    Output(ID.USER_CREDIT_LIMIT_BAR, "figure"),
+    Input(ID.USER_ID_SEARCH_INPUT, "value"),
+    Input(ID.CARD_ID_SEARCH_INPUT, "value"),
+)
+def update_credit_limit_bar(user_id, card_id):
+    if card_id and str(card_id).strip():
+        card_df = dm.df_cards[dm.df_cards["id"] == int(card_id)]
+        if card_df.empty:
+            return comp_factory.create_empty_figure()
+        user_id = int(card_df.iloc[0]["client_id"])
+    elif user_id and str(user_id).strip():
+        user_id = int(user_id)
+    else:
+        return comp_factory.create_empty_figure()
+
+    user_cards = dm.df_cards[dm.df_cards["client_id"] == user_id]
+    if user_cards.empty:
+        return comp_factory.create_empty_figure()
+
+    # Nach Kreditlimit sortieren (größte zuerst)
+    user_cards = user_cards.sort_values("credit_limit", ascending=False).reset_index(drop=True)
+    credit_limits = user_cards["credit_limit"].tolist()
+    card_ids = user_cards["id"].tolist()
+
+    # 9 Colors as max num of credit cards is 9
+    colors = [
+        "#36c36a",  # grün
+        "#5d9cf8",  # blau
+        "#f1b44c",  # gelb-orange
+        "#e74c3c",  # rot
+        "#8e44ad",  # lila
+        "#16a085",  # türkis
+        "#f06292",  # pink
+        "#f39c12",  # orange
+        "#7f8c8d",  # grau
+    ]
+
+    fig = go.Figure()
+    for i, (limit, card_id) in enumerate(zip(credit_limits, card_ids)):
+        fig.add_trace(go.Bar(
+            x=[limit],
+            y=["Credit Limit"],
+            name=f"Card {i + 1}",
+            orientation="h",
+            marker_color=colors[i % len(colors)],
+            marker_line_width=0,
+            hovertemplate=(
+                "💳 <b>Card:</b> %{customdata[0]}<br>"
+                "🆔 <b>ID:</b> %{customdata[1]}<br>"
+                "💰 <b>Limit:</b> $%{x:,.2f}<extra></extra>"
+            ),
+            text=f"${limit:,.2f}",
+            textposition="inside",
+            insidetextanchor="middle",
+            textfont=dict(size=14, color="white"),
+            offsetgroup=0,
+            customdata=[[i + 1, card_id]],
+        ))
+
+    fig.update_layout(
+        barmode="stack",
+        showlegend=False,
+        bargap=0,
+        margin=dict(l=0, r=0, t=0, b=0),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(
+            showticklabels=False,
+            visible=False,
+            range=[0, sum(credit_limits)]
+        ),
+        yaxis=dict(showticklabels=False, visible=False),
+    )
+
+    return fig
 
 
 # === Callback: Merchant Bar Chart (bottom) ===
