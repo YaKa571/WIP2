@@ -16,7 +16,7 @@ import components.factories.settings_components_factory as settings_comp_factory
 from backend.callbacks.settings_callbacks import *  # noqa: F401
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401
 from backend.callbacks.tabs.tab_buttons_callbacks import update_tabs  # noqa: F401
-#from backend.callbacks.tabs.tab_cluster_callbacks import update_cluster  # noqa: F401
+from backend.callbacks.tabs.tab_cluster_callbacks import update_cluster, set_cluster_tab # noqa: F401
 from backend.callbacks.tabs.tab_user_callbacks import (update_user_kpis, update_credit_limit,  # noqa: F401
                                                        update_merchant_bar_chart)  # noqa: F401
 from backend.callbacks.tabs.tab_home_callbacks import (store_selected_state, update_all_pies,  # noqa: F401
@@ -28,11 +28,28 @@ from components.rightcolumn.right_column import create_right_column
 from frontend.component_ids import ID
 
 
-def create_app():
+def create_app(suppress_callback_exceptions: bool = True):
+    """
+    Creates and configures a Dash application instance for the Financial Transactions Dashboard.
+
+    This function sets up the application with a specified layout, initializes necessary
+    data stores, and adds interface components such as tables, headers, columns, and tooltips.
+    It is designed to use Dash's `dbc.themes.BOOTSTRAP` stylesheet and an external
+    Bootstrap Icons stylesheet for styling.
+
+    Parameters:
+        suppress_callback_exceptions: bool
+            Indicates whether callback exceptions are suppressed. When set to `False`,
+            the Dash debugger will handle callback-related issues. Defaults to `True`.
+
+    Returns:
+        Dash
+            A Dash application instance configured for the Financial Transactions Dashboard.
+    """
     app = Dash(__name__, external_stylesheets=
     [dbc.themes.BOOTSTRAP, "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"],
                # If there are callback problems, set this False to use debugger
-               suppress_callback_exceptions=True)
+               suppress_callback_exceptions=suppress_callback_exceptions)
 
     app.title = "Financial Transactions Dashboard"
 
@@ -46,7 +63,8 @@ def create_app():
             dcc.Store(id=ID.ANIMATION_STATE_STORE.value),
             dcc.Store(id=ID.HOME_TAB_SELECTED_STATE_STORE, data=None),
             dcc.Store(id=ID.ACTIVE_TAB_STORE, data=ID.TAB_HOME),
-            dcc.Store(id=ID.MERCHANT_SELECTED_BUTTON_STORE, data="opt1"),
+            dcc.Store(id=ID.MERCHANT_SELECTED_BUTTON_STORE, data="all"),
+            dcc.Store(id=ID.CLUSTER_SELECTED_BUTTON_STORE, data={"main": "total_value", "age": "all_ages"}),
             html.Div(id="app-init-trigger", style={"display": "none"}),
             html.Div(id="layout-ready-signal", style={"display": "none"}),
 
