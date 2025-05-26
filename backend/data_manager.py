@@ -12,6 +12,7 @@ from backend.data_handler import optimize_data, clean_units, json_to_data_frame,
     get_mcc_description_by_merchant_id
 from backend.kpi_models import MerchantKPI, VisitKPI, UserKPI, PeakHourKPI
 from utils.benchmark import Benchmark
+from utils.utils import rounded_rect
 
 DATA_DIRECTORY = Path("assets/data/")
 
@@ -134,6 +135,8 @@ class DataManager:
         self._cache_expenditures_by_age: dict[str | None, dict[str, float]] = {}
         self._cache_expenditures_by_channel: dict[str | None, dict[str, float]] = {}
 
+        self.online_shape = list[list]
+
         self.start()  # <-- Initializing all data
         benchmark_data_manager.print_time()
 
@@ -200,6 +203,9 @@ class DataManager:
             df = self.df_transactions.copy()
             # Map merchant_state (e.g. "NY") to full name (e.g. "New York")
             df["state_name"] = df["merchant_state"].map(mapping)
+
+            # Null value -> Online
+            df["state_name"] = df["state_name"].fillna("ONLINE")
 
             # Write back to parquet
             df.to_parquet(
@@ -670,10 +676,13 @@ class DataManager:
         online_sum = df.loc[online_mask, "amount"].sum()
 
         # In-Store: only swipe transactions, optionally filtered by state
-        instore_mask = df["use_chip_norm"].str.startswith("swipe")
-        if state:
-            instore_mask &= (df["state_name"] == state)
-        instore_sum = df.loc[instore_mask, "amount"].sum()
+        if state == "ONLINE":
+            instore_sum = 0  # No In-store for Online Transactions
+        else:
+            instore_mask = df["use_chip_norm"].str.startswith("swipe")
+            if state:
+                instore_mask &= (df["state_name"] == state)
+            instore_sum = df.loc[instore_mask, "amount"].sum()
 
         result = {
             "ONLINE": online_sum,
@@ -840,6 +849,11 @@ class DataManager:
         self.sum_of_transactions = self.df_transactions["amount"].sum()
         self.avg_transaction_amount = self.sum_of_transactions / self.amount_of_transactions
         self._pre_cache_home_tab_data()
+        self.online_shape = rounded_rect(
+            l=-95, b=23, r=-85, t=28,
+            radius=0.7,
+            n_arc=8
+        )
 
         # Print summary
         # logger.log(f"ℹ️ Users: {self.units_users}", 2)
