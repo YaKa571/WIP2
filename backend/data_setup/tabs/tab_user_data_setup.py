@@ -11,8 +11,8 @@ TRANSACTION_COUNT_TITLE = "USER'S TOP MERCHANTS BY TRANSACTION COUNT"
 TOTAL_SPENDING_TITLE = "USER'S TOP MERCHANTS BY TOTAL SPENDING"
 HOVER_TEMPLATE_BASE = (
     "🏷️ <b>MCC:</b> %{customdata[0]}<br>"
-    "📝 <b>Description:</b> %{customdata[2]}<br>"
-    "🆔 <b>Merchant ID:</b> %{customdata[1]}<br>"
+    "📝 <b>DESCRIPTION:</b> %{customdata[2]}<br>"
+    "🆔 <b>MERCHANT ID:</b> %{customdata[1]}<br>"
 )
 
 
@@ -135,19 +135,19 @@ def configure_chart_parameters(agg, sort_by):
         column names, chart titles, and hover template formats.
     """
     if sort_by == SORT_BY_COUNT:
-        agg = agg.sort_values("tx_count", ascending=False)
+        agg.sort_values("tx_count", ascending=False)
         return {
             "x_col": "tx_count",
-            "x_title": "Transaction Count",
-            "hover_last_row": "💳 <b>Transactions:</b> %{y:,}<br>",
+            "x_title": "TRANSACTION COUNT",
+            "hover_last_row": "💳 <b>TRANSACTIONS:</b> %{y:,}<br>",
             "bar_title": TRANSACTION_COUNT_TITLE
         }
     else:
-        agg = agg.sort_values("total_sum", ascending=False)
+        agg.sort_values("total_sum", ascending=False)
         return {
             "x_col": "total_sum",
-            "x_title": "Total Amount",
-            "hover_last_row": "💰 <b>Sum:</b> $%{y:,.2f}<br>",
+            "x_title": "TOTAL AMOUNT",
+            "hover_last_row": "💰 <b>SUM:</b> $%{y:,.2f}<br>",
             "bar_title": TOTAL_SPENDING_TITLE
         }
 
@@ -177,6 +177,8 @@ def create_bar_chart_figure(agg, params, dark_mode):
         Figure: A Plotly figure object representing the bar chart.
     """
     hover_template = HOVER_TEMPLATE_BASE + params["hover_last_row"] + "<extra></extra>"
+    agg = agg.copy()
+    agg["mcc_desc"] = agg["mcc_desc"].astype(str).str.upper()
 
     return comp_factory.create_bar_chart(
         df=agg,
@@ -185,7 +187,7 @@ def create_bar_chart_figure(agg, params, dark_mode):
         title=params["bar_title"],
         custom_data=["mcc", "merchant_id", "mcc_desc"],
         hover_template=hover_template,
-        labels={params["x_col"]: params["x_title"], "merchant_id": "Merchant ID"},
+        labels={params["x_col"]: params["x_title"], "merchant_id": "MERCHANT ID"},
         bar_color=COLOR_BLUE_MAIN,
         showlegend=False,
         dark_mode=dark_mode

@@ -11,10 +11,10 @@ from dash import dash_table, html, dcc
 from plotly.graph_objs._figure import Figure
 from shapely.geometry import shape
 
+import components.constants as const
 from backend.data_manager import DataManager
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID, Icons
-import components.constants as const
 
 dm: DataManager = DataManager.get_instance()
 
@@ -116,12 +116,14 @@ def create_usa_map(color_scale: str = "Blues",
         A Dash Graph component representing the map.
     """
     state_counts = (
-        dm.df_transactions
+        dm.df_transactions.copy()
         .dropna(subset=["state_name"])
         .groupby("state_name", as_index=False)
         .size()
         .rename(columns={"size": "transaction_count"})
     )
+
+    state_counts["state_name_upper"] = state_counts["state_name"].str.upper()
 
     # Choropleth Mapbox
     fig = px.choropleth_map(
@@ -132,7 +134,13 @@ def create_usa_map(color_scale: str = "Blues",
         color="transaction_count",
         color_continuous_scale=color_scale,
         labels={"transaction_count": "Transactions"},
-        map_style=map_style
+        map_style=map_style,
+        custom_data=["state_name_upper"]
+    )
+
+    # Add hover template
+    fig.update_traces(
+        hovertemplate="<b>📍 STATE:</b> %{customdata[0]}<br><b>💳 TRANSACTIONS:</b> %{z:,}<extra></extra>"
     )
 
     # Text with state abbreviations
@@ -190,9 +198,9 @@ def create_tooltips():
         children=[
 
             dbc.Tooltip(children=[
-                "Open Settings",
-                html.Br(),
-                "Shortcut: S"
+                "OPEN SETTINGS",
+                html.Hr(),
+                "SHORTCUT: S"
             ],
                 target=ID.BUTTON_SETTINGS_MENU.value,
                 placement="bottom-start",
@@ -201,9 +209,9 @@ def create_tooltips():
                 id={"type": "tooltip", "id": "settings-button"},
             ),
             dbc.Tooltip(children=[
-                "Toggle Theme",
-                html.Br(),
-                "Shortcut: T"
+                "TOGGLE THEME",
+                html.Hr(),
+                "SHORTCUT: T"
             ],
                 target=ID.BUTTON_DARK_MODE_TOGGLE.value,
                 placement="bottom-end",

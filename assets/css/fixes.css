@@ -46,6 +46,7 @@
 /* Remove modebar background */
 .graph-card .js-plotly-plot .modebar-group {
     background-color: var(--kpi-card-body-bg) !important;
+    padding: 0 !important;
 }
 
 /* Remove gray area around buttons */

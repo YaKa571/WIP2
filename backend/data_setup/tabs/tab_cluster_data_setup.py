@@ -1,8 +1,10 @@
 import json
+
 import pandas as pd
-from dash import html
 import plotly.express as px
+from dash import html
 from sklearn.cluster import KMeans
+
 from backend.data_setup.tabs.tab_merchant_data_setup import get_my_transactions_mcc_users
 
 # mcc code
@@ -11,29 +13,29 @@ with open("assets/data/mcc_codes.json", "r", encoding="utf-8") as file:
 my_mcc = pd.DataFrame(list(data.items()), columns=["mcc", "merchant_group"])
 my_mcc["mcc"] = my_mcc["mcc"].astype(int)
 
-#-----------------prepare data file-----------------------
-my_data_file = get_my_transactions_mcc_users() # imported from tab_merchant_data_setup
+# -----------------prepare data file-----------------------
+my_data_file = get_my_transactions_mcc_users()  # imported from tab_merchant_data_setup
 # add age_group
 bins = [0, 25, 35, 45, 55, 65, 200]
 labels = ['<25', '26–35', '36–45', '46–55', '56–65', '65+']
 my_data_file['age_group'] = pd.cut(my_data_file['current_age'], bins=bins, labels=labels)
 
-#print(my_data_file.head())
-#print(my_data_file.dtypes)
+# print(my_data_file.head())
+# print(my_data_file.dtypes)
 
-#---------------------------------------------------------
+# ---------------------------------------------------------
 cluster_colors = {
-        "0": "#56B4E9",  # light blue
-        "1": "#D55E00",  # reddish brown
-        "2": "#009E73",  # teal green
-        "3": "#E69F00",  # orange
-        "4": "#0072B2",  # dark blue
-        "5": "#F0E442",  # yellow
-        "6": "#CC79A7",  # pink/magenta
-        "7": "#999999",  # grey
-        "8": "#ADFF2F",  # light green
-        "9": "#87CEEB"  # sky blue
-    }
+    "0": "#56B4E9",  # light blue
+    "1": "#D55E00",  # reddish brown
+    "2": "#009E73",  # teal green
+    "3": "#E69F00",  # orange
+    "4": "#0072B2",  # dark blue
+    "5": "#F0E442",  # yellow
+    "6": "#CC79A7",  # pink/magenta
+    "7": "#999999",  # grey
+    "8": "#ADFF2F",  # light green
+    "9": "#87CEEB"  # sky blue
+}
 
 
 def get_cluster_merchant_group_dropdown():
@@ -47,6 +49,7 @@ def get_cluster_merchant_group_dropdown():
     my_list = sorted(my_df['merchant_group'].unique().tolist())
     my_list.insert(0, 'All Merchant Groups')
     return my_list
+
 
 def prepare_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
     """
@@ -97,6 +100,7 @@ def prepare_cluster_data(df: pd.DataFrame, merchant_group) -> pd.DataFrame:
 
     return agg
 
+
 def make_cluster_plot(df_agg: pd.DataFrame, mode='total_value', age_group_mode='all'):
     """
         Create a scatter plot showing clusters based on transaction data.
@@ -125,7 +129,6 @@ def make_cluster_plot(df_agg: pd.DataFrame, mode='total_value', age_group_mode='
         category_orders={"age_group": ['<25', '26–35', '36–45', '46–55', '56–65', '65+']},
         labels={"age_group": " "}
     )
-
 
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 
@@ -209,7 +212,7 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
             return "slightly lower"
 
     descriptions = {}
-    means = {}         # Cluster ID -> (x_mean, y_mean)
+    means = {}  # Cluster ID -> (x_mean, y_mean)
 
     # first round, generate descriptions
     for cl in sorted(df[cluster_col].unique()):
@@ -241,13 +244,14 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
                 html.Div(
                     style={"display": "flex", "alignItems": "center", "marginBottom": "6px"},
                     children=[
-                        html.Div(style={"width": "20px", "height": "20px", "backgroundColor": color, "marginRight": "8px"}),
+                        html.Div(
+                            style={"width": "20px", "height": "20px", "backgroundColor": color, "marginRight": "8px"}),
                         html.Span(f"Cluster {cl}: {desc}")
                     ]
                 )
             )
         else:
-           # more detailed description, if description already exists
+            # more detailed description, if description already exists
             clusters_sorted = sorted(clusters_with_desc, key=lambda c: means[c][0])
             base_desc = desc
             for i, cl in enumerate(clusters_sorted):
@@ -255,13 +259,12 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
                 suffix = ""
                 if i > 0:
 
-                    prev_cl = clusters_sorted[i-1]
+                    prev_cl = clusters_sorted[i - 1]
                     prev_x, prev_y = means[prev_cl]
                     x_mean, y_mean = means[cl]
 
                     x_comp = compare_values(prev_x, x_mean)
                     y_comp = compare_values(prev_y, y_mean)
-
 
                     add_parts = []
                     if x_comp != "approximately equal":
@@ -278,8 +281,11 @@ def create_cluster_legend(mode: str, df: pd.DataFrame) -> html.Div:
                     html.Div(
                         style={"display": "flex", "alignItems": "center", "marginBottom": "6px"},
                         children=[
-                            html.Div(style={"width": "20px", "height": "20px", "backgroundColor": color, "marginRight": "8px"}),
+
+                            html.Div(style={"width": "20px", "height": "20px", "backgroundColor": color,
+                                            "marginRight": "8px"}),
                             html.Span(f"Cluster {cl}: {base_desc}{suffix}")
+
                         ]
                     )
                 )
@@ -324,6 +330,7 @@ def prepare_inc_vs_exp_cluster_data(df: pd.DataFrame, merchant_group) -> pd.Data
     agg['cluster_inc_vs_exp_str'] = agg['cluster_inc_vs_exp'].astype(str)
     return agg
 
+
 def make_inc_vs_exp_plot(df_agg: pd.DataFrame, age_group_mode='all'):
     """
         Create a scatter plot for clusters of income versus expenses data.
@@ -352,4 +359,3 @@ def make_inc_vs_exp_plot(df_agg: pd.DataFrame, age_group_mode='all'):
 
     fig.update_layout(showlegend=False)
     return fig
-

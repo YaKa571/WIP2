@@ -576,6 +576,9 @@ class DataManager:
             .to_dict()
         )
 
+        # Keys uppercased
+        gender_sums = {str(k).upper(): v for k, v in gender_sums.items()}
+
         # Cache & return
         self._cache_expenditures_by_gender[state] = gender_sums
         return gender_sums
@@ -673,8 +676,8 @@ class DataManager:
         instore_sum = df.loc[instore_mask, "amount"].sum()
 
         result = {
-            "Online": online_sum,
-            "In-Store": instore_sum
+            "ONLINE": online_sum,
+            "IN-STORE": instore_sum
         }
 
         # Cache & return
