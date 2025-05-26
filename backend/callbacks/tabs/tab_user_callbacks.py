@@ -128,6 +128,25 @@ def update_credit_limit(user_id, card_id):
     Input(ID.CARD_ID_SEARCH_INPUT, "value"),
 )
 def update_credit_limit_bar(user_id, card_id):
+    """
+    Updates the credit limit bar chart visualization for a user based on the provided
+    user ID or card ID. The function dynamically creates a horizontal stacked bar chart,
+    where each segment represents the credit limit associated with a specific credit card.
+    If no valid inputs are provided, or if the inputs do not correspond to any records,
+    an empty figure is generated and returned.
+
+    :param user_id: A string or integer representing the user identifier. If provided,
+        the function will use the user ID to fetch and process all cards belonging
+        to the given user.
+    :type user_id: str | int
+    :param card_id: A string or integer representing the card identifier. If provided,
+        the function will look up the corresponding user ID and fetch relevant
+        card details for that user.
+    :type card_id: str | int
+    :return: A Plotly figure object representing the credit limit bar chart for the user's
+        cards. If no data is found, an empty figure is returned.
+    :rtype: plotly.graph_objs._figure.Figure
+    """
     if card_id and str(card_id).strip():
         card_df = dm.df_cards[dm.df_cards["id"] == int(card_id)]
         if card_df.empty:
