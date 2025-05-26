@@ -78,5 +78,6 @@ def create_left_column() -> html.Div:
         children=[
 
             create_kpi_cards(),
-            create_map_card(),
+            create_map_card()
+
         ])
