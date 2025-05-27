@@ -33,6 +33,16 @@ with urllib.request.urlopen(
 ) as response:
     states_geo = json.load(response)
 
+online_polygon = {
+    "type": "Feature",
+    "properties": {"name": "ONLINE"},
+    "geometry": {
+        "type": "Polygon",
+        "coordinates": [dm.online_shape]
+    }
+}
+states_geo["features"].append(online_polygon)
+
 # Calculate centroids (lon, lat) and mapping full-name -> abbreviation
 state_centroids = {}
 full_to_abbr = {}
@@ -148,7 +158,8 @@ def create_usa_map(color_scale: str = "Blues",
         lat=[state_centroids[n][0] for n in state_counts["state_name"]],
         lon=[state_centroids[n][1] for n in state_counts["state_name"]],
         mode="text",
-        text=[full_to_abbr[n] for n in state_counts["state_name"]],
+        text=[full_to_abbr.get(n, "ONLINE") if n != "ONLINE" else "ONLINE"
+              for n in state_counts["state_name"]],
         textfont=dict(size=12, color="black"),
         showlegend=False,
         hoverinfo="skip"

@@ -7,3 +7,4 @@ plotly~=6.1.1
 shapely~=2.1.0
 pyarrow~=20.0.0
 scikit-learn~=1.7.0rc1
+numpy~=2.2.5

@@ -2,7 +2,7 @@
 Project: Financial Transactions Dashboard
 Start Date: April 14, 2025
 Status: 🔄 In Progress
-Overall Progress: ~25%
+Overall Progress: ~70%
 
 ## 1. FOUNDATIONS [COMPLETED]
 Priority: HIGH | Effort: 7d | Status: ✅
@@ -17,31 +17,31 @@ Priority: HIGH | Effort: 7d | Status: 🔄
 - Set up Navigation Structure
 
 ### 2.2 Fraud Page
-Priority: HIGH | Effort: 7d | Status: ⭕
+Priority: HIGH | Effort: 7d | Status: 🔄
 - Display Suspicious Transactions
 - Implement Filtering Options
 - Important thing no. 3
 
 ### 2.3 Cluster Page
-Priority: HIGH | Effort: 7d | Status: ⭕
+Priority: HIGH | Effort: 7d | Status: 🔄
 - Cluster Visualization
 - Interactive Filter Functions
 - Detailed Cluster View
 
 ### 2.4 User Page
-Priority: HIGH | Effort: 7d | Status: ⭕
+Priority: HIGH | Effort: 7d | Status: 🔄
 - Important thing no. 1
 - Important thing no. 2
 - Important thing no. 3
 
 ### 2.5 Merchant Page
-Priority: MEDIUM | Effort: 7d | Status: ⭕
+Priority: MEDIUM | Effort: 7d | Status: 🔄
 - Important thing no. 1
 - Important thing no. 2
 - Important thing no. 3
 
 ## 3. CLEAN-UP & OPTIMIZATIONS [OPEN]
-Priority: IRRELEVANT | Effort: 3d | Status: ⭕
+Priority: IRRELEVANT | Effort: 3d | Status: 🔄
 - Clean up code
 - Optimize
 
@@ -56,3 +56,8 @@ Home Top 10 Users -> Open Users Tab with specific user data
 Fraud suspicious Users Liset -> Open Users Tab with specific user data
 Cluster -> Open Users Tab with specific user data
 Cluster: State selection via map -> Clustering for specific state
+
+Input 26.05.2025:
+- Fix colors for each merchant across the whole application --> easier to identify
+- Somehow put online transactions on the map --> extra button? --> Done ✅
+
