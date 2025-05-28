@@ -36,7 +36,7 @@ def _create_heading() -> html.Div:
         children=[
 
             html.P(),  # Dummy element
-            html.H4("Fraud", id=ID.FRAUD_TAB_HEADING),
+            html.H4("Fraud", id=ID.FRAUD_TAB_HEADING, className="green-heading"),
             comp_factory.create_info_icon(ID.FRAUD_TAB_INFO_ICON),
             dbc.Tooltip(
                 target=ID.FRAUD_TAB_INFO_ICON,
