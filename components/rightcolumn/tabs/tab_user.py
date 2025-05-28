@@ -59,7 +59,7 @@ def _create_heading() -> html.Div:
         children=[
 
             html.P(),  # Dummy element for spacing
-            html.H4("User", id=ID.USER_TAB_HEADING),
+            html.H4("User", id=ID.USER_TAB_HEADING, className="green-heading"),
             comp_factory.create_info_icon(ID.USER_TAB_INFO_ICON),
             dbc.Tooltip(
                 target=ID.USER_TAB_INFO_ICON,
@@ -97,7 +97,7 @@ def _create_search_bars() -> html.Div:
         ])
 
 
-def _create_single_search_bar(input_id: str, placeholder: str) -> dcc.Input:
+def _create_single_search_bar(input_id: str, placeholder: str, start_value: int = None) -> dcc.Input:
     """
     Creates a single search bar with a magnifier icon.
 
@@ -115,7 +115,9 @@ def _create_single_search_bar(input_id: str, placeholder: str) -> dcc.Input:
     """
     return dcc.Input(
         id=input_id,
+        value=start_value,
         type="number",
+        autoComplete="off",
         placeholder=placeholder,
         className="search-bar-input no-spinner"
     )
@@ -268,7 +270,27 @@ def _create_bottom_merchant_diagram() -> html.Div:
                                     "minHeight": 0,
                                     "minWidth": 0
                                 }
-                            )
+                            ),
+
+                            comp_factory.create_info_icon(
+                                icon_id=ID.USER_TAB_BAR_INFO_ICON,
+                                style={
+                                    "position": "absolute",
+                                    "top": "111px",
+                                    "left": "16px",
+                                    "zIndex": 100
+                                }),
+
+                            dbc.Tooltip(
+                                target=ID.USER_TAB_BAR_INFO_ICON,
+                                is_open=False,
+                                placement="right",
+                                children=[
+                                    "Click any bar to explore",
+                                    html.Br(),
+                                    "further information"
+                                ])
+
                         ])
                 ])
         ])
