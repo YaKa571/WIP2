@@ -127,6 +127,7 @@ class DataManager:
 
         self.mcc_dict = json_to_dict("mcc_codes.json")
 
+        # Home Tab
         self._cache_most_valuable_merchant: dict[str, pd.DataFrame] = {}
         self._cache_visits_by_merchant: dict[Optional[str], pd.DataFrame] = {}
         self._cache_spending_by_user: dict[Optional[str], pd.DataFrame] = {}
@@ -135,6 +136,11 @@ class DataManager:
         self._cache_expenditures_by_age: dict[str | None, dict[str, float]] = {}
         self._cache_expenditures_by_channel: dict[str | None, dict[str, float]] = {}
 
+        # User Tab
+        self._cache_user_transactions: dict[int, pd.DataFrame] = {}  # user_id -> DataFrame
+        self._cache_user_merchant_agg: dict[int, pd.DataFrame] = {}  # user_id -> Aggregated DataFrame
+
+        # Map
         self.online_shape = list[list]
 
         self.start()  # <-- Initializing all data
@@ -749,6 +755,64 @@ class DataManager:
 
         bm_pre_cache_full.print_time(level=3)
 
+    def cache_user_transactions(self):
+        """
+        Caches user transactions by grouping them by client ID.
+
+        This method processes the transactions DataFrame (df_transactions) by grouping
+        transactions based on the "client_id" column. For each unique client ID, it
+        creates a copy of the corresponding subset of the DataFrame and stores it in
+        a dictionary. The dictionary is stored as an internal attribute
+        (_cache_user_transactions), where the keys represent client IDs and the values
+        are the dataframes containing transactions for each user.
+
+        Raises:
+            KeyError: If the DataFrame does not contain a "client_id" column.
+            AttributeError: If df_transactions is not a valid DataFrame object.
+        """
+        grouped = self.df_transactions.groupby("client_id")
+        self._cache_user_transactions = {int(user_id): df.copy() for user_id, df in grouped}
+
+    def cache_user_merchant_agg(self):
+        """
+        Caches aggregated user merchant data.
+
+        This method processes user transaction data to calculate and cache aggregated
+        information by merchant and MCC (Merchant Category Code) for each user. It
+        groups the data by merchant ID and MCC, computes the total transaction count
+        and sum of amounts for each group, adds merchant category descriptions, and
+        stores the results in a dictionary.
+
+        Attributes:
+            _cache_user_merchant_agg (dict[int, DataFrame]): A dictionary mapping user
+            IDs (int) to their corresponding aggregated transaction data (DataFrame).
+            Each DataFrame contains the merchant ID, MCC, transaction count, total
+            transaction amount, and merchant category description for the user.
+
+        Raises:
+            KeyError: Raised if certain keys or values are not present in the input
+            data or dictionaries during processing.
+
+        """
+        self._cache_user_merchant_agg = {}
+        for user_id, df_tx in self._cache_user_transactions.items():
+            agg = df_tx.groupby(["merchant_id", "mcc"]).agg(
+                tx_count=("amount", "size"),
+                total_sum=("amount", "sum")
+            ).reset_index()
+            agg["mcc_desc"] = agg["mcc"].apply(
+                lambda m: get_mcc_description_by_merchant_id(self.mcc_dict, int(m))
+            )
+            self._cache_user_merchant_agg[int(user_id)] = agg
+
+    def _pre_cache_user_tab_data(self) -> None:
+        bm_pre_cache_full = Benchmark("Pre-caching User-Tab data")
+        logger.log("🔄 Pre-caching User-Tab data...", indent_level=2)
+
+        self.cache_user_transactions()
+        self.cache_user_merchant_agg()
+        bm_pre_cache_full.print_time(level=3)
+
     # TODO: @SonPhạm: Tab User - User/Card KPIs
     def get_user_kpis(self, user_id: int) -> dict:
         """
@@ -809,6 +873,45 @@ class DataManager:
                 return float(user_cards["credit_limit"].sum())
         return None
 
+    def get_user_transactions(self, user_id: int) -> pd.DataFrame:
+        """
+        Retrieves the transactions associated with a specific user from the cache.
+
+        This method accesses a cached record of user transactions and retrieves the
+        transactions for the given user ID. If no transactions are found for the
+        specified user ID, it returns an empty DataFrame.
+
+        Args:
+            user_id: The unique identifier of the user whose transactions are
+                to be retrieved.
+
+        Returns:
+            A DataFrame containing the transactions associated with the given
+            user ID. If no transactions exist for the user, an empty DataFrame
+            is returned.
+        """
+        return self._cache_user_transactions.get(int(user_id), pd.DataFrame())
+
+    def get_user_merchant_agg(self, user_id: int) -> pd.DataFrame:
+        """
+        Retrieve aggregated merchant data for a specific user from cache.
+
+        This method fetches pre-aggregated merchant-level data for a given user from
+        the cache. If no data is found for the user in the cache, it returns an empty
+        pandas DataFrame. This function is useful for retrieving cached user-specific
+        data quickly.
+
+        Args:
+            user_id (int): The ID of the user whose merchant aggregated data is to
+            be retrieved.
+
+        Returns:
+            pd.DataFrame: A pandas DataFrame containing the cached aggregated merchant
+            data for the specified user. Returns an empty DataFrame if no data is
+            cached for the given user.
+        """
+        return self._cache_user_merchant_agg.get(int(user_id), pd.DataFrame())
+
     def start(self):
         """
         Starts the process of loading, cleaning, and processing transaction data. The method primarily deals
@@ -849,6 +952,7 @@ class DataManager:
         self.sum_of_transactions = self.df_transactions["amount"].sum()
         self.avg_transaction_amount = self.sum_of_transactions / self.amount_of_transactions
         self._pre_cache_home_tab_data()
+        self._pre_cache_user_tab_data()
         self.online_shape = rounded_rect(
             l=-95, b=23, r=-85, t=28,
             radius=0.7,
