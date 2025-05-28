@@ -19,7 +19,8 @@ from backend.callbacks.tabs.tab_buttons_callbacks import update_tabs  # noqa: F4
 from backend.callbacks.tabs.tab_cluster_callbacks import update_cluster, set_cluster_tab  # noqa: F401
 from backend.callbacks.tabs.tab_user_callbacks import (update_user_kpis, update_credit_limit,  # noqa: F401
                                                        update_merchant_bar_chart,
-                                                       bridge_user_to_merchant_tab)  # noqa: F401
+                                                       bridge_user_to_merchant_tab,
+                                                       toggle_inputs, update_tab_heading)  # noqa: F401
 from backend.callbacks.tabs.tab_home_callbacks import (store_selected_state, update_all_pies,  # noqa: F401
                                                        update_bar_chart, bridge_home_to_user_tab)  # noqa: F401
 from backend.callbacks.tabs.tab_merchant_callbacks import update_merchant, set_merchant_tab  # noqa: F401
