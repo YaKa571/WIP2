@@ -1,11 +1,13 @@
 import pandas as pd
 import plotly.graph_objects as go
 from dash import Input, Output, callback
+from dash.exceptions import PreventUpdate
 
 import components.factories.component_factory as comp_factory
+from backend.callbacks.tabs.tab_merchant_callbacks import ID_TO_MERCHANT_TAB
 from backend.data_manager import DataManager
-from backend.data_setup.tabs.tab_user_data_setup import aggregate_transaction_data, get_user_transactions, \
-    get_valid_user_id, configure_chart_parameters, create_bar_chart_figure
+from backend.data_setup.tabs.tab_user_data_setup import get_valid_user_id, configure_chart_parameters, \
+    create_bar_chart_figure
 from components.rightcolumn.tabs.tab_user import create_kpi_value_text
 from frontend.component_ids import ID
 
@@ -225,7 +227,7 @@ def update_credit_limit_bar(user_id, card_id):
     Input(ID.USER_ID_SEARCH_INPUT, "value"),
     Input(ID.CARD_ID_SEARCH_INPUT, "value"),
     Input(ID.USER_MERCHANT_SORT_DROPDOWN, "value"),
-    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks"),
+    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks")
 )
 def update_merchant_bar_chart(user_id, card_id, sort_by, n_clicks_dark):
     """
@@ -257,12 +259,12 @@ def update_merchant_bar_chart(user_id, card_id, sort_by, n_clicks_dark):
         return comp_factory.create_empty_figure()
 
     # Get transaction data
-    df_tx = get_user_transactions(valid_user_id)
+    df_tx = dm.get_user_transactions(valid_user_id)
     if df_tx.empty:
         return comp_factory.create_empty_figure()
 
     # Process transaction data
-    agg_data = aggregate_transaction_data(df_tx)
+    agg_data = dm.get_user_merchant_agg(valid_user_id)
     if agg_data.empty:
         return comp_factory.create_empty_figure()
 
@@ -270,3 +272,20 @@ def update_merchant_bar_chart(user_id, card_id, sort_by, n_clicks_dark):
     chart_params = configure_chart_parameters(agg_data, sort_by)
 
     return create_bar_chart_figure(agg_data, chart_params, dark_mode)
+
+
+@callback(
+    Output(ID.MERCHANT_INPUT_MERCHANT_ID, "value", allow_duplicate=True),
+    # Merchant Tab -> Input -> Search by Merchant ID
+    Output(ID.ACTIVE_TAB_STORE, "data", allow_duplicate=True),  # Active Tab Store
+    Output(ID.USER_MERCHANT_BAR_CHART, "clickData"),  # User Graph Bar Chart
+    Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),  # Merchant Button Store
+    Input(ID.USER_MERCHANT_BAR_CHART, "clickData"),
+    prevent_initial_call=True
+)
+def bridge_user_to_merchant_tab(click_data):
+    if click_data is None:
+        return PreventUpdate
+
+    return click_data["points"][0]["x"], ID.TAB_MERCHANT, None, ID_TO_MERCHANT_TAB.get(
+        ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT).value
