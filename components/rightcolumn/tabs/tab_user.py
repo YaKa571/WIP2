@@ -114,7 +114,7 @@ def _create_single_search_bar(input_id: str, placeholder: str, start_value: int 
     return dcc.Input(
         id=input_id,
         value=start_value,
-        type="search",
+        type="number",
         autoComplete="off",
         placeholder=placeholder,
         className="search-bar-input no-spinner"
