@@ -123,7 +123,7 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
     channel_label_colors = {"ONLINE": COLOR_ONLINE, "IN-STORE": COLOR_INSTORE}
     channel_leader, leader_color, diff = get_leader_info(channel_sums, channel_label_colors)
     center_text_channel = build_center_text(channel_leader, leader_color, diff, color_green, tie_label="TIE",
-                                            font_size=17, value_font_size=12)
+                                            font_size=15, value_font_size=12)
 
     hover_template_channel = (
         "🛒‍ <b>CHANNEL:</b> %{label}<br>"
