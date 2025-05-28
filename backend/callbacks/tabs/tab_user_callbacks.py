@@ -298,3 +298,12 @@ def disable_card_if_user(user_value):
     if user_value and str(user_value).strip():
         return True
     return False
+
+@callback(
+    Output(ID.USER_ID_SEARCH_INPUT, "disabled"),
+    Input(ID.CARD_ID_SEARCH_INPUT, "value"),
+)
+def disable_user_if_card(card_value):
+    if card_value and str(card_value).strip():
+        return True
+    return False
