@@ -12,6 +12,7 @@ from components.rightcolumn.tabs.tab_user import create_kpi_value_text
 from frontend.component_ids import ID
 
 dm = DataManager.get_instance()
+TEXT_EMPTY_KPI = "Waiting for input..."
 
 
 # === Callback: KPI-Boxes (Transactions, Sum, Average, Cards) ===
@@ -45,7 +46,7 @@ def update_user_kpis(user_id, card_id):
     """
     # Show default text if nothing entered
     if not (user_id and str(user_id).strip()) and not (card_id and str(card_id).strip()):
-        return ("...",) * 4
+        return (create_kpi_value_text(TEXT_EMPTY_KPI, True),) * 4
 
     try:
         if card_id and str(card_id).strip():
@@ -107,7 +108,7 @@ def update_credit_limit(user_id, card_id):
         be caught, and an "INVALID" message will be returned to the user interface.
     """
     if not (user_id and str(user_id).strip()) and not (card_id and str(card_id).strip()):
-        return "..."
+        return create_kpi_value_text(TEXT_EMPTY_KPI, True)
 
     try:
         if card_id and str(card_id).strip():
@@ -313,48 +314,47 @@ def bridge_user_to_merchant_tab(click_data):
     return click_data["points"][0]["x"], ID.TAB_MERCHANT, None, ID_TO_MERCHANT_TAB.get(
         ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT).value
 
+
 @callback(
     Output(ID.CARD_ID_SEARCH_INPUT, "disabled"),
-    Input(ID.USER_ID_SEARCH_INPUT, "value"),
-)
-def disable_card_if_user(user_value):
-    """
-    Disables the card search input field if a valid user value is provided.
-
-    This callback function monitors the value of the user ID search input and determines
-    whether the card ID search input should be disabled based on the presence of a valid,
-    non-empty user value.
-
-    Args:
-        user_value: The value provided in the user ID search input field.
-
-    Returns:
-        A boolean indicating whether the card ID search input should be disabled.
-        Returns True to disable the field, or False otherwise.
-    """
-    if user_value and str(user_value).strip():
-        return True
-    return False
-
-@callback(
+    Output(ID.CARD_ID_SEARCH_INPUT, "className"),
     Output(ID.USER_ID_SEARCH_INPUT, "disabled"),
+    Output(ID.USER_ID_SEARCH_INPUT, "className"),
+    Input(ID.USER_ID_SEARCH_INPUT, "value"),
     Input(ID.CARD_ID_SEARCH_INPUT, "value"),
 )
-def disable_user_if_card(card_value):
+def toggle_inputs(user_value, card_value):
     """
-    Handles the enabling and disabling of the user ID search input field based on the
-    presence of a value in the card ID search input field.
+    Toggles the disabled state and CSS class of search input fields based on the input values.
 
-    Args:
-        card_value: Input value from the card ID search input field.
+    This function determines whether the "disabled" attribute and CSS class of the input
+    fields for user ID and card ID should be updated based on whether values have been
+    input into the respective fields. When one field is filled, the other becomes disabled
+    and gets an updated CSS class, indicating its disabled state.
+
+    Parameters:
+        user_value (str | None): The current value of the user ID search input.
+        card_value (str | None): The current value of the card ID search input.
 
     Returns:
-        bool: True if the `card_value` is provided and non-empty,
-            otherwise False.
+        tuple[bool, str, bool, str]: A tuple containing four values:
+            1. Boolean indicating whether the card ID search input should be disabled.
+            2. String representing the updated CSS class for the card ID search input.
+            3. Boolean indicating whether the user ID search input should be disabled.
+            4. String representing the updated CSS class for the user ID search input.
     """
-    if card_value and str(card_value).strip():
-        return True
-    return False
+    base_class = "search-bar-input no-spinner"
+
+    user_filled = bool(user_value and str(user_value).strip())
+    card_filled = bool(card_value and str(card_value).strip())
+
+    card_disabled = user_filled
+    user_disabled = card_filled
+
+    card_class = f"{base_class} is-disabled" if card_disabled else base_class
+    user_class = f"{base_class} is-disabled" if user_disabled else base_class
+    return card_disabled, card_class, user_disabled, user_class
+
 
 @callback(
     Output(ID.USER_TAB_HEADING, "children"),
