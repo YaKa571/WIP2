@@ -157,29 +157,29 @@ def create_all_merchant_kpis():
 
     kpi_data = [
         {
-            "icon": IconID.REPEAT,
-            "title": "Most frequently used merchant group",
+            "icon": IconID.CHART_PIPE,
+            "title": "Top Merchant Group (by Transactions)",
             "value_1": group_1,
             "value_2": f"{count_1} Transactions",
             "value_id": ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP
         },
         {
-            "icon": IconID.USER_PAYING,
-            "title": "Merchant group with the highest total transfers",
+            "icon": IconID.MONEY_DOLLAR,
+            "title": "Top Merchant Group (by Value)",
             "value_1": group_2,
             "value_2": f"${value_2:,.2f}",
             "value_id": ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP
         },
         {
-            "icon": IconID.REPEAT,
-            "title": "User with most transactions",
+            "icon": IconID.TRANSACTION_BY_CARD,
+            "title": "Top User (by Transactions)",
             "value_1": f"ID {user_3}",
             "value_2": f"{count_3} Transactions",
             "value_id": ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_ALL
         },
         {
-            "icon": IconID.USER_PAYING,
-            "title": "User with highest Expenditure",
+            "icon": IconID.MONEY_WINGS,
+            "title": "Top User (by Expenditure)",
             "value_1": f"ID {user_4}",
             "value_2": f"${value_4:,.2f}",
             "value_id": ID.MERCHANT_KPI_USER_HIGHEST_VALUE_ALL
@@ -214,29 +214,29 @@ def create_merchant_group_kpi(merchant_group):
 
     kpi_data = [
         {
-            "icon": IconID.REPEAT,
-            "title": "Most frequently used merchant in merchant group",
+            "icon": IconID.CHART_PIPE,
+            "title": "Top Merchant (by Transactions)",
             "value_1": f"ID {merchant_1}",
             "value_2": f"{count_1} Transactions",
             "value_id": ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP
         },
         {
-            "icon": IconID.USER_PAYING,
-            "title": "Merchant in group with the highest total transfers",
+            "icon": IconID.MONEY_DOLLAR,
+            "title": "Top Merchant (by Value)",
             "value_1": f"ID {merchant_2}",
             "value_2": f"${value_2:,.2f}",
             "value_id": ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP
         },
         {
-            "icon": IconID.REPEAT,
-            "title": "User with most transactions in merchant group",
+            "icon": IconID.TRANSACTION_BY_CARD,
+            "title": "Top User (by Transactions)",
             "value_1": f"ID {user_3}",
             "value_2": f"{count_3} Transactions",
             "value_id": ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP
         },
         {
-            "icon": IconID.USER_PAYING,
-            "title": "User with highest Expenditure in merchant group",
+            "icon": IconID.MONEY_WINGS,
+            "title": "Top User (by Expenditure)",
             "value_1": f"ID {user_4}",
             "value_2": f"${value_4:,.2f}",
             "value_id": ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP
@@ -266,29 +266,29 @@ def create_individual_merchant_kpi(merchant: int):
 
     kpi_data = [
         {
-            "icon": IconID.REPEAT,
+            "icon": IconID.CHART_PIPE,
             "title": "Transactions",
             "value_1": " ",
             "value_2": f"{count_1} Transactions",
             "value_id": ID.MERCHANT_KPI_MERCHANT_TRANSACTIONS
         },
         {
-            "icon": IconID.USER_PAYING,
+            "icon": IconID.MONEY_DOLLAR,
             "title": "Value",
             "value_1": " ",
             "value_2": f"${value_2:,.2f}",
             "value_id": ID.MERCHANT_KPI_MERCHANT_VALUE
         },
         {
-            "icon": IconID.REPEAT,
-            "title": "User with most transactions at merchant",
+            "icon": IconID.TRANSACTION_BY_CARD,
+            "title": "Top User (by Transactions)",
             "value_1": f"ID {user_3}",
             "value_2": f"{count_3} Transactions",
             "value_id": ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS
         },
         {
-            "icon": IconID.USER_PAYING,
-            "title": "User with highest Expenditure at merchant",
+            "icon": IconID.MONEY_WINGS,
+            "title": "Top User (by Expenditure)",
             "value_1": f"ID {user_4}",
             "value_2": f"${value_4:,.2f}",
             "value_id": ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE
@@ -348,6 +348,7 @@ def get_merchant_id_input() -> dcc.Input:
         id=ID.MERCHANT_INPUT_MERCHANT_ID,
         className="search-bar-input no-spinner",
         type="number",
+        autoComplete="off",
         value="50783",
         placeholder="Enter Merchant ID...",
         style={"width": "100%"}
@@ -402,7 +403,7 @@ def create_merchant_group_distribution_tree_map(dark_mode: bool = False) -> px.t
 # === CALLBACKS ===
 
 @callback(
-    Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data"),
+    Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
     Input(ID.MERCHANT_BTN_ALL_MERCHANTS, "n_clicks"),
     Input(ID.MERCHANT_BTN_MERCHANT_GROUP, "n_clicks"),
     Input(ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT, "n_clicks"),
