@@ -12,7 +12,7 @@ dm: DataManager = DataManager.get_instance()
 
 def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
                      hover_template: str = None, showlegend: bool = True,
-                     dark_mode: bool = False) -> go.Figure:
+                     dark_mode: bool = False, center_text: str = None) -> go.Figure:
     """
     Create a pie graph visualization.
 
@@ -46,21 +46,28 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
     labels = list(data.keys())
     values = list(data.values())
 
+    # Create pull values for single slices
+    if len(values) > 2:
+        pull = [0.1 if v == max(values) else 0 for v in values]
+    else:
+        pull = [0 for _ in values]
+
     fig = go.Figure(
         data=[
             go.Pie(
                 name="",
                 labels=labels,
                 values=values,
-                hole=0.42,
+                hole=0.5,
                 marker=dict(colors=colors),
                 textinfo=textinfo,
                 textfont=dict(color=textcolor),
-                hovertemplate=hover_template
+                hovertemplate=hover_template,
+                pull=pull,
             )
         ],
         layout=go.Layout(
-            margin=dict(l=0, r=0, t=0, b=0),
+            margin=dict(l=1, r=1, t=1, b=1),
             showlegend=showlegend
         )
     )
@@ -76,6 +83,17 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
             font=dict(size=12, color="#0d6efd", weight="bold")
         )
     )
+
+    fig.add_annotation(
+        text=center_text,
+        showarrow=False,
+        font=dict(size=15, color=textcolor, family="Open Sans"),
+        x=0.5, y=0.5, xref="paper", yref="paper",
+        xanchor="center", yanchor="middle"
+    )
+
+    fig.update_traces(textposition="inside",
+                      texttemplate="<b>%{label}</b><br><span style='font-size:16px'>%{percent}</span>")
 
     return fig
 
@@ -247,13 +265,19 @@ def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = Fa
         "<extra></extra>"
     )
 
+    title = (
+        "MERCHANTS IN ALL STATES" if state is None
+        else "ONLINE MERCHANTS" if state == "ONLINE"
+        else f"MERCHANTS IN {state.upper()}"
+    )
+
     return comp_factory.create_bar_chart(
         df=df,
         x="merchant_id",
         y="merchant_sum",
         custom_data=["mcc_desc", "merchant_id"],
         hover_template=hover_template,
-        title=f"TOP 10 MOST VALUABLE MERCHANTS IN {state.upper() if state else 'ALL STATES'}",
+        title=f"TOP 10 MOST VALUABLE {title}",
         labels={"merchant_id": "MERCHANT ID", "merchant_sum": "SUM"},
         bar_color=COLOR_BLUE_MAIN,
         dark_mode=dark_mode
@@ -290,13 +314,19 @@ def get_peak_hour_bar_chart(state: str = None, dark_mode: bool = False):
         "<extra></extra>"
     )
 
+    title = (
+        "IN ALL STATES" if state is None
+        else "ONLINE" if state == "ONLINE"
+        else f"IN {state.upper()}"
+    )
+
     return comp_factory.create_bar_chart(
         df=df,
         x="hour_range",
         y="transaction_count",
         custom_data=["hour_range", "transaction_count"],
         hover_template=hover_template,
-        title=f"MOST ACTIVE HOURS IN {state.upper() if state else 'ALL STATES'}",
+        title=f"MOST ACTIVE HOURS {title}",
         labels={"hour_range": "HOUR RANGE", "transaction_count": "TRANSACTIONS"},
         bar_color=COLOR_BLUE_MAIN,
         dark_mode=dark_mode
@@ -331,6 +361,12 @@ def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = False):
         "<extra></extra>"
     )
 
+    title = (
+        "IN ALL STATES" if state is None
+        else "ONLINE" if state == "ONLINE"
+        else f"IN {state.upper()}"
+    )
+
     return comp_factory.create_bar_chart(
         df=df,
         x="client_id",
@@ -339,7 +375,7 @@ def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = False):
         color_discrete_map=color_discrete_map,
         custom_data=["gender", "current_age", "spending"],
         hover_template=hover_template,
-        title=f"TOP 10 MOST SPENDING USERS IN {state.upper() if state else 'ALL STATES'}",
+        title=f"TOP 10 MOST SPENDING USERS {title}",
         labels={"client_id": "USER ID", "spending": "TOTAL SPENDING", "gender": "GENDER", "current_age": "AGE"},
         showlegend=True,
         dark_mode=dark_mode
@@ -375,14 +411,153 @@ def get_most_visited_merchants_bar_chart(state: str = None, dark_mode: bool = Fa
         "<extra></extra>"
     )
 
+    title = (
+        "MERCHANTS IN ALL STATES" if state is None
+        else "ONLINE MERCHANTS" if state == "ONLINE"
+        else f"MERCHANTS IN {state.upper()}"
+    )
+
     return comp_factory.create_bar_chart(
         df=df,
         x="merchant_id",
         y="visits",
         custom_data=["mcc", "mcc_desc", "visits"],
         hover_template=hover_template,
-        title=f"TOP 10 MOST VISITED MERCHANTS IN {state.upper() if state else 'ALL STATES'}",
+        title=f"TOP 10 MOST VISITED {title}",
         labels={"merchant_id": "MERCHANT ID", "visits": "VISITS"},
         bar_color=COLOR_BLUE_MAIN,
         dark_mode=dark_mode
     )
+
+
+def build_center_text(leader, leader_color, diff, color_green, tie_label="TIE", value=None, percent=None, font_size=20,
+                      value_font_size=16):
+    """
+    Constructs and returns a formatted HTML string for a leader and associated values.
+
+    This function generates an HTML string based on the leader type, associated values,
+    and additional formatting options. If a leader is not tied, it includes the leader's
+    name with specific styling. Optionally, it can include the leader's value and percentage
+    contribution. If a leader is tied, a specific label will be displayed instead.
+
+    Parameters:
+    leader: str
+        The name of the leader to display.
+    leader_color: str
+        The color code for the leader's name styling.
+    diff: float or None
+        The difference value to display for the leader. Can be None if not applicable.
+    color_green: str
+        The color code utilized for highlighting the difference or value.
+    tie_label: str, default "TIE"
+        The label to display when there is a tie. Defaults to "TIE".
+    value: float or None, optional
+        The numeric value associated with the leader. Can be None if not applicable.
+    percent: float or None, optional
+        The percentage value associated with the leader. Can be None if not applicable.
+    font_size: int, default 20
+        The font size for displaying the leader's name.
+    value_font_size: int, default 16
+        The font size for displaying numeric values or percentages.
+
+    Returns:
+    str
+        A formatted HTML string representing the styled leader, values, and optional tie label.
+
+    Raises:
+    None
+    """
+    if leader != tie_label:
+        value_str = f"<span style='color:{color_green}; font-size:{value_font_size}px; font-weight:bold'>"
+        if value is not None:
+            value_str += f"${value:,.0f}"
+        if percent is not None:
+            value_str += f" ({percent:.1f}%)"
+        value_str += "</span>"
+        diff_str = f"<span style='color:{color_green}; font-size:{value_font_size}px; font-weight:bold'>+${diff:,.0f}</span>" if diff is not None else ""
+        return (
+            f"<span style='color:{leader_color}; font-size:{font_size}px; font-weight:bold'>{leader}</span><br>"
+            f"{value_str if value is not None else diff_str}"
+        )
+    else:
+        return f"<span style='color:#aaa; font-size:20px; font-weight:bold'>{tie_label}</span>"
+
+
+def get_leader_info(values: dict, label_colors: dict, tie_label="TIE"):
+    """
+    Determines the leading category based on provided values and calculates the difference
+    between the leading category and the next highest. It also returns the label color
+    corresponding to the leading category or a tie label if values are tied.
+
+    Arguments:
+        values (dict): A dictionary where keys represent category labels and values
+            represent corresponding numerical values.
+        label_colors (dict): A dictionary mapping category labels to their respective
+            color codes.
+        tie_label (str, optional): The label to be used when a tie occurs or no values
+            are present. Defaults to "TIE".
+
+    Returns:
+        tuple: A tuple containing:
+            - str: The label of the leading category, or the tie label.
+            - str: The color code corresponding to the leading category, or the default
+              tie color ("#aaa").
+            - int: The difference between the leading value and the second highest
+              value, or 0 in case of a tie.
+    """
+    # Only return tie if both present and values equal
+    items = list(values.items())
+    if not items or all(v == 0 for _, v in items):
+        # No data at all
+        return tie_label, "#aaa", 0
+
+    if len(items) == 1:
+        # Only one category present: it's the winner!
+        label, val = items[0]
+        return label, label_colors.get(label, "#000"), val  # diff = val, since other is 0
+
+    # Two categories
+    (label1, val1), (label2, val2) = items[0], items[1]
+    if val1 == val2:
+        return tie_label, "#aaa", 0
+    if val1 > val2:
+        return label1, label_colors.get(label1, "#000"), val1 - val2
+    else:
+        return label2, label_colors.get(label2, "#000"), val2 - val1
+
+
+def get_age_leader_info(age_sums: dict, age_colors: list):
+    """
+    Gets the leader information based on the age group distribution. The leader information includes the
+    age group with the highest value, its associated color, the value, the percentage contribution to the
+    total, and the sum of all age group values.
+
+    Attributes:
+        age_sums (dict): Dictionary mapping age groups to their respective numeric values.
+        age_colors (list): List of colors corresponding to each age group by index.
+
+    Args:
+        age_sums (dict): A dictionary where keys are age group labels and values are their associated numbers.
+        age_colors (list): A list of string color codes corresponding to the age groups.
+
+    Returns:
+        tuple: A tuple containing the following elements:
+            - top_group (str): The age group with the highest value.
+            - leader_color (str): The color associated with the leading age group.
+            - top_value (int): The value of the leading age group.
+            - percent (float): The percentage contribution of the leading age group to the total.
+            - total (int): The total of all values in age_sums.
+    """
+    if not age_sums:
+        return "-", "#aaa", 0, 0, 0
+    age_labels = list(age_sums.keys())
+    age_values = list(age_sums.values())
+    top_group, top_value = max(age_sums.items(), key=lambda x: x[1])
+    try:
+        leader_idx = age_labels.index(top_group)
+        leader_color = age_colors[leader_idx]
+    except ValueError:
+        leader_color = "#a29bfe"  # Fallback
+    total = sum(age_values)
+    percent = (top_value / total) * 100 if total > 0 else 0
+    return top_group, leader_color, top_value, percent, total
