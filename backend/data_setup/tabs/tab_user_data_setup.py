@@ -50,46 +50,6 @@ def get_valid_user_id(user_id, card_id):
         return None
 
 
-def get_user_transactions(user_id):
-    """
-    Fetches transactions associated with a specific user from the transactions dataset.
-
-    Parameters:
-    user_id: int
-        The identifier of the user whose transactions are to be retrieved.
-
-    Returns:
-    pandas.DataFrame
-        A DataFrame containing all transactions linked to the specified user.
-    """
-    return dm.df_transactions[dm.df_transactions["client_id"] == user_id]
-
-
-def aggregate_transaction_data(df_tx):
-    """
-    Aggregates transaction data by grouping based on merchant ID and MCC, and computes
-    the transaction count and total amount sum. Adds an MCC description for each group.
-
-    Parameters:
-    df_tx : pandas.DataFrame
-        A DataFrame containing transaction data with at least the following columns:
-        'merchant_id', 'mcc', and 'amount'.
-
-    Returns:
-    pandas.DataFrame
-        A new DataFrame containing aggregated transaction data with the following columns:
-        'merchant_id', 'mcc', 'tx_count', 'total_sum', and 'mcc_desc'.
-
-    """
-    agg = df_tx.groupby(["merchant_id", "mcc"]).agg(
-        tx_count=("amount", "size"),
-        total_sum=("amount", "sum")
-    ).reset_index()
-
-    agg["mcc_desc"] = agg["mcc"].apply(get_mcc_description)
-    return agg
-
-
 def get_mcc_description(mcc):
     """
     Fetches the description for a given MCC (Merchant Category Code).
