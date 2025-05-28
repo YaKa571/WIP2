@@ -97,30 +97,34 @@ def _create_search_bars() -> html.Div:
         ])
 
 
-def _create_single_search_bar(input_id: str, placeholder: str, start_value: int = None) -> dcc.Input:
+def _create_single_search_bar(input_id: str, placeholder: str, start_value: int = None) -> html.Div:
     """
-    Creates a single search bar with a magnifier icon.
+    Creates a single search bar component.
 
-    Parameters
-    ----------
-    input_id : str
-        The ID to assign to the input element.
-    placeholder : str
-        The placeholder text to display in the input field.
+    This function generates a search bar component consisting of an input field and a
+    clear button, styled and embedded within a `html.Div`. The input field allows users
+    to enter search queries, while the clear button can be used to clear the input.
 
-    Returns
-    -------
-    html.Div
-        A Div element containing a search icon and an input field.
+    Args:
+        input_id (str): The unique identifier for the search bar input field.
+        placeholder (str): The placeholder text to display in the input field when no value is entered.
+        start_value (int, optional): The initial value of the input field, if any. Defaults to None.
+
+    Returns:
+        html.Div: A Dash HTML component containing the search bar and clear button.
     """
-    return dcc.Input(
-        id=input_id,
-        value=start_value,
-        type="search",
-        autoComplete="off",
-        placeholder=placeholder,
-        className="search-bar-input no-spinner"
-    )
+    return html.Div([
+        dcc.Input(
+            id=input_id,
+            value=start_value,
+            type="search",
+            autoComplete="off",
+            placeholder=placeholder,
+            className="custom-search-input search-bar-input no-spinner"
+        ),
+        html.Button('✖', id=f"{input_id}-clear-btn", n_clicks=0, className="clear-btn"),
+    ], style={"position": "relative", "display": "inline-block"})
+
 
 
 def _create_top_kpis() -> html.Div:

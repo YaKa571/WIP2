@@ -307,3 +307,19 @@ def disable_user_if_card(card_value):
     if card_value and str(card_value).strip():
         return True
     return False
+
+@callback(
+    Output(ID.USER_ID_SEARCH_INPUT, "value"),
+    Input(f"{ID.USER_ID_SEARCH_INPUT}-clear-btn", "n_clicks"),
+    prevent_initial_call=True
+)
+def clear_user_id_input(n_clicks):
+    return ""
+
+@callback(
+    Output(ID.CARD_ID_SEARCH_INPUT, "value"),
+    Input(f"{ID.CARD_ID_SEARCH_INPUT}-clear-btn", "n_clicks"),
+    prevent_initial_call=True
+)
+def clear_card_id_input(n_clicks):
+    return ""
