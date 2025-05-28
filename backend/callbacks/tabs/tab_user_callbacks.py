@@ -289,3 +289,12 @@ def bridge_user_to_merchant_tab(click_data):
 
     return click_data["points"][0]["x"], ID.TAB_MERCHANT, None, ID_TO_MERCHANT_TAB.get(
         ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT).value
+
+@callback(
+    Output(ID.CARD_ID_SEARCH_INPUT, "disabled"),
+    Input(ID.USER_ID_SEARCH_INPUT, "value"),
+)
+def disable_card_if_user(user_value):
+    if user_value and str(user_value).strip():
+        return True
+    return False
