@@ -90,6 +90,7 @@ class ID(str, Enum):
     USER_MERCHANT_BAR_CHART = "user-merchant-bar-chart"
     USER_MERCHANT_SORT_DROPDOWN = "merchant-sort-dropdown"
     USER_CREDIT_LIMIT_BAR = "user-credit-limit-bar"
+    USER_TAB_BAR_INFO_ICON = "user-tab-bar-info-icon"
 
     # Merchant Tab
     MERCHANT_HEADING = "merchant-heading"
