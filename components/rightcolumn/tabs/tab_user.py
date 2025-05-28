@@ -99,19 +99,17 @@ def _create_search_bars() -> html.Div:
 
 def _create_single_search_bar(input_id: str, placeholder: str, start_value: int = None) -> dcc.Input:
     """
-    Creates a single search bar with a magnifier icon.
+    Creates a single search bar input element with the specified id, placeholder text, and optional start value. This
+    component is constructed as a Dash Core Components Input element with the "search" type, designed for user input
+    related to search functionality.
 
-    Parameters
-    ----------
-    input_id : str
-        The ID to assign to the input element.
-    placeholder : str
-        The placeholder text to display in the input field.
+    Args:
+        input_id: A unique identifier for the search bar input element.
+        placeholder: A textual hint for the user indicating the intended input value.
+        start_value: An optional initial value to populate the search bar.
 
-    Returns
-    -------
-    html.Div
-        A Div element containing a search icon and an input field.
+    Returns:
+        A Dash Core Components Input element configured as a search bar.
     """
     return dcc.Input(
         id=input_id,

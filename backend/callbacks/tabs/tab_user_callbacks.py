@@ -284,6 +284,29 @@ def update_merchant_bar_chart(user_id, card_id, sort_by, n_clicks_dark):
     prevent_initial_call=True
 )
 def bridge_user_to_merchant_tab(click_data):
+    """
+    This callback function bridges interactions from the user bar chart to the merchant tab. It updates the merchant input
+    field, activates the merchant tab, and resets or sets related data stores. When a user clicks on a bar in the
+    user-merchant bar chart, this function extracts the relevant data from the click event and updates the specified
+    components accordingly.
+
+    Args:
+        click_data: The information about the user's interaction with the
+            user-merchant bar chart. Contains details about the specific bar
+            that was clicked.
+
+    Returns:
+        tuple: A tuple with four elements. The first element is the selected
+            Merchant ID to populate the Merchant Input field. The second
+            element is the active tab identifier for navigating to the
+            Merchant tab. The third element resets the clickData for the bar
+            chart. The fourth element updates the merchant selection button
+            store data.
+
+    Raises:
+        PreventUpdate: This will be raised if the `click_data` is `None`,
+            meaning no click event occurred.
+    """
     if click_data is None:
         return PreventUpdate
 
@@ -295,6 +318,20 @@ def bridge_user_to_merchant_tab(click_data):
     Input(ID.USER_ID_SEARCH_INPUT, "value"),
 )
 def disable_card_if_user(user_value):
+    """
+    Disables the card search input field if a valid user value is provided.
+
+    This callback function monitors the value of the user ID search input and determines
+    whether the card ID search input should be disabled based on the presence of a valid,
+    non-empty user value.
+
+    Args:
+        user_value: The value provided in the user ID search input field.
+
+    Returns:
+        A boolean indicating whether the card ID search input should be disabled.
+        Returns True to disable the field, or False otherwise.
+    """
     if user_value and str(user_value).strip():
         return True
     return False
@@ -304,7 +341,30 @@ def disable_card_if_user(user_value):
     Input(ID.CARD_ID_SEARCH_INPUT, "value"),
 )
 def disable_user_if_card(card_value):
+    """
+    Handles the enabling and disabling of the user ID search input field based on the
+    presence of a value in the card ID search input field.
+
+    Args:
+        card_value: Input value from the card ID search input field.
+
+    Returns:
+        bool: True if the `card_value` is provided and non-empty,
+            otherwise False.
+    """
     if card_value and str(card_value).strip():
         return True
     return False
 
+@callback(
+    Output(ID.USER_TAB_HEADING, "children"),
+    Input(ID.USER_ID_SEARCH_INPUT, "value"),
+    Input(ID.CARD_ID_SEARCH_INPUT, "value"),
+)
+def update_tab_heading(user_id, card_id):
+    if card_id and str(card_id).strip():
+        return f"Card-ID: {card_id}"
+    elif user_id and str(user_id).strip():
+        return f"User-ID: {user_id}"
+    else:
+        return "User"
