@@ -21,21 +21,3 @@
     background-color: transparent;
 }
 
-.custom-search-input {
-    padding-right: 28px;
-}
-.clear-btn {
-    position: absolute;
-    right: 4px;
-    top: 3px;
-    border: none;
-    background: transparent;
-    font-size: 1.2em;
-    cursor: pointer;
-    outline: none;
-    z-index: 10;
-    color: #888;
-}
-.clear-btn:hover {
-    color: #d00;
-}
