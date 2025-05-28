@@ -322,3 +322,8 @@ li span:nth-of-type(2) {
     background-color: var(--searchbar-bg);
     padding-left: 0.5rem !important;
 }
+
+.is-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
