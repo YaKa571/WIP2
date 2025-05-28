@@ -18,6 +18,8 @@ class IconID(str, Enum):
     LEGEND = "legend"
     CLUSTER = "cluster"
     CREDITCARD = "creditcard"
+    MONEY_WINGS = "money-wings"
+    TRANSACTION_BY_CARD = "transaction-by-card"
 
 
 class Icons:

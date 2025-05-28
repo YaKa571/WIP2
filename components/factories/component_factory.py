@@ -1,6 +1,7 @@
 import json
 import time
 import urllib.request
+from typing import Union
 
 import dash_bootstrap_components as dbc
 import pandas as pd
@@ -275,33 +276,42 @@ def create_info_icon(icon_id: ID, style: dict = None) -> html.I:
 
 def create_circle_diagram_card(
         icon_id: IconID,
-        title: str,
+        title: Union[str, list],
         graph_id: str,
         figure: Figure = None,
         config: dict = None
 ) -> dbc.Card:
     """
-    Creates a card component that contains a circular diagram graph with a header.
-
-    This function constructs a Dash Bootstrap Card component to display a circular
-    diagram graph. It includes a customizable icon and title in the header, and
-    renders a Dash Core Component (dcc.Graph) in the card body. A user can specify
-    the graph data, its configuration, and other parameters through the function
-    arguments.
+    Creates a Dash Bootstrap Components card element containing a circle diagram graph.
+    This function generates a card layout with a header displaying an icon and title,
+    and a body containing a graph. The graph's figure and configuration can be customized.
 
     Args:
-        icon_id (IconID): The ID of the icon to be displayed in the card header.
-        title (str): The title for the card header.
-        graph_id (str): The unique identifier for the graph component.
-        figure (Figure, optional): The figure object containing data for the
-            circular diagram. Defaults to an empty Figure instance.
-        config (dict, optional): Configuration dictionary for the graph. If not
-            provided, a default configuration (PIE_CONFIG) will be used.
+        icon_id (IconID): ID of the icon to be displayed in the card header.
+        title (str): Title of the card. If it contains " by ", the text following this
+            phrase will be placed on a separate line.
+        graph_id (str): ID to assign to the graph for interactivity and identification
+            within the Dash application.
+        figure (Figure, optional): A Plotly Figure object to be used as the graph's
+            data and layout. Defaults to None, in which case an empty Figure object
+            is used.
+        config (dict, optional): Configuration options for the graph. If not provided,
+            defaults to a predefined CIRCLE_DIAGRAM_CONFIG setting.
 
     Returns:
-        dbc.Card: A Dash Bootstrap card component containing the circular diagram
-            graph with the specified header and configuration.
+        dbc.Card: A Dash Bootstrap Components card element containing the specified
+        icon, title, and circle diagram graph.
     """
+
+    if isinstance(title, list):
+        title_children = []
+        for idx, part in enumerate(title):
+            title_children.append(part)
+            if idx < len(title) - 1:
+                title_children.append(html.Br())
+    else:
+        title_children = [title]
+
     return dbc.Card(
         className="graph-card",
         children=[
@@ -310,7 +320,7 @@ def create_circle_diagram_card(
                 children=[
 
                     create_icon(icon_id, cls="icon icon-small"),
-                    html.P(children=title, className="graph-card-title")
+                    html.P(children=title_children, className="graph-card-title")
 
                 ]),
 
@@ -323,7 +333,7 @@ def create_circle_diagram_card(
                         id=graph_id,
                         responsive=True,
                         config=config or CIRCLE_DIAGRAM_CONFIG,
-                        style={"height": "100%"}
+                        style={"height": "100%", "width": "100%"},
                     )
 
                 ])

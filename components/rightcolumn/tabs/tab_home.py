@@ -8,6 +8,7 @@ from frontend.icon_manager import IconID
 
 dm: DataManager = DataManager.get_instance()
 
+# Constants for configuration
 MODEBAR_CONFIG = dict(
     displayModeBar=True,
     displaylogo=False
@@ -80,7 +81,7 @@ def _create_heading() -> html.Div:
 
                 ]),
 
-            html.H4("All States", id=ID.HOME_TAB_STATE_HEADING),
+            html.H4("All States", id=ID.HOME_TAB_STATE_HEADING, className="green-heading"),
             comp_factory.create_info_icon(ID.HOME_TAB_INFO_ICON),
             dbc.Tooltip(
                 target=ID.HOME_TAB_INFO_ICON,
@@ -169,21 +170,21 @@ def _create_middle_circle_diagrams() -> html.Div:
             # Pie Chart Expenditures by Gender
             comp_factory.create_circle_diagram_card(
                 icon_id=IconID.GENDERS,
-                title="Expenditures by Gender",
+                title=["Expenditures by", "Gender"],
                 graph_id=ID.HOME_GRAPH_EXPENDITURES_BY_GENDER,
             ),
 
             # Pie Chart Expenditures by Channel
             comp_factory.create_circle_diagram_card(
                 icon_id=IconID.CART,
-                title="Expenditures by Channel",
+                title=["Expenditures by", "Channel"],
                 graph_id=ID.HOME_GRAPH_EXPENDITURES_BY_CHANNEL,
             ),
 
             # Pie Chart Expenditures by Age
             comp_factory.create_circle_diagram_card(
                 icon_id=IconID.CAKE,
-                title="Expenditures by Age",
+                title=["Expenditures by", "Age"],
                 graph_id=ID.HOME_GRAPH_EXPENDITURES_BY_AGE,
             )
 

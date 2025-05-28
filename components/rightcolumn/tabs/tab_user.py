@@ -59,7 +59,7 @@ def _create_heading() -> html.Div:
         children=[
 
             html.P(),  # Dummy element for spacing
-            html.H4("User", id=ID.USER_TAB_HEADING),
+            html.H4("User", id=ID.USER_TAB_HEADING, className="green-heading"),
             comp_factory.create_info_icon(ID.USER_TAB_INFO_ICON),
             dbc.Tooltip(
                 target=ID.USER_TAB_INFO_ICON,
@@ -97,25 +97,25 @@ def _create_search_bars() -> html.Div:
         ])
 
 
-def _create_single_search_bar(input_id: str, placeholder: str) -> dcc.Input:
+def _create_single_search_bar(input_id: str, placeholder: str, start_value: int = None) -> dcc.Input:
     """
-    Creates a single search bar with a magnifier icon.
+    Creates a single search bar input element with the specified id, placeholder text, and optional start value. This
+    component is constructed as a Dash Core Components Input element with the "search" type, designed for user input
+    related to search functionality.
 
-    Parameters
-    ----------
-    input_id : str
-        The ID to assign to the input element.
-    placeholder : str
-        The placeholder text to display in the input field.
+    Args:
+        input_id: A unique identifier for the search bar input element.
+        placeholder: A textual hint for the user indicating the intended input value.
+        start_value: An optional initial value to populate the search bar.
 
-    Returns
-    -------
-    html.Div
-        A Div element containing a search icon and an input field.
+    Returns:
+        A Dash Core Components Input element configured as a search bar.
     """
     return dcc.Input(
         id=input_id,
+        value=start_value,
         type="number",
+        autoComplete="off",
         placeholder=placeholder,
         className="search-bar-input no-spinner"
     )
@@ -268,7 +268,27 @@ def _create_bottom_merchant_diagram() -> html.Div:
                                     "minHeight": 0,
                                     "minWidth": 0
                                 }
-                            )
+                            ),
+
+                            comp_factory.create_info_icon(
+                                icon_id=ID.USER_TAB_BAR_INFO_ICON,
+                                style={
+                                    "position": "absolute",
+                                    "top": "111px",
+                                    "left": "16px",
+                                    "zIndex": 100
+                                }),
+
+                            dbc.Tooltip(
+                                target=ID.USER_TAB_BAR_INFO_ICON,
+                                is_open=False,
+                                placement="right",
+                                children=[
+                                    "Click any bar to explore",
+                                    html.Br(),
+                                    "further information"
+                                ])
+
                         ])
                 ])
         ])
