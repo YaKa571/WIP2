@@ -362,6 +362,24 @@ def disable_user_if_card(card_value):
     Input(ID.CARD_ID_SEARCH_INPUT, "value"),
 )
 def update_tab_heading(user_id, card_id):
+    """
+    Updates the tab heading dynamically based on user or card IDs.
+
+    This callback function modifies the content of a user tab heading
+    based on the provided `user_id` or `card_id` values. It determines
+    which identifier is present and returns a corresponding label.
+    If both identifiers are empty or invalid, it defaults to a generic
+    "User" label.
+
+    Args:
+        user_id: The ID of the user to be displayed in the tab heading.
+        card_id: The ID of the card to be displayed in the tab heading.
+
+    Returns:
+        str: A formatted string representing the tab heading that uses
+        the provided user or card ID. Defaults to "User" if neither
+        identifier is valid.
+    """
     if card_id and str(card_id).strip():
         return f"Card-ID: {card_id}"
     elif user_id and str(user_id).strip():
