@@ -7,6 +7,7 @@ html, body, #react-entry-point, .dash-application {
     margin: 0;
     padding: 0;
     min-width: 1124px;
+    font-family: "Open Sans", sans-serif;
 }
 
 /* ==========================================================================
@@ -69,6 +70,10 @@ h1, h2, h3, h4, h5, h6, p, label, div {
 /* Cluster Tab Legend second Row Text */
 li span:nth-of-type(2) {
     color: var(--text-main) !important;
+}
+
+.green-heading {
+    color: var(--kpi-number-value);
 }
 
 /* ==========================================================================
