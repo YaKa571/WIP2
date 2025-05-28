@@ -1,11 +1,14 @@
 from dash import callback, Output, Input, ctx, no_update, State
 from dash.exceptions import PreventUpdate
 
+from backend.callbacks.tabs.tab_merchant_callbacks import ID_TO_MERCHANT_TAB
 from backend.data_manager import DataManager
 from backend.data_setup.tabs.tab_home_data_setup import get_most_valuable_merchant_bar_chart, \
     get_most_visited_merchants_bar_chart, get_spending_by_user_bar_chart, get_peak_hour_bar_chart, create_pie_graph, \
     get_most_valuable_merchant_details, get_most_visited_merchant_details, get_top_spending_user_details, \
-    get_peak_hour_details
+    get_peak_hour_details, build_center_text, get_leader_info, get_age_leader_info
+from components.constants import COLOR_BLUE_MAIN, COLOR_FEMALE_PINK, GREEN_DARK, GREEN_LIGHT, COLOR_ONLINE, \
+    COLOR_INSTORE, AGE_GROUP_COLORS
 from components.rightcolumn.tabs.tab_home import BAR_CHART_OPTIONS
 from frontend.component_ids import ID
 
@@ -88,46 +91,20 @@ def store_selected_state(clickData, n_clicks):
     prevent_initial_call=True
 )
 def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
-    """
-    Updates multiple pie chart figures, heading text, KPI details, and the class name of a toggle button
-    based on the user's interactions and selected state. Handles dark mode toggling and state selection
-    to update visual components and textual details dynamically based on the application's data.
-
-    Args:
-        n_clicks_toggle (int | None): Number of times the "Toggle All States" button has been clicked.
-        n_clicks_dark (int | None): Number of times the dark mode toggle button has been clicked.
-        selected_state (str | None): The state currently selected in the application, or None if in all-state mode.
-
-    Returns:
-        tuple: A tuple containing updated properties for the application interface:
-            - Figure for expenditures by gender.
-            - Figure for expenditures by channel.
-            - Figure for expenditures by age.
-            - Heading text displaying the current state being analyzed.
-            - Most valuable merchant as a KPI detail.
-            - Most visited merchant as a KPI detail.
-            - Top spending user as a KPI detail.
-            - Peak hour as a KPI detail.
-            - Updated class name for the "Toggle All States" button.
-    """
-    # Get the context
+    # Context, State, Dark Mode
     trigger = ctx.triggered_id
-
-    # Determine the current state
-    if trigger == ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES:
-        state = None
-    else:
-        state = selected_state
-
-    # Determine dark mode
+    state = None if trigger == ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES else selected_state
     dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
+    color_green = GREEN_DARK if dark_mode else GREEN_LIGHT
 
-    # Aggregate data (cached getters)
+    # Gender
     gender_sums = dm.get_expenditures_by_gender(state=state).copy()
-    channel_sums = dm.get_expenditures_by_channel(state=state)
-    age_sums = dm.get_expenditures_by_age(state=state)
-
-    # Build figures
+    gender_label_colors = {"MALE": COLOR_BLUE_MAIN, "FEMALE": COLOR_FEMALE_PINK}
+    labels_gender = list(gender_sums.keys())
+    colors_gender = [gender_label_colors.get(label, "#cccccc") for label in labels_gender]
+    gender_leader, leader_color, diff = get_leader_info(gender_sums, gender_label_colors)
+    center_text_gender = build_center_text(gender_leader, leader_color, diff, color_green,
+                                           font_size=17, value_font_size=12)
 
     hover_template_gender = (
         "🧑‍🤝‍🧑 <b>GENDER:</b> %{label}<br>"
@@ -135,8 +112,18 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
         "💰 <b>SUM:</b> $%{value:,.2f}"
     )
 
-    fig_gender = create_pie_graph(data=gender_sums, dark_mode=dark_mode, showlegend=False,
-                                  hover_template=hover_template_gender)
+    fig_gender = create_pie_graph(
+        data=gender_sums, dark_mode=dark_mode, showlegend=False,
+        hover_template=hover_template_gender, center_text=center_text_gender,
+        colors=colors_gender
+    )
+
+    # Channel
+    channel_sums = dm.get_expenditures_by_channel(state=state)
+    channel_label_colors = {"ONLINE": COLOR_ONLINE, "IN-STORE": COLOR_INSTORE}
+    channel_leader, leader_color, diff = get_leader_info(channel_sums, channel_label_colors)
+    center_text_channel = build_center_text(channel_leader, leader_color, diff, color_green, tie_label="TIE",
+                                            font_size=17, value_font_size=12)
 
     hover_template_channel = (
         "🛒‍ <b>CHANNEL:</b> %{label}<br>"
@@ -144,8 +131,18 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
         "💰 <b>SUM:</b> $%{value:,.2f}"
     )
 
-    fig_channel = create_pie_graph(data=channel_sums, dark_mode=dark_mode, showlegend=False,
-                                   colors=["#FFCD00", "#81C784"], hover_template=hover_template_channel)
+    fig_channel = create_pie_graph(
+        data=channel_sums, dark_mode=dark_mode, showlegend=False,
+        colors=[COLOR_ONLINE, COLOR_INSTORE], hover_template=hover_template_channel,
+        center_text=center_text_channel
+    )
+
+    # Age
+    age_sums = dm.get_expenditures_by_age(state=state)
+    top_group, color_leader, top_value, percent, total = get_age_leader_info(age_sums, AGE_GROUP_COLORS)
+    center_text_age = build_center_text(top_group, color_leader, None, color_green, tie_label="NO DATA",
+                                        value=top_value, percent=None,
+                                        font_size=17, value_font_size=12)
 
     hover_template_age = (
         "🎂 <b>AGE:</b> %{label}<br>"
@@ -153,49 +150,49 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
         "💰 <b>SUM:</b> $%{value:,.2f}"
     )
 
-    fig_age = create_pie_graph(data=age_sums, dark_mode=dark_mode, showlegend=False,
-                               textinfo="label", hover_template=hover_template_age)
+    fig_age = create_pie_graph(
+        data=age_sums, dark_mode=dark_mode, showlegend=False,
+        textinfo="label", hover_template=hover_template_age,
+        center_text=center_text_age, colors=AGE_GROUP_COLORS
+    )
 
-    # Heading and KPI details
-    heading = "All States" if state is None else f"State: {state}"
+    # Heading & KPIs & Buttons
+    heading = (
+        "All States" if state is None
+        else "ONLINE" if state == "ONLINE"
+        else f"State: {state}"
+    )
     kpi1 = get_most_valuable_merchant_details(state=state)
     kpi2 = get_most_visited_merchant_details(state=state)
     kpi3 = get_top_spending_user_details(state=state)
     kpi4 = get_peak_hour_details(state=state)
-
-    # Only show the button when a state is selected
     base_cls = "settings-button-text"
     button_cls = base_cls if state is not None else f"{base_cls} hidden"
 
     return (
-        fig_gender,
-        fig_channel,
-        fig_age,
-        heading,
-        kpi1,
-        kpi2,
-        kpi3,
-        kpi4,
-        button_cls
+        fig_gender, fig_channel, fig_age, heading, kpi1, kpi2, kpi3, kpi4, button_cls
     )
 
 
 @callback(
-    Output(ID.USER_ID_SEARCH_INPUT, "value"),
-    Output(ID.ACTIVE_TAB_STORE, "data"),
-    Output(ID.HOME_GRAPH_BAR_CHART, "clickData"),
+    Output(ID.USER_ID_SEARCH_INPUT, "value"),  # User Tab -> Input -> Search by User ID
+    Output(ID.MERCHANT_INPUT_MERCHANT_ID, "value", allow_duplicate=True),
+    # Merchant Tab -> Input -> Search by Merchant ID
+    Output(ID.ACTIVE_TAB_STORE, "data", allow_duplicate=True),  # Active Tab Store
+    Output(ID.HOME_GRAPH_BAR_CHART, "clickData"),  # Home Graph Bar Chart
+    Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),  # Merchant Button Store
     Input(ID.HOME_GRAPH_BAR_CHART, "clickData"),
     State(ID.HOME_TAB_BAR_CHART_DROPDOWN, "value"),
     prevent_initial_call=True
 )
-def bridge_home_to_user_tab(clickData, chart_option):
+def bridge_home_to_user_tab(click_data, chart_option):
     """
     Updates the user input and active tab based on interactions with the bar chart
     in the home tab. This callback bridges data between the home tab and
     the user tab for smoother navigation and display updates.
 
     Parameters:
-        clickData: dict
+        click_data: dict
             The data from the click event on the bar chart in the home tab.
             It contains details about the clicked bar such as x and y coordinates.
         chart_option: str
@@ -212,13 +209,18 @@ def bridge_home_to_user_tab(clickData, chart_option):
             Raised when no click event data is available, interrupting updates
             to prevent unnecessary computations and state changes.
     """
-    if clickData is None:
+    if click_data is None:
         raise PreventUpdate
 
     # Top Spending User -> User Tab
     if chart_option == BAR_CHART_OPTIONS[2]["value"]:
-        return clickData["points"][0]["x"], ID.TAB_USER, None
+        return click_data["points"][0]["x"], no_update, ID.TAB_USER, None, no_update
+
+    # Most Valuable / Visited Merchant --> Merchant Tab
+    elif chart_option == BAR_CHART_OPTIONS[0]["value"] or chart_option == BAR_CHART_OPTIONS[1]["value"]:
+        return no_update, click_data["points"][0]["x"], ID.TAB_MERCHANT, None, ID_TO_MERCHANT_TAB.get(
+            ID.MERCHANT_BTN_INDIVIDUAL_MERCHANT).value
 
     # TODO: Add other chart options here if needed
 
-    return no_update, no_update, no_update
+    return no_update, no_update, no_update, no_update, no_update
