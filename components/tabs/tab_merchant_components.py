@@ -9,7 +9,7 @@ dm: DataManager = DataManager.get_instance()
 merchant_data = dm.merchant_tab_data
 
 
-def create_merchant_group_line_chart(merchant_group, dark_mode: bool = False):
+def create_merchant_group_line_chart(merchant_group, dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
     Creates a line chart for a merchant group, displaying:
     - The number of transactions per day (left Y-axis)
@@ -103,7 +103,7 @@ def create_merchant_group_line_chart(merchant_group, dark_mode: bool = False):
     return fig
 
 
-def create_individual_merchant_line_chart(merchant, dark_mode: bool = False):
+def create_individual_merchant_line_chart(merchant, dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
     Creates a line chart for a specific merchant, displaying:
     - The number of transactions per day (left Y-axis)

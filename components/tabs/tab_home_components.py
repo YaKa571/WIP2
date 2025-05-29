@@ -14,7 +14,7 @@ home_data = dm.home_tab_data
 
 def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
                      hover_template: str = None, showlegend: bool = True,
-                     dark_mode: bool = False, center_text: str = None) -> go.Figure:
+                     dark_mode: bool = const.DEFAULT_DARK_MODE, center_text: str = None) -> go.Figure:
     """
     Create a pie graph visualization.
 
@@ -245,7 +245,7 @@ def get_peak_hour_details(state: str = None) -> list:
     return [one, two]
 
 
-def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = False):
+def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
     Generates a bar chart to visualize the top 10 most valuable merchants based on their total
     transaction values for a given state or all states.
@@ -298,7 +298,7 @@ def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = Fa
     )
 
 
-def get_peak_hour_bar_chart(state: str = None, dark_mode: bool = False):
+def get_peak_hour_bar_chart(state: str = None, dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
     Generates a bar chart depicting the most active transaction hours.
 
@@ -347,7 +347,7 @@ def get_peak_hour_bar_chart(state: str = None, dark_mode: bool = False):
     )
 
 
-def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = False):
+def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
     Generate a bar chart visualizing the top 10 most spending users. Users can be filtered by state, and the chart
     supports dark mode styling.
@@ -396,7 +396,7 @@ def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = False):
     )
 
 
-def get_most_visited_merchants_bar_chart(state: str = None, dark_mode: bool = False):
+def get_most_visited_merchants_bar_chart(state: str = None, dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
     Generates a bar chart visualization for the top 10 most visited merchants. The chart
     displays merchant IDs on the x-axis and the number of visits on the y-axis, with

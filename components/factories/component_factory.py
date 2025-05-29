@@ -394,7 +394,7 @@ def create_bar_chart(
         bar_color: str = None,
         margin: dict = None,
         showlegend: bool = False,
-        dark_mode: bool = False,
+        dark_mode: bool = const.DEFAULT_DARK_MODE,
 ) -> go.Figure:
     """
     Creates a bar chart visualization using Plotly.

@@ -109,7 +109,7 @@ def create_general_setting_toggle_tooltips() -> html.Div:
 
 ## ICON BUTTONS ##
 
-def create_icon_button(icon: str, id: ID, extra_cls: str = None) -> dbc.Button:
+def create_icon_button(icon: str, id: ID, extra_cls: str = None, n_clicks: int = 0) -> dbc.Button:
     """
     Creates a square-shaped icon button with customizable icon, ID, and extra CSS
     classes. The button is styled using Bootstrap and includes an icon specified
@@ -133,7 +133,7 @@ def create_icon_button(icon: str, id: ID, extra_cls: str = None) -> dbc.Button:
         html.I(className="bi " + icon),
         id=id,
         className="square-button" + (" " + extra_cls if extra_cls else ""),
-        n_clicks=0
+        n_clicks=n_clicks
     )
 
 

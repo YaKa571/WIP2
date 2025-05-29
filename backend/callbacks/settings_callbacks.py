@@ -3,6 +3,7 @@ import time
 from dash import callback, Output, Input, State, MATCH, ctx, html
 from dash.exceptions import PreventUpdate
 
+import components.constants as const
 from backend.data_manager import DataManager
 from components.factories.component_factory import create_usa_map
 from frontend.component_ids import ID
@@ -33,14 +34,14 @@ def toggle_settings_canvas(n_clicks, is_open):
 
 # === CENTRAL APP STATE MANAGER ===
 @callback(
-    Output(ID.SETTINGS_CANVAS.value, "className"),
-    Output(ID.DASHBOARD_CONTAINER.value, "className"),
-    Output(ID.BUTTON_DARK_MODE_TOGGLE.value, "children"),
-    Output(ID.APP_STATE_STORE.value, "data"),
+    Output(ID.SETTINGS_CANVAS, "className"),
+    Output(ID.DASHBOARD_CONTAINER, "className"),
+    Output(ID.BUTTON_DARK_MODE_TOGGLE, "children"),
+    Output(ID.APP_STATE_STORE, "data"),
     Input("app-init-trigger", "children"),
-    Input(ID.BUTTON_DARK_MODE_TOGGLE.value, "n_clicks"),
-    Input(ID.SETTING_MAP_COLOR_SCALE.value, "value"),
-    State(ID.APP_STATE_STORE.value, "data"),
+    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks"),
+    Input(ID.SETTING_MAP_COLOR_SCALE, "value"),
+    State(ID.APP_STATE_STORE, "data"),
 )
 def update_app_state(_, n_clicks, color_scale, current_state):
     """
@@ -73,7 +74,7 @@ def update_app_state(_, n_clicks, color_scale, current_state):
     # Initialize state if necessary
     if current_state is None:
         current_state = {
-            "dark_mode": False,
+            "dark_mode": const.DEFAULT_DARK_MODE,
             "color_scale": color_scale if color_scale else "Viridis",  # Default value
             "phase": "initial",
             "update_id": 0,
@@ -82,7 +83,7 @@ def update_app_state(_, n_clicks, color_scale, current_state):
 
     # Update state based on trigger
     if triggered_id == ID.BUTTON_DARK_MODE_TOGGLE.value and n_clicks:
-        current_state["dark_mode"] = not current_state.get("dark_mode", False)
+        current_state["dark_mode"] = not current_state.get("dark_mode", const.DEFAULT_DARK_MODE)
         current_state["settings_changed"] = True
         current_state["update_id"] += 1
 
@@ -93,7 +94,7 @@ def update_app_state(_, n_clicks, color_scale, current_state):
             current_state["update_id"] += 1
 
     # Read dark mode status
-    dark = current_state.get("dark_mode", False)
+    dark = current_state.get("dark_mode", const.DEFAULT_DARK_MODE)
 
     # Update UI classes and icon
     canvas_cls = "settings-canvas dark-mode" if dark else "settings-canvas"
@@ -105,10 +106,10 @@ def update_app_state(_, n_clicks, color_scale, current_state):
 
 # === FIRST STEP: START LOADING ANIMATION ===
 @callback(
-    Output(ID.MAP_CONTAINER.value, "className"),
-    Output(ID.ANIMATION_STATE_STORE.value, "data"),
-    Input(ID.APP_STATE_STORE.value, "data"),
-    State(ID.ANIMATION_STATE_STORE.value, "data"),
+    Output(ID.MAP_CONTAINER, "className"),
+    Output(ID.ANIMATION_STATE_STORE, "data"),
+    Input(ID.APP_STATE_STORE, "data"),
+    State(ID.ANIMATION_STATE_STORE, "data"),
 )
 def prepare_map_update(app_state, animation_state):
     """
@@ -157,11 +158,11 @@ def prepare_map_update(app_state, animation_state):
 
 # === SECOND STEP: RENDER MAP ===
 @callback(
-    Output(ID.MAP_CONTAINER.value, "children"),
-    Output(ID.MAP_CONTAINER.value, "className", allow_duplicate=True),
-    Output(ID.APP_STATE_STORE.value, "data", allow_duplicate=True),
-    Input(ID.ANIMATION_STATE_STORE.value, "data"),
-    State(ID.APP_STATE_STORE.value, "data"),
+    Output(ID.MAP_CONTAINER, "children"),
+    Output(ID.MAP_CONTAINER, "className", allow_duplicate=True),
+    Output(ID.APP_STATE_STORE, "data", allow_duplicate=True),
+    Input(ID.ANIMATION_STATE_STORE, "data"),
+    State(ID.APP_STATE_STORE, "data"),
     prevent_initial_call=True
 )
 def render_map(animation_state, app_state):
@@ -195,7 +196,7 @@ def render_map(animation_state, app_state):
         raise PreventUpdate
 
     # Render map with current settings
-    dark = app_state.get("dark_mode", False)
+    dark = app_state.get("dark_mode", const.DEFAULT_DARK_MODE)
     color_scale = app_state.get("color_scale", "blues")
 
     map_style = "carto-darkmatter-nolabels" if dark else "carto-positron-nolabels"
@@ -235,9 +236,9 @@ def initialize_layout(_):
 
 # === START RENDERING THE MAP ===
 @callback(
-    Output(ID.APP_STATE_STORE.value, "data", allow_duplicate=True),
+    Output(ID.APP_STATE_STORE, "data", allow_duplicate=True),
     Input("layout-ready-signal", "children"),
-    State(ID.APP_STATE_STORE.value, "data"),
+    State(ID.APP_STATE_STORE, "data"),
     prevent_initial_call=True,
 )
 def trigger_initial_render(ready_signal, app_state):
@@ -268,7 +269,7 @@ def trigger_initial_render(ready_signal, app_state):
 # === TOOLTIP TOGGLE ===
 @callback(
     Output({"type": "tooltip", "id": MATCH}, "style"),
-    Input(ID.SETTING_GENERAL_SHOW_TOOLTIPS.value, "value")
+    Input(ID.SETTING_GENERAL_SHOW_TOOLTIPS, "value")
 )
 def toggle_tooltips(show):
     """
@@ -292,8 +293,8 @@ def toggle_tooltips(show):
     return {} if show else {"display": "none"}
 
 
-@callback(Output(ID.SETTINGS_CANVAS.value, "placement"),
-          Input(ID.SETTING_GENERAL_CANVAS_PLACEMENT.value, "value")
+@callback(Output(ID.SETTINGS_CANVAS, "placement"),
+          Input(ID.SETTING_GENERAL_CANVAS_PLACEMENT, "value")
           )
 def change_settings_position(placement):
     """

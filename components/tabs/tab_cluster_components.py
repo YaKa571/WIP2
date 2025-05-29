@@ -9,7 +9,7 @@ dm: DataManager = DataManager.get_instance()
 cluster_data = dm.cluster_tab_data
 
 
-def make_cluster_plot(df_agg, mode='total_value', age_group_mode='all', dark_mode: bool = False):
+def make_cluster_plot(df_agg, mode='total_value', age_group_mode='all', dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
     Generates a cluster plot visualizing transaction data segmented by cluster and other grouping parameters.
 
@@ -250,7 +250,7 @@ def create_cluster_legend(mode: str, df) -> list:
     return items
 
 
-def make_inc_vs_exp_plot(df_agg, age_group_mode='all', dark_mode: bool = False):
+def make_inc_vs_exp_plot(df_agg, age_group_mode='all', dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
     Generates a scatter plot visualizing yearly income versus total expenses, segmented by clusters
     and optionally grouped by age groups, with customization options for dark mode. The function

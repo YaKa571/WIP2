@@ -302,7 +302,7 @@ def create_individual_merchant_kpi(merchant: int):
 
 # === GRAPH ===
 
-def create_merchant_group_distribution_tree_map(dark_mode: bool = False) -> px.treemap:
+def create_merchant_group_distribution_tree_map(dark_mode: bool = const.DEFAULT_DARK_MODE) -> px.treemap:
     """
     Generates a treemap visualization of merchant group distribution.
 

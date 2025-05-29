@@ -25,5 +25,18 @@ GRAPH_GRID_COLOR_DARK = "rgba(230,230,230,0.11)"
 GRAPH_GRID_COLOR_LIGHT = "rgba(25,25,25,0.11)"
 COLOR_TRANSPARENT = "rgba(0,0,0,0)"
 
+# Bools
+DEFAULT_DARK_MODE: bool = True
+
+# Stores
+APP_STATE_STORE_DEFAULT = {
+            "dark_mode": DEFAULT_DARK_MODE,
+            "color_scale": "blues",
+            "phase": "initial",
+            "update_id": 0,
+            "settings_changed": False
+        }
+
+
 # Paths
 DATA_DIRECTORY = Path("assets/data/")

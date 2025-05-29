@@ -9,6 +9,7 @@ dm: DataManager = DataManager.get_instance()
 
 import dash_bootstrap_components as dbc
 from dash import Dash, dcc, html
+import components.constants as const
 
 import components.factories.component_factory as comp_factory
 import components.factories.settings_components_factory as settings_comp_factory
@@ -77,12 +78,12 @@ def create_app(suppress_callback_exceptions: bool = True, add_data_tables: bool 
 
     dash_app.layout = html.Div(
         className="dashboard",
-        id=ID.DASHBOARD_CONTAINER.value,
+        id=ID.DASHBOARD_CONTAINER,
         children=[
 
             # Stores and Divs needed for the layout to work properly
-            dcc.Store(id=ID.APP_STATE_STORE.value),
-            dcc.Store(id=ID.ANIMATION_STATE_STORE.value),
+            dcc.Store(id=ID.APP_STATE_STORE, data=const.APP_STATE_STORE_DEFAULT),
+            dcc.Store(id=ID.ANIMATION_STATE_STORE),
             dcc.Store(id=ID.HOME_TAB_SELECTED_STATE_STORE, data=None),
             dcc.Store(id=ID.ACTIVE_TAB_STORE, data=ID.TAB_HOME),
             dcc.Store(id=ID.MERCHANT_SELECTED_BUTTON_STORE, data="all"),
@@ -97,7 +98,8 @@ def create_app(suppress_callback_exceptions: bool = True, add_data_tables: bool 
 
                     settings_comp_factory.create_icon_button("bi-gear", ID.BUTTON_SETTINGS_MENU, "settings-menu"),
                     html.H1("Financial Transactions Dashboard", className="m-0 flex-grow-1 text-center"),
-                    settings_comp_factory.create_icon_button("bi-sun-fill", ID.BUTTON_DARK_MODE_TOGGLE),
+                    settings_comp_factory.create_icon_button("bi-sun-fill", ID.BUTTON_DARK_MODE_TOGGLE,
+                                                             n_clicks=1 if const.DEFAULT_DARK_MODE else 0),
                     settings_comp_factory.create_settings_canvas()
 
                 ]),
