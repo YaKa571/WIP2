@@ -7,9 +7,9 @@ import pgeocode
 import utils.logger as logger
 from backend.data_handler import optimize_data, clean_units, json_to_data_frame, json_to_dict, \
     read_parquet_data
+from backend.data_setup.tabs.tab_cluster_data import ClusterTabData
 from backend.data_setup.tabs.tab_home_data import HomeTabData
 from backend.data_setup.tabs.tab_merchant_data import MerchantTabData
-from backend.data_setup.tabs.tab_cluster_data import ClusterTabData
 from backend.data_setup.tabs.tab_user_data import UserTabData
 from components.constants import DATA_DIRECTORY
 from utils.benchmark import Benchmark

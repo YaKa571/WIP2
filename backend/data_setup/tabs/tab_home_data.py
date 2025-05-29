@@ -26,6 +26,7 @@ class HomeTabData:
         self._cache_expenditures_by_gender: dict[str | None, dict[str, float]] = {}
         self._cache_expenditures_by_age: dict[str | None, dict[str, float]] = {}
         self._cache_expenditures_by_channel: dict[str | None, dict[str, float]] = {}
+        self.map_data: pd.DataFrame = pd.DataFrame()
 
     def _process_transaction_zips(self):
         """
@@ -580,6 +581,23 @@ class HomeTabData:
         self._cache_expenditures_by_channel[state] = result
         return result
 
+    def _cache_map_data(self) -> None:
+        bm_cache_map = Benchmark("Pre-caching USA Map data...")
+        logger.log("🔄 Pre-caching USA Map data...", indent_level=2)
+
+        state_counts = (
+            self.df_transactions.copy()
+            .dropna(subset=["state_name"])
+            .groupby("state_name", as_index=False)
+            .size()
+            .rename(columns={"size": "transaction_count"})
+        )
+
+        state_counts["state_name_upper"] = state_counts["state_name"].str.upper()
+
+        self.map_data = state_counts
+        bm_cache_map.print_time(level=3)
+
     def _pre_cache_home_tab_data(self, log_state_times: bool = True) -> None:
         """
         Pre-caches data for the Home-Tab view by performing data aggregation and calculations for
@@ -640,3 +658,4 @@ class HomeTabData:
         self._process_transaction_data()
         self._calc_home_tab_kpis()
         self._pre_cache_home_tab_data()
+        self._cache_map_data()

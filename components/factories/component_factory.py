@@ -13,6 +13,7 @@ from plotly.graph_objs._figure import Figure
 from shapely.geometry import shape
 
 import components.constants as const
+from backend.callbacks.tabs.tab_home_callbacks import home_data
 from backend.data_manager import DataManager
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID, Icons
@@ -126,19 +127,11 @@ def create_usa_map(color_scale: str = "Blues",
     dash_core_components.Graph
         A Dash Graph component representing the map.
     """
-    state_counts = (
-        dm.df_transactions.copy()
-        .dropna(subset=["state_name"])
-        .groupby("state_name", as_index=False)
-        .size()
-        .rename(columns={"size": "transaction_count"})
-    )
-
-    state_counts["state_name_upper"] = state_counts["state_name"].str.upper()
+    df = home_data.map_data
 
     # Choropleth Mapbox
     fig = px.choropleth_map(
-        state_counts,
+        df,
         geojson=states_geo,
         locations="state_name",
         featureidkey="properties.name",
@@ -156,11 +149,11 @@ def create_usa_map(color_scale: str = "Blues",
 
     # Text with state abbreviations
     fig.add_trace(go.Scattermap(
-        lat=[state_centroids[n][0] for n in state_counts["state_name"]],
-        lon=[state_centroids[n][1] for n in state_counts["state_name"]],
+        lat=[state_centroids[n][0] for n in df["state_name"]],
+        lon=[state_centroids[n][1] for n in df["state_name"]],
         mode="text",
         text=[full_to_abbr.get(n, "ONLINE") if n != "ONLINE" else "ONLINE"
-              for n in state_counts["state_name"]],
+              for n in df["state_name"]],
         textfont=dict(size=12, color="black"),
         showlegend=False,
         hoverinfo="skip"
