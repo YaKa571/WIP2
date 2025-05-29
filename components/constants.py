@@ -1,5 +1,7 @@
 # Add constants here...
+from pathlib import Path
 
+# Colors
 COLOR_BLUE_MAIN = "#2563eb"
 COLOR_FEMALE_PINK = "#c65ed4"
 TEXT_COLOR_LIGHT = "#222c3a"
@@ -19,3 +21,6 @@ AGE_GROUP_COLORS = [
     "#636e72",
     "#b2bec3",
 ]
+
+# Paths
+DATA_DIRECTORY = Path("assets/data/")
