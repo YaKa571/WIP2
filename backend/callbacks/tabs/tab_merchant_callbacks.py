@@ -5,12 +5,15 @@ import plotly.express as px
 from dash import html, Output, Input, callback, dcc, ctx
 
 import components.constants as const
-from backend.data_setup.tabs import tab_merchant_data_setup
-from backend.data_setup.tabs.tab_merchant_data_setup import create_merchant_group_line_chart, \
-    create_individual_merchant_line_chart
+from backend.data_manager import DataManager
 from components.factories import component_factory as comp_factory
+from components.tabs.tab_merchant_components import create_merchant_group_line_chart, \
+    create_individual_merchant_line_chart
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID
+
+# Initialize DataManager instance
+dm = DataManager.get_instance()
 
 """
 Callbacks and factories for tab Merchant.
@@ -150,10 +153,10 @@ def create_all_merchant_kpis():
         Dashboard: A dashboard object containing the calculated merchant KPIs.
 
     """
-    group_1, count_1 = tab_merchant_data_setup.get_most_frequently_used_merchant_group()
-    group_2, value_2 = tab_merchant_data_setup.get_highest_value_merchant_group()
-    user_3, count_3 = tab_merchant_data_setup.get_most_user_with_most_transactions_all_merchants()
-    user_4, value_4 = tab_merchant_data_setup.get_user_with_highest_expenditure_all_merchants()
+    group_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_group()
+    group_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_group()
+    user_3, count_3 = dm.merchant_tab_data.get_most_user_with_most_transactions_all_merchants()
+    user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_all_merchants()
 
     kpi_data = [
         {
@@ -207,10 +210,10 @@ def create_merchant_group_kpi(merchant_group):
     Returns:
         A dashboard object created from the generated KPI data.
     """
-    merchant_1, count_1 = tab_merchant_data_setup.get_most_frequently_used_merchant_in_group(merchant_group)
-    merchant_2, value_2 = tab_merchant_data_setup.get_highest_value_merchant_in_group(merchant_group)
-    user_3, count_3 = tab_merchant_data_setup.get_user_with_most_transactions_in_group(merchant_group)
-    user_4, value_4 = tab_merchant_data_setup.get_user_with_highest_expenditure_in_group(merchant_group)
+    merchant_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_in_group(merchant_group)
+    merchant_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_in_group(merchant_group)
+    user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_in_group(merchant_group)
+    user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_in_group(merchant_group)
 
     kpi_data = [
         {
@@ -259,10 +262,10 @@ def create_individual_merchant_kpi(merchant: int):
     Raises:
         None
     """
-    count_1 = tab_merchant_data_setup.get_merchant_transactions(merchant)
-    value_2 = tab_merchant_data_setup.get_merchant_value(merchant)
-    user_3, count_3 = tab_merchant_data_setup.get_user_with_most_transactions_at_merchant(merchant)
-    user_4, value_4 = tab_merchant_data_setup.get_user_with_highest_expenditure_at_merchant(merchant)
+    count_1 = dm.merchant_tab_data.get_merchant_transactions(merchant)
+    value_2 = dm.merchant_tab_data.get_merchant_value(merchant)
+    user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_at_merchant(merchant)
+    user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_at_merchant(merchant)
 
     kpi_data = [
         {
@@ -312,7 +315,7 @@ def get_merchant_group_input() -> dcc.Dropdown:
         groups.
 
     """
-    my_merchant_groups = tab_merchant_data_setup.get_all_merchant_groups()
+    my_merchant_groups = dm.merchant_tab_data.get_all_merchant_groups()
     options = [{'label': group, 'value': group} for group in my_merchant_groups]
     default_value = my_merchant_groups[0] if my_merchant_groups else None
 
@@ -376,7 +379,7 @@ def create_merchant_group_distribution_tree_map(dark_mode: bool = False) -> px.t
     """
     text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
 
-    treemap_df = tab_merchant_data_setup.get_merchant_group_overview(1000).copy()
+    treemap_df = dm.merchant_tab_data.get_merchant_group_overview(1000).copy()
     treemap_df["merchant_group"] = treemap_df["merchant_group"].astype(str).str.upper()
 
     fig = px.treemap(
@@ -387,14 +390,14 @@ def create_merchant_group_distribution_tree_map(dark_mode: bool = False) -> px.t
     fig.update_traces(
         texttemplate="<b>%{label}</b><br><br><b>TRANSACTIONS:</b> %{value}<br><b>SHARE:</b> %{percentEntry:.2%}",
         hovertemplate="<b>%{label}</b><br>💳 <b>TRANSACTIONS:</b> %{value}<br><b>🔢 SHARE:</b> %{percentEntry:.2%}<extra></extra>",
-        root_color="rgba(0,0,0,0)",
+        root_color=const.COLOR_TRANSPARENT,
         tiling_pad=0
     )
     fig.update_layout(
         font=dict(color=text_color),
         margin=dict(t=2, l=2, r=2, b=2),
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor=const.COLOR_TRANSPARENT,
+        paper_bgcolor=const.COLOR_TRANSPARENT,
         showlegend=False,
     )
     return fig
@@ -503,8 +506,8 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
         graph_title = "Merchant Group Distribution"
     elif selected == MerchantTab.GROUP.value:
         merchant_group = selected_group or (
-            tab_merchant_data_setup.get_all_merchant_groups()[0]
-            if tab_merchant_data_setup.get_all_merchant_groups() else None)
+            dm.merchant_tab_data.get_all_merchant_groups()[0]
+            if dm.merchant_tab_data.get_all_merchant_groups() else None)
         kpi_content = create_merchant_group_kpi(merchant_group) if merchant_group else html.Div(
             "No merchant groups available.")
         graph_content = create_merchant_group_line_chart(
