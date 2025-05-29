@@ -32,6 +32,20 @@ def create_cluster_content():
 
 
 def _create_heading() -> html.Div:
+    """
+    Creates a heading component designed for the Cluster Analysis tab.
+
+    This function generates a `html.Div` component containing a styled
+    heading, an information icon, and a tooltip, with functionality allowing
+    users to interact and understand the options available in the Cluster
+    Analysis interface.
+
+    Returns:
+        html.Div: A `Div` component containing the formatted heading and
+        associated elements such as an icon and tooltip. The element is styled
+        and structured to be used specifically for the Cluster Analysis tab
+        in the application.
+    """
     return html.Div(
         className="tab-heading-wrapper",
         children=[
@@ -178,6 +192,16 @@ def _create_cluster_control_merchant_group():
 
 
 def _create_cluster_legend():
+    """
+    Creates a cluster legend component.
+
+    This function generates a user interface component for displaying a cluster legend.
+    It consists of a collapsible card containing the legend title, an icon, and a toggle
+    button for expanding or collapsing the legend content.
+
+    Returns:
+        dash.html.Div: A Div component containing the cluster legend UI.
+    """
     return html.Div(
         className="flex-wrapper",
         children=[
