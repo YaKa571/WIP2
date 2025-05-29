@@ -6,9 +6,9 @@ from dash.exceptions import PreventUpdate
 import components.factories.component_factory as comp_factory
 from backend.callbacks.tabs.tab_merchant_callbacks import ID_TO_MERCHANT_TAB
 from backend.data_manager import DataManager
-from components.factories.tabcomponents.tab_user_components import get_valid_user_id, configure_chart_parameters, \
+from components.tabs.tab_user_components import get_valid_user_id, configure_chart_parameters, \
     create_bar_chart_figure
-from components.rightcolumn.tabs.tab_user import create_kpi_value_text
+from frontend.layout.right.tabs.tab_user import create_kpi_value_text
 from frontend.component_ids import ID
 
 dm: DataManager = DataManager.get_instance()

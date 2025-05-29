@@ -1,11 +1,11 @@
 import dash_bootstrap_components as dbc
 from dash import html
 
-from components.rightcolumn.tabs.tab_cluster import create_cluster_content
-from components.rightcolumn.tabs.tab_fraud import create_fraud_content
-from components.rightcolumn.tabs.tab_home import create_home_content
-from components.rightcolumn.tabs.tab_merchant import create_merchant_content
-from components.rightcolumn.tabs.tab_user import create_user_content
+from frontend.layout.right.tabs.tab_cluster import create_cluster_content
+from frontend.layout.right.tabs.tab_fraud import create_fraud_content
+from frontend.layout.right.tabs.tab_home import create_home_content
+from frontend.layout.right.tabs.tab_merchant import create_merchant_content
+from frontend.layout.right.tabs.tab_user import create_user_content
 from frontend.component_ids import ID
 
 TABS = [
