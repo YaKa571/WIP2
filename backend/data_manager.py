@@ -111,7 +111,7 @@ class DataManager:
         # Converts CSV files to parquet files if they don't exist yet and load them as DataFrames
         optimize_data("users_data.csv", "transactions_data.csv", "cards_data.csv")
 
-        # Read and clean data – clean_units returns (df, unit_info)
+        # Read and clean data
         self.df_users = clean_units(read_parquet_data("users_data.parquet"))
         self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet",
                                                              num_rows=100_000))
