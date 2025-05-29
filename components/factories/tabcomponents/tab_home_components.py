@@ -8,6 +8,7 @@ from components.constants import COLOR_BLUE_MAIN, COLOR_FEMALE_PINK
 from frontend.component_ids import ID
 
 dm: DataManager = DataManager.get_instance()
+home_data = dm.home_tab_data
 
 
 def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
@@ -116,10 +117,10 @@ def get_most_valuable_merchant_details(state: str = None) -> list:
 
     """
     one = html.P(
-        f"{dm.get_most_valuable_merchant(state).mcc_desc}",
+        f"{dm.home_tab_data.get_most_valuable_merchant(state).mcc_desc}",
         className="kpi-card-value")
 
-    two = html.P(f"${dm.get_most_valuable_merchant(state).value}",
+    two = html.P(f"${dm.home_tab_data.get_most_valuable_merchant(state).value}",
                  className="kpi-card-value kpi-number-value")
 
     tooltip = dbc.Tooltip(
@@ -129,9 +130,9 @@ def get_most_valuable_merchant_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_1"},
         target=ID.HOME_KPI_MOST_VALUABLE_MERCHANT,
         children=[
-            f"🆔 MERCHANT ID: {dm.get_most_valuable_merchant(state).id}",
+            f"🆔 MERCHANT ID: {dm.home_tab_data.get_most_valuable_merchant(state).id}",
             html.Br(),
-            f"🏷️ MCC: {dm.get_most_valuable_merchant(state).mcc}"
+            f"🏷️ MCC: {dm.home_tab_data.get_most_valuable_merchant(state).mcc}"
         ])
 
     return [one, two, tooltip]
@@ -154,10 +155,10 @@ def get_most_visited_merchant_details(state: str = None) -> list:
         the number of visits.
     """
     one = html.P(
-        f"{dm.get_most_visited_merchant(state).mcc_desc}",
+        f"{home_data.get_most_visited_merchant(state).mcc_desc}",
         className="kpi-card-value")
 
-    two = html.P(f"{dm.get_most_visited_merchant(state).visits} visits",
+    two = html.P(f"{home_data.get_most_visited_merchant(state).visits} visits",
                  className="kpi-card-value kpi-number-value")
 
     tooltip = dbc.Tooltip(
@@ -167,9 +168,9 @@ def get_most_visited_merchant_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_2"},
         target=ID.HOME_KPI_MOST_VISITED_MERCHANT,
         children=[
-            f"🆔 MERCHANT ID: {dm.get_most_visited_merchant(state).id}",
+            f"🆔 MERCHANT ID: {home_data.get_most_visited_merchant(state).id}",
             html.Br(),
-            f"🏷️MCC: {dm.get_most_visited_merchant(state).mcc}"
+            f"🏷️MCC: {home_data.get_most_visited_merchant(state).mcc}"
         ])
 
     return [one, two, tooltip]
@@ -192,10 +193,10 @@ def get_top_spending_user_details(state: str = None) -> list:
         spending value.
     """
     one = html.P(
-        f"{dm.get_top_spending_user(state).gender}, {dm.get_top_spending_user(state).current_age} years",
+        f"{home_data.get_top_spending_user(state).gender}, {home_data.get_top_spending_user(state).current_age} years",
         className="kpi-card-value")
 
-    two = html.P(f"${dm.get_top_spending_user(state).value}", className="kpi-card-value kpi-number-value")
+    two = html.P(f"${home_data.get_top_spending_user(state).value}", className="kpi-card-value kpi-number-value")
 
     tooltip = dbc.Tooltip(
         placement="bottom",
@@ -204,7 +205,7 @@ def get_top_spending_user_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_3"},
         target=ID.HOME_KPI_TOP_SPENDING_USER,
         children=[
-            f"🆔 USER ID: {dm.get_top_spending_user(state).id}"
+            f"🆔 USER ID: {home_data.get_top_spending_user(state).id}"
         ])
 
     return [one, two, tooltip]
@@ -225,8 +226,8 @@ def get_peak_hour_details(state: str = None) -> list:
         list: A list of HTML paragraph elements containing the peak hour range and the
             transaction count information.
     """
-    one = html.P(f"{dm.get_peak_hour(state).hour_range}", className="kpi-card-value")
-    two = html.P(f"{dm.get_peak_hour(state).value} transactions", className="kpi-card-value kpi-number-value")
+    one = html.P(f"{home_data.get_peak_hour(state).hour_range}", className="kpi-card-value")
+    two = html.P(f"{home_data.get_peak_hour(state).value} transactions", className="kpi-card-value kpi-number-value")
 
     return [one, two]
 
@@ -253,7 +254,7 @@ def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = Fa
                                       for the specified state, or across all states when no state
                                       is provided.
     """
-    df = dm.get_merchant_values_by_state(state=state).head(10)
+    df = home_data.get_merchant_values_by_state(state=state).head(10)
     df = df.copy()
     df["mcc_desc"] = df["mcc_desc"].astype(str).str.upper()
 
@@ -304,7 +305,7 @@ def get_peak_hour_bar_chart(state: str = None, dark_mode: bool = False):
     Returns:
         Figure: A bar chart visualizing the transaction counts by hour of the day.
     """
-    df = dm.get_transaction_counts_by_hour(state=state)
+    df = home_data.get_transaction_counts_by_hour(state=state)
     df = df[df["transaction_count"] > 0].copy()
     df["hour_range"] = df["hour"].apply(lambda h: f"{h:02d}:00 – {(h + 1) % 24:02d}:00")
 
@@ -346,7 +347,7 @@ def get_spending_by_user_bar_chart(state: str = None, dark_mode: bool = False):
         Bar chart visualization showcasing the top 10 spending users, with data categorized by gender and additional
         hover information such as gender, age, and spending.
     """
-    df = dm.get_spending_by_user(state).head(10)
+    df = home_data.get_spending_by_user(state).head(10)
     df = df.merge(dm.df_users[["id", "gender", "current_age"]], left_on="client_id", right_on="id").drop(columns=["id"])
     df = df.copy()
 
@@ -399,7 +400,7 @@ def get_most_visited_merchants_bar_chart(state: str = None, dark_mode: bool = Fa
         A bar chart representation of the top 10 most visited merchants based on the
         specified parameters.
     """
-    df = dm.get_visits_by_merchant(state).head(10)
+    df = home_data.get_visits_by_merchant(state).head(10)
     df = df.copy()
     df["mcc_desc"] = df["mcc_desc"].astype(str).str.upper()
 
