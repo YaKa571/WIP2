@@ -143,7 +143,6 @@ def _create_merchant_input_container():
 
     return html.Div(
         className="flex-wrapper",
-        style={"visibility": "collapse"},
         children=[
 
             # Merchant Group dropdown input
