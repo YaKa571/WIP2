@@ -21,6 +21,9 @@ AGE_GROUP_COLORS = [
     "#636e72",
     "#b2bec3",
 ]
+GRAPH_GRID_COLOR_DARK = "rgba(230,230,230,0.11)"
+GRAPH_GRID_COLOR_LIGHT = "rgba(25,25,25,0.11)"
+COLOR_TRANSPARENT = "rgba(0,0,0,0)"
 
 # Paths
 DATA_DIRECTORY = Path("assets/data/")
