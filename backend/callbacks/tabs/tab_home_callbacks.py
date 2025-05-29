@@ -3,16 +3,18 @@ from dash.exceptions import PreventUpdate
 
 from backend.callbacks.tabs.tab_merchant_callbacks import ID_TO_MERCHANT_TAB
 from backend.data_manager import DataManager
-from backend.data_setup.tabs.tab_home_data_setup import get_most_valuable_merchant_bar_chart, \
+from backend.data_setup.tabs.tab_home_data import HomeTabData
+from components.constants import COLOR_BLUE_MAIN, COLOR_FEMALE_PINK, GREEN_DARK, GREEN_LIGHT, COLOR_ONLINE, \
+    COLOR_INSTORE, AGE_GROUP_COLORS
+from components.factories.tabcomponents.tab_home_components import get_most_valuable_merchant_bar_chart, \
     get_most_visited_merchants_bar_chart, get_spending_by_user_bar_chart, get_peak_hour_bar_chart, create_pie_graph, \
     get_most_valuable_merchant_details, get_most_visited_merchant_details, get_top_spending_user_details, \
     get_peak_hour_details, build_center_text, get_leader_info, get_age_leader_info
-from components.constants import COLOR_BLUE_MAIN, COLOR_FEMALE_PINK, GREEN_DARK, GREEN_LIGHT, COLOR_ONLINE, \
-    COLOR_INSTORE, AGE_GROUP_COLORS
 from components.rightcolumn.tabs.tab_home import BAR_CHART_OPTIONS
 from frontend.component_ids import ID
 
 dm: DataManager = DataManager.get_instance()
+home_data: HomeTabData = dm.home_tab_data
 
 # Map of dropdown-values -> chart-builder functions
 CHART_BUILDERS = {
@@ -98,7 +100,7 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
     color_green = GREEN_DARK if dark_mode else GREEN_LIGHT
 
     # Gender
-    gender_sums = dm.get_expenditures_by_gender(state=state).copy()
+    gender_sums = home_data.get_expenditures_by_gender(state=state).copy()
     gender_label_colors = {"MALE": COLOR_BLUE_MAIN, "FEMALE": COLOR_FEMALE_PINK}
     labels_gender = list(gender_sums.keys())
     colors_gender = [gender_label_colors.get(label, "#cccccc") for label in labels_gender]
@@ -119,7 +121,7 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
     )
 
     # Channel
-    channel_sums = dm.get_expenditures_by_channel(state=state)
+    channel_sums = home_data.get_expenditures_by_channel(state=state)
     channel_label_colors = {"ONLINE": COLOR_ONLINE, "IN-STORE": COLOR_INSTORE}
     channel_leader, leader_color, diff = get_leader_info(channel_sums, channel_label_colors)
     center_text_channel = build_center_text(channel_leader, leader_color, diff, color_green, tie_label="TIE",
@@ -138,7 +140,7 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
     )
 
     # Age
-    age_sums = dm.get_expenditures_by_age(state=state)
+    age_sums = home_data.get_expenditures_by_age(state=state)
     top_group, color_leader, top_value, percent, total = get_age_leader_info(age_sums, AGE_GROUP_COLORS)
     center_text_age = build_center_text(top_group, color_leader, None, color_green, tie_label="NO DATA",
                                         value=top_value, percent=None,
