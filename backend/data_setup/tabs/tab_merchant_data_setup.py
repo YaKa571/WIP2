@@ -11,6 +11,11 @@ from backend.data_manager import DataManager
 contains data setup for Merchant tab
 """
 
+# TODO: Re-organize this file to separate out the data setup for each tab
+#  See tab_home_data.py or tab_user_data.py for examples and data_manager.py
+#  Data --> Here
+#  Tab components --> components/tabs/tab_merchant_components.py
+
 # Data Files
 dm: DataManager = DataManager.get_instance()
 my_transactions = dm.df_transactions
@@ -36,6 +41,8 @@ my_transactions_agg_by_user = my_transactions.groupby('client_id').agg(
 
 # Transactions join MCC(mcc,mcc) join Users(client_id,id)
 my_transactions_mcc_users = my_transactions_mcc.merge(my_users, how="left", left_on='client_id', right_on='id')
+
+
 def get_my_transactions_mcc_users():
     return my_transactions_mcc_users
 
