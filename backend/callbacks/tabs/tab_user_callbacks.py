@@ -372,8 +372,8 @@ def update_tab_heading(user_id, card_id):
         identifier is valid.
     """
     if card_id and str(card_id).strip():
-        return f" From Card-ID: {card_id}"
+        return f"Card-ID: {card_id}"
     elif user_id and str(user_id).strip():
-        return f"From User-ID: {user_id}"
+        return f"User-ID: {user_id}"
     else:
         return "User"

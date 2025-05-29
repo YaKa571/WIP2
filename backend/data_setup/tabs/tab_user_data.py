@@ -58,9 +58,14 @@ class UserTabData:
                 tx_count=("amount", "size"),
                 total_sum=("amount", "sum")
             ).reset_index()
+
+            # Add MCC description
             agg["mcc_desc"] = agg["mcc"].apply(
                 lambda m: get_mcc_description_by_merchant_id(self.data_manager.mcc_dict, int(m))
             )
+            # Filter out rows with tx_count == 0 or total_sum == 0
+            agg = agg[(agg["tx_count"] != 0) & (agg["total_sum"] != 0)]
+
             self._cache_user_merchant_agg[int(user_id)] = agg
 
     def get_user_kpis(self, user_id: int) -> dict:
