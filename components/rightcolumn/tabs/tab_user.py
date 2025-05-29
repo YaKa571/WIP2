@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 
-from components.factories import component_factory as comp_factory
+import components.factories.component_factory as comp_factory
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID
 
