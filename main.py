@@ -8,29 +8,40 @@ DataManager.initialize()
 dm: DataManager = DataManager.get_instance()
 
 import dash_bootstrap_components as dbc
-from dash import Dash, dcc
+from dash import Dash, dcc, html
 
 import components.factories.component_factory as comp_factory
 import components.factories.settings_components_factory as settings_comp_factory
 
-from backend.callbacks.settings_callbacks import *  # noqa: F401
+from backend.callbacks.settings_callbacks import (  # noqa: F401
+    toggle_settings_canvas, update_app_state, prepare_map_update,
+    render_map, initialize_layout, trigger_initial_render,
+    toggle_tooltips, change_settings_position
+)
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401
 from backend.callbacks.tabs.tab_buttons_callbacks import update_tabs  # noqa: F401
-from backend.callbacks.tabs.tab_cluster_callbacks import update_cluster, set_cluster_tab, toggle_legend  # noqa: F401
-from backend.callbacks.tabs.tab_user_callbacks import (update_user_kpis, update_credit_limit,  # noqa: F401
-                                                       update_merchant_bar_chart,
-                                                       bridge_user_to_merchant_tab,
-                                                       toggle_inputs, update_tab_heading)  # noqa: F401
-from backend.callbacks.tabs.tab_home_callbacks import (store_selected_state, update_all_pies,  # noqa: F401
-                                                       update_bar_chart, bridge_home_to_user_tab)  # noqa: F401
-from backend.callbacks.tabs.tab_merchant_callbacks import update_merchant, set_merchant_tab  # noqa: F401
-
+from backend.callbacks.tabs.tab_cluster_callbacks import (  # noqa: F401
+    update_cluster, set_cluster_tab, toggle_legend
+)
+from backend.callbacks.tabs.tab_user_callbacks import (  # noqa: F401
+    update_user_kpis, update_credit_limit,
+    update_merchant_bar_chart,
+    bridge_user_to_merchant_tab,
+    toggle_inputs, update_tab_heading
+)
+from backend.callbacks.tabs.tab_home_callbacks import (  # noqa: F401
+    store_selected_state, update_all_pies,
+    update_bar_chart, bridge_home_to_user_tab
+)
+from backend.callbacks.tabs.tab_merchant_callbacks import (  # noqa: F401
+    update_merchant, set_merchant_tab
+)
 from frontend.layout.left.left_column import create_left_column
 from frontend.layout.right.right_column import create_right_column
 from frontend.component_ids import ID
 
 
-def create_app(suppress_callback_exceptions: bool = True):
+def create_app(suppress_callback_exceptions: bool = True, add_data_tables: bool = False) -> Dash:
     """
     Creates and configures a Dash application instance for the Financial Transactions Dashboard.
 
@@ -43,21 +54,28 @@ def create_app(suppress_callback_exceptions: bool = True):
         suppress_callback_exceptions: bool
             Indicates whether callback exceptions are suppressed. When set to `False`,
             the Dash debugger will handle callback-related issues. Defaults to `True`.
+        add_data_tables: bool
+            Whether to add data tables to the layout. Defaults to `False`.
 
     Returns:
         Dash
             A Dash application instance configured for the Financial Transactions Dashboard.
     """
-    app = Dash(__name__, external_stylesheets=
-    [dbc.themes.BOOTSTRAP, "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css",
-     "https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap",
-     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"],
-               # If there are callback problems, set this False to use debugger
-               suppress_callback_exceptions=suppress_callback_exceptions)
+    dash_app = Dash(
+        __name__,
+        suppress_callback_exceptions=suppress_callback_exceptions,
+        external_stylesheets=[
+            dbc.themes.BOOTSTRAP,
+            "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css",
+            "https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;"
+            "1,300;1,400;1,700;1,900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap",
+            "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        ]
+    )
 
-    app.title = "Financial Transactions Dashboard"
+    dash_app.title = "Financial Transactions Dashboard"
 
-    app.layout = html.Div(
+    dash_app.layout = html.Div(
         className="dashboard",
         id=ID.DASHBOARD_CONTAINER.value,
         children=[
@@ -99,7 +117,7 @@ def create_app(suppress_callback_exceptions: bool = True):
                             comp_factory.create_data_table(ID.TABLE_MCC, dm.df_mcc, visible=False),
 
                         ])
-                ]),
+                ]) if add_data_tables else None,
 
             # Row with Left and Right Column
             html.Div(
@@ -115,7 +133,7 @@ def create_app(suppress_callback_exceptions: bool = True):
             comp_factory.create_tooltips()
         ])
 
-    return app
+    return dash_app
 
 
 if __name__ == '__main__':

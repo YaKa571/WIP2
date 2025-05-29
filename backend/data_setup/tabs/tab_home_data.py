@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable, Any
 
 import pandas as pd
 import us
@@ -608,9 +608,8 @@ class HomeTabData:
 
         Parameters
         ----------
-        self : object
-            An instance of the class for which the method is defined. It provides access
-            to attributes and other methods of the object.
+        log_state_times : bool, optional
+            Whether to log the time taken for each state's data processing. Defaults to True.
 
         Raises
         ------
@@ -623,32 +622,36 @@ class HomeTabData:
         bm_pre_cache_full = Benchmark("Pre-caching Home-Tab data")
         logger.log("🔄 Pre-caching Home-Tab data...", indent_level=2)
 
+        # Caching functions to run for each state
+        caching_functions: list[Callable[[str | None], Any]] = [
+            self.get_merchant_values_by_state,
+            self.get_transaction_counts_by_hour,
+            self.get_spending_by_user,
+            self.get_visits_by_merchant,
+            self.get_expenditures_by_gender,
+            self.get_expenditures_by_age,
+            self.get_expenditures_by_channel
+        ]
+
         # First for overall (state=None)
         bm_usa_wide = Benchmark("Pre-caching of USA-wide data")
-        self.get_merchant_values_by_state(state=None)
-        self.get_transaction_counts_by_hour(state=None)
-        self.get_spending_by_user(state=None)
-        self.get_visits_by_merchant(state=None)
-        self.get_expenditures_by_gender(state=None)
-        self.get_expenditures_by_age(state=None)
-        self.get_expenditures_by_channel(state=None)
+        for func in caching_functions:
+            func(None)
         bm_usa_wide.print_time(level=3)
 
         # Then for each individual state
         states = self.df_transactions['state_name'].dropna().unique().tolist()
         counter = 1
+        bm_state = None
 
         for st in states:
-            bm_state = Benchmark("(" + str(counter) + ") Pre-caching of state " + st)
-            self.get_merchant_values_by_state(state=st)
-            self.get_transaction_counts_by_hour(state=st)
-            self.get_spending_by_user(state=st)
-            self.get_visits_by_merchant(state=st)
-            self.get_expenditures_by_gender(state=st)
-            self.get_expenditures_by_age(state=st)
-            self.get_expenditures_by_channel(state=st)
-
             if log_state_times:
+                bm_state = Benchmark(f"({counter}) Pre-caching of state {st}")
+
+            for func in caching_functions:
+                func(st)
+
+            if log_state_times and bm_state is not None:
                 bm_state.print_time(level=3)
                 counter += 1
 

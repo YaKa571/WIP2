@@ -13,7 +13,6 @@ from plotly.graph_objs._figure import Figure
 from shapely.geometry import shape
 
 import components.constants as const
-from backend.callbacks.tabs.tab_home_callbacks import home_data
 from backend.data_manager import DataManager
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID, Icons
@@ -127,7 +126,7 @@ def create_usa_map(color_scale: str = "Blues",
     dash_core_components.Graph
         A Dash Graph component representing the map.
     """
-    df = home_data.map_data
+    df = dm.home_tab_data.map_data
 
     # Choropleth Mapbox
     fig = px.choropleth_map(
