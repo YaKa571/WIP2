@@ -1,14 +1,59 @@
 import json
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import pyarrow as pa
 from pandas import DataFrame
+from pyarrow.parquet import ParquetFile
 
 import utils.logger as logger
+from components.constants import DATA_DIRECTORY
 from utils.benchmark import Benchmark
 
-DATA_DIRECTORY = Path("assets/data/")
+
+def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically: bool = False) -> pd.DataFrame:
+    """
+    Reads a Parquet file into a pandas DataFrame.
+
+    This function loads data from a specified Parquet file, with options to limit the
+    number of rows and to sort column names alphabetically.
+
+    Parameters:
+    file_name: str
+        The name of the Parquet file to read. Must exist in the DATA_DIRECTORY.
+    num_rows: int, optional
+        The number of rows to load from the Parquet file. By default, 500,000 rows
+        are loaded. If None or greater than the total number of rows in the file,
+        all rows will be loaded.
+    sort_alphabetically: bool, optional
+        If True, sort the column names alphabetically. Default is False.
+
+    Returns:
+    pd.DataFrame
+        The pandas DataFrame containing the data from the Parquet file.
+
+    Raises:
+    FileNotFoundError
+        If the specified file does not exist in the DATA_DIRECTORY.
+    """
+    file_path = DATA_DIRECTORY / file_name
+
+    if not file_path.exists():
+        raise FileNotFoundError(f"⚠️ Parquet file not found: {file_path}")
+
+    pf = ParquetFile(file_path)
+    total_rows = pf.metadata.num_rows
+
+    if num_rows is None or num_rows >= total_rows:
+        df = pd.read_parquet(file_path, engine="pyarrow")
+    else:
+        batch = next(pf.iter_batches(batch_size=num_rows))
+        df = pa.Table.from_batches(batches=[batch]).to_pandas()
+
+    if sort_alphabetically:
+        df = df.reindex(sorted(df.columns), axis=1)
+
+    return df
 
 
 def optimize_data(*file_names: str):
@@ -50,21 +95,23 @@ def optimize_data(*file_names: str):
             bm.print_time(level=3)
 
 
-def clean_units(df: pd.DataFrame) -> (pd.DataFrame, dict):
+def clean_units(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Cleans currency or unit information from the input DataFrame `df` by handling
-    columns where every value starts with a specific unit character (e.g., "$").
-    Removes unit prefixes, converts the numeric part to a float, and returns a
-    cleaned DataFrame along with a dictionary mapping units to their columns.
+    Cleans monetary unit symbols from the columns of a DataFrame.
 
-    :param df: The input DataFrame to be processed.
-    :type df: pd.DataFrame
-    :return: A tuple containing a modified DataFrame where currency or unit
-        prefixes are removed and a dictionary mapping units to the columns
-        in which they are found.
-    :rtype: tuple[pd.DataFrame, dict]
+    This function processes the columns of the input DataFrame and removes dollar
+    signs from cell values, converting them into numeric values where applicable.
+    Only columns where all non-empty cells start with a dollar sign are cleaned.
+    Any column not matching these criteria remains unchanged. Cells are coerced
+    to numeric types during processing.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame to be cleaned.
+
+    Returns:
+        pd.DataFrame: A new DataFrame with monetary symbols removed and converted
+        to numeric values where applicable.
     """
-    unit_to_columns = {}
     new_df = df.copy()
 
     for col in df.columns:
@@ -75,14 +122,11 @@ def clean_units(df: pd.DataFrame) -> (pd.DataFrame, dict):
 
         # Check: does each cell start with "$"?
         if sample_values.str.startswith("$").all():
-            unit = "$"
-            unit_to_columns.setdefault(unit, set()).add(col)
-
             # Remove $
             new_df[col] = sample_values.str[1:]  # Only cut off the first character
             new_df[col] = pd.to_numeric(new_df[col], errors="coerce")  # Convert to float
 
-    return new_df, unit_to_columns
+    return new_df
 
 
 def json_to_data_frame(file_name: str) -> pd.DataFrame:
