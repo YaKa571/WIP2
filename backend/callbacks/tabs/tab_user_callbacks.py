@@ -13,7 +13,7 @@ from frontend.component_ids import ID
 import components.constants as const
 
 dm: DataManager = DataManager.get_instance()
-TEXT_EMPTY_KPI = "Waiting for input..."
+TEXT_EMPTY_KPI: str = "Waiting for input..."
 
 
 # === Callback: KPI-Boxes (Transactions, Sum, Average, Cards) ===
@@ -27,25 +27,23 @@ TEXT_EMPTY_KPI = "Waiting for input..."
 )
 def update_user_kpis(user_id, card_id):
     """
-    Updates and returns user KPI values based on the provided user ID or card ID. The method
-    fetches data from the appropriate source depending on the input provided and generates
-    KPI texts for display. If no valid data is entered, it provides default or error messages.
+    Updates user KPI metrics based on a given user ID or card ID. The KPIs updated include
+    the transaction count, total transaction sum, average transaction amount, and
+    card count associated with either the specified user or card. If no valid
+    user ID or card ID is provided, default values indicating no data or invalid input
+    are returned. In case of an error during the process, invalid KPI values are returned.
 
-    Arguments:
-        user_id (str | None): The user ID input value. Expected to be a string or None.
-        card_id (str | None): The card ID input value. Expected to be a string or None.
+    Args:
+        user_id: The ID of the user used to fetch KPI data.
+        card_id: The ID of the card used to fetch KPI data.
 
     Returns:
-        tuple:
-            A tuple containing four strings:
-            - The number of transactions.
-            - The total sum of transactions formatted as currency.
-            - The average transaction amount formatted as currency.
-            - The number of cards.
-            Each value is returned in a string format. If input is invalid or no data is found,
-            default or error texts are returned instead.
+        A tuple containing updated KPI values for:
+            - Transaction count.
+            - Total transaction sum formatted as currency.
+            - Average transaction amount formatted as currency.
+            - Card count.
     """
-    # Show default text if nothing entered
     if not (user_id and str(user_id).strip()) and not (card_id and str(card_id).strip()):
         return (create_kpi_value_text(TEXT_EMPTY_KPI, True),) * 4
 
@@ -83,30 +81,22 @@ def update_user_kpis(user_id, card_id):
 )
 def update_credit_limit(user_id, card_id):
     """
-    This function is a callback designed to update and display the credit limit based on
-    the provided user ID or card ID input. The function first determines if a valid user
-    ID or card ID is supplied, then attempts to retrieve the associated credit limit from
-    a data management utility. It generates formatted text to represent the credit limit
-    or an appropriate error message if retrieval fails.
+    Updates the credit limit information in the user interface based on the provided 
+    user ID or card ID. The function determines the credit limit by querying the 
+    data manager, formats the limit as a text representation, and returns it to the 
+    callback output. If the input values are invalid, missing, or lead to data 
+    retrieval issues, user feedback messages are provided accordingly.
 
-    Parameters:
-    user_id: str
-        The input value representing the user ID. It is expected to be a string,
-        but can be converted to an integer if necessary.
-    card_id: str
-        The input value representing the card ID. It is expected to be a string,
-        but can be converted to an integer if necessary.
+    Args:
+        user_id (str): The value entered in the user ID search input field. This is 
+            used to fetch the credit limit associated with the specific user.
+        card_id (str): The value entered in the card ID search input field. This is 
+            used to fetch the credit limit associated with the specific card.
 
     Returns:
-    str
-        Returns a string containing the formatted credit limit in dollars if available,
-        or corresponding error messages such as "NO DATA," "INVALID," or ellipsis ("...")
-        when inputs or operations are invalid or data is unavailable.
-
-    Raises:
-    Exception
-        Any unexpected error that occurs during the retrieval or processing flow will
-        be caught, and an "INVALID" message will be returned to the user interface.
+        str: A formatted representation of the credit limit, an error message if the 
+            inputs are invalid or missing, or a message indicating that no data is 
+            available for the specified inputs.
     """
     if not (user_id and str(user_id).strip()) and not (card_id and str(card_id).strip()):
         return create_kpi_value_text(TEXT_EMPTY_KPI, True)
@@ -382,8 +372,8 @@ def update_tab_heading(user_id, card_id):
         identifier is valid.
     """
     if card_id and str(card_id).strip():
-        return f"Card-ID: {card_id}"
+        return f" From Card-ID: {card_id}"
     elif user_id and str(user_id).strip():
-        return f"User-ID: {user_id}"
+        return f"From User-ID: {user_id}"
     else:
         return "User"
