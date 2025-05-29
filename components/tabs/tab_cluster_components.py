@@ -336,7 +336,7 @@ def make_inc_vs_exp_plot(df_agg, age_group_mode='all', dark_mode: bool = False):
 
     fig.update_layout(
         showlegend=False,
-        margin=dict(l=32, r=32, t=56, b=32),
+        margin=dict(l=32, r=32, t=64, b=32),
         title_x=0.5,
         title_y=0.97,
         font=dict(family="Open Sans, Arial, sans-serif", size=14, color=text_color),
