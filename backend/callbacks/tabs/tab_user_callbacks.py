@@ -6,12 +6,12 @@ from dash.exceptions import PreventUpdate
 import components.factories.component_factory as comp_factory
 from backend.callbacks.tabs.tab_merchant_callbacks import ID_TO_MERCHANT_TAB
 from backend.data_manager import DataManager
-from backend.data_setup.tabs.tab_user_data_setup import get_valid_user_id, configure_chart_parameters, \
+from components.factories.tabcomponents.tab_user_components import get_valid_user_id, configure_chart_parameters, \
     create_bar_chart_figure
 from components.rightcolumn.tabs.tab_user import create_kpi_value_text
 from frontend.component_ids import ID
 
-dm = DataManager.get_instance()
+dm: DataManager = DataManager.get_instance()
 TEXT_EMPTY_KPI = "Waiting for input..."
 
 
@@ -50,9 +50,9 @@ def update_user_kpis(user_id, card_id):
 
     try:
         if card_id and str(card_id).strip():
-            data = dm.get_card_kpis(int(card_id))
+            data = dm.user_tab_data.get_card_kpis(int(card_id))
         elif user_id and str(user_id).strip():
-            data = dm.get_user_kpis(int(user_id))
+            data = dm.user_tab_data.get_user_kpis(int(user_id))
         else:
             return (create_kpi_value_text("INVALID", True),) * 4
 
@@ -112,9 +112,9 @@ def update_credit_limit(user_id, card_id):
 
     try:
         if card_id and str(card_id).strip():
-            limit = dm.get_credit_limit(card_id=int(card_id))
+            limit = dm.user_tab_data.get_credit_limit(card_id=int(card_id))
         elif user_id and str(user_id).strip():
-            limit = dm.get_credit_limit(user_id=int(user_id))
+            limit = dm.user_tab_data.get_credit_limit(user_id=int(user_id))
         else:
             return create_kpi_value_text("INVALID", True)
         if limit is None or pd.isna(limit):
@@ -260,12 +260,12 @@ def update_merchant_bar_chart(user_id, card_id, sort_by, n_clicks_dark):
         return comp_factory.create_empty_figure()
 
     # Get transaction data
-    df_tx = dm.get_user_transactions(valid_user_id)
+    df_tx = dm.user_tab_data.get_user_transactions(valid_user_id)
     if df_tx.empty:
         return comp_factory.create_empty_figure()
 
     # Process transaction data
-    agg_data = dm.get_user_merchant_agg(valid_user_id)
+    agg_data = dm.user_tab_data.get_user_merchant_agg(valid_user_id)
     if agg_data.empty:
         return comp_factory.create_empty_figure()
 
