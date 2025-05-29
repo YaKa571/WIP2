@@ -8,6 +8,8 @@ import utils.logger as logger
 from backend.data_handler import optimize_data, clean_units, json_to_data_frame, json_to_dict, \
     read_parquet_data
 from backend.data_setup.tabs.tab_home_data import HomeTabData
+from backend.data_setup.tabs.tab_merchant_data import MerchantTabData
+from backend.data_setup.tabs.tab_cluster_data import ClusterTabData
 from backend.data_setup.tabs.tab_user_data import UserTabData
 from components.constants import DATA_DIRECTORY
 from utils.benchmark import Benchmark
@@ -78,6 +80,12 @@ class DataManager:
         # Home Tab
         self.home_tab_data: Optional[HomeTabData] = None
 
+        # Merchant Tab
+        self.merchant_tab_data: Optional[MerchantTabData] = None
+
+        # Cluster Tab
+        self.cluster_tab_data: Optional[ClusterTabData] = None
+
         # User Tab
         self.user_tab_data: Optional[UserTabData] = None
 
@@ -147,6 +155,14 @@ class DataManager:
         # Initialize Home Tab Data
         self.home_tab_data = HomeTabData(self)
         self.home_tab_data.initialize()
+
+        # Initialize Merchant Tab Data
+        self.merchant_tab_data = MerchantTabData(self)
+        self.merchant_tab_data.initialize()
+
+        # Initialize Cluster Tab Data
+        self.cluster_tab_data = ClusterTabData(self)
+        self.cluster_tab_data.initialize()
 
         # Initialize User Tab Data
         self.user_tab_data = UserTabData(self)
