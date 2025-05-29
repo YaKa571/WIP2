@@ -2,7 +2,7 @@ from enum import Enum
 
 import dash_bootstrap_components as dbc
 import plotly.express as px
-from dash import html, Output, Input, callback, dcc, ctx
+from dash import html, Output, Input, callback, ctx
 
 import components.constants as const
 from backend.data_manager import DataManager
@@ -300,64 +300,6 @@ def create_individual_merchant_kpi(merchant: int):
     return create_kpi_dashboard(kpi_data)
 
 
-# === INPUT CONTAINERS ===
-
-def get_merchant_group_input() -> dcc.Dropdown:
-    """
-    Generates a Dash Dropdown component for selecting merchant groups.
-
-    This function fetches a list of all available merchant groups and creates a Dropdown
-    component with them as selectable options. If no merchant groups are available, the
-    Dropdown will not set a default selection.
-
-    Returns:
-        dcc.Dropdown: A Dash Dropdown component configured with the available merchant
-        groups.
-
-    """
-    my_merchant_groups = dm.merchant_tab_data.get_all_merchant_groups()
-    options = [{'label': group, 'value': group} for group in my_merchant_groups]
-    default_value = my_merchant_groups[0] if my_merchant_groups else None
-
-    return dcc.Dropdown(
-        id=ID.MERCHANT_INPUT_GROUP_DROPDOWN,
-        className="settings-dropdown settings-text-centered",
-        options=options,
-        value=default_value,
-        placeholder="Choose a Merchant Group...",
-        searchable=True,
-        clearable=False,
-        multi=False,
-        style={"width": "100%"}
-    )
-
-
-def get_merchant_id_input() -> dcc.Input:
-    """
-    Generate an Input component for entering a Merchant ID.
-
-    The function creates and returns a Dash Core Components (dcc) Input
-    element configured for accepting a numeric Merchant ID input. Provides
-    default value, styles, and a placeholder for user guidance.
-
-    Returns
-    -------
-    dcc.Input
-        A Dash Input component preconfigured for numeric Merchant ID input
-        with specified ID, class name, default value, placeholder text, and
-        style attributes.
-    """
-    return dcc.Input(
-        id=ID.MERCHANT_INPUT_MERCHANT_ID,
-        className="search-bar-input no-spinner",
-        type="number",
-        autoComplete="off",
-        value="50783",
-        placeholder="Enter Merchant ID...",
-        style={"width": "100%"}
-    )
-
-
 # === GRAPH ===
 
 def create_merchant_group_distribution_tree_map(dark_mode: bool = False) -> px.treemap:
@@ -494,7 +436,6 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
         selected = MerchantTab.ALL.value  # Default
 
     dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
-
     group_style = {"display": "flex", "width": "100%"} if selected == MerchantTab.GROUP.value else {"display": "none",
                                                                                                     "width": "100%"}
     indiv_style = {"display": "flex", "width": "100%"} if selected == MerchantTab.INDIVIDUAL.value else {

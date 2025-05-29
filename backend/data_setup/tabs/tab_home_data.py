@@ -658,6 +658,13 @@ class HomeTabData:
         bm_pre_cache_full.print_time(level=3)
 
     def initialize(self):
+        """
+        Initializes the necessary processes for setting up internal data structures
+        and preloading cache configurations. It organizes tasks for transaction
+        data processing, key performance indicators calculation, and caching
+        necessary data for efficient system operation.
+
+        """
         self._process_transaction_data()
         self._calc_home_tab_kpis()
         self._pre_cache_home_tab_data()
