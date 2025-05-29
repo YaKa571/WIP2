@@ -452,7 +452,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
         kpi_content = create_merchant_group_kpi(merchant_group) if merchant_group else html.Div(
             "No merchant groups available.")
         graph_content = create_merchant_group_line_chart(
-            merchant_group) if merchant_group else comp_factory.create_empty_figure()
+            merchant_group, dark_mode=dark_mode) if merchant_group else comp_factory.create_empty_figure()
         graph_title = f"History for Merchant Group: {merchant_group}" if merchant_group else "No Merchant Group Selected"
     elif selected == MerchantTab.INDIVIDUAL.value:
         try:
@@ -461,7 +461,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
             merchant = None
         if merchant:
             kpi_content = create_individual_merchant_kpi(merchant)
-            graph_content = create_individual_merchant_line_chart(merchant)
+            graph_content = create_individual_merchant_line_chart(merchant, dark_mode=dark_mode)
             graph_title = f"History for Merchant: {merchant}"
         else:
             kpi_content = html.Div("Invalid or no Merchant ID entered.")
