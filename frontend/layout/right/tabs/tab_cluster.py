@@ -237,7 +237,6 @@ def _create_cluster_visualization():
 
             dbc.Card(
                 className="graph-card with-bar-chart",
-                style={"flex": "2 1 0"},
                 children=[
 
                     dbc.CardHeader(
@@ -253,11 +252,16 @@ def _create_cluster_visualization():
                         children=[
 
                             dcc.Graph(
+                                figure=comp_factory.create_empty_figure(),
                                 id=ID.CLUSTER_GRAPH,
                                 className="bar-chart",
                                 config={"displayModeBar": True, "displaylogo": False},
                                 responsive=True,
-                                style={"height": "100%"}
+                                style={
+                                    "height": "100%",
+                                    "width": "100%",
+                                    "minHeight": 0,
+                                    "minWidth": 0}
                             )
 
                         ]

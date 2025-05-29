@@ -4,14 +4,19 @@ from dash.exceptions import PreventUpdate
 from backend.callbacks.tabs.tab_merchant_callbacks import ID_TO_MERCHANT_TAB
 from backend.data_manager import DataManager
 from backend.data_setup.tabs.tab_home_data import HomeTabData
-from components.constants import COLOR_BLUE_MAIN, COLOR_FEMALE_PINK, GREEN_DARK, GREEN_LIGHT, COLOR_ONLINE, \
-    COLOR_INSTORE, AGE_GROUP_COLORS
-from components.tabs.tab_home_components import get_most_valuable_merchant_bar_chart, \
-    get_most_visited_merchants_bar_chart, get_spending_by_user_bar_chart, get_peak_hour_bar_chart, create_pie_graph, \
-    get_most_valuable_merchant_details, get_most_visited_merchant_details, get_top_spending_user_details, \
-    get_peak_hour_details, build_center_text, get_leader_info, get_age_leader_info
-from frontend.layout.right.tabs.tab_home import BAR_CHART_OPTIONS
+from components.constants import (
+    COLOR_BLUE_MAIN, COLOR_FEMALE_PINK, GREEN_DARK, GREEN_LIGHT,
+    COLOR_ONLINE, COLOR_INSTORE, AGE_GROUP_COLORS
+)
+from components.tabs.tab_home_components import (
+    get_most_valuable_merchant_bar_chart, get_most_visited_merchants_bar_chart,
+    get_spending_by_user_bar_chart, get_peak_hour_bar_chart, create_pie_graph,
+    get_most_valuable_merchant_details, get_most_visited_merchant_details,
+    get_top_spending_user_details, get_peak_hour_details, build_center_text,
+    get_leader_info, get_age_leader_info
+)
 from frontend.component_ids import ID
+from frontend.layout.right.tabs.tab_home import BAR_CHART_OPTIONS
 
 dm: DataManager = DataManager.get_instance()
 home_data: HomeTabData = dm.home_tab_data

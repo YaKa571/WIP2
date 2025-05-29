@@ -117,11 +117,14 @@ def get_most_valuable_merchant_details(state: str = None) -> list:
         associated with the merchant.
 
     """
+    # Get merchant data once to avoid redundant calls
+    merchant = dm.home_tab_data.get_most_valuable_merchant(state)
+
     one = html.P(
-        f"{dm.home_tab_data.get_most_valuable_merchant(state).mcc_desc}",
+        f"{merchant.mcc_desc}",
         className="kpi-card-value")
 
-    two = html.P(f"${dm.home_tab_data.get_most_valuable_merchant(state).value}",
+    two = html.P(f"${merchant.value}",
                  className="kpi-card-value kpi-number-value")
 
     tooltip = dbc.Tooltip(
@@ -131,9 +134,9 @@ def get_most_valuable_merchant_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_1"},
         target=ID.HOME_KPI_MOST_VALUABLE_MERCHANT,
         children=[
-            f"🆔 MERCHANT ID: {dm.home_tab_data.get_most_valuable_merchant(state).id}",
+            f"🆔 MERCHANT ID: {merchant.id}",
             html.Br(),
-            f"🏷️ MCC: {dm.home_tab_data.get_most_valuable_merchant(state).mcc}"
+            f"🏷️ MCC: {merchant.mcc}"
         ])
 
     return [one, two, tooltip]
@@ -155,11 +158,14 @@ def get_most_visited_merchant_details(state: str = None) -> list:
         description of the most visited merchant, and the second component includes
         the number of visits.
     """
+    # Get merchant data once to avoid redundant calls
+    merchant = home_data.get_most_visited_merchant(state)
+
     one = html.P(
-        f"{home_data.get_most_visited_merchant(state).mcc_desc}",
+        f"{merchant.mcc_desc}",
         className="kpi-card-value")
 
-    two = html.P(f"{home_data.get_most_visited_merchant(state).visits} visits",
+    two = html.P(f"{merchant.visits} visits",
                  className="kpi-card-value kpi-number-value")
 
     tooltip = dbc.Tooltip(
@@ -169,9 +175,9 @@ def get_most_visited_merchant_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_2"},
         target=ID.HOME_KPI_MOST_VISITED_MERCHANT,
         children=[
-            f"🆔 MERCHANT ID: {home_data.get_most_visited_merchant(state).id}",
+            f"🆔 MERCHANT ID: {merchant.id}",
             html.Br(),
-            f"🏷️MCC: {home_data.get_most_visited_merchant(state).mcc}"
+            f"🏷️MCC: {merchant.mcc}"
         ])
 
     return [one, two, tooltip]
@@ -193,11 +199,14 @@ def get_top_spending_user_details(state: str = None) -> list:
         A list of top spending user details, including formatted gender, age, and
         spending value.
     """
+    # Get user data once to avoid redundant calls
+    user = home_data.get_top_spending_user(state)
+
     one = html.P(
-        f"{home_data.get_top_spending_user(state).gender}, {home_data.get_top_spending_user(state).current_age} years",
+        f"{user.gender}, {user.current_age} years",
         className="kpi-card-value")
 
-    two = html.P(f"${home_data.get_top_spending_user(state).value}", className="kpi-card-value kpi-number-value")
+    two = html.P(f"${user.value}", className="kpi-card-value kpi-number-value")
 
     tooltip = dbc.Tooltip(
         placement="bottom",
@@ -206,7 +215,7 @@ def get_top_spending_user_details(state: str = None) -> list:
         id={"type": "tooltip", "id": "tab_home_kpi_3"},
         target=ID.HOME_KPI_TOP_SPENDING_USER,
         children=[
-            f"🆔 USER ID: {home_data.get_top_spending_user(state).id}"
+            f"🆔 USER ID: {user.id}"
         ])
 
     return [one, two, tooltip]
@@ -227,8 +236,11 @@ def get_peak_hour_details(state: str = None) -> list:
         list: A list of HTML paragraph elements containing the peak hour range and the
             transaction count information.
     """
-    one = html.P(f"{home_data.get_peak_hour(state).hour_range}", className="kpi-card-value")
-    two = html.P(f"{home_data.get_peak_hour(state).value} transactions", className="kpi-card-value kpi-number-value")
+    # Get peak hour data once to avoid redundant calls
+    peak_hour = home_data.get_peak_hour(state)
+
+    one = html.P(f"{peak_hour.hour_range}", className="kpi-card-value")
+    two = html.P(f"{peak_hour.value} transactions", className="kpi-card-value kpi-number-value")
 
     return [one, two]
 
@@ -469,20 +481,32 @@ def build_center_text(leader, leader_color, diff, color_green, tie_label="TIE", 
     Raises:
     None
     """
-    if leader != tie_label:
-        value_str = f"<span style='color:{color_green}; font-size:{value_font_size}px; font-weight:bold'>"
-        if value is not None:
-            value_str += f"${value:,.0f}"
-        if percent is not None:
-            value_str += f" ({percent:.1f}%)"
-        value_str += "</span>"
-        diff_str = f"<span style='color:{color_green}; font-size:{value_font_size}px; font-weight:bold'>+${diff:,.0f}</span>" if diff is not None else ""
-        return (
-            f"<span style='color:{leader_color}; font-size:{font_size}px; font-weight:bold'>{leader}</span><br>"
-            f"{value_str if value is not None else diff_str}"
-        )
-    else:
+    # If it's a tie, return a simple tie label
+    if leader == tie_label:
         return f"<span style='color:#aaa; font-size:20px; font-weight:bold'>{tie_label}</span>"
+
+    # Create the leader span with styling
+    leader_span = f"<span style='color:{leader_color}; font-size:{font_size}px; font-weight:bold'>{leader}</span><br>"
+
+    # Create the value span with styling
+    value_span = f"<span style='color:{color_green}; font-size:{value_font_size}px; font-weight:bold'>"
+
+    # Add value if provided
+    if value is not None:
+        value_span += f"${value:,.0f}"
+        # Add percent if provided
+        if percent is not None:
+            value_span += f" ({percent:.1f}%)"
+        value_span += "</span>"
+        return leader_span + value_span
+
+    # If no value but diff is provided, show the diff
+    if diff is not None:
+        diff_span = f"<span style='color:{color_green}; font-size:{value_font_size}px; font-weight:bold'>+${diff:,.0f}</span>"
+        return leader_span + diff_span
+
+    # If neither value nor diff is provided, just return the leader
+    return leader_span
 
 
 def get_leader_info(values: dict, label_colors: dict, tie_label="TIE"):

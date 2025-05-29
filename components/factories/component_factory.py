@@ -440,58 +440,89 @@ def create_bar_chart(
     go.Figure
         A Plotly Figure object representing the bar chart.
     """
+
+    # Extract constants
+    DEFAULT_MARGIN = dict(l=32, r=32, t=32, b=32)
+    DEFAULT_OPACITY = 0.95
+    DEFAULT_MARKER_LINE_WIDTH = 0
+
+    # Set theme colors
     text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
     grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
 
-    px_bar_kwargs = dict(
-        data_frame=df,
-        x=x,
-        y=y,
-        hover_data=hover_data,
-        color=color,
-        color_discrete_map=color_discrete_map,
-        labels=labels
-    )
+    # Build base configuration
+    chart_config = {
+        "data_frame": df,
+        "x": x,
+        "y": y
+    }
 
-    if title:
-        px_bar_kwargs["title"] = title
+    # Add optional parameters
+    optional_params = {
+        "hover_data": hover_data,
+        "color": color,
+        "color_discrete_map": color_discrete_map,
+        "labels": labels,
+        "title": title,
+        "custom_data": custom_data
+    }
+    chart_config.update({k: v for k, v in optional_params.items() if v is not None})
 
-    if custom_data:
-        px_bar_kwargs["custom_data"] = custom_data
+    # Create figure
+    fig = px.bar(**chart_config)
 
-    fig = px.bar(**px_bar_kwargs)
+    def update_axes_style():
+        fig.update_xaxes(
+            type="category",
+            categoryorder=x_category_order,
+            linecolor=grid_color,
+            gridcolor=const.COLOR_TRANSPARENT
+        )
+        fig.update_yaxes(
+            showline=False,
+            linecolor=grid_color,
+            gridcolor=grid_color
+        )
 
-    fig.update_xaxes(type="category", categoryorder=x_category_order,
-                     linecolor=grid_color, gridcolor=const.COLOR_TRANSPARENT)
+    def update_trace_style():
+        trace_updates = {
+            "marker_line_width": DEFAULT_MARKER_LINE_WIDTH,
+            "opacity": DEFAULT_OPACITY
+        }
+        if bar_color and not color:
+            trace_updates["marker_color"] = bar_color
+        if hover_template:
+            trace_updates["hovertemplate"] = hover_template
+        fig.update_traces(**trace_updates)
 
-    fig.update_yaxes(showline=False, linecolor=grid_color, gridcolor=grid_color)
+    def update_chart_layout():
+        fig.update_layout(
+            paper_bgcolor=const.COLOR_TRANSPARENT,
+            plot_bgcolor=const.COLOR_TRANSPARENT,
+            margin=margin or DEFAULT_MARGIN,
+            title_x=0.5,
+            title_y=0.975,
+            showlegend=showlegend,
+            modebar={"orientation": "h"},
+            font=dict(color=text_color),
+            xaxis=dict(title_font=dict(color=text_color), tickfont=dict(color=text_color)),
+            yaxis=dict(title_font=dict(color=text_color), tickfont=dict(color=text_color)),
+            legend=dict(
+                font=dict(color=text_color),
+                x=1.00275,
+                xanchor="right",
+                y=1.04,
+                yanchor="top",
+                orientation="h"
+            ),
+            title=dict(font=dict(color=text_color)),
+            barcornerradius="16%"
+        )
 
-    if bar_color and not color:
-        fig.update_traces(marker_color=bar_color)
-
-    fig.update_traces(marker_line_width=0,
-                      opacity=0.95)
-
-    if hover_template:
-        fig.update_traces(hovertemplate=hover_template)
-
-    fig.update_layout(
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        margin=margin or dict(l=32, r=32, t=32, b=32),
-        title_x=0.5,
-        title_y=0.975,
-        showlegend=showlegend,
-        modebar={"orientation": "h"},
-        font=dict(color=text_color),
-        xaxis=dict(title_font=dict(color=text_color), tickfont=dict(color=text_color)),
-        yaxis=dict(title_font=dict(color=text_color), tickfont=dict(color=text_color)),
-        legend=dict(font=dict(color=text_color),
-                    x=1.00275, xanchor="right", y=1.04, yanchor="top",
-                    orientation="h"),
-        title=dict(font=dict(color=text_color)),
-        barcornerradius="16%"
-    )
+    # Apply styles
+    update_axes_style()
+    update_trace_style()
+    update_chart_layout()
 
     return fig
 
