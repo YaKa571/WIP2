@@ -2,6 +2,7 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from dash import html
 
+import components.constants as const
 import components.factories.component_factory as comp_factory
 from backend.data_manager import DataManager
 from components.constants import COLOR_BLUE_MAIN, COLOR_FEMALE_PINK
@@ -42,7 +43,7 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
     if colors is None:
         colors = [COLOR_FEMALE_PINK, COLOR_BLUE_MAIN]  # Female = pink, Male = blue
 
-    textcolor = "white" if dark_mode else "black"
+    textcolor = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
 
     labels = list(data.keys())
     values = list(data.values())
@@ -74,8 +75,8 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
     )
 
     fig.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',  # Transparent background
-        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor=const.COLOR_TRANSPARENT,  # Transparent background
+        plot_bgcolor=const.COLOR_TRANSPARENT,
         legend=dict(
             x=1,  # 100% right
             y=1,  # 100% top

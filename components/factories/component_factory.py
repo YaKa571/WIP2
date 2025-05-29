@@ -448,8 +448,7 @@ def create_bar_chart(
         A Plotly Figure object representing the bar chart.
     """
     text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-    transparent_color = "rgba(0,0,0,0)"
-    grid_color = "rgba(230,230,230,100)" if dark_mode else "rgba(25,25,25,100)"
+    grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
 
     px_bar_kwargs = dict(
         data_frame=df,
@@ -470,7 +469,7 @@ def create_bar_chart(
     fig = px.bar(**px_bar_kwargs)
 
     fig.update_xaxes(type="category", categoryorder=x_category_order,
-                     linecolor=grid_color, gridcolor=transparent_color)
+                     linecolor=grid_color, gridcolor=const.COLOR_TRANSPARENT)
 
     fig.update_yaxes(showline=False, linecolor=grid_color, gridcolor=grid_color)
 
@@ -484,8 +483,8 @@ def create_bar_chart(
         fig.update_traces(hovertemplate=hover_template)
 
     fig.update_layout(
-        paper_bgcolor=transparent_color,
-        plot_bgcolor=transparent_color,
+        paper_bgcolor=const.COLOR_TRANSPARENT,
+        plot_bgcolor=const.COLOR_TRANSPARENT,
         margin=margin or dict(l=32, r=32, t=32, b=32),
         title_x=0.5,
         title_y=0.975,
@@ -517,8 +516,8 @@ def create_empty_figure():
     fig.update_layout(
         xaxis={'visible': False},
         yaxis={'visible': False},
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor=const.COLOR_TRANSPARENT,
+        paper_bgcolor=const.COLOR_TRANSPARENT,
         margin=dict(l=0, r=0, t=0, b=0)
     )
     return fig

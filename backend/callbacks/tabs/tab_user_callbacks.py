@@ -10,6 +10,7 @@ from components.tabs.tab_user_components import get_valid_user_id, configure_cha
     create_bar_chart_figure
 from frontend.layout.right.tabs.tab_user import create_kpi_value_text
 from frontend.component_ids import ID
+import components.constants as const
 
 dm: DataManager = DataManager.get_instance()
 TEXT_EMPTY_KPI = "Waiting for input..."
@@ -209,8 +210,8 @@ def update_credit_limit_bar(user_id, card_id):
         showlegend=False,
         bargap=0,
         margin=dict(l=0, r=0, t=0, b=0),
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor=const.COLOR_TRANSPARENT,
+        paper_bgcolor=const.COLOR_TRANSPARENT,
         xaxis=dict(
             showticklabels=False,
             visible=False,
