@@ -53,20 +53,17 @@ class ClusterTabData:
         if cache_key in self._cache_cluster_data:
             return self._cache_cluster_data[cache_key]
 
-        # Get a copy of the data
-        df = self.data_file.copy()
-
-        # Optional: Merchant Group filter
+        # Use view
         if merchant_group != 'All Merchant Groups':
-            df = df[df['merchant_group'] == merchant_group].copy()
-
-        df['age_group_plot'] = df['age_group']  # for plotting
+            df_view = self.data_file[self.data_file['merchant_group'] == merchant_group]
+        else:
+            df_view = self.data_file
 
         # Aggregation per client_id
-        agg = df.groupby('client_id').agg(
+        agg = df_view.groupby('client_id').agg(
             transaction_count=('amount', 'count'),
             total_value=('amount', 'sum'),
-            age_group=('age_group_plot', 'first')  # one age group per client
+            age_group=('age_group', 'first')  # one age group per client
         ).reset_index()
 
         agg['average_value'] = agg['total_value'] / agg['transaction_count']
@@ -77,8 +74,9 @@ class ClusterTabData:
         # Clustering 1: total_value vs count
         n_clusters_total = min(4, n_samples)
         if n_clusters_total >= 1:
-            kmeans_total = KMeans(n_clusters=n_clusters_total, random_state=42, n_init=30)
-            agg['cluster_total'] = kmeans_total.fit_predict(agg[['transaction_count', 'total_value']])
+            kmeans_total = KMeans(n_clusters=n_clusters_total, random_state=42, n_init=10)
+            cluster_data = agg[['transaction_count', 'total_value']]
+            agg['cluster_total'] = kmeans_total.fit_predict(cluster_data)
         else:
             agg['cluster_total'] = 0  # fallback for 0 rows
         agg['cluster_total_str'] = agg['cluster_total'].astype(str)
@@ -86,8 +84,9 @@ class ClusterTabData:
         # Clustering 2: average_value vs count
         n_clusters_avg = min(4, n_samples)
         if n_clusters_avg >= 1:
-            kmeans_avg = KMeans(n_clusters=n_clusters_avg, random_state=42, n_init=30)
-            agg['cluster_avg'] = kmeans_avg.fit_predict(agg[['transaction_count', 'average_value']])
+            kmeans_avg = KMeans(n_clusters=n_clusters_avg, random_state=42, n_init=10)
+            cluster_data = agg[['transaction_count', 'average_value']]
+            agg['cluster_avg'] = kmeans_avg.fit_predict(cluster_data)
         else:
             agg['cluster_avg'] = 0
         agg['cluster_avg_str'] = agg['cluster_avg'].astype(str)
@@ -112,15 +111,15 @@ class ClusterTabData:
         if cache_key in self._cache_inc_vs_exp_cluster_data:
             return self._cache_inc_vs_exp_cluster_data[cache_key]
 
-        # Get a copy of the data
-        df = self.data_file.copy()
-
-        # Filtering
+        # Use view instead of copy when possible
         if merchant_group != 'All Merchant Groups':
-            df = df[df['merchant_group'] == merchant_group].copy()
+            # Filter data without creating an unnecessary copy
+            df_view = self.data_file[self.data_file['merchant_group'] == merchant_group]
+        else:
+            df_view = self.data_file
 
-        # Aggregation per client_id
-        agg = df.groupby('client_id').agg(
+        # Aggregation per client_id - more efficient with named aggregation
+        agg = df_view.groupby('client_id').agg(
             total_expenses=('amount', 'sum'),
             yearly_income=('yearly_income', 'first'),
             age_group=('age_group', 'first')
@@ -133,8 +132,11 @@ class ClusterTabData:
         n_clusters = min(4, n_samples)
 
         if n_clusters >= 1:
-            kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=30)
-            agg['cluster_inc_vs_exp'] = kmeans.fit_predict(agg[['yearly_income', 'total_expenses']])
+            # Reduced n_init for better performance while maintaining reproducibility
+            kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+            # Extract only needed columns for clustering to reduce memory usage
+            cluster_data = agg[['yearly_income', 'total_expenses']]
+            agg['cluster_inc_vs_exp'] = kmeans.fit_predict(cluster_data)
         else:
             agg['cluster_inc_vs_exp'] = 0
 
