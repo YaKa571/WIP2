@@ -163,7 +163,7 @@ def create_all_merchant_kpis():
             "icon": IconID.CHART_PIPE,
             "title": "Top Merchant Group (by Transactions)",
             "value_1": group_1,
-            "value_2": f"{count_1} Transactions",
+            "value_2": f"{count_1:,} Transactions",
             "value_id": ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP
         },
         {
@@ -177,7 +177,7 @@ def create_all_merchant_kpis():
             "icon": IconID.TRANSACTION_BY_CARD,
             "title": "Top User (by Transactions)",
             "value_1": f"ID {user_3}",
-            "value_2": f"{count_3} Transactions",
+            "value_2": f"{count_3:,} Transactions",
             "value_id": ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_ALL
         },
         {
@@ -220,7 +220,7 @@ def create_merchant_group_kpi(merchant_group):
             "icon": IconID.CHART_PIPE,
             "title": "Top Merchant (by Transactions)",
             "value_1": f"ID {merchant_1}",
-            "value_2": f"{count_1} Transactions",
+            "value_2": f"{count_1:,} Transactions",
             "value_id": ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP
         },
         {
@@ -234,7 +234,7 @@ def create_merchant_group_kpi(merchant_group):
             "icon": IconID.TRANSACTION_BY_CARD,
             "title": "Top User (by Transactions)",
             "value_1": f"ID {user_3}",
-            "value_2": f"{count_3} Transactions",
+            "value_2": f"{count_3:,} Transactions",
             "value_id": ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP
         },
         {
@@ -272,7 +272,7 @@ def create_individual_merchant_kpi(merchant: int):
             "icon": IconID.CHART_PIPE,
             "title": "Transactions",
             "value_1": " ",
-            "value_2": f"{count_1} Transactions",
+            "value_2": f"{count_1:,} Transactions",
             "value_id": ID.MERCHANT_KPI_MERCHANT_TRANSACTIONS
         },
         {
@@ -286,7 +286,7 @@ def create_individual_merchant_kpi(merchant: int):
             "icon": IconID.TRANSACTION_BY_CARD,
             "title": "Top User (by Transactions)",
             "value_1": f"ID {user_3}",
-            "value_2": f"{count_3} Transactions",
+            "value_2": f"{count_3:,} Transactions",
             "value_id": ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS
         },
         {
@@ -444,16 +444,16 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
     if selected == MerchantTab.ALL.value:
         kpi_content = create_all_merchant_kpis()
         graph_content = create_merchant_group_distribution_tree_map(dark_mode=dark_mode)
-        graph_title = "Merchant Group Distribution"
+        graph_title = "MERCHANT GROUP DISTRIBUTION"
     elif selected == MerchantTab.GROUP.value:
         merchant_group = selected_group or (
             dm.merchant_tab_data.get_all_merchant_groups()[0]
             if dm.merchant_tab_data.get_all_merchant_groups() else None)
         kpi_content = create_merchant_group_kpi(merchant_group) if merchant_group else html.Div(
-            "No merchant groups available.")
+            "NO MERCHANT GROUPS AVAILABLE.")
         graph_content = create_merchant_group_line_chart(
             merchant_group, dark_mode=dark_mode) if merchant_group else comp_factory.create_empty_figure()
-        graph_title = f"History for Merchant Group: {merchant_group}" if merchant_group else "No Merchant Group Selected"
+        graph_title = f"HISTORY FOR MERCHANT GROUP: {merchant_group}" if merchant_group else "NO MERCHANT GROUP SELECTED"
     elif selected == MerchantTab.INDIVIDUAL.value:
         try:
             merchant = int(selected_merchant_id)
@@ -462,11 +462,11 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
         if merchant:
             kpi_content = create_individual_merchant_kpi(merchant)
             graph_content = create_individual_merchant_line_chart(merchant, dark_mode=dark_mode)
-            graph_title = f"History for Merchant: {merchant}"
+            graph_title = f"HISTORY FOR MERCHANT: {merchant}"
         else:
-            kpi_content = html.Div("Invalid or no Merchant ID entered.")
+            kpi_content = html.Div("INVALID OR NO MERCHANT ID ENTERED.")
             graph_content = comp_factory.create_empty_figure()
-            graph_title = "Invalid Merchant ID"
+            graph_title = "INVALID MERCHANT ID"
     else:
         kpi_content = html.Div()
         graph_content = comp_factory.create_empty_figure()
