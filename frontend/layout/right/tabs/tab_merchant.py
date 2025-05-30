@@ -228,7 +228,7 @@ def _create_merchant_graph():
         children=[
 
             dbc.Card(
-                className="graph-card with-bar-chart lower-modebar",
+                className="graph-card with-bar-chart",
                 children=[
 
                     dbc.CardHeader(
@@ -246,6 +246,7 @@ def _create_merchant_graph():
                                 id=ID.MERCHANT_GRAPH_CONTAINER,
                                 className="bar-chart",
                                 config={
+                                    "scrollZoom": True,
                                     "displayModeBar": True,
                                     "modeBarButtonsToRemove": ["zoom2d", "pan2d", "select2d", "lasso2d",
                                                                "zoomIn2d", "zoomOut2d", "autoScale2d",

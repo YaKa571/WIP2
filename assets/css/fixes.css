@@ -23,7 +23,7 @@
 }
 
 .graph-card.with-bar-chart .js-plotly-plot .modebar {
-    top: 32px !important;
+    top: 30px !important;
     right: auto !important;
     left: 50% !important;
     transform: translateX(-50%);
@@ -34,7 +34,7 @@
 
 /* Merchant Group Distribution */
 .graph-card.with-bar-chart.lower-modebar .js-plotly-plot .modebar {
-    top: -6px !important;
+    top: 38px !important;
 }
 
 /* When hovering over diagram show modebar */
