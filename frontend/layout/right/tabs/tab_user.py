@@ -91,7 +91,7 @@ def _create_search_bars() -> html.Div:
         className="flex-wrapper",
         children=[
 
-            _create_single_search_bar(ID.USER_ID_SEARCH_INPUT, "SEARCH BY USER ID..."),
+            _create_single_search_bar(ID.USER_ID_SEARCH_INPUT, "SEARCH BY USER ID...", start_value=1098),
             _create_single_search_bar(ID.CARD_ID_SEARCH_INPUT, "SEARCH BY CARD ID...")
 
         ])
@@ -311,5 +311,5 @@ def create_kpi_value_text(text: str, red_text_color: bool = False) -> html.P:
     Returns:
         An html.P object styled based on the specified parameters.
     """
-    className = "kpi-card-value kpi-number-value" if not red_text_color else "kpi-card-value kpi-number-value red-text"
+    className = "kpi-card-value kpi-number-value" if not red_text_color else "kpi-card-value kpi-number-value info-text"
     return html.P(text, className=className)
