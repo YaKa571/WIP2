@@ -3,16 +3,23 @@ from dash.exceptions import PreventUpdate
 
 from backend.callbacks.tabs.tab_merchant_callbacks import ID_TO_MERCHANT_TAB
 from backend.data_manager import DataManager
-from backend.data_setup.tabs.tab_home_data_setup import get_most_valuable_merchant_bar_chart, \
-    get_most_visited_merchants_bar_chart, get_spending_by_user_bar_chart, get_peak_hour_bar_chart, create_pie_graph, \
-    get_most_valuable_merchant_details, get_most_visited_merchant_details, get_top_spending_user_details, \
-    get_peak_hour_details, build_center_text, get_leader_info, get_age_leader_info
-from components.constants import COLOR_BLUE_MAIN, COLOR_FEMALE_PINK, GREEN_DARK, GREEN_LIGHT, COLOR_ONLINE, \
-    COLOR_INSTORE, AGE_GROUP_COLORS
-from components.rightcolumn.tabs.tab_home import BAR_CHART_OPTIONS
+from backend.data_setup.tabs.tab_home_data import HomeTabData
+from components.constants import (
+    COLOR_BLUE_MAIN, COLOR_FEMALE_PINK, GREEN_DARK, GREEN_LIGHT,
+    COLOR_ONLINE, COLOR_INSTORE, AGE_GROUP_COLORS
+)
+from components.tabs.tab_home_components import (
+    get_most_valuable_merchant_bar_chart, get_most_visited_merchants_bar_chart,
+    get_spending_by_user_bar_chart, get_peak_hour_bar_chart, create_pie_graph,
+    get_most_valuable_merchant_details, get_most_visited_merchant_details,
+    get_top_spending_user_details, get_peak_hour_details, build_center_text,
+    get_leader_info, get_age_leader_info
+)
 from frontend.component_ids import ID
+from frontend.layout.right.tabs.tab_home import BAR_CHART_OPTIONS
 
 dm: DataManager = DataManager.get_instance()
+home_data: HomeTabData = dm.home_tab_data
 
 # Map of dropdown-values -> chart-builder functions
 CHART_BUILDERS = {
@@ -32,6 +39,23 @@ CHART_BUILDERS = {
     prevent_initial_call=True
 )
 def update_bar_chart(selected_state, chart_option, n_clicks_toggle, n_clicks_dark):
+    """
+    Updates the bar chart figure based on the selected state, chart options, and user interaction.
+
+    This callback function dynamically generates a bar chart figure for display.
+    It re-renders the figure when any of its inputs change, including the selected
+    state, chart type option, or toggle actions for all states and dark mode. The
+    function also provides support for toggling dark mode UI representation.
+
+    Args:
+        selected_state: Data representing the current state selection.
+        chart_option: Selected option for bar chart type.
+        n_clicks_toggle: Number of clicks on the "Toggle All States" button.
+        n_clicks_dark: Number of clicks on the "Dark Mode Toggle" button.
+
+    Returns:
+        A plotly figure object for the updated bar chart.
+    """
     trigger = ctx.triggered_id
 
     if trigger == ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES:
@@ -59,6 +83,20 @@ def update_bar_chart(selected_state, chart_option, n_clicks_toggle, n_clicks_dar
     prevent_initial_call=True
 )
 def store_selected_state(clickData, n_clicks):
+    """
+    Handles storing the selected state based on interaction with a map or toggle button. The function processes user
+    interactions, such as clicking on a map location or a toggle button, and updates the state data accordingly.
+
+    Args:
+        clickData: Dictionary containing data about a click event on the map. It includes details about the clicked
+            location, such as coordinates or state identifier.
+        n_clicks: Number of times the toggle button has been clicked.
+
+    Returns:
+        tuple: A tuple containing updated state data and clickData for the map. The returned values depend on the user
+            interaction that triggered the callback. If the toggle button is clicked, both values are set to None. If a map
+            location is clicked, state data is updated with the clicked location, and the map clickData remains unchanged.
+    """
     # Get the context
     trigger = ctx.triggered_id
 
@@ -91,6 +129,35 @@ def store_selected_state(clickData, n_clicks):
     prevent_initial_call=True
 )
 def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
+    """
+    Updates multiple pie charts, headings, KPIs, and button classes based on user interaction and state selection.
+
+    This callback is responsible for updating the gender, channel, and age-based expenditure pie charts,
+    updating the state-specific heading text, recalculating various Key Performance Indicators (KPIs),
+    and modifying the visibility/classes of UI elements. The updates dynamically adapt based on the user's
+    input actions such as toggling between all states and specific state selections or enabling/disabling
+    dark mode.
+
+    Args:
+        n_clicks_toggle (int): The number of times the "Toggle All States" button is clicked. Used to
+            switch between all states and a specific state view.
+        n_clicks_dark (int): The number of times the dark mode toggle button is clicked. Used to enable
+            or disable dark mode based on the parity of the number of clicks.
+        selected_state (str): The currently selected state, represented as a string. It determines
+            the scope of data visualizations (e.g., Gender, Channel, and Age expenditures) and KPIs.
+
+    Returns:
+        tuple: A tuple containing the following elements:
+            - (plotly.graph_objects.Figure) The updated pie chart for expenditures by gender.
+            - (plotly.graph_objects.Figure) The updated pie chart for expenditures by channel.
+            - (plotly.graph_objects.Figure) The updated pie chart for expenditures by age.
+            - (str) The updated heading for the state or "All States".
+            - (str) The name/details of the most valuable merchant based on the selected state.
+            - (str) The name/details of the most visited merchant based on the selected state.
+            - (str) The name/details of the top spending user based on the selected state.
+            - (str) The peak hour details indicating the time of highest expenditures.
+            - (str) The CSS class name for the toggle button, indicating its visibility or styling.
+    """
     # Context, State, Dark Mode
     trigger = ctx.triggered_id
     state = None if trigger == ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES else selected_state
@@ -98,7 +165,7 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
     color_green = GREEN_DARK if dark_mode else GREEN_LIGHT
 
     # Gender
-    gender_sums = dm.get_expenditures_by_gender(state=state).copy()
+    gender_sums = home_data.get_expenditures_by_gender(state=state).copy()
     gender_label_colors = {"MALE": COLOR_BLUE_MAIN, "FEMALE": COLOR_FEMALE_PINK}
     labels_gender = list(gender_sums.keys())
     colors_gender = [gender_label_colors.get(label, "#cccccc") for label in labels_gender]
@@ -119,7 +186,7 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
     )
 
     # Channel
-    channel_sums = dm.get_expenditures_by_channel(state=state)
+    channel_sums = home_data.get_expenditures_by_channel(state=state)
     channel_label_colors = {"ONLINE": COLOR_ONLINE, "IN-STORE": COLOR_INSTORE}
     channel_leader, leader_color, diff = get_leader_info(channel_sums, channel_label_colors)
     center_text_channel = build_center_text(channel_leader, leader_color, diff, color_green, tie_label="TIE",
@@ -138,7 +205,7 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
     )
 
     # Age
-    age_sums = dm.get_expenditures_by_age(state=state)
+    age_sums = home_data.get_expenditures_by_age(state=state)
     top_group, color_leader, top_value, percent, total = get_age_leader_info(age_sums, AGE_GROUP_COLORS)
     center_text_age = build_center_text(top_group, color_leader, None, color_green, tie_label="NO DATA",
                                         value=top_value, percent=None,

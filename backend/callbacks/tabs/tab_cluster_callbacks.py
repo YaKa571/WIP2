@@ -3,10 +3,13 @@ from enum import Enum
 from dash import dcc, html, callback, Input, Output, ctx, State
 
 import components.factories.component_factory as comp_factory
-from backend.data_setup.tabs import tab_cluster_data_setup
-from backend.data_setup.tabs.tab_cluster_data_setup import prepare_cluster_data, make_cluster_plot, my_data_file, \
-    create_cluster_legend, prepare_inc_vs_exp_cluster_data, make_inc_vs_exp_plot
+from backend.data_manager import DataManager
+from components.tabs.tab_cluster_components import make_cluster_plot, create_cluster_legend, make_inc_vs_exp_plot
 from frontend.component_ids import ID
+
+# Initialize DataManager instance
+dm: DataManager = DataManager.get_instance()
+cluster_data = dm.cluster_tab_data
 
 
 class ClusterMainOption(str, Enum):
@@ -112,8 +115,9 @@ def set_cluster_tab(n_total_value, n_average_value, n_inc_vs_exp, n_all_ages, n_
     Output(ID.CLUSTER_LEGEND, "children"),
     Input(ID.CLUSTER_SELECTED_BUTTON_STORE, "data"),
     Input(ID.CLUSTER_MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
+    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks"),
 )
-def update_cluster(selected, selected_merchant_group):
+def update_cluster(selected, selected_merchant_group, n_clicks_dark):
     """
     A callback function to update clustering-related interactive components based on user input. It adjusts the visual
     representation and styling of buttons and plots depending on the selected main clustering criterion and age grouping
@@ -133,6 +137,8 @@ def update_cluster(selected, selected_merchant_group):
         Updated class names for each cluster button, a customized plotly figure representing the clustering data,
         and the corresponding legend object as a `Div` element for further interface usability.
     """
+    dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
+
     if not selected:
         selected = {
             "main": ClusterMainOption.TOTAL_VALUE.value,
@@ -143,33 +149,33 @@ def update_cluster(selected, selected_merchant_group):
     selected_age = selected["age"]
 
     if selected_main == ClusterMainOption.TOTAL_VALUE.value and selected_age == ClusterAgeOption.ALL_AGES.value:
-        df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
-        fig = make_cluster_plot(df_clustered, mode="total_value", age_group_mode="not grouped")
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        fig = make_cluster_plot(df_clustered, mode="total_value", age_group_mode="not grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="total_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.TOTAL_VALUE.value and selected_age == ClusterAgeOption.AGE_GROUPS.value:
-        df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
-        fig = make_cluster_plot(df_clustered, mode="total_value", age_group_mode="grouped")
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        fig = make_cluster_plot(df_clustered, mode="total_value", age_group_mode="grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="total_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.AVERAGE_VALUE.value and selected_age == ClusterAgeOption.ALL_AGES.value:
-        df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
-        fig = make_cluster_plot(df_clustered, mode="average_value", age_group_mode="not grouped")
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        fig = make_cluster_plot(df_clustered, mode="average_value", age_group_mode="not grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="average_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.AVERAGE_VALUE.value and selected_age == ClusterAgeOption.AGE_GROUPS.value:
-        df_clustered = prepare_cluster_data(my_data_file, merchant_group=selected_merchant_group)
-        fig = make_cluster_plot(df_clustered, mode="average_value", age_group_mode="grouped")
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        fig = make_cluster_plot(df_clustered, mode="average_value", age_group_mode="grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="average_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.INC_VS_EXP.value and selected_age == ClusterAgeOption.ALL_AGES.value:
-        df_clustered = prepare_inc_vs_exp_cluster_data(my_data_file, merchant_group=selected_merchant_group)
-        fig = make_inc_vs_exp_plot(df_clustered, age_group_mode="not grouped")
+        df_clustered = cluster_data.prepare_inc_vs_exp_cluster_data(selected_merchant_group)
+        fig = make_inc_vs_exp_plot(df_clustered, age_group_mode="not grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="inc_vs_exp", df=df_clustered)
 
     elif selected_main == ClusterMainOption.INC_VS_EXP.value and selected_age == ClusterAgeOption.AGE_GROUPS.value:
-        df_clustered = prepare_inc_vs_exp_cluster_data(my_data_file, merchant_group=selected_merchant_group)
-        fig = make_inc_vs_exp_plot(df_clustered, age_group_mode="grouped")
+        df_clustered = cluster_data.prepare_inc_vs_exp_cluster_data(selected_merchant_group)
+        fig = make_inc_vs_exp_plot(df_clustered, age_group_mode="grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="inc_vs_exp", df=df_clustered)
 
     else:
@@ -202,7 +208,7 @@ def get_cluster_merchant_group_input() -> dcc.Dropdown:
         selection if available, or a placeholder if no groups exist. The dropdown is
         searchable, not clearable, and supports single selection only.
     """
-    merchant_groups = tab_cluster_data_setup.get_cluster_merchant_group_dropdown()
+    merchant_groups = cluster_data.get_cluster_merchant_group_dropdown()
     options = [{'label': group, 'value': group} for group in merchant_groups]
 
     default_value = merchant_groups[0] if merchant_groups else None
@@ -218,3 +224,36 @@ def get_cluster_merchant_group_input() -> dcc.Dropdown:
         multi=False,
         style={"width": "100%"}
     )
+
+
+@callback(
+    Output(ID.CLUSTER_COLLAPSE_LEGEND, "is_open"),
+    Output(ID.CLUSTER_BTN_TOGGLE_LEGEND, "children"),
+    Input(ID.CLUSTER_BTN_TOGGLE_LEGEND, "n_clicks"),
+    State(ID.CLUSTER_COLLAPSE_LEGEND, "is_open"),
+    prevent_initial_call=True
+)
+def toggle_legend(n_clicks, is_open):
+    """
+    Toggle the visibility of a legend section and update the icon displayed on a button.
+
+    Toggles the "is_open" state of a legend section and modifies the button's icon based
+    on the toggled state. This function is triggered by button clicks.
+
+    @param n_clicks: The number of times the button has been clicked.
+        A positive integer indicating the number of button clicks.
+    @param is_open: Indicates whether the legend section is currently open.
+        A boolean value where True represents that the legend is open,
+        and False indicates it is closed.
+
+    @return:
+        A tuple containing:
+        - The new state for the "is_open" property of the legend section,
+          where True means the legend section is closed and False means it is open.
+        - The icon element (html.I) that should be displayed on the button,
+          either an up arrow or a down arrow.
+    """
+    new_state = not is_open
+    icon = html.I(className="fa fa-chevron-up") if new_state else html.I(className="fa fa-chevron-down")
+
+    return new_state, icon

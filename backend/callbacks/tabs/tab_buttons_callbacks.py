@@ -3,7 +3,7 @@ import json
 from dash import callback, callback_context
 from dash.dependencies import Input, Output, ALL
 
-from components.rightcolumn.right_column import TABS
+from frontend.layout.right.right_column import TABS
 from frontend.component_ids import ID
 
 

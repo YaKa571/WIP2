@@ -76,6 +76,8 @@ class ID(str, Enum):
     CLUSTER_CONTROL_MERCHANT_GROUP_DROPDOWN = "cluster-control-merchant-group-dropdown"
     CLUSTER_MERCHANT_INPUT_GROUP_DROPDOWN = "cluster-control-merchant-input-group-dropdown"
     CLUSTER_SELECTED_BUTTON_STORE = "cluster-selected-button-store"
+    CLUSTER_BTN_TOGGLE_LEGEND = "cluster-btn-toggle-legend"
+    CLUSTER_COLLAPSE_LEGEND = "cluster-collapse-legend"
 
     # User Tab
     USER_TAB_INFO_ICON = "user-tab-info-icon"

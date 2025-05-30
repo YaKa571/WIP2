@@ -24,6 +24,7 @@ def create_cluster_content():
             _create_button_row(),
             _create_cluster_age_group_switch(),
             _create_cluster_control_merchant_group(),
+            _create_cluster_legend(),
             _create_cluster_visualization()
 
         ]
@@ -31,6 +32,20 @@ def create_cluster_content():
 
 
 def _create_heading() -> html.Div:
+    """
+    Creates a heading component designed for the Cluster Analysis tab.
+
+    This function generates a `html.Div` component containing a styled
+    heading, an information icon, and a tooltip, with functionality allowing
+    users to interact and understand the options available in the Cluster
+    Analysis interface.
+
+    Returns:
+        html.Div: A `Div` component containing the formatted heading and
+        associated elements such as an icon and tooltip. The element is styled
+        and structured to be used specifically for the Cluster Analysis tab
+        in the application.
+    """
     return html.Div(
         className="tab-heading-wrapper",
         children=[
@@ -176,6 +191,62 @@ def _create_cluster_control_merchant_group():
     )
 
 
+def _create_cluster_legend():
+    """
+    Creates a cluster legend component.
+
+    This function generates a user interface component for displaying a cluster legend.
+    It consists of a collapsible card containing the legend title, an icon, and a toggle
+    button for expanding or collapsing the legend content.
+
+    Returns:
+        dash.html.Div: A Div component containing the cluster legend UI.
+    """
+    return html.Div(
+        className="flex-wrapper",
+        children=[
+
+            dbc.Card(
+                className="graph-card",
+                children=[
+                    dbc.CardHeader(
+                        style={"position": "relative"},
+                        children=[
+
+                            comp_factory.create_icon(IconID.LEGEND, cls="icon icon-small"),
+                            html.P("Cluster Legend", className="graph-card-title"),
+
+                            dbc.Button(
+                                html.I(className="fa fa-chevron-up"),
+                                id=ID.CLUSTER_BTN_TOGGLE_LEGEND,
+                                n_clicks=0,
+                                style={
+                                    "position": "absolute",
+                                    "right": "18px",
+                                    "top": "50%",
+                                    "transform": "translateY(-50%)",
+                                    "zIndex": 2,
+                                    "borderRadius": "16%"
+                                }
+                            )
+
+                        ]
+                    ),
+                    dbc.Collapse(
+                        id=ID.CLUSTER_COLLAPSE_LEGEND,
+                        is_open=True,
+                        children=dbc.CardBody(
+                            html.Div(
+                                id=ID.CLUSTER_LEGEND,
+                                className="legend-item-container"
+                            )
+                        ),
+                    )
+                ]
+            )
+        ])
+
+
 def _create_cluster_visualization():
     """
         Creates the visualization layout for the cluster tab including two cards:
@@ -189,8 +260,7 @@ def _create_cluster_visualization():
         children=[
 
             dbc.Card(
-                className="graph-card with-bar-chart",
-                style={"flex": "2 1 0"},
+                className="graph-card with-bar-chart lower-modebar",
                 children=[
 
                     dbc.CardHeader(
@@ -206,11 +276,20 @@ def _create_cluster_visualization():
                         children=[
 
                             dcc.Graph(
+                                figure=comp_factory.create_empty_figure(),
                                 id=ID.CLUSTER_GRAPH,
                                 className="bar-chart",
-                                config={"displayModeBar": True, "displaylogo": False},
+                                config={
+                                    "scrollZoom": True,
+                                    "displayModeBar": True,
+                                    "displaylogo": False
+                                },
                                 responsive=True,
-                                style={"minHeight": "400px", "height": "100%"}
+                                style={
+                                    "height": "100%",
+                                    "width": "100%",
+                                    "minHeight": 0,
+                                    "minWidth": 0}
                             )
 
                         ]
@@ -218,28 +297,4 @@ def _create_cluster_visualization():
                 ]
             ),
 
-            dbc.Card(
-                className="graph-card",
-                children=[
-
-                    dbc.CardHeader(
-                        children=[
-
-                            comp_factory.create_icon(IconID.LEGEND, cls="icon icon-small"),
-                            html.P("Cluster Legend", className="graph-card-title")
-
-                        ]
-                    ),
-
-                    dbc.CardBody(
-                        children=[
-
-                            html.Div(
-                                id=ID.CLUSTER_LEGEND,
-                                className="p-2",
-                                style={"minHeight": "400px", "height": "100%"}
-                            )
-
-                        ])
-                ]),
         ])

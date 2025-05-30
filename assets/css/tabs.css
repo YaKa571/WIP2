@@ -17,7 +17,7 @@
 
 /* Cluster Tab Grid Layout */
 .tab-content-inner.cluster-tab {
-    grid-template-rows: auto auto auto auto 1fr !important;
+    grid-template-rows: auto auto auto auto min-content 1fr !important;
     align-items: start;
     align-content: start;
 }
@@ -184,7 +184,6 @@
     min-width: 0;
 }
 
-
 /* KPI Cards START */
 .tab-content-inner .flex-wrapper .kpi-card {
     flex: 1 1 0;
@@ -327,3 +326,35 @@
 }
 
 /* Graph Cards END */
+
+/* Cluster Legend START */
+
+.legend-item-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Für 4 Cluster */
+    gap: 24px;
+    align-items: start;
+    justify-items: center;
+    padding: 0.5rem;
+}
+
+.legend-item-wrapper {
+    display: flex;
+    flex: 1 1 0;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 35%;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.legend-text {
+    line-height: 16px;
+    font-size: 13px;
+    text-transform: uppercase;
+}

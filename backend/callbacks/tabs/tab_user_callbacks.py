@@ -6,13 +6,14 @@ from dash.exceptions import PreventUpdate
 import components.factories.component_factory as comp_factory
 from backend.callbacks.tabs.tab_merchant_callbacks import ID_TO_MERCHANT_TAB
 from backend.data_manager import DataManager
-from backend.data_setup.tabs.tab_user_data_setup import get_valid_user_id, configure_chart_parameters, \
+from components.tabs.tab_user_components import get_valid_user_id, configure_chart_parameters, \
     create_bar_chart_figure
-from components.rightcolumn.tabs.tab_user import create_kpi_value_text
+from frontend.layout.right.tabs.tab_user import create_kpi_value_text
 from frontend.component_ids import ID
+import components.constants as const
 
-dm = DataManager.get_instance()
-TEXT_EMPTY_KPI = "Waiting for input..."
+dm: DataManager = DataManager.get_instance()
+TEXT_EMPTY_KPI: str = "Waiting for input..."
 
 
 # === Callback: KPI-Boxes (Transactions, Sum, Average, Cards) ===
@@ -26,33 +27,31 @@ TEXT_EMPTY_KPI = "Waiting for input..."
 )
 def update_user_kpis(user_id, card_id):
     """
-    Updates and returns user KPI values based on the provided user ID or card ID. The method
-    fetches data from the appropriate source depending on the input provided and generates
-    KPI texts for display. If no valid data is entered, it provides default or error messages.
+    Updates user KPI metrics based on a given user ID or card ID. The KPIs updated include
+    the transaction count, total transaction sum, average transaction amount, and
+    card count associated with either the specified user or card. If no valid
+    user ID or card ID is provided, default values indicating no data or invalid input
+    are returned. In case of an error during the process, invalid KPI values are returned.
 
-    Arguments:
-        user_id (str | None): The user ID input value. Expected to be a string or None.
-        card_id (str | None): The card ID input value. Expected to be a string or None.
+    Args:
+        user_id: The ID of the user used to fetch KPI data.
+        card_id: The ID of the card used to fetch KPI data.
 
     Returns:
-        tuple:
-            A tuple containing four strings:
-            - The number of transactions.
-            - The total sum of transactions formatted as currency.
-            - The average transaction amount formatted as currency.
-            - The number of cards.
-            Each value is returned in a string format. If input is invalid or no data is found,
-            default or error texts are returned instead.
+        A tuple containing updated KPI values for:
+            - Transaction count.
+            - Total transaction sum formatted as currency.
+            - Average transaction amount formatted as currency.
+            - Card count.
     """
-    # Show default text if nothing entered
     if not (user_id and str(user_id).strip()) and not (card_id and str(card_id).strip()):
         return (create_kpi_value_text(TEXT_EMPTY_KPI, True),) * 4
 
     try:
         if card_id and str(card_id).strip():
-            data = dm.get_card_kpis(int(card_id))
+            data = dm.user_tab_data.get_card_kpis(int(card_id))
         elif user_id and str(user_id).strip():
-            data = dm.get_user_kpis(int(user_id))
+            data = dm.user_tab_data.get_user_kpis(int(user_id))
         else:
             return (create_kpi_value_text("INVALID", True),) * 4
 
@@ -82,39 +81,31 @@ def update_user_kpis(user_id, card_id):
 )
 def update_credit_limit(user_id, card_id):
     """
-    This function is a callback designed to update and display the credit limit based on
-    the provided user ID or card ID input. The function first determines if a valid user
-    ID or card ID is supplied, then attempts to retrieve the associated credit limit from
-    a data management utility. It generates formatted text to represent the credit limit
-    or an appropriate error message if retrieval fails.
+    Updates the credit limit information in the user interface based on the provided 
+    user ID or card ID. The function determines the credit limit by querying the 
+    data manager, formats the limit as a text representation, and returns it to the 
+    callback output. If the input values are invalid, missing, or lead to data 
+    retrieval issues, user feedback messages are provided accordingly.
 
-    Parameters:
-    user_id: str
-        The input value representing the user ID. It is expected to be a string,
-        but can be converted to an integer if necessary.
-    card_id: str
-        The input value representing the card ID. It is expected to be a string,
-        but can be converted to an integer if necessary.
+    Args:
+        user_id (str): The value entered in the user ID search input field. This is 
+            used to fetch the credit limit associated with the specific user.
+        card_id (str): The value entered in the card ID search input field. This is 
+            used to fetch the credit limit associated with the specific card.
 
     Returns:
-    str
-        Returns a string containing the formatted credit limit in dollars if available,
-        or corresponding error messages such as "NO DATA," "INVALID," or ellipsis ("...")
-        when inputs or operations are invalid or data is unavailable.
-
-    Raises:
-    Exception
-        Any unexpected error that occurs during the retrieval or processing flow will
-        be caught, and an "INVALID" message will be returned to the user interface.
+        str: A formatted representation of the credit limit, an error message if the 
+            inputs are invalid or missing, or a message indicating that no data is 
+            available for the specified inputs.
     """
     if not (user_id and str(user_id).strip()) and not (card_id and str(card_id).strip()):
         return create_kpi_value_text(TEXT_EMPTY_KPI, True)
 
     try:
         if card_id and str(card_id).strip():
-            limit = dm.get_credit_limit(card_id=int(card_id))
+            limit = dm.user_tab_data.get_credit_limit(card_id=int(card_id))
         elif user_id and str(user_id).strip():
-            limit = dm.get_credit_limit(user_id=int(user_id))
+            limit = dm.user_tab_data.get_credit_limit(user_id=int(user_id))
         else:
             return create_kpi_value_text("INVALID", True)
         if limit is None or pd.isna(limit):
@@ -209,8 +200,8 @@ def update_credit_limit_bar(user_id, card_id):
         showlegend=False,
         bargap=0,
         margin=dict(l=0, r=0, t=0, b=0),
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor=const.COLOR_TRANSPARENT,
+        paper_bgcolor=const.COLOR_TRANSPARENT,
         xaxis=dict(
             showticklabels=False,
             visible=False,
@@ -260,12 +251,12 @@ def update_merchant_bar_chart(user_id, card_id, sort_by, n_clicks_dark):
         return comp_factory.create_empty_figure()
 
     # Get transaction data
-    df_tx = dm.get_user_transactions(valid_user_id)
+    df_tx = dm.user_tab_data.get_user_transactions(valid_user_id)
     if df_tx.empty:
         return comp_factory.create_empty_figure()
 
     # Process transaction data
-    agg_data = dm.get_user_merchant_agg(valid_user_id)
+    agg_data = dm.user_tab_data.get_user_merchant_agg(valid_user_id)
     if agg_data.empty:
         return comp_factory.create_empty_figure()
 

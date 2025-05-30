@@ -1,10 +1,12 @@
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 
-from backend.callbacks.tabs import tab_merchant_callbacks
+from backend.data_manager import DataManager
 from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID
+
+dm: DataManager = DataManager.get_instance()
 
 
 # Info: Edit grid layout in assets/css/tabs.css
@@ -135,6 +137,10 @@ def _create_merchant_input_container():
         in a flexible wrapper structure for layout alignment.
 
     """
+    merchant_groups = dm.merchant_tab_data.get_all_merchant_groups()
+    options = [{'label': group, 'value': group} for group in merchant_groups]
+    default_value = merchant_groups[0] if merchant_groups else None
+
     return html.Div(
         className="flex-wrapper",
         children=[
@@ -142,20 +148,49 @@ def _create_merchant_input_container():
             # Merchant Group dropdown input
             html.Div(
                 className="flex-wrapper",
-                children=[tab_merchant_callbacks.get_merchant_group_input()],
                 id=ID.MERCHANT_GROUP_INPUT_WRAPPER,
-                style={"display": "none", "width": "100%"}
+                style={"display": "none", "width": "100%"},
+                children=[
+
+                    dcc.Dropdown(
+                        id=ID.MERCHANT_INPUT_GROUP_DROPDOWN,
+                        className="settings-dropdown settings-text-centered",
+                        options=options,
+                        value=default_value,
+                        placeholder="Choose a Merchant Group...",
+                        searchable=True,
+                        clearable=False,
+                        multi=False,
+                        style={"width": "100%"}
+                    )
+
+                ]
+
             ),
 
             # Individual Merchant ID input
             html.Div(
                 className="flex-wrapper",
-                children=[tab_merchant_callbacks.get_merchant_id_input()],
                 id=ID.MERCHANT_INPUT_WRAPPER,
-                style={"display": "none", "width": "100%"}
+                style={"display": "none", "width": "100%"},
+                children=[
+
+                    dcc.Input(
+                        id=ID.MERCHANT_INPUT_MERCHANT_ID,
+                        className="search-bar-input no-spinner",
+                        type="number",
+                        autoComplete="off",
+                        value="50783",
+                        placeholder="Enter Merchant ID...",
+                        style={"width": "100%"}
+                    )
+
+                ]
+
             )
 
-        ])
+        ]
+    )
 
 
 def _create_merchant_kpi() -> html.Div:
@@ -193,7 +228,7 @@ def _create_merchant_graph():
         children=[
 
             dbc.Card(
-                className="graph-card with-bar-chart lower-modebar",
+                className="graph-card with-bar-chart",
                 children=[
 
                     dbc.CardHeader(
@@ -211,6 +246,7 @@ def _create_merchant_graph():
                                 id=ID.MERCHANT_GRAPH_CONTAINER,
                                 className="bar-chart",
                                 config={
+                                    "scrollZoom": True,
                                     "displayModeBar": True,
                                     "modeBarButtonsToRemove": ["zoom2d", "pan2d", "select2d", "lasso2d",
                                                                "zoomIn2d", "zoomOut2d", "autoScale2d",

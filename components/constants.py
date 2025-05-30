@@ -1,5 +1,7 @@
 # Add constants here...
+from pathlib import Path
 
+# Colors
 COLOR_BLUE_MAIN = "#2563eb"
 COLOR_FEMALE_PINK = "#c65ed4"
 TEXT_COLOR_LIGHT = "#222c3a"
@@ -19,3 +21,33 @@ AGE_GROUP_COLORS = [
     "#636e72",
     "#b2bec3",
 ]
+GRAPH_GRID_COLOR_DARK = "rgba(230,230,230,0.11)"
+GRAPH_GRID_COLOR_LIGHT = "rgba(25,25,25,0.11)"
+COLOR_TRANSPARENT = "rgba(0,0,0,0)"
+CLUSTER_COLORS = {
+    "0": "#56B4E9",  # light blue
+    "1": "#D55E00",  # reddish brown
+    "2": "#009E73",  # teal green
+    "3": "#E69F00",  # orange
+    "4": "#0072B2",  # dark blue
+    "5": "#F0E442",  # yellow
+    "6": "#CC79A7",  # pink/magenta
+    "7": "#999999",  # grey
+    "8": "#ADFF2F",  # light green
+    "9": "#87CEEB"  # sky blue
+}
+
+# Bools
+DEFAULT_DARK_MODE: bool = True
+
+# Stores
+APP_STATE_STORE_DEFAULT = {
+    "dark_mode": DEFAULT_DARK_MODE,
+    "color_scale": "blues",
+    "phase": "initial",
+    "update_id": 0,
+    "settings_changed": False
+}
+
+# Paths
+DATA_DIRECTORY = Path("assets/data/")
