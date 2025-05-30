@@ -60,7 +60,7 @@ def update_user_kpis(user_id, card_id):
             return (create_kpi_value_text("NO DATA", True),) * 4
 
         return (
-            create_kpi_value_text(f"{data['amount_of_transactions']}"),
+            create_kpi_value_text(f"{data['amount_of_transactions']:,}"),
             create_kpi_value_text(f"${data['total_sum']:,.2f}"),
             create_kpi_value_text(f"${data['average_amount']:,.2f}"),
             create_kpi_value_text(f"{data['amount_of_cards']}"),
