@@ -11,12 +11,12 @@ from frontend.component_ids import ID
 # TODO: Free...
 def create_fraud_content():
     return html.Div(
+        className="tab-content-inner fraud-tab",
         children=[
 
-        _create_heading()
+            _create_heading()
 
-    ],
-        className="tab-content-inner fraud-tab"
+        ]
     )
 
 
