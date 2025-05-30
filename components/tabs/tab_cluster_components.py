@@ -41,12 +41,13 @@ def make_cluster_plot(df_agg, mode='total_value', age_group_mode='all', dark_mod
         'Cluster 3': 'triangle-up'
     }
 
+    # TODO: Hover template
     fig = px.scatter(
         df_agg,
         x='transaction_count',
         y=y_column,
         color=cluster_column,
-        color_discrete_map=cluster_data.get_cluster_colors(),
+        color_discrete_map=const.CLUSTER_COLORS,
         symbol=cluster_column,
         symbol_map=symbol_map,
         opacity=0.8,
@@ -211,7 +212,7 @@ def create_cluster_legend(mode: str, df) -> list:
         if len(clusters_with_desc) == 1:
             # if description does not exist yet
             cl = clusters_with_desc[0]
-            color = cluster_data.get_cluster_colors().get(str(cl), "#000000")
+            color = const.CLUSTER_COLORS.get(str(cl), "#000000")
             items.append(
                 create_legend_item(color=color, text=f"{desc}")
             )
@@ -221,7 +222,7 @@ def create_cluster_legend(mode: str, df) -> list:
             clusters_sorted = sorted(clusters_with_desc, key=lambda c: means[c][0])
             base_desc = desc
             for i, cl in enumerate(clusters_sorted):
-                color = cluster_data.get_cluster_colors().get(str(cl), "#000000")
+                color = const.CLUSTER_COLORS.get(str(cl), "#000000")
                 suffix = ""
                 if i > 0:
 
@@ -284,12 +285,13 @@ def make_inc_vs_exp_plot(df_agg, age_group_mode='all', dark_mode: bool = const.D
         'Cluster 3': 'triangle-up'
     }
 
+    # TODO: Hover template
     fig = px.scatter(
         df_agg,
         x='yearly_income',
         y='total_expenses',
         color='cluster_inc_vs_exp_str',
-        color_discrete_map=cluster_data.get_cluster_colors(),
+        color_discrete_map=const.CLUSTER_COLORS,
         symbol='cluster_inc_vs_exp_str',
         symbol_map=symbol_map,
         opacity=0.8,
