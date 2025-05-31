@@ -507,7 +507,9 @@ def create_bar_chart(
         fig.update_yaxes(
             showline=False,
             linecolor=grid_color,
-            gridcolor=grid_color
+            gridcolor=grid_color,
+            zeroline=True,
+            zerolinecolor=grid_color
         )
 
     def update_trace_style():
