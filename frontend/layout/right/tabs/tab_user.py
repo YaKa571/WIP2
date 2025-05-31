@@ -288,6 +288,8 @@ def _create_bottom_merchant_diagram() -> html.Div:
                                 }
                             ),
 
+                            html.Div(className="map-spinner visible", id=ID.USER_BAR_CHART_SPINNER),
+
                             comp_factory.create_info_icon(
                                 icon_id=ID.USER_TAB_BAR_INFO_ICON,
                                 style={

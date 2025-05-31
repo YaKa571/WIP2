@@ -264,7 +264,9 @@ def _create_merchant_graph():
                                     "height": "100%",
                                     "width": "100%"
                                 }
-                            )
+                            ),
+
+                            html.Div(className="map-spinner visible", id=ID.MERCHANT_BAR_CHART_SPINNER),
 
                         ]
                     )
