@@ -96,8 +96,6 @@ class DataManager:
         self.start()
         benchmark_data_manager.print_time()
 
-    # User Tab
-
     def load_data_frames(self):
         """
         Loads and pre-processes the data from specified files to use them as DataFrames. This includes

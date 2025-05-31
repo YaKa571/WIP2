@@ -2,8 +2,11 @@ import dash_bootstrap_components as dbc
 from dash import html, dcc
 
 import components.factories.component_factory as comp_factory
+from backend.data_manager import DataManager
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID
+
+dm: DataManager = DataManager.get_instance()
 
 # Constants for configuration
 MODEBAR_CONFIG = dict(
@@ -87,17 +90,30 @@ def _create_search_bars() -> html.Div:
     html.Div
         A Div element containing two search bars with magnifier icons.
     """
+    unique_cards = dm.user_tab_data.unique_card_ids
+    min_card_id = min(unique_cards)
+    max_card_id = max(unique_cards)
+
+    unique_users = dm.user_tab_data.unique_user_ids
+    min_user_id = min(unique_users)
+    max_user_id = max(unique_users)
+
     return html.Div(
         className="flex-wrapper",
         children=[
 
-            _create_single_search_bar(ID.USER_ID_SEARCH_INPUT, "SEARCH BY USER ID..."),
-            _create_single_search_bar(ID.CARD_ID_SEARCH_INPUT, "SEARCH BY CARD ID...")
+            _create_single_search_bar(ID.USER_ID_SEARCH_INPUT, f"SEARCH BY USER ID ({min_user_id} - {max_user_id})",
+                                      start_value=1098,
+                                      min_value=min_user_id, max_value=max_user_id),
+
+            _create_single_search_bar(ID.CARD_ID_SEARCH_INPUT, f"SEARCH BY CARD ID ({min_card_id} - {max_card_id})",
+                                      min_value=min_card_id, max_value=max_card_id)
 
         ])
 
 
-def _create_single_search_bar(input_id: str, placeholder: str, start_value: int = None) -> dcc.Input:
+def _create_single_search_bar(input_id: str, placeholder: str, start_value: int = None, min_value: int = 0,
+                              max_value: int = 9_999_999) -> dcc.Input:
     """
     Creates a single search bar input element with the specified id, placeholder text, and optional start value. This
     component is constructed as a Dash Core Components Input element with the "search" type, designed for user input
@@ -115,6 +131,8 @@ def _create_single_search_bar(input_id: str, placeholder: str, start_value: int 
         id=input_id,
         value=start_value,
         type="number",
+        min=min_value,
+        max=max_value,
         autoComplete="off",
         placeholder=placeholder,
         className="search-bar-input no-spinner"
@@ -270,6 +288,8 @@ def _create_bottom_merchant_diagram() -> html.Div:
                                 }
                             ),
 
+                            html.Div(className="map-spinner visible", id=ID.USER_BAR_CHART_SPINNER),
+
                             comp_factory.create_info_icon(
                                 icon_id=ID.USER_TAB_BAR_INFO_ICON,
                                 style={
@@ -311,5 +331,5 @@ def create_kpi_value_text(text: str, red_text_color: bool = False) -> html.P:
     Returns:
         An html.P object styled based on the specified parameters.
     """
-    className = "kpi-card-value kpi-number-value" if not red_text_color else "kpi-card-value kpi-number-value red-text"
+    className = "kpi-card-value kpi-number-value" if not red_text_color else "kpi-card-value kpi-number-value info-text"
     return html.P(text, className=className)

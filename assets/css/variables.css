@@ -85,6 +85,7 @@
     /* Etc. */
     --kpi-number-value: #259d60;
     --modebar-icon-filter: brightness(0%);
+    --info-text-color: rgba(55, 55, 55, 0.55);
 }
 
 .dark-mode {
@@ -161,4 +162,5 @@
     /* Etc. */
     --kpi-number-value: #81C784;
     --modebar-icon-filter: brightness(900%);
+    --info-text-color: rgba(200, 200, 200, 0.55);
 }

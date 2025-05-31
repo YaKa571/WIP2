@@ -140,6 +140,7 @@ def _create_merchant_input_container():
     merchant_groups = dm.merchant_tab_data.get_all_merchant_groups()
     options = [{'label': group, 'value': group} for group in merchant_groups]
     default_value = merchant_groups[0] if merchant_groups else None
+    unique_ids = dm.merchant_tab_data.unique_merchant_ids
 
     return html.Div(
         className="flex-wrapper",
@@ -157,7 +158,7 @@ def _create_merchant_input_container():
                         className="settings-dropdown settings-text-centered",
                         options=options,
                         value=default_value,
-                        placeholder="Choose a Merchant Group...",
+                        placeholder="CHOOSE A MERCHANT GROUP...",
                         searchable=True,
                         clearable=False,
                         multi=False,
@@ -180,8 +181,10 @@ def _create_merchant_input_container():
                         className="search-bar-input no-spinner",
                         type="number",
                         autoComplete="off",
-                        value="50783",
-                        placeholder="Enter Merchant ID...",
+                        min=min(unique_ids) if unique_ids else 0,
+                        max=max(unique_ids) if unique_ids else 9_999_999,
+                        value=50783,
+                        placeholder=f"ENTER MERCHANT ID BETWEEN {min(unique_ids)} AND {max(unique_ids)}...",
                         style={"width": "100%"}
                     )
 
@@ -261,7 +264,9 @@ def _create_merchant_graph():
                                     "height": "100%",
                                     "width": "100%"
                                 }
-                            )
+                            ),
+
+                            html.Div(className="map-spinner visible", id=ID.MERCHANT_BAR_CHART_SPINNER),
 
                         ]
                     )

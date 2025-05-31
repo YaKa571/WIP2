@@ -3,14 +3,14 @@ import plotly.graph_objects as go
 from dash import Input, Output, callback
 from dash.exceptions import PreventUpdate
 
+import components.constants as const
 import components.factories.component_factory as comp_factory
 from backend.callbacks.tabs.tab_merchant_callbacks import ID_TO_MERCHANT_TAB
 from backend.data_manager import DataManager
 from components.tabs.tab_user_components import get_valid_user_id, configure_chart_parameters, \
     create_bar_chart_figure
-from frontend.layout.right.tabs.tab_user import create_kpi_value_text
 from frontend.component_ids import ID
-import components.constants as const
+from frontend.layout.right.tabs.tab_user import create_kpi_value_text
 
 dm: DataManager = DataManager.get_instance()
 TEXT_EMPTY_KPI: str = "Waiting for input..."
@@ -44,13 +44,13 @@ def update_user_kpis(user_id, card_id):
             - Average transaction amount formatted as currency.
             - Card count.
     """
-    if not (user_id and str(user_id).strip()) and not (card_id and str(card_id).strip()):
+    if (user_id is None or str(user_id).strip() == "") and (card_id is None or str(card_id).strip() == ""):
         return (create_kpi_value_text(TEXT_EMPTY_KPI, True),) * 4
 
     try:
-        if card_id and str(card_id).strip():
+        if card_id is not None and str(card_id).strip() != "":
             data = dm.user_tab_data.get_card_kpis(int(card_id))
-        elif user_id and str(user_id).strip():
+        elif user_id is not None and str(user_id).strip() != "":
             data = dm.user_tab_data.get_user_kpis(int(user_id))
         else:
             return (create_kpi_value_text("INVALID", True),) * 4
@@ -60,7 +60,7 @@ def update_user_kpis(user_id, card_id):
             return (create_kpi_value_text("NO DATA", True),) * 4
 
         return (
-            create_kpi_value_text(f"{data['amount_of_transactions']}"),
+            create_kpi_value_text(f"{data['amount_of_transactions']:,}"),
             create_kpi_value_text(f"${data['total_sum']:,.2f}"),
             create_kpi_value_text(f"${data['average_amount']:,.2f}"),
             create_kpi_value_text(f"{data['amount_of_cards']}"),
@@ -98,13 +98,13 @@ def update_credit_limit(user_id, card_id):
             inputs are invalid or missing, or a message indicating that no data is 
             available for the specified inputs.
     """
-    if not (user_id and str(user_id).strip()) and not (card_id and str(card_id).strip()):
+    if (user_id is None or str(user_id).strip() == "") and (card_id is None or str(card_id).strip() == ""):
         return create_kpi_value_text(TEXT_EMPTY_KPI, True)
 
     try:
-        if card_id and str(card_id).strip():
+        if card_id is not None and str(card_id).strip() != "":
             limit = dm.user_tab_data.get_credit_limit(card_id=int(card_id))
-        elif user_id and str(user_id).strip():
+        elif user_id is not None and str(user_id).strip() != "":
             limit = dm.user_tab_data.get_credit_limit(user_id=int(user_id))
         else:
             return create_kpi_value_text("INVALID", True)
@@ -141,12 +141,12 @@ def update_credit_limit_bar(user_id, card_id):
         cards. If no data is found, an empty figure is returned.
     :rtype: plotly.graph_objs._figure.Figure
     """
-    if card_id and str(card_id).strip():
+    if card_id is not None and str(card_id).strip() != "":
         card_df = dm.df_cards[dm.df_cards["id"] == int(card_id)]
         if card_df.empty:
             return comp_factory.create_empty_figure()
         user_id = int(card_df.iloc[0]["client_id"])
-    elif user_id and str(user_id).strip():
+    elif user_id is not None and str(user_id).strip() != "":
         user_id = int(user_id)
     else:
         return comp_factory.create_empty_figure()
@@ -216,6 +216,7 @@ def update_credit_limit_bar(user_id, card_id):
 # === Callback: Merchant Bar Chart (bottom) ===
 @callback(
     Output(ID.USER_MERCHANT_BAR_CHART, "figure"),
+    Output(ID.USER_BAR_CHART_SPINNER, "className"),
     Input(ID.USER_ID_SEARCH_INPUT, "value"),
     Input(ID.CARD_ID_SEARCH_INPUT, "value"),
     Input(ID.USER_MERCHANT_SORT_DROPDOWN, "value"),
@@ -241,29 +242,30 @@ def update_merchant_bar_chart(user_id, card_id, sort_by, n_clicks_dark):
             if the user ID is invalid, no transactions exist for the user, or no aggregation data is available.
     """
     dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
+    show_spinner_cls = "map-spinner visible"
+    hide_spinner_cls = "map-spinner"
 
     # Get valid user ID
     try:
         valid_user_id = get_valid_user_id(user_id, card_id)
-        if not valid_user_id:
-            return comp_factory.create_empty_figure()
+        if valid_user_id is None or str(valid_user_id).strip() == "":
+            return comp_factory.create_empty_figure(), show_spinner_cls
     except ValueError:
-        return comp_factory.create_empty_figure()
+        return comp_factory.create_empty_figure(), show_spinner_cls
 
     # Get transaction data
     df_tx = dm.user_tab_data.get_user_transactions(valid_user_id)
     if df_tx.empty:
-        return comp_factory.create_empty_figure()
+        return comp_factory.create_empty_figure(), show_spinner_cls
 
     # Process transaction data
     agg_data = dm.user_tab_data.get_user_merchant_agg(valid_user_id)
     if agg_data.empty:
-        return comp_factory.create_empty_figure()
+        return comp_factory.create_empty_figure(), show_spinner_cls
 
     # Configure chart parameters
     chart_params = configure_chart_parameters(agg_data, sort_by)
-
-    return create_bar_chart_figure(agg_data, chart_params, dark_mode)
+    return create_bar_chart_figure(agg_data, chart_params, dark_mode), hide_spinner_cls
 
 
 @callback(
@@ -336,8 +338,8 @@ def toggle_inputs(user_value, card_value):
     """
     base_class = "search-bar-input no-spinner"
 
-    user_filled = bool(user_value and str(user_value).strip())
-    card_filled = bool(card_value and str(card_value).strip())
+    user_filled = user_value is not None and str(user_value).strip() != ""
+    card_filled = card_value is not None and str(card_value).strip() != ""
 
     card_disabled = user_filled
     user_disabled = card_filled
@@ -371,9 +373,9 @@ def update_tab_heading(user_id, card_id):
         the provided user or card ID. Defaults to "User" if neither
         identifier is valid.
     """
-    if card_id and str(card_id).strip():
+    if card_id is not None and str(card_id).strip() != "":
         return f"Card-ID: {card_id}"
-    elif user_id and str(user_id).strip():
+    elif user_id is not None and str(user_id).strip() != "":
         return f"User-ID: {user_id}"
     else:
         return "User"

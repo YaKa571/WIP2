@@ -36,6 +36,7 @@ class MerchantTabData:
         self._cache_merchant_value: Dict[int, float] = {}
         self._cache_user_with_most_transactions_at_merchant: Dict[int, Tuple[int, int]] = {}
         self._cache_user_with_highest_expenditure_at_merchant: Dict[int, Tuple[int, float]] = {}
+        self.unique_merchant_ids = set(self.df_transactions["merchant_id"].unique())
 
     def get_my_transactions_mcc_users(self):
         """
@@ -98,7 +99,7 @@ class MerchantTabData:
         self._cache_merchant_group_overview[threshold] = large_groups
         return large_groups
 
-    def get_most_user_with_most_transactions_all_merchants(self):
+    def get_user_with_most_transactions_all_merchants(self):
         """
         Identify the user with the highest number of transactions across all merchant groups.
 
@@ -449,7 +450,7 @@ class MerchantTabData:
         # Cache global data (no parameters)
         bm_global = Benchmark("Pre-caching global merchant data")
         self.get_all_merchant_groups()
-        self.get_most_user_with_most_transactions_all_merchants()
+        self.get_user_with_most_transactions_all_merchants()
         self.get_user_with_highest_expenditure_all_merchants()
         self.get_most_frequently_used_merchant_group()
         self.get_highest_value_merchant_group()

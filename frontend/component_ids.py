@@ -93,6 +93,7 @@ class ID(str, Enum):
     USER_MERCHANT_SORT_DROPDOWN = "merchant-sort-dropdown"
     USER_CREDIT_LIMIT_BAR = "user-credit-limit-bar"
     USER_TAB_BAR_INFO_ICON = "user-tab-bar-info-icon"
+    USER_BAR_CHART_SPINNER = "user-bar-chart-spinner"
 
     # Merchant Tab
     MERCHANT_HEADING = "merchant-heading"
@@ -126,3 +127,4 @@ class ID(str, Enum):
     MERCHANT_INPUT_WRAPPER = "merchant-input-wrapper"
     MERCHANT_SETTINGS_WRAPPER = "merchant-settings-wrapper"
     MERCHANT_SELECTED_BUTTON_STORE = "merchant-selected-button-store"
+    MERCHANT_BAR_CHART_SPINNER = "merchant-bar-chart-spinner"

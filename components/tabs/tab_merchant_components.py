@@ -125,10 +125,14 @@ def create_individual_merchant_line_chart(merchant, dark_mode: bool = const.DEFA
     plotly.graph_objects.Figure
         A Plotly figure object containing the time series chart with dual Y-axes.
     """
+
+    show_spinner_cls = "map-spinner visible"
+    hide_spinner_cls = "map-spinner"
+
     df = merchant_data.get_my_transactions_mcc_users()
     df = df[df['merchant_id'] == merchant].copy()
     if df.empty:
-        return comp_factory.create_empty_figure()
+        return comp_factory.create_empty_figure(), show_spinner_cls
 
     df['date'] = pd.to_datetime(df['date'])
     df['date_only'] = df['date'].dt.normalize()
@@ -195,4 +199,4 @@ def create_individual_merchant_line_chart(merchant, dark_mode: bool = const.DEFA
         margin=dict(l=1, r=1, t=1, b=1)
     )
 
-    return fig
+    return fig, hide_spinner_cls

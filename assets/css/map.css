@@ -64,6 +64,11 @@
     transition: opacity 0.2s ease-in-out;
 }
 
+.map-spinner.visible {
+    opacity: 1;
+    pointer-events: none;
+}
+
 .map-container.fade-out ~ .map-spinner {
     opacity: 1;
 }

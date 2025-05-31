@@ -34,14 +34,14 @@ def get_valid_user_id(user_id, card_id):
         int or None: The validated user ID as an integer, or None if both inputs are invalid
         or empty.
     """
-    if card_id and str(card_id).strip():
+    if card_id is not None and str(card_id).strip() != "":
         try:
             card_row = dm.df_cards[dm.df_cards["id"] == int(card_id)]
             return int(card_row.iloc[0]["client_id"]) if not card_row.empty else None
         except Exception:
             return None
 
-    if not user_id or str(user_id).strip() == "":
+    if user_id is None or str(user_id).strip() == "":
         return None
 
     try:

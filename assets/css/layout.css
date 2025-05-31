@@ -207,8 +207,8 @@ li span:nth-of-type(2) {
     color: var(--kpi-number-value) !important;
 }
 
-.kpi-card-value.kpi-number-value.red-text {
-    color: red !important;
+.kpi-card-value.kpi-number-value.info-text {
+    color: var(--info-text-color) !important;
 }
 
 /* ============================================================

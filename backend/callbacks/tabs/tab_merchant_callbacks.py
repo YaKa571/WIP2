@@ -13,7 +13,7 @@ from frontend.component_ids import ID
 from frontend.icon_manager import IconID
 
 # Initialize DataManager instance
-dm = DataManager.get_instance()
+dm: DataManager = DataManager.get_instance()
 
 """
 Callbacks and factories for tab Merchant.
@@ -58,7 +58,7 @@ def get_option_button_class(option: str, selected_option: str) -> str:
 
 # === KPI Card Factory ===
 
-def create_kpi_card(icon, title, value_1, value_2, value_id):
+def create_kpi_card(icon, title, value_1, value_2, value_id, value_1_class="", value_2_class=""):
     """
     Creates a KPI (Key Performance Indicator) card component with an icon, title,
     and two value fields. The card is styled with predefined CSS classes and allows
@@ -104,8 +104,8 @@ def create_kpi_card(icon, title, value_1, value_2, value_id):
                         id=value_id,
                         children=[
 
-                            html.P(value_1, className="kpi-card-value"),
-                            html.P(value_2, className="kpi-card-value kpi-number-value")
+                            html.P(value_1, className=f"kpi-card-value {value_1_class}"),
+                            html.P(value_2, className=f"kpi-card-value kpi-number-value {value_2_class}"),
 
                         ]
                     )
@@ -155,7 +155,7 @@ def create_all_merchant_kpis():
     """
     group_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_group()
     group_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_group()
-    user_3, count_3 = dm.merchant_tab_data.get_most_user_with_most_transactions_all_merchants()
+    user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_all_merchants()
     user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_all_merchants()
 
     kpi_data = [
@@ -248,13 +248,14 @@ def create_merchant_group_kpi(merchant_group):
     return create_kpi_dashboard(kpi_data)
 
 
-def create_individual_merchant_kpi(merchant: int):
+def create_individual_merchant_kpi(merchant: int = None):
     """
     Generate individual Key Performance Indicators (KPIs) for a merchant by collecting relevant transaction and
     user data.
 
     Args:
-        merchant (str): A unique identifier for the merchant whose KPIs are to be generated.
+        merchant (int, optional): A unique identifier for the merchant whose KPIs are to be generated.
+                                 If None, all values will display "NO DATA". Defaults to None.
 
     Returns:
         dict: A dashboard representation of the merchant's KPIs, formatted for display.
@@ -262,41 +263,91 @@ def create_individual_merchant_kpi(merchant: int):
     Raises:
         None
     """
-    count_1 = dm.merchant_tab_data.get_merchant_transactions(merchant)
-    value_2 = dm.merchant_tab_data.get_merchant_value(merchant)
-    user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_at_merchant(merchant)
-    user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_at_merchant(merchant)
+    if merchant is None:
+        # If merchant is None, set all values to "WAITING FOR INPUT..."
+        kpi_data = [
+            {
+                "icon": IconID.CHART_PIPE,
+                "title": "Transactions",
+                "value_1": "",
+                "value_2": "WAITING FOR INPUT...",
+                "value_id": ID.MERCHANT_KPI_MERCHANT_TRANSACTIONS,
+                "value_1_class": "info-text",
+                "value_2_class": "info-text"
+            },
+            {
+                "icon": IconID.MONEY_DOLLAR,
+                "title": "Value",
+                "value_1": "",
+                "value_2": "WAITING FOR INPUT...",
+                "value_id": ID.MERCHANT_KPI_MERCHANT_VALUE,
+                "value_1_class": "info-text",
+                "value_2_class": "info-text"
+            },
+            {
+                "icon": IconID.TRANSACTION_BY_CARD,
+                "title": "Top User (by Transactions)",
+                "value_1": "",
+                "value_2": "WAITING FOR INPUT...",
+                "value_id": ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS,
+                "value_1_class": "info-text",
+                "value_2_class": "info-text"
+            },
+            {
+                "icon": IconID.MONEY_WINGS,
+                "title": "Top User (by Expenditure)",
+                "value_1": "",
+                "value_2": "WAITING FOR INPUT...",
+                "value_id": ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE,
+                "value_1_class": "info-text",
+                "value_2_class": "info-text"
+            },
+        ]
 
-    kpi_data = [
-        {
-            "icon": IconID.CHART_PIPE,
-            "title": "Transactions",
-            "value_1": " ",
-            "value_2": f"{count_1:,} Transactions",
-            "value_id": ID.MERCHANT_KPI_MERCHANT_TRANSACTIONS
-        },
-        {
-            "icon": IconID.MONEY_DOLLAR,
-            "title": "Value",
-            "value_1": " ",
-            "value_2": f"${value_2:,.2f}",
-            "value_id": ID.MERCHANT_KPI_MERCHANT_VALUE
-        },
-        {
-            "icon": IconID.TRANSACTION_BY_CARD,
-            "title": "Top User (by Transactions)",
-            "value_1": f"ID {user_3}",
-            "value_2": f"{count_3:,} Transactions",
-            "value_id": ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS
-        },
-        {
-            "icon": IconID.MONEY_WINGS,
-            "title": "Top User (by Expenditure)",
-            "value_1": f"ID {user_4}",
-            "value_2": f"${value_4:,.2f}",
-            "value_id": ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE
-        },
-    ]
+    else:
+        count_1 = dm.merchant_tab_data.get_merchant_transactions(merchant)
+        value_2 = dm.merchant_tab_data.get_merchant_value(merchant)
+        user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_at_merchant(merchant)
+        user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_at_merchant(merchant)
+
+        no_transactions = count_1 == 0
+        transactions_str = "Transaction" if count_1 == 1 else "Transactions"
+
+        kpi_data = [
+            {
+                "icon": IconID.CHART_PIPE,
+                "title": "Transactions",
+                "value_1": "",
+                "value_2": f"{count_1:,} {transactions_str}" if not no_transactions else "NO DATA",
+                "value_id": ID.MERCHANT_KPI_MERCHANT_TRANSACTIONS,
+                "value_2_class": "info-text" if no_transactions else ""
+            },
+            {
+                "icon": IconID.MONEY_DOLLAR,
+                "title": "Value",
+                "value_1": "",
+                "value_2": f"${value_2:,.2f}" if not no_transactions else "NO DATA",
+                "value_id": ID.MERCHANT_KPI_MERCHANT_VALUE,
+                "value_2_class": "info-text" if no_transactions else ""
+            },
+            {
+                "icon": IconID.TRANSACTION_BY_CARD,
+                "title": "Top User (by Transactions)",
+                "value_1": f"ID {user_3}" if not no_transactions else "",
+                "value_2": f"{count_3:,} {transactions_str}" if not no_transactions else "NO DATA",
+                "value_id": ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS,
+                "value_2_class": "info-text" if no_transactions else ""
+            },
+            {
+                "icon": IconID.MONEY_WINGS,
+                "title": "Top User (by Expenditure)",
+                "value_1": f"ID {user_4}" if not no_transactions else "",
+                "value_2": f"${value_4:,.2f}" if not no_transactions else "NO DATA",
+                "value_id": ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE,
+                "value_2_class": "info-text" if no_transactions else ""
+            },
+        ]
+
     return create_kpi_dashboard(kpi_data)
 
 
@@ -388,6 +439,7 @@ def set_merchant_tab(n_all, n_group, n_indiv):
     Output(ID.MERCHANT_KPI_CONTAINER, "children"),
     Output(ID.MERCHANT_GRAPH_CONTAINER, "figure"),
     Output(ID.MERCHANT_GRAPH_TITLE, "children"),
+    Output(ID.MERCHANT_BAR_CHART_SPINNER, "className"),
     Input(ID.MERCHANT_SELECTED_BUTTON_STORE, "data"),
     Input(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
     Input(ID.MERCHANT_INPUT_MERCHANT_ID, "value"),
@@ -396,82 +448,85 @@ def set_merchant_tab(n_all, n_group, n_indiv):
 def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dark):
     """
     Updates the user interface components based on the currently selected merchant
-    tab, group, or individual merchant. This function updates visual elements like
-    button styles, visibility of input wrappers, KPI content, graph figures, and
-    graph titles depending on the selection. The function also considers dark mode
-    toggle state to adjust display content accordingly.
+    tab, group, or individual merchant.
+
+    This function handles the dynamic UI updates for the merchant tab, including button styles,
+    input visibility, KPI content, graph figures, and titles based on the selected merchant type.
 
     Arguments:
         selected (str): Identifier for the currently selected merchant type
-            (e.g., "all", "group", or "individual"). Defaults to "all" if not
-            provided.
-        selected_group (str): The currently selected merchant group from the
-            dropdown input. Can be None if no group is selected.
-        selected_merchant_id (str or int): The identifier or value for the
-            selected individual merchant. Can be None or an invalid input (e.g.,
-            empty string).
-        n_clicks_dark (int): Number of times the dark mode toggle button is
-            clicked. Odd values indicate dark mode is activated; even or zero
-            values indicate light mode.
+            (e.g., "all", "group", or "individual"). Defaults to "all" if not provided.
+        selected_group (str): The currently selected merchant group from the dropdown.
+            Can be None if no group is selected.
+        selected_merchant_id (str or int): The identifier for the selected individual merchant.
+            Can be None or an invalid input.
+        n_clicks_dark (int): Number of times the dark mode toggle button is clicked.
+            Odd values indicate dark mode is activated.
 
     Returns:
-        tuple: Contains the following outputs:
-            - className (str): The CSS class name for the "All Merchants" button.
-            - className (str): The CSS class name for the "Merchant Group" button.
-            - className (str): The CSS class name for the "Individual Merchant"
-              button.
-            - style (dict): The style properties for the "Merchant Group" input
-              wrapper.
-            - style (dict): The style properties for the "Individual Merchant"
-              input wrapper.
-            - children: The content of the KPI container, usually dynamically
-              generated components or a placeholder message.
-            - figure: The figure content for the graph, rendered differently based
-              on the selected merchant type and data availability.
-            - children (str): The title of the graph, indicating its purpose or
-              scope based on the selection (e.g., merchant group, individual
-              merchant).
+        tuple: Contains UI component properties (button classes, styles, content, figures, titles).
     """
+    # Set default tab if none selected
     if not selected:
-        selected = MerchantTab.ALL.value  # Default
+        selected = MerchantTab.ALL.value
 
+    # Determine dark mode state
     dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
-    group_style = {"display": "flex", "width": "100%"} if selected == MerchantTab.GROUP.value else {"display": "none",
-                                                                                                    "width": "100%"}
-    indiv_style = {"display": "flex", "width": "100%"} if selected == MerchantTab.INDIVIDUAL.value else {
-        "display": "none", "width": "100%"}
 
+    # Define display styles based on selected tab
+    visible_style = {"display": "flex", "width": "100%"}
+    hidden_style = {"display": "none", "width": "100%"}
+
+    # Set input wrapper visibility based on selected tab
+    group_style = visible_style if selected == MerchantTab.GROUP.value else hidden_style
+    indiv_style = visible_style if selected == MerchantTab.INDIVIDUAL.value else hidden_style
+
+    # Initialize default values
+    kpi_content = html.Div()
+    graph_content = comp_factory.create_empty_figure()
+    graph_title = ""
+    spinner_class = "map-spinner"
+
+    # Handle content based on selected tab
     if selected == MerchantTab.ALL.value:
         kpi_content = create_all_merchant_kpis()
         graph_content = create_merchant_group_distribution_tree_map(dark_mode=dark_mode)
         graph_title = "MERCHANT GROUP DISTRIBUTION"
+
     elif selected == MerchantTab.GROUP.value:
-        merchant_group = selected_group or (
-            dm.merchant_tab_data.get_all_merchant_groups()[0]
-            if dm.merchant_tab_data.get_all_merchant_groups() else None)
-        kpi_content = create_merchant_group_kpi(merchant_group) if merchant_group else html.Div(
-            "NO MERCHANT GROUPS AVAILABLE.")
-        graph_content = create_merchant_group_line_chart(
-            merchant_group, dark_mode=dark_mode) if merchant_group else comp_factory.create_empty_figure()
-        graph_title = f"HISTORY FOR MERCHANT GROUP: {merchant_group}" if merchant_group else "NO MERCHANT GROUP SELECTED"
+        # Get merchant group (selected or default first group)
+        merchant_groups = dm.merchant_tab_data.get_all_merchant_groups()
+        default_group = merchant_groups[0] if merchant_groups else None
+        merchant_group = selected_group or default_group
+
+        if merchant_group:
+            kpi_content = create_merchant_group_kpi(merchant_group)
+            graph_content = create_merchant_group_line_chart(merchant_group, dark_mode=dark_mode)
+            graph_title = f"HISTORY FOR MERCHANT GROUP: {merchant_group}"
+        else:
+            kpi_content = html.Div("NO MERCHANT GROUPS AVAILABLE.")
+            graph_title = "NO MERCHANT GROUP SELECTED"
+
     elif selected == MerchantTab.INDIVIDUAL.value:
+        # Convert merchant ID to integer if possible
+        merchant = None
         try:
             merchant = int(selected_merchant_id)
         except (ValueError, TypeError):
-            merchant = None
-        if merchant:
-            kpi_content = create_individual_merchant_kpi(merchant)
-            graph_content = create_individual_merchant_line_chart(merchant, dark_mode=dark_mode)
-            graph_title = f"HISTORY FOR MERCHANT: {merchant}"
-        else:
-            kpi_content = html.Div("INVALID OR NO MERCHANT ID ENTERED.")
-            graph_content = comp_factory.create_empty_figure()
-            graph_title = "INVALID MERCHANT ID"
-    else:
-        kpi_content = html.Div()
-        graph_content = comp_factory.create_empty_figure()
-        graph_title = ""
+            pass
 
+        # Create KPI content for the merchant
+        kpi_content = create_individual_merchant_kpi(merchant)
+
+        # Create graph content if merchant ID is valid
+        if merchant in dm.merchant_tab_data.unique_merchant_ids:
+            graph_content, spinner_class = create_individual_merchant_line_chart(merchant, dark_mode=dark_mode)
+            graph_title = f"HISTORY FOR MERCHANT {merchant}"
+        else:
+            graph_title = "HISTORY FOR MERCHANT"
+            spinner_class = "map-spinner visible"
+
+    # Return all UI component properties
     return (
         get_option_button_class(MerchantTab.ALL.value, selected),
         get_option_button_class(MerchantTab.GROUP.value, selected),
@@ -480,5 +535,6 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
         indiv_style,
         kpi_content,
         graph_content,
-        graph_title
+        graph_title,
+        spinner_class
     )

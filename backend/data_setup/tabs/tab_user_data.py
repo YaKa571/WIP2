@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from backend.data_handler import get_mcc_description_by_merchant_id
@@ -12,6 +13,8 @@ class UserTabData:
         # Caches
         self._cache_user_transactions: dict[int, pd.DataFrame] = {}  # user_id -> DataFrame
         self._cache_user_merchant_agg: dict[int, pd.DataFrame] = {}  # user_id -> Aggregated DataFrame
+        self.unique_user_ids = set(data_manager.df_users["id"].unique())
+        self.unique_card_ids = set(data_manager.df_cards["id"].unique())
 
     def cache_user_transactions(self):
         """
@@ -63,6 +66,8 @@ class UserTabData:
             agg["mcc_desc"] = agg["mcc"].apply(
                 lambda m: get_mcc_description_by_merchant_id(self.data_manager.mcc_dict, int(m))
             )
+
+            # TODO: Fix total_sum with value of 0 not being deleted
             # Filter out rows with tx_count == 0 or total_sum == 0
             agg = agg[(agg["tx_count"] != 0) & (agg["total_sum"] != 0)]
 
