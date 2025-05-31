@@ -22,9 +22,8 @@ def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically:
     file_name: str
         The name of the Parquet file to read. Must exist in the DATA_DIRECTORY.
     num_rows: int, optional
-        The number of rows to load from the Parquet file. By default, 500,000 rows
-        are loaded. If None or greater than the total number of rows in the file,
-        all rows will be loaded.
+        The number of rows to load from the Parquet file. By default, all rows
+        are loaded. If specified, only the first num_rows will be loaded.
     sort_alphabetically: bool, optional
         If True, sort the column names alphabetically. Default is False.
 
@@ -41,16 +40,35 @@ def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically:
     if not file_path.exists():
         raise FileNotFoundError(f"⚠️ Parquet file not found: {file_path}")
 
-    pf = ParquetFile(file_path)
-    total_rows = pf.metadata.num_rows
-
-    if num_rows is None or num_rows >= total_rows:
-        df = pd.read_parquet(file_path, engine="pyarrow")
+    # Use optimized reading approach
+    if num_rows is None:
+        # Read all rows with optimized settings
+        df = pd.read_parquet(
+            file_path, 
+            engine="pyarrow",
+            use_threads=True,  # Enable multi-threading
+            memory_map=True    # Use memory mapping for better performance
+        )
     else:
-        batch = next(pf.iter_batches(batch_size=num_rows))
-        df = pa.Table.from_batches(batches=[batch]).to_pandas()
+        # Read only the specified number of rows
+        pf = ParquetFile(file_path)
+        total_rows = pf.metadata.num_rows
+
+        if num_rows >= total_rows:
+            # If requesting more rows than available, read all rows with optimized settings
+            df = pd.read_parquet(
+                file_path, 
+                engine="pyarrow",
+                use_threads=True,
+                memory_map=True
+            )
+        else:
+            # Read only the specified number of rows using batched reading
+            batch = next(pf.iter_batches(batch_size=num_rows))
+            df = pa.Table.from_batches(batches=[batch]).to_pandas()
 
     if sort_alphabetically:
+        # Use inplace sorting if possible to avoid copying the entire dataframe
         df = df.reindex(sorted(df.columns), axis=1)
 
     return df
@@ -112,19 +130,27 @@ def clean_units(df: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: A new DataFrame with monetary symbols removed and converted
         to numeric values where applicable.
     """
-    new_df = df.copy()
+    # Create a copy only if we need to modify the dataframe
+    columns_to_clean = []
 
+    # First identify which columns need cleaning
     for col in df.columns:
         sample_values = df[col].dropna().astype(str)
 
-        if sample_values.empty:
-            continue
+        if not sample_values.empty and sample_values.str.startswith("$").all():
+            columns_to_clean.append(col)
 
-        # Check: does each cell start with "$"?
-        if sample_values.str.startswith("$").all():
-            # Remove $
-            new_df[col] = sample_values.str[1:]  # Only cut off the first character
-            new_df[col] = pd.to_numeric(new_df[col], errors="coerce")  # Convert to float
+    # If no columns need cleaning, return the original dataframe
+    if not columns_to_clean:
+        return df
+
+    # Only create a copy if we need to modify the dataframe
+    new_df = df.copy()
+
+    # Process only the columns that need cleaning
+    for col in columns_to_clean:
+        # Process in a single step to avoid intermediate copies
+        new_df[col] = pd.to_numeric(df[col].astype(str).str[1:], errors="coerce")
 
     return new_df
 

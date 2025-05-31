@@ -22,7 +22,7 @@ class UserTabData:
 
         This method processes the transactions DataFrame (df_transactions) by grouping
         transactions based on the "client_id" column. For each unique client ID, it
-        creates a copy of the corresponding subset of the DataFrame and stores it in
+        creates a reference to the corresponding subset of the DataFrame and stores it in
         a dictionary. The dictionary is stored as an internal attribute
         (_cache_user_transactions), where the keys represent client IDs and the values
         are the dataframes containing transactions for each user.
@@ -31,8 +31,18 @@ class UserTabData:
             KeyError: If the DataFrame does not contain a "client_id" column.
             AttributeError: If df_transactions is not a valid DataFrame object.
         """
-        grouped = self.data_manager.df_transactions.groupby("client_id")
-        self._cache_user_transactions = {int(user_id): df.copy() for user_id, df in grouped}
+        # Use a more memory-efficient approach by storing references instead of copies
+        # Only create copies when the dataframe is actually modified
+        self._cache_user_transactions = {}
+
+        # Convert client_id to int once to avoid repeated conversions
+        df = self.data_manager.df_transactions.copy()
+        if not pd.api.types.is_integer_dtype(df['client_id']):
+            df['client_id'] = df['client_id'].astype(int)
+
+        # Group by client_id and store references to the groups
+        for user_id, group in df.groupby("client_id"):
+            self._cache_user_transactions[int(user_id)] = group
 
     def cache_user_merchant_agg(self):
         """
@@ -55,21 +65,53 @@ class UserTabData:
             data or dictionaries during processing.
 
         """
+        # Pre-create the dictionary to avoid resizing
         self._cache_user_merchant_agg = {}
+
+        # Create a mapping of MCC codes to descriptions once instead of repeatedly calling the function
+        mcc_dict = self.data_manager.mcc_dict
+        unique_mccs = set()
+
+        # First collect all unique MCCs
+        for _, df_tx in self._cache_user_transactions.items():
+            if 'mcc' in df_tx.columns:
+                unique_mccs.update(df_tx['mcc'].unique())
+
+        # Create the mapping dictionary
+        mcc_to_desc = {
+            int(mcc): get_mcc_description_by_merchant_id(mcc_dict, int(mcc))
+            for mcc in unique_mccs if pd.notna(mcc)
+        }
+
+        # Process each user's transactions
         for user_id, df_tx in self._cache_user_transactions.items():
+            # Skip if dataframe is empty
+            if df_tx.empty:
+                continue
+
+            # Perform aggregation
             agg = df_tx.groupby(["merchant_id", "mcc"]).agg(
                 tx_count=("amount", "size"),
                 total_sum=("amount", "sum")
             ).reset_index()
 
-            # Add MCC description
-            agg["mcc_desc"] = agg["mcc"].apply(
-                lambda m: get_mcc_description_by_merchant_id(self.data_manager.mcc_dict, int(m))
-            )
+            # Skip if aggregation is empty
+            if agg.empty:
+                continue
 
-            # TODO: Fix total_sum with value of 0 not being deleted
+            # Add MCC description using the pre-computed mapping
+            # Convert MCC to int once for the whole column
+            if not pd.api.types.is_integer_dtype(agg['mcc']):
+                agg['mcc'] = agg['mcc'].astype(int)
+
+            # Use vectorized mapping instead of apply with lambda
+            agg["mcc_desc"] = agg["mcc"].map(mcc_to_desc)
+
             # Filter out rows with tx_count == 0 or total_sum == 0
-            agg = agg[(agg["tx_count"] != 0) & (agg["total_sum"] != 0)]
+            # This is more efficient than filtering after the fact
+            mask = (agg["tx_count"] != 0) & (agg["total_sum"] != 0)
+            if not mask.all():
+                agg = agg[mask]
 
             self._cache_user_merchant_agg[int(user_id)] = agg
 

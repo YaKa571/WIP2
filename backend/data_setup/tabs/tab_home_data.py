@@ -619,6 +619,8 @@ class HomeTabData:
         -------
         None
         """
+        import concurrent.futures
+
         bm_pre_cache_full = Benchmark("Pre-caching Home-Tab data")
         logger.log("🔄 Pre-caching Home-Tab data...", indent_level=2)
 
@@ -633,28 +635,31 @@ class HomeTabData:
             self.get_expenditures_by_channel
         ]
 
-        # First for overall (state=None)
+        # First for overall (state=None) - this is often a dependency for state-specific data
         bm_usa_wide = Benchmark("Pre-caching of USA-wide data")
         for func in caching_functions:
             func(None)
         bm_usa_wide.print_time(level=3)
 
-        # Then for each individual state
-        states = self.df_transactions['state_name'].dropna().unique().tolist()
-        counter = 1
-        bm_state = None
-
-        for st in states:
-            if log_state_times:
-                bm_state = Benchmark(f"({counter}) Pre-caching of state {st}")
-
+        # Define a function to cache all data for a specific state
+        def cache_state_data(state):
             for func in caching_functions:
-                func(st)
+                func(state)
+            return state
 
-            if log_state_times and bm_state is not None:
-                bm_state.print_time(level=3)
-                counter += 1
+        # Get all states
+        states = self.df_transactions['state_name'].dropna().unique().tolist()
 
+        # Use ThreadPoolExecutor for parallel processing of states
+        bm_states = Benchmark("Pre-caching data for all states in parallel")
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Process all states in parallel
+            results = list(executor.map(cache_state_data, states))
+
+            if log_state_times:
+                logger.log(f"✅ Pre-cached data for {len(results)} states", indent_level=3)
+
+        bm_states.print_time(level=3)
         bm_pre_cache_full.print_time(level=3)
 
     def initialize(self):
