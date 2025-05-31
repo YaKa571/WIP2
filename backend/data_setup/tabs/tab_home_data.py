@@ -148,16 +148,18 @@ class HomeTabData:
             df = df[df["state_name"] == state]
 
         df_sums = (
-            df.groupby(["merchant_id", "mcc"])["amount"]
+            df.groupby(["merchant_id", "mcc"], sort=False)["amount"]
             .sum()
             .reset_index(name="merchant_sum")
             .sort_values("merchant_sum", ascending=False)
         )
 
-        # Apply the same helper used in KPI to each MCC code.
-        df_sums["mcc_desc"] = df_sums["mcc"].apply(
-            lambda m: get_mcc_description_by_merchant_id(self.mcc_dict, int(m))
-        )
+        # Pre-compute MCC descriptions for all unique MCCs
+        unique_mccs = df_sums['mcc'].unique()
+        mcc_desc_map = {mcc: get_mcc_description_by_merchant_id(self.mcc_dict, int(mcc)) for mcc in unique_mccs}
+
+        # Use vectorized mapping instead of apply
+        df_sums["mcc_desc"] = df_sums["mcc"].map(mcc_desc_map)
 
         self._cache_most_valuable_merchant[state] = df_sums
         return df_sums
@@ -220,20 +222,21 @@ class HomeTabData:
         if state:
             df = df[df["state_name"] == state]
 
-        # Copy & Datetime -> extract hour
-        df = df.copy()
-        df["date"] = pd.to_datetime(df["date"])
-        df["hour"] = df["date"].dt.hour
+        # Extract hour directly without copying the entire dataframe
+        # Convert date to datetime only if it's not already
+        if not pd.api.types.is_datetime64_dtype(df["date"]):
+            hours = pd.to_datetime(df["date"]).dt.hour
+        else:
+            hours = df["date"].dt.hour
 
-        # Group & count
+        # Group & count more efficiently
         df_counts = (
-            df.groupby("hour")
+            pd.DataFrame({'hour': hours})
+            .groupby("hour", sort=False)
             .size()
             .reset_index(name="transaction_count")
+            .sort_values("transaction_count", ascending=False)
         )
-
-        # Sort descending by count
-        df_counts = df_counts.sort_values("transaction_count", ascending=False)
 
         # Cache & return
         self._cache_transaction_counts_by_hour[state] = df_counts
@@ -297,16 +300,13 @@ class HomeTabData:
         if state:
             df = df[df["state_name"] == state]
 
-        # Sum spending per client
-        df = df.copy()
+        # Sum spending per client more efficiently
         df_sums = (
-            df.groupby("client_id")["amount"]
+            df.groupby("client_id", sort=False)["amount"]
             .sum()
             .reset_index(name="spending")
+            .sort_values("spending", ascending=False)
         )
-
-        # Sort by spending descending
-        df_sums = df_sums.sort_values("spending", ascending=False)
 
         # Cache & return
         self._cache_spending_by_user[state] = df_sums
@@ -372,20 +372,24 @@ class HomeTabData:
         if state:
             df = df[df["state_name"] == state]
 
-        df = df.copy()
+        # Create a mapping of merchant_id to mcc once
+        merchant_mcc_map = df[['merchant_id', 'mcc']].drop_duplicates('merchant_id').set_index('merchant_id')['mcc'].to_dict()
+
+        # Pre-compute MCC descriptions for all unique MCCs
+        unique_mccs = set(merchant_mcc_map.values())
+        mcc_desc_map = {mcc: get_mcc_description_by_merchant_id(self.mcc_dict, mcc) for mcc in unique_mccs}
+
+        # Aggregate visits by merchant more efficiently
         visit_counts = (
-            df.groupby("merchant_id")["merchant_id"]
+            df.groupby("merchant_id", sort=False)
             .size()
             .reset_index(name="visits")
             .sort_values("visits", ascending=False)
         )
-        # Lookup MCC and description
-        visit_counts['mcc'] = visit_counts['merchant_id'].apply(
-            lambda mid: int(df.loc[df['merchant_id'] == mid, 'mcc'].iloc[0])
-        )
-        visit_counts['mcc_desc'] = visit_counts['mcc'].apply(
-            lambda m: get_mcc_description_by_merchant_id(self.mcc_dict, m)
-        )
+
+        # Use vectorized operations instead of apply
+        visit_counts['mcc'] = visit_counts['merchant_id'].map(merchant_mcc_map)
+        visit_counts['mcc_desc'] = visit_counts['mcc'].map(mcc_desc_map)
 
         self._cache_visits_by_merchant[state] = visit_counts
         return visit_counts
@@ -448,30 +452,31 @@ class HomeTabData:
         if state in self._cache_expenditures_by_gender:
             return self._cache_expenditures_by_gender[state]
 
-        # Copy & optional filter
-        df = self.df_transactions.copy()
+        # Optional filter without copying
+        df = self.df_transactions
         if state:
             df = df[df["state_name"] == state]
 
-        # Merge with user gender
+        # Merge with user gender more efficiently
         df_merged = pd.merge(
             df[["client_id", "amount"]],
             self.df_users[["id", "gender"]],
             left_on="client_id",
             right_on="id",
-            how="left"
+            how="left",
+            sort=False  # Avoid unnecessary sorting
         )
 
-        # Group & sum
+        # Group & sum more efficiently
         gender_sums = (
             df_merged
-            .groupby("gender")["amount"]
+            .groupby("gender", sort=False)["amount"]
             .sum()
             .to_dict()
         )
 
-        # Keys uppercased
-        gender_sums = {str(k).upper(): v for k, v in gender_sums.items()}
+        # Keys uppercased - do this more efficiently
+        gender_sums = {(str(k).upper() if pd.notna(k) else "UNKNOWN"): v for k, v in gender_sums.items()}
 
         # Cache & return
         self._cache_expenditures_by_gender[state] = gender_sums
@@ -497,33 +502,32 @@ class HomeTabData:
         if state in self._cache_expenditures_by_age:
             return self._cache_expenditures_by_age[state]
 
-        # Copy & optional filter
-        df = self.df_transactions.copy()
+        # Optional filter without copying
+        df = self.df_transactions
         if state:
             df = df[df["state_name"] == state]
 
-        # Merge with user ages
+        # Merge with user ages more efficiently
         df_merged = pd.merge(
             df[["client_id", "amount"]],
             self.df_users[["id", "current_age"]],
             left_on="client_id",
             right_on="id",
-            how="left"
+            how="left",
+            sort=False  # Avoid unnecessary sorting
         )
 
-        # Create age groups like "20-30", "30-40", etc.
-        df_merged["age_group"] = (
-                df_merged["current_age"].floordiv(10).mul(10).astype(int).astype(str)
-                + "-"
-                + (df_merged["current_age"].floordiv(10).mul(10) + 10).astype(int).astype(str)
-        )
+        # Create age groups more efficiently
+        # First calculate the decade (floor division by 10)
+        decades = df_merged["current_age"].floordiv(10)
+        # Create age groups directly
+        df_merged["age_group"] = (decades * 10).astype(str) + "-" + ((decades * 10) + 10).astype(str)
 
-        # Group by age group and sum amounts
+        # Group by age group and sum amounts more efficiently
         age_group_sums = (
             df_merged
-            .groupby("age_group")["amount"]
+            .groupby("age_group", sort=False)["amount"]
             .sum()
-            .sort_index()
             .to_dict()
         )
 
@@ -553,21 +557,22 @@ class HomeTabData:
         if state in self._cache_expenditures_by_channel:
             return self._cache_expenditures_by_channel[state]
 
-        # Work on a copy
-        df = self.df_transactions.copy()
+        # Work without copying
+        df = self.df_transactions
 
-        # Normalize use_chip for matching
-        df["use_chip_norm"] = df["use_chip"].str.strip().str.lower()
+        # Normalize and check use_chip more efficiently
+        # Avoid creating a new column by using Series operations directly
+        use_chip_lower = df["use_chip"].str.strip().str.lower()
 
         # All online transactions (state_name may be null)
-        online_mask = df["use_chip_norm"].str.startswith("online")
+        online_mask = use_chip_lower.str.startswith("online")
         online_sum = df.loc[online_mask, "amount"].sum()
 
         # In-Store: only swipe transactions, optionally filtered by state
         if state == "ONLINE":
             instore_sum = 0  # No In-store for Online Transactions
         else:
-            instore_mask = df["use_chip_norm"].str.startswith("swipe")
+            instore_mask = use_chip_lower.str.startswith("swipe")
             if state:
                 instore_mask &= (df["state_name"] == state)
             instore_sum = df.loc[instore_mask, "amount"].sum()
@@ -585,14 +590,21 @@ class HomeTabData:
         bm_cache_map = Benchmark("Pre-caching USA Map data...")
         logger.log("🔄 Pre-caching USA Map data...", indent_level=2)
 
+        # More efficient approach without copying the entire dataframe
+        df = self.df_transactions
+
+        # Filter out rows with null state_name
+        df_filtered = df.dropna(subset=["state_name"])
+
+        # Group and count more efficiently
         state_counts = (
-            self.df_transactions.copy()
-            .dropna(subset=["state_name"])
-            .groupby("state_name", as_index=False)
+            df_filtered
+            .groupby("state_name", sort=False, as_index=False)
             .size()
             .rename(columns={"size": "transaction_count"})
         )
 
+        # Add uppercase state names for easier matching
         state_counts["state_name_upper"] = state_counts["state_name"].str.upper()
 
         self.map_data = state_counts
@@ -620,6 +632,7 @@ class HomeTabData:
         None
         """
         import concurrent.futures
+        import multiprocessing
 
         bm_pre_cache_full = Benchmark("Pre-caching Home-Tab data")
         logger.log("🔄 Pre-caching Home-Tab data...", indent_level=2)
@@ -641,23 +654,46 @@ class HomeTabData:
             func(None)
         bm_usa_wide.print_time(level=3)
 
-        # Define a function to cache all data for a specific state
-        def cache_state_data(state):
-            for func in caching_functions:
-                func(state)
-            return state
-
         # Get all states
         states = self.df_transactions['state_name'].dropna().unique().tolist()
 
-        # Use ThreadPoolExecutor for parallel processing of states
-        bm_states = Benchmark("Pre-caching data for all states in parallel")
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Process all states in parallel
-            results = list(executor.map(cache_state_data, states))
+        # Skip if no states to process
+        if not states:
+            logger.log("ℹ️ No states to process", indent_level=3)
+            bm_pre_cache_full.print_time(level=3)
+            return
+
+        # Determine optimal batch size based on number of states and CPU cores
+        # This helps reduce thread creation overhead while still utilizing parallelism
+        num_cores = multiprocessing.cpu_count()
+        batch_size = max(1, min(10, len(states) // num_cores))
+
+        # Create batches of states
+        state_batches = [states[i:i + batch_size] for i in range(0, len(states), batch_size)]
+
+        # Define a function to cache data for a batch of states
+        def cache_state_batch(state_batch):
+            results = []
+            for state in state_batch:
+                # Process each function for this state
+                for func in caching_functions:
+                    func(state)
+                results.append(state)
+            return results
+
+        # Use ThreadPoolExecutor for parallel processing of state batches
+        bm_states = Benchmark("Pre-caching data for all states in batches")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_cores) as executor:
+            # Process batches of states in parallel
+            all_results = []
+            futures = [executor.submit(cache_state_batch, batch) for batch in state_batches]
+
+            # Collect results as they complete
+            for future in concurrent.futures.as_completed(futures):
+                all_results.extend(future.result())
 
             if log_state_times:
-                logger.log(f"✅ Pre-cached data for {len(results)} states", indent_level=3)
+                logger.log(f"✅ Pre-cached data for {len(all_results)} states in {len(state_batches)} batches", indent_level=3)
 
         bm_states.print_time(level=3)
         bm_pre_cache_full.print_time(level=3)
