@@ -439,6 +439,7 @@ def set_merchant_tab(n_all, n_group, n_indiv):
     Output(ID.MERCHANT_KPI_CONTAINER, "children"),
     Output(ID.MERCHANT_GRAPH_CONTAINER, "figure"),
     Output(ID.MERCHANT_GRAPH_TITLE, "children"),
+    Output(ID.MERCHANT_BAR_CHART_SPINNER, "className"),
     Input(ID.MERCHANT_SELECTED_BUTTON_STORE, "data"),
     Input(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
     Input(ID.MERCHANT_INPUT_MERCHANT_ID, "value"),
@@ -484,6 +485,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
     kpi_content = html.Div()
     graph_content = comp_factory.create_empty_figure()
     graph_title = ""
+    spinner_class = "map-spinner"
 
     # Handle content based on selected tab
     if selected == MerchantTab.ALL.value:
@@ -518,10 +520,11 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
 
         # Create graph content if merchant ID is valid
         if merchant in dm.merchant_tab_data.unique_merchant_ids:
-            graph_content = create_individual_merchant_line_chart(merchant, dark_mode=dark_mode)
+            graph_content, spinner_class = create_individual_merchant_line_chart(merchant, dark_mode=dark_mode)
             graph_title = f"HISTORY FOR MERCHANT {merchant}"
         else:
             graph_title = "HISTORY FOR MERCHANT"
+            spinner_class = "map-spinner visible"
 
     # Return all UI component properties
     return (
@@ -532,5 +535,6 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
         indiv_style,
         kpi_content,
         graph_content,
-        graph_title
+        graph_title,
+        spinner_class
     )

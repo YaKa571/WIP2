@@ -216,6 +216,7 @@ def update_credit_limit_bar(user_id, card_id):
 # === Callback: Merchant Bar Chart (bottom) ===
 @callback(
     Output(ID.USER_MERCHANT_BAR_CHART, "figure"),
+    Output(ID.USER_BAR_CHART_SPINNER, "className"),
     Input(ID.USER_ID_SEARCH_INPUT, "value"),
     Input(ID.CARD_ID_SEARCH_INPUT, "value"),
     Input(ID.USER_MERCHANT_SORT_DROPDOWN, "value"),
@@ -241,28 +242,30 @@ def update_merchant_bar_chart(user_id, card_id, sort_by, n_clicks_dark):
             if the user ID is invalid, no transactions exist for the user, or no aggregation data is available.
     """
     dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
+    show_spinner_cls = "map-spinner visible"
+    hide_spinner_cls = "map-spinner"
 
     # Get valid user ID
     try:
         valid_user_id = get_valid_user_id(user_id, card_id)
         if valid_user_id is None or str(valid_user_id).strip() == "":
-            return comp_factory.create_empty_figure()
+            return comp_factory.create_empty_figure(), show_spinner_cls
     except ValueError:
-        return comp_factory.create_empty_figure()
+        return comp_factory.create_empty_figure(), show_spinner_cls
 
     # Get transaction data
     df_tx = dm.user_tab_data.get_user_transactions(valid_user_id)
     if df_tx.empty:
-        return comp_factory.create_empty_figure()
+        return comp_factory.create_empty_figure(), show_spinner_cls
 
     # Process transaction data
     agg_data = dm.user_tab_data.get_user_merchant_agg(valid_user_id)
     if agg_data.empty:
-        return comp_factory.create_empty_figure()
+        return comp_factory.create_empty_figure(), show_spinner_cls
 
     # Configure chart parameters
     chart_params = configure_chart_parameters(agg_data, sort_by)
-    return create_bar_chart_figure(agg_data, chart_params, dark_mode)
+    return create_bar_chart_figure(agg_data, chart_params, dark_mode), hide_spinner_cls
 
 
 @callback(
