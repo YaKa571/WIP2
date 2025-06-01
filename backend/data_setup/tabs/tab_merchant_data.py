@@ -12,7 +12,7 @@ class MerchantTabData:
         self.data_manager = data_manager
         self.df_transactions = data_manager.df_transactions
         self.df_users = data_manager.df_users
-        self.mcc_dict = data_manager.mcc_dict
+        self.df_mcc = data_manager.df_mcc
 
         # Initialize dataframes
         self.mcc = None
@@ -444,10 +444,12 @@ class MerchantTabData:
         -------
         None
         """
+        import concurrent.futures
+
         bm_pre_cache_full = Benchmark("Pre-caching Merchant Tab data")
         logger.log("🔄 Pre-caching Merchant Tab data...", indent_level=2)
 
-        # Cache global data (no parameters)
+        # Cache global data (no parameters) - these are fast and dependencies for other caches
         bm_global = Benchmark("Pre-caching global merchant data")
         self.get_all_merchant_groups()
         self.get_user_with_most_transactions_all_merchants()
@@ -456,42 +458,57 @@ class MerchantTabData:
         self.get_highest_value_merchant_group()
 
         # Cache merchant group overview with common thresholds
-        self.get_merchant_group_overview(10)
-        self.get_merchant_group_overview(20)
-        self.get_merchant_group_overview(50)
+        thresholds = [10, 20, 50]
+        for threshold in thresholds:
+            self.get_merchant_group_overview(threshold)
         bm_global.print_time(level=3)
 
-        # Cache data for each merchant group
-        merchant_groups = self.get_all_merchant_groups()
-        counter = 1
-        bm_group = None
-
-        for group in merchant_groups:
-            if log_times:
-                bm_group = Benchmark(f"({counter}) Pre-caching data for merchant group {group}")
-
-            # Cache data for this merchant group
+        # Define functions to cache data for a merchant group
+        def cache_merchant_group_data(group):
+            # Cache all data for this merchant group
             self.get_most_frequently_used_merchant_in_group(group)
             self.get_highest_value_merchant_in_group(group)
             self.get_user_with_most_transactions_in_group(group)
             self.get_user_with_highest_expenditure_in_group(group)
+            return group
 
-            if log_times and bm_group is not None:
-                bm_group.print_time(level=3)
-                counter += 1
-
-        # Cache data for top merchants by transaction count
-        bm_merchants = Benchmark("Pre-caching data for top merchants")
-        top_merchants_df = self.transactions_mcc_users.groupby('merchant_id').size().reset_index(
-            name='count').sort_values(by='count', ascending=False).head(100)
-        top_merchants = top_merchants_df['merchant_id'].tolist()
-
-        for merchant in top_merchants:
+        # Define function to cache data for a merchant
+        def cache_merchant_data(merchant):
+            # Cache all data for this merchant
             self.get_merchant_transactions(merchant)
             self.get_merchant_value(merchant)
             self.get_user_with_most_transactions_at_merchant(merchant)
             self.get_user_with_highest_expenditure_at_merchant(merchant)
+            return merchant
+
+        # Get merchant groups and top merchants
+        merchant_groups = self.get_all_merchant_groups()
+
+        # Get top merchants more efficiently
+        bm_merchants = Benchmark("Identifying top merchants")
+        merchant_counts = (
+            self.transactions_mcc_users
+            .groupby('merchant_id', sort=False)
+            .size()
+            .reset_index(name='count')
+            .sort_values(by='count', ascending=False)
+            .head(100)
+        )
+        top_merchants = merchant_counts['merchant_id'].tolist()
         bm_merchants.print_time(level=3)
+
+        # Use ThreadPoolExecutor for parallel processing
+        # This is ideal for I/O-bound operations like these caching operations
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Cache merchant group data in parallel
+            bm_groups = Benchmark("Pre-caching data for all merchant groups")
+            list(executor.map(cache_merchant_group_data, merchant_groups))
+            bm_groups.print_time(level=3)
+
+            # Cache merchant data in parallel
+            bm_merchants = Benchmark("Pre-caching data for top merchants")
+            list(executor.map(cache_merchant_data, top_merchants))
+            bm_merchants.print_time(level=3)
 
         bm_pre_cache_full.print_time(level=3)
 
@@ -502,30 +519,33 @@ class MerchantTabData:
         logger.log("ℹ️ Initializing Merchant Tab Data...", 2)
         bm = Benchmark("Initialization")
 
-        # Load MCC codes
-        with open("assets/data/mcc_codes.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
-        self.mcc = pd.DataFrame(list(data.items()), columns=["mcc", "merchant_group"])
-        self.mcc["mcc"] = self.mcc["mcc"].astype(int)
+        # Use shared MCC codes from data manager
+        self.mcc = self.data_manager.df_mcc
 
-        # Join transactions and mcc_codes
-        self.transactions_mcc = self.df_transactions.merge(self.mcc, how="left", on="mcc")
+        # Use shared transactions_mcc from data manager
+        self.transactions_mcc = self.data_manager.transactions_mcc
 
-        # Aggregate by merchant group
-        self.transactions_mcc_agg = self.transactions_mcc.groupby('merchant_group').agg(
-            transaction_count=('merchant_group', 'count')
-        ).reset_index()
-
-        # Aggregate by user
-        self.transactions_agg_by_user = self.df_transactions.groupby('client_id').agg(
-            transaction_count=('amount', 'count'),
-            total_value=('amount', 'sum')
-        ).reset_index()
-
-        # Transactions join MCC join Users
-        self.transactions_mcc_users = self.transactions_mcc.merge(
-            self.df_users, how="left", left_on='client_id', right_on='id'
+        # Aggregate by merchant group - use more efficient named aggregation
+        self.transactions_mcc_agg = (
+            self.transactions_mcc
+            .groupby('merchant_group', sort=False)  # Avoid sorting for better performance
+            .agg(transaction_count=('merchant_group', 'count'))
+            .reset_index()
         )
+
+        # Aggregate by user - use more efficient named aggregation
+        self.transactions_agg_by_user = (
+            self.df_transactions
+            .groupby('client_id', sort=False)  # Avoid sorting for better performance
+            .agg(
+                transaction_count=('amount', 'count'),
+                total_value=('amount', 'sum')
+            )
+            .reset_index()
+        )
+
+        # Use shared transactions_mcc_users from data manager
+        self.transactions_mcc_users = self.data_manager.transactions_mcc_users
 
         # Pre-cache merchant data
         self._pre_cache_merchant_tab_data()

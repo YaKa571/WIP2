@@ -77,7 +77,7 @@ def create_app(suppress_callback_exceptions: bool = True, add_data_tables: bool 
     dash_app.title = "Financial Transactions Dashboard"
 
     dash_app.layout = html.Div(
-        className="dashboard",
+        className="dashboard dark-mode",
         id=ID.DASHBOARD_CONTAINER,
         children=[
 

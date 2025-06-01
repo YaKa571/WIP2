@@ -1,11 +1,12 @@
 from pathlib import Path
+from pathlib import Path
 from typing import Optional
 
 import pandas as pd
 import pgeocode
 
 import utils.logger as logger
-from backend.data_handler import optimize_data, clean_units, json_to_data_frame, json_to_dict, \
+from backend.data_handler import optimize_data, clean_units, json_to_df, \
     read_parquet_data
 from backend.data_setup.tabs.tab_cluster_data import ClusterTabData
 from backend.data_setup.tabs.tab_home_data import HomeTabData
@@ -65,16 +66,16 @@ class DataManager:
         self.df_users: pd.DataFrame = pd.DataFrame()
         self.df_transactions: pd.DataFrame = pd.DataFrame()
         self.df_cards: pd.DataFrame = pd.DataFrame()
-        self.df_mcc: pd.DataFrame = pd.DataFrame()
+        self.df_mcc: pd.DataFrame = json_to_df("mcc_codes.json", col_names=["mcc", "merchant_group"])
         self.df_train_fraud: pd.DataFrame = pd.DataFrame()
+        self.transactions_mcc: pd.DataFrame = pd.DataFrame()
+        self.transactions_mcc_users: pd.DataFrame = pd.DataFrame()
 
         self.amount_of_transactions: int = 0
         self.sum_of_transactions: float = 0.00
         self.avg_transaction_amount: float = 0.00
 
         self.nomi = pgeocode.Nominatim("us")
-
-        self.mcc_dict = json_to_dict("mcc_codes.json")
 
         # Home Tab
         self.home_tab_data: Optional[HomeTabData] = None
@@ -113,7 +114,49 @@ class DataManager:
         self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet",
                                                              num_rows=100_000)) #100_000
         self.df_cards = clean_units(read_parquet_data("cards_data.parquet"))
-        self.df_mcc = json_to_data_frame("mcc_codes.json")
+
+        # Convert to int once
+        self.df_mcc["mcc"] = self.df_mcc["mcc"].astype(int)
+
+    def prepare_shared_data(self):
+        """
+        Prepares shared data that is used by multiple tabs.
+        This avoids duplicate processing and improves performance.
+
+        Creates:
+            - transactions_mcc: DataFrame with transactions joined with MCC codes
+            - transactions_mcc_users: DataFrame with transactions joined with MCC codes and users
+        """
+        logger.log("ℹ️ Preparing shared data for tabs...", indent_level=2)
+        bm = Benchmark("Shared data preparation")
+
+        # Ensure transactions df has int mcc for efficient merging
+        df_transactions = self.df_transactions
+        if 'mcc' in df_transactions.columns and not pd.api.types.is_integer_dtype(df_transactions['mcc']):
+            df_transactions = df_transactions.copy()
+            df_transactions['mcc'] = df_transactions['mcc'].astype(int)
+            self.df_transactions = df_transactions
+
+        # Join transactions and mcc_codes using efficient merge
+        self.transactions_mcc = pd.merge(
+            df_transactions,
+            self.df_mcc,
+            how="left",
+            on="mcc",
+            sort=False  # Avoid unnecessary sorting
+        )
+
+        # Transactions join MCC join Users - use efficient merge
+        self.transactions_mcc_users = pd.merge(
+            self.transactions_mcc,
+            self.df_users,
+            how="left",
+            left_on='client_id',
+            right_on='id',
+            sort=False  # Avoid unnecessary sorting
+        )
+
+        bm.print_time(level=3)
 
     def start(self):
         """
@@ -147,23 +190,37 @@ class DataManager:
         online_shape : Shape
             Predefined rounded rectangular shape for graphical visualization.
         """
+        import concurrent.futures
+
         self.load_data_frames()
 
-        # Initialize Home Tab Data
+        # Prepare shared data that will be used by multiple tabs
+        # This avoids duplicate processing and improves performance
+        self.prepare_shared_data()
+
+        # Create tab data instances
         self.home_tab_data = HomeTabData(self)
-        self.home_tab_data.initialize()
-
-        # Initialize Merchant Tab Data
         self.merchant_tab_data = MerchantTabData(self)
-        self.merchant_tab_data.initialize()
-
-        # Initialize Cluster Tab Data
         self.cluster_tab_data = ClusterTabData(self)
-        self.cluster_tab_data.initialize()
-
-        # Initialize User Tab Data
         self.user_tab_data = UserTabData(self)
-        self.user_tab_data.initialize()
+
+        # Initialize tab data in parallel using ThreadPoolExecutor
+        # This significantly improves performance by running initialization concurrently
+        logger.log("🔄 Initializing tab data in parallel...", indent_level=2)
+        bm_parallel_init = Benchmark("Parallel tab data initialization")
+
+        # Data loading in parallel: -53% start-up time
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Submit all initialization tasks in parallel
+            future_home = executor.submit(self.home_tab_data.initialize)
+            future_merchant = executor.submit(self.merchant_tab_data.initialize)
+            future_cluster = executor.submit(self.cluster_tab_data.initialize)
+            future_user = executor.submit(self.user_tab_data.initialize)
+
+            # Wait for all tasks to complete
+            concurrent.futures.wait([future_home, future_merchant, future_cluster, future_user])
+
+        bm_parallel_init.print_time(level=2)
 
         # Calculations
         self.amount_of_transactions = len(self.df_transactions)

@@ -171,32 +171,39 @@ class ClusterTabData:
         -------
         None
         """
+        import concurrent.futures
+
         bm_pre_cache_full = Benchmark("Pre-caching Cluster Tab data")
         logger.log("🔄 Pre-caching Cluster Tab data...", indent_level=2)
 
-        # Cache data for 'All Merchant Groups'
+        # Cache data for 'All Merchant Groups' first as it's often a dependency
         bm_all_groups = Benchmark("Pre-caching data for All Merchant Groups")
         self.prepare_cluster_data('All Merchant Groups')
         self.prepare_inc_vs_exp_cluster_data('All Merchant Groups')
         bm_all_groups.print_time(level=3)
 
-        # Cache data for each merchant group
-        merchant_groups = self.get_cluster_merchant_group_dropdown()[1:]  # Skip 'All Merchant Groups'
-        counter = 1
-        bm_group = None
-
-        for group in merchant_groups:
-            if log_times:
-                bm_group = Benchmark(f"({counter}) Pre-caching data for merchant group {group}")
-
-            # Cache data for this merchant group
+        # Define a function to cache data for a merchant group
+        def cache_merchant_group_data(group):
+            # Cache both types of cluster data for this merchant group
             self.prepare_cluster_data(group)
             self.prepare_inc_vs_exp_cluster_data(group)
+            return group
 
-            if log_times and bm_group is not None:
-                bm_group.print_time(level=3)
-                counter += 1
+        # Get merchant groups (skip 'All Merchant Groups' as it's already cached)
+        merchant_groups = self.get_cluster_merchant_group_dropdown()[1:]
 
+        # Use ThreadPoolExecutor for parallel processing
+        # This is ideal for CPU-bound operations like clustering
+        # The max_workers parameter can be adjusted based on the system's capabilities
+        bm_groups = Benchmark("Pre-caching data for all merchant groups in parallel")
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Process all merchant groups in parallel
+            results = list(executor.map(cache_merchant_group_data, merchant_groups))
+
+            if log_times:
+                logger.log(f"✅ Pre-cached data for {len(results)} merchant groups", indent_level=3)
+
+        bm_groups.print_time(level=3)
         bm_pre_cache_full.print_time(level=3)
 
     def initialize(self):
@@ -206,14 +213,12 @@ class ClusterTabData:
         logger.log("ℹ️ Initializing Cluster Tab Data...", 2)
         bm = Benchmark("Initialization")
 
-        # Load MCC codes
-        with open("assets/data/mcc_codes.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
-        self.mcc = pd.DataFrame(list(data.items()), columns=["mcc", "merchant_group"])
-        self.mcc["mcc"] = self.mcc["mcc"].astype(int)
+        # Use shared MCC codes from data manager
+        self.mcc = self.data_manager.df_mcc
 
-        # Get transaction data from merchant tab data
-        self.data_file = self.data_manager.merchant_tab_data.get_my_transactions_mcc_users()
+        # Use shared transactions_mcc_users from data manager
+        # This avoids duplicate processing and improves performance
+        self.data_file = self.data_manager.transactions_mcc_users.copy()
 
         # Add age_group
         self.data_file['age_group'] = pd.cut(
