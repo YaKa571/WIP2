@@ -127,8 +127,7 @@ class DataManager:
 
         # Read and clean data
         self.df_users = clean_units(read_parquet_data("users_data.parquet"))
-        self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet",
-                                                             num_rows=None))  # 100_000
+        self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet"))  # Now using all rows
         self.df_cards = clean_units(read_parquet_data("cards_data.parquet"))
 
         # Convert to int once
