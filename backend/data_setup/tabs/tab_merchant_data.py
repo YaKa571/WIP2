@@ -1,4 +1,3 @@
-import json
 from typing import Dict, Tuple
 
 import pandas as pd
@@ -446,11 +445,8 @@ class MerchantTabData:
         """
         import concurrent.futures
 
-        bm_pre_cache_full = Benchmark("Pre-caching Merchant Tab data")
-        logger.log("🔄 Pre-caching Merchant Tab data...", indent_level=2)
-
         # Cache global data (no parameters) - these are fast and dependencies for other caches
-        bm_global = Benchmark("Pre-caching global merchant data")
+        bm_global = Benchmark("Merchant: Pre-caching global merchant data")
         self.get_all_merchant_groups()
         self.get_user_with_most_transactions_all_merchants()
         self.get_user_with_highest_expenditure_all_merchants()
@@ -461,7 +457,7 @@ class MerchantTabData:
         thresholds = [10, 20, 50]
         for threshold in thresholds:
             self.get_merchant_group_overview(threshold)
-        bm_global.print_time(level=3)
+        bm_global.print_time(level=4)
 
         # Define functions to cache data for a merchant group
         def cache_merchant_group_data(group):
@@ -485,7 +481,7 @@ class MerchantTabData:
         merchant_groups = self.get_all_merchant_groups()
 
         # Get top merchants more efficiently
-        bm_merchants = Benchmark("Identifying top merchants")
+        bm_merchants = Benchmark("Merchant: Identifying top merchants")
         merchant_counts = (
             self.transactions_mcc_users
             .groupby('merchant_id', sort=False)
@@ -495,29 +491,27 @@ class MerchantTabData:
             .head(100)
         )
         top_merchants = merchant_counts['merchant_id'].tolist()
-        bm_merchants.print_time(level=3)
+        bm_merchants.print_time(level=4)
 
         # Use ThreadPoolExecutor for parallel processing
         # This is ideal for I/O-bound operations like these caching operations
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Cache merchant group data in parallel
-            bm_groups = Benchmark("Pre-caching data for all merchant groups")
+            bm_groups = Benchmark("Merchant: Pre-caching data for all merchant groups")
             list(executor.map(cache_merchant_group_data, merchant_groups))
-            bm_groups.print_time(level=3)
+            bm_groups.print_time(level=4)
 
             # Cache merchant data in parallel
-            bm_merchants = Benchmark("Pre-caching data for top merchants")
+            bm_merchants = Benchmark("Merchant: Pre-caching data for top merchants")
             list(executor.map(cache_merchant_data, top_merchants))
-            bm_merchants.print_time(level=3)
-
-        bm_pre_cache_full.print_time(level=3)
+            bm_merchants.print_time(level=4)
 
     def initialize(self):
         """
         Initialize the merchant tab data by loading and processing the necessary data.
         """
-        logger.log("ℹ️ Initializing Merchant Tab Data...", 2)
-        bm = Benchmark("Initialization")
+        logger.log("ℹ️ Merchant: Initializing Merchant Tab Data...", 3, add_line_before=True)
+        bm = Benchmark("Merchant: Initialization")
 
         # Use shared MCC codes from data manager
         self.mcc = self.data_manager.df_mcc
@@ -550,4 +544,4 @@ class MerchantTabData:
         # Pre-cache merchant data
         self._pre_cache_merchant_tab_data()
 
-        bm.print_time(level=3)
+        bm.print_time(level=4, add_empty_line=True)

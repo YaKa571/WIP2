@@ -16,6 +16,7 @@ from components.constants import DATA_DIRECTORY
 from utils.benchmark import Benchmark
 from utils.utils import rounded_rect
 
+
 class DataManager:
     """
     Manages data initialization, preprocessing, and storage for use in a larger application.
@@ -106,17 +107,22 @@ class DataManager:
         Raises:
             FileNotFoundError: If any of the specified files are not found during processing.
         """
+        logger.log("ℹ️ DataManager: Loading from files...", 2, add_line_before=True)
+        bm = Benchmark("DataManager: Loading from files")
+
         # Converts CSV files to parquet files if they don't exist yet and load them as DataFrames
         optimize_data("users_data.csv", "transactions_data.csv", "cards_data.csv")
 
         # Read and clean data
         self.df_users = clean_units(read_parquet_data("users_data.parquet"))
         self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet",
-                                                             num_rows=100_000)) #100_000
+                                                             num_rows=100_000))  # 100_000
         self.df_cards = clean_units(read_parquet_data("cards_data.parquet"))
 
         # Convert to int once
         self.df_mcc["mcc"] = self.df_mcc["mcc"].astype(int)
+
+        bm.print_time(level=4, add_empty_line=True)
 
     def prepare_shared_data(self):
         """
@@ -127,8 +133,8 @@ class DataManager:
             - transactions_mcc: DataFrame with transactions joined with MCC codes
             - transactions_mcc_users: DataFrame with transactions joined with MCC codes and users
         """
-        logger.log("ℹ️ Preparing shared data for tabs...", indent_level=2)
-        bm = Benchmark("Shared data preparation")
+        logger.log("ℹ️ DataManager: Preparing shared data for tabs...", indent_level=2)
+        bm = Benchmark("DataManager: Shared data preparation")
 
         # Ensure transactions df has int mcc for efficient merging
         df_transactions = self.df_transactions
@@ -156,7 +162,7 @@ class DataManager:
             sort=False  # Avoid unnecessary sorting
         )
 
-        bm.print_time(level=3)
+        bm.print_time(level=3, add_empty_line=True)
 
     def start(self):
         """
@@ -206,8 +212,8 @@ class DataManager:
 
         # Initialize tab data in parallel using ThreadPoolExecutor
         # This significantly improves performance by running initialization concurrently
-        logger.log("🔄 Initializing tab data in parallel...", indent_level=2)
-        bm_parallel_init = Benchmark("Parallel tab data initialization")
+        logger.log("🔄 DataManager: Initializing tab data in parallel...", indent_level=2)
+        bm_parallel_init = Benchmark("DataManager: Parallel tab data initialization")
 
         # Data loading in parallel: -53% start-up time
         with concurrent.futures.ThreadPoolExecutor() as executor:

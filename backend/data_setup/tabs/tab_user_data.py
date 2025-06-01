@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 from backend.data_handler import get_mcc_description_by_merchant_id
@@ -267,13 +266,10 @@ class UserTabData:
         """
         return self._cache_user_merchant_agg.get(int(user_id), pd.DataFrame())
 
-    def _pre_cache_user_tab_data(self) -> None:
-        bm_pre_cache_full = Benchmark("Pre-caching User-Tab data")
-        logger.log("🔄 Pre-caching User-Tab data...", indent_level=2)
+    def initialize(self):
+        logger.log("🔄 User: Pre-caching User-Tab data...", indent_level=3, add_line_before=True)
+        bm_pre_cache_full = Benchmark("User: Pre-caching User-Tab data")
 
         self.cache_user_transactions()
         self.cache_user_merchant_agg()
-        bm_pre_cache_full.print_time(level=3)
-
-    def initialize(self):
-        self._pre_cache_user_tab_data()
+        bm_pre_cache_full.print_time(level=4, add_empty_line=True)

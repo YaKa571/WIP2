@@ -11,7 +11,8 @@ def _get_debug_markers(debug: bool) -> tuple[str, str]:
     return "", ""
 
 
-def log(message: str, indent_level: int = 0, debug: bool = False) -> None:
+def log(message: str, indent_level: int = 0, debug: bool = False, add_line_before: bool = False,
+        add_line_after: bool = False) -> None:
     """
     Logs a message with optional indentation and debug markers.
 
@@ -29,8 +30,16 @@ def log(message: str, indent_level: int = 0, debug: bool = False) -> None:
         debug: bool, optional
             A flag indicating if debug markers should be added to the message.
             Defaults to False.
+        add_line_before: bool, optional
+            Whether to add a line break before the message. Defaults to False.
+        add_line_after: bool, optional
+            Whether to add a line break after the message. Defaults to False.
     """
     indent_level = 1 if debug else indent_level
     indent = INDENT_CHARS * indent_level
     debug_start, debug_end = _get_debug_markers(debug)
+    if add_line_before:
+        print("")
     print(f"{indent}{debug_start}{message}{debug_end}")
+    if add_line_after:
+        print("")

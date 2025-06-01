@@ -102,9 +102,9 @@ def optimize_data(*file_names: str):
 
         # Only convert if Parquet missing or outdated
         if parquet_path.exists() and parquet_path.stat().st_mtime >= csv_mtime:
-            logger.log(f"ℹ️ Loading from Parquet: {parquet_path}", 2)
+            logger.log(f"ℹ️ Loading from Parquet: {parquet_path}", 3)
         else:
-            logger.log(f"🔄 Converting CSV to Parquet: {csv_path}", 2)
+            logger.log(f"🔄 Converting CSV to Parquet: {csv_path}", 3)
             bm = Benchmark("Conversion")
 
             # Read CSV into DataFrame
@@ -115,8 +115,8 @@ def optimize_data(*file_names: str):
                 engine='pyarrow',
                 compression='snappy',
             )
-            logger.log(f"✅ Saved Parquet: {parquet_path}", 3)
-            bm.print_time(level=3)
+            logger.log(f"✅ Saved Parquet: {parquet_path}", 4)
+            bm.print_time(level=4)
 
 
 def clean_units(df: pd.DataFrame) -> pd.DataFrame:
