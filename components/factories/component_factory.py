@@ -107,10 +107,10 @@ def create_data_table(id_name: str, dataset: pd.DataFrame, visible: bool = True,
     )
 
 
-def create_usa_map(color_scale: str = "Blues",
+def create_usa_map(color_scale: str = const.MAP_DEFAULT_COLOR_SCALE,
                    map_style: str = "carto-positron-nolabels",
-                   text_color: str = "black",
-                   dark_mode: bool = True,
+                   text_color: str = "black" if const.DEFAULT_DARK_MODE else "white",
+                   dark_mode: bool = const.DEFAULT_DARK_MODE,
                    show_color_scale: bool = True) -> dcc.Graph:
     """
     Creates a choropleth map of the United States illustrating transaction count
@@ -182,7 +182,7 @@ def create_usa_map(color_scale: str = "Blues",
             r=0,
             t=0,
         ),
-        uirevision=str(time.time()),
+        uirevision="usa-map",
     )
 
     fig.update_coloraxes(

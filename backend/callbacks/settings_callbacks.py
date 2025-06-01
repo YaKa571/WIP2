@@ -47,7 +47,7 @@ def toggle_settings_canvas(n_clicks, is_open):
     Input(ID.SETTING_GENERAL_CANVAS_PLACEMENT, "value"),
     State(ID.APP_STATE_STORE, "data"),
 )
-def update_app_state(_, n_clicks, map_color_scale, map_text_color, map_show_color_scale, show_tooltips,
+def update_app_state(_, n_clicks_dark, map_color_scale, map_text_color, map_show_color_scale, show_tooltips,
                      canvas_placement, current_state):
     """
     Handles the state updates and UI toggling based on user interaction with the application.
@@ -56,7 +56,7 @@ def update_app_state(_, n_clicks, map_color_scale, map_text_color, map_show_colo
 
     Args:
         _: Ignored value, represents the content of the 'app-init-trigger'. Typically, not used.
-        n_clicks: Number of clicks on the dark mode toggle button. Used to determine if the mode
+        n_clicks_dark: Number of clicks on the dark mode toggle button. Used to determine if the mode
             should be switched between dark and light.
         map_color_scale: Selected color scale for the map visualization. Changes trigger updates in
             the application’s state to align with the new color scale.
@@ -89,7 +89,7 @@ def update_app_state(_, n_clicks, map_color_scale, map_text_color, map_show_colo
         current_state = const.APP_STATE_STORE_DEFAULT
 
     # Update state based on trigger
-    if triggered_id == ID.BUTTON_DARK_MODE_TOGGLE.value and n_clicks:
+    if triggered_id == ID.BUTTON_DARK_MODE_TOGGLE.value and n_clicks_dark:
         current_state["dark_mode"] = not current_state.get("dark_mode", const.DEFAULT_DARK_MODE)
         current_state["settings_changed"] = True
         current_state["update_id"] += 1
