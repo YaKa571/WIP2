@@ -53,8 +53,7 @@ def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically:
     # dynamic threshold for grouping minor merchant groups
     if file_name == "transactions_data.parquet" and num_rows is not None:
         global merchant_other_threshold
-        merchant_other_threshold = num_rows/50
-        print("bin beim aufruf")
+        merchant_other_threshold = num_rows/50 #based on testing with 50_000 rows and threshold = 1000
 
     return df
 
