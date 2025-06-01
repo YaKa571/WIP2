@@ -109,6 +109,7 @@ def create_data_table(id_name: str, dataset: pd.DataFrame, visible: bool = True,
 
 def create_usa_map(color_scale: str = "Blues",
                    map_style: str = "carto-positron-nolabels",
+                   text_color: str = "black",
                    dark_mode: bool = True) -> dcc.Graph:
     """
     Creates a choropleth map of the United States illustrating transaction count
@@ -122,6 +123,8 @@ def create_usa_map(color_scale: str = "Blues",
         The graphs color scale to use, by default "Reds"
     map_style: str, optional
         Mapbox style to use, by default "carto-positron"
+    text_color: str, optional
+        The color to use for text, by default "black"
     dark_mode: bool, optional
         Whether to use dark mode colors, by default True
     Returns
@@ -131,6 +134,7 @@ def create_usa_map(color_scale: str = "Blues",
     """
     df = dm.home_tab_data.map_data
     text_color_colorbar = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
+    text_font = "Open Sans Bold, Open Sans, Arial, sans-serif"
 
     # Choropleth Mapbox
     fig = px.choropleth_map(
@@ -157,9 +161,9 @@ def create_usa_map(color_scale: str = "Blues",
         mode="text",
         text=[full_to_abbr.get(n, "ONLINE") if n != "ONLINE" else "ONLINE"
               for n in df["state_name"]],
-        textfont=dict(size=12, color="black"),
+        textfont=dict(size=12, color=text_color, family=text_font),
         showlegend=False,
-        hoverinfo="skip"
+        hoverinfo="skip",
     ))
 
     # Update layout
@@ -180,6 +184,7 @@ def create_usa_map(color_scale: str = "Blues",
 
     fig.update_coloraxes(
         colorbar=dict(
+            title="TRANSACTIONS",
             orientation='h',
             x=0.5,
             y=0.05,
@@ -187,8 +192,8 @@ def create_usa_map(color_scale: str = "Blues",
             yanchor='bottom',
             len=0.7,
             thickness=20,
-            tickfont=dict(color=text_color_colorbar),
-            title_font=dict(color=text_color_colorbar)
+            tickfont=dict(color=text_color_colorbar, family=text_font),
+            title_font=dict(color=text_color_colorbar, family=text_font),
         ),
         showscale=True
     )

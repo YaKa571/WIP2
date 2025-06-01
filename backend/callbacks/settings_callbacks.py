@@ -41,9 +41,10 @@ def toggle_settings_canvas(n_clicks, is_open):
     Input("app-init-trigger", "children"),
     Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks"),
     Input(ID.SETTING_MAP_COLOR_SCALE, "value"),
+    Input(ID.SETTING_MAP_TEXT_COLOR, "value"),
     State(ID.APP_STATE_STORE, "data"),
 )
-def update_app_state(_, n_clicks, color_scale, current_state):
+def update_app_state(_, n_clicks, map_color_scale, map_text_color, current_state):
     """
     Handles the state updates and UI toggling based on user interaction with the application.
     The function processes different types of inputs to determine the current state and modifies
@@ -53,10 +54,11 @@ def update_app_state(_, n_clicks, color_scale, current_state):
         _: Ignored value, represents the content of the 'app-init-trigger'. Typically, not used.
         n_clicks: Number of clicks on the dark mode toggle button. Used to determine if the mode
             should be switched between dark and light.
-        color_scale: Selected color scale for the map visualization. Changes trigger updates in
+        map_color_scale: Selected color scale for the map visualization. Changes trigger updates in
             the application’s state to align with the new color scale.
         current_state: Persisted state data of the application. Includes various state elements
             such as dark mode status, color scale, update count, and settings modification flag.
+        map_text_color: Selected text color for the map visualization. Changes trigger updates in
 
     Returns:
         tuple: A tuple containing:
@@ -73,13 +75,7 @@ def update_app_state(_, n_clicks, color_scale, current_state):
 
     # Initialize state if necessary
     if current_state is None:
-        current_state = {
-            "dark_mode": const.DEFAULT_DARK_MODE,
-            "color_scale": color_scale if color_scale else "Viridis",  # Default value
-            "phase": "initial",
-            "update_id": 0,
-            "settings_changed": True
-        }
+        current_state = const.APP_STATE_STORE_DEFAULT
 
     # Update state based on trigger
     if triggered_id == ID.BUTTON_DARK_MODE_TOGGLE.value and n_clicks:
@@ -88,8 +84,14 @@ def update_app_state(_, n_clicks, color_scale, current_state):
         current_state["update_id"] += 1
 
     elif triggered_id == ID.SETTING_MAP_COLOR_SCALE.value:
-        if current_state.get("color_scale") != color_scale:
-            current_state["color_scale"] = color_scale
+        if current_state.get("map_setting_color_scale") != map_color_scale:
+            current_state["map_setting_color_scale"] = map_color_scale
+            current_state["settings_changed"] = True
+            current_state["update_id"] += 1
+
+    elif triggered_id == ID.SETTING_MAP_TEXT_COLOR.value:
+        if current_state.get("map_setting_text_color") != map_text_color:
+            current_state["map_setting_text_color"] = map_text_color
             current_state["settings_changed"] = True
             current_state["update_id"] += 1
 
@@ -197,10 +199,12 @@ def render_map(animation_state, app_state):
 
     # Render map with current settings
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE)
-    color_scale = app_state.get("color_scale", "blues")
+    color_scale = app_state.get("map_setting_color_scale", "blues")
+    text_color = app_state.get("map_setting_text_color", const.TEXT_COLOR_LIGHT if dark_mode else const.TEXT_COLOR_DARK)
 
     map_style = "carto-darkmatter-nolabels" if dark_mode else "carto-positron-nolabels"
-    map_component = create_usa_map(color_scale=color_scale, map_style=map_style, dark_mode=dark_mode)
+    map_component = create_usa_map(color_scale=color_scale, text_color=text_color, map_style=map_style,
+                                   dark_mode=dark_mode)
 
     # Reset settings changed flag
     app_state["settings_changed"] = False

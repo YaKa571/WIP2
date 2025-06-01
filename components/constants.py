@@ -43,7 +43,8 @@ DEFAULT_DARK_MODE: bool = True
 # Stores
 APP_STATE_STORE_DEFAULT = {
     "dark_mode": DEFAULT_DARK_MODE,
-    "color_scale": "blues",
+    "map_setting_color_scale": "blues",
+    "map_setting_text_color": "black" if DEFAULT_DARK_MODE else "white",
     "phase": "initial",
     "update_id": 0,
     "settings_changed": False
