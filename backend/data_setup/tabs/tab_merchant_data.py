@@ -428,6 +428,67 @@ class MerchantTabData:
         self._cache_user_with_highest_expenditure_at_merchant[merchant] = result
         return result
 
+    def _save_caches_to_disk(self):
+        """
+        Save all cached data to disk.
+        """
+        logger.log("🔄 Merchant: Saving caches to disk...", indent_level=3)
+        bm = Benchmark("Merchant: Saving caches to disk")
+
+        # Save all cache dictionaries
+        cache_data = {
+            "merchant_group_overview": self._cache_merchant_group_overview,
+            "all_merchant_groups": self._cache_all_merchant_groups,
+            "most_transactions_all_merchants": self._cache_most_transactions_all_merchants,
+            "highest_expenditure_all_merchants": self._cache_highest_expenditure_all_merchants,
+            "most_frequently_used_merchant_group": self._cache_most_frequently_used_merchant_group,
+            "highest_value_merchant_group": self._cache_highest_value_merchant_group,
+            "most_frequently_used_merchant_in_group": self._cache_most_frequently_used_merchant_in_group,
+            "highest_value_merchant_in_group": self._cache_highest_value_merchant_in_group,
+            "user_with_most_transactions_in_group": self._cache_user_with_most_transactions_in_group,
+            "user_with_highest_expenditure_in_group": self._cache_user_with_highest_expenditure_in_group,
+            "merchant_transactions": self._cache_merchant_transactions,
+            "merchant_value": self._cache_merchant_value,
+            "user_with_most_transactions_at_merchant": self._cache_user_with_most_transactions_at_merchant,
+            "user_with_highest_expenditure_at_merchant": self._cache_user_with_highest_expenditure_at_merchant
+        }
+
+        self.data_manager.save_cache_to_disk("merchant_tab_caches", cache_data)
+        bm.print_time(level=4)
+
+    def _load_caches_from_disk(self) -> bool:
+        """
+        Load all cached data from disk.
+
+        Returns:
+            bool: True if caches were successfully loaded, False otherwise
+        """
+        logger.log("🔄 Merchant: Loading caches from disk...", indent_level=3)
+        bm = Benchmark("Merchant: Loading caches from disk")
+
+        # Load cache dictionaries
+        cache_data = self.data_manager.load_cache_from_disk("merchant_tab_caches", is_dataframe=False)
+        if cache_data is not None:
+            self._cache_merchant_group_overview = cache_data.get("merchant_group_overview", {})
+            self._cache_all_merchant_groups = cache_data.get("all_merchant_groups")
+            self._cache_most_transactions_all_merchants = cache_data.get("most_transactions_all_merchants")
+            self._cache_highest_expenditure_all_merchants = cache_data.get("highest_expenditure_all_merchants")
+            self._cache_most_frequently_used_merchant_group = cache_data.get("most_frequently_used_merchant_group")
+            self._cache_highest_value_merchant_group = cache_data.get("highest_value_merchant_group")
+            self._cache_most_frequently_used_merchant_in_group = cache_data.get("most_frequently_used_merchant_in_group", {})
+            self._cache_highest_value_merchant_in_group = cache_data.get("highest_value_merchant_in_group", {})
+            self._cache_user_with_most_transactions_in_group = cache_data.get("user_with_most_transactions_in_group", {})
+            self._cache_user_with_highest_expenditure_in_group = cache_data.get("user_with_highest_expenditure_in_group", {})
+            self._cache_merchant_transactions = cache_data.get("merchant_transactions", {})
+            self._cache_merchant_value = cache_data.get("merchant_value", {})
+            self._cache_user_with_most_transactions_at_merchant = cache_data.get("user_with_most_transactions_at_merchant", {})
+            self._cache_user_with_highest_expenditure_at_merchant = cache_data.get("user_with_highest_expenditure_at_merchant", {})
+            bm.print_time(level=4)
+            return True
+
+        bm.print_time(level=4)
+        return False
+
     def _pre_cache_merchant_tab_data(self, log_times: bool = True) -> None:
         """
         Pre-caches data for the Merchant Tab view by performing data aggregation and calculations for
@@ -444,6 +505,15 @@ class MerchantTabData:
         None
         """
         import concurrent.futures
+
+        logger.log("🔄 Merchant: Pre-caching Merchant Tab data...", indent_level=3)
+        bm_pre_cache_full = Benchmark("Merchant: Pre-caching Merchant Tab data")
+
+        # Try to load caches from disk first
+        if self._load_caches_from_disk():
+            logger.log("✅ Merchant: Successfully loaded caches from disk", indent_level=3)
+            bm_pre_cache_full.print_time(level=4)
+            return
 
         # Cache global data (no parameters) - these are fast and dependencies for other caches
         bm_global = Benchmark("Merchant: Pre-caching global merchant data")
@@ -505,6 +575,11 @@ class MerchantTabData:
             bm_merchants = Benchmark("Merchant: Pre-caching data for top merchants")
             list(executor.map(cache_merchant_data, top_merchants))
             bm_merchants.print_time(level=4)
+
+        # Save caches to disk for future use
+        self._save_caches_to_disk()
+
+        bm_pre_cache_full.print_time(level=4)
 
     def initialize(self):
         """

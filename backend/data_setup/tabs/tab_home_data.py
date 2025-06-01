@@ -591,6 +591,14 @@ class HomeTabData:
         logger.log("🔄 Home: Pre-caching USA Map data...", indent_level=3)
         bm_cache_map = Benchmark("Home: Pre-caching USA Map data")
 
+        # Try to load map data from cache first
+        map_data = self.data_manager.load_cache_from_disk("home_tab_map_data")
+        if map_data is not None:
+            self.map_data = map_data
+            logger.log("✅ Home: Loaded map data from cache", indent_level=4)
+            bm_cache_map.print_time(level=4)
+            return
+
         # More efficient approach without copying the entire dataframe
         df = self.df_transactions
 
@@ -609,7 +617,69 @@ class HomeTabData:
         state_counts["state_name_upper"] = state_counts["state_name"].str.upper()
 
         self.map_data = state_counts
+
+        # Save map data to cache
+        self.data_manager.save_cache_to_disk("home_tab_map_data", self.map_data)
+
         bm_cache_map.print_time(level=4)
+
+    def _save_caches_to_disk(self):
+        """
+        Save all cached data to disk.
+        """
+        logger.log("🔄 Home: Saving caches to disk...", indent_level=3)
+        bm = Benchmark("Home: Saving caches to disk")
+
+        # Save all cache dictionaries
+        cache_data = {
+            "most_valuable_merchant": self._cache_most_valuable_merchant,
+            "visits_by_merchant": self._cache_visits_by_merchant,
+            "spending_by_user": self._cache_spending_by_user,
+            "transaction_counts_by_hour": self._cache_transaction_counts_by_hour,
+            "expenditures_by_gender": self._cache_expenditures_by_gender,
+            "expenditures_by_age": self._cache_expenditures_by_age,
+            "expenditures_by_channel": self._cache_expenditures_by_channel
+        }
+
+        self.data_manager.save_cache_to_disk("home_tab_caches", cache_data)
+
+        # Save map data separately as it's a DataFrame
+        if not self.map_data.empty:
+            self.data_manager.save_cache_to_disk("home_tab_map_data", self.map_data)
+
+        bm.print_time(level=4)
+
+    def _load_caches_from_disk(self) -> bool:
+        """
+        Load all cached data from disk.
+
+        Returns:
+            bool: True if caches were successfully loaded, False otherwise
+        """
+        logger.log("🔄 Home: Loading caches from disk...", indent_level=3)
+        bm = Benchmark("Home: Loading caches from disk")
+
+        # Load cache dictionaries
+        cache_data = self.data_manager.load_cache_from_disk("home_tab_caches", is_dataframe=False)
+        if cache_data is not None:
+            self._cache_most_valuable_merchant = cache_data.get("most_valuable_merchant", {})
+            self._cache_visits_by_merchant = cache_data.get("visits_by_merchant", {})
+            self._cache_spending_by_user = cache_data.get("spending_by_user", {})
+            self._cache_transaction_counts_by_hour = cache_data.get("transaction_counts_by_hour", {})
+            self._cache_expenditures_by_gender = cache_data.get("expenditures_by_gender", {})
+            self._cache_expenditures_by_age = cache_data.get("expenditures_by_age", {})
+            self._cache_expenditures_by_channel = cache_data.get("expenditures_by_channel", {})
+
+            # Load map data
+            map_data = self.data_manager.load_cache_from_disk("home_tab_map_data")
+            if map_data is not None:
+                self.map_data = map_data
+
+            bm.print_time(level=4)
+            return True
+
+        bm.print_time(level=4)
+        return False
 
     def _pre_cache_home_tab_data(self) -> None:
         """
@@ -637,6 +707,12 @@ class HomeTabData:
 
         logger.log("🔄 Home: Pre-caching Home-Tab States data...", indent_level=3)
         bm_pre_cache_full = Benchmark("Home: Pre-caching Home-Tab States data")
+
+        # Try to load caches from disk first
+        if self._load_caches_from_disk():
+            logger.log("✅ Home: Successfully loaded caches from disk", indent_level=3)
+            bm_pre_cache_full.print_time(level=4)
+            return
 
         # Caching functions to run for each state
         caching_functions: list[Callable[[str | None], Any]] = [
@@ -694,6 +770,10 @@ class HomeTabData:
                 all_results.extend(future.result())
 
         bm_states.print_time(level=4)
+
+        # Save caches to disk for future use
+        self._save_caches_to_disk()
+
         bm_pre_cache_full.print_time(level=4)
 
     def initialize(self):

@@ -154,6 +154,43 @@ class ClusterTabData:
         """
         return self.data_file
 
+    def _save_caches_to_disk(self):
+        """
+        Save all cached data to disk.
+        """
+        logger.log("🔄 Cluster: Saving caches to disk...", indent_level=3)
+        bm = Benchmark("Cluster: Saving caches to disk")
+
+        # Save all cache dictionaries
+        cache_data = {
+            "cluster_data": self._cache_cluster_data,
+            "inc_vs_exp_cluster_data": self._cache_inc_vs_exp_cluster_data
+        }
+
+        self.data_manager.save_cache_to_disk("cluster_tab_caches", cache_data)
+        bm.print_time(level=4)
+
+    def _load_caches_from_disk(self) -> bool:
+        """
+        Load all cached data from disk.
+
+        Returns:
+            bool: True if caches were successfully loaded, False otherwise
+        """
+        logger.log("🔄 Cluster: Loading caches from disk...", indent_level=3)
+        bm = Benchmark("Cluster: Loading caches from disk")
+
+        # Load cache dictionaries
+        cache_data = self.data_manager.load_cache_from_disk("cluster_tab_caches", is_dataframe=False)
+        if cache_data is not None:
+            self._cache_cluster_data = cache_data.get("cluster_data", {})
+            self._cache_inc_vs_exp_cluster_data = cache_data.get("inc_vs_exp_cluster_data", {})
+            bm.print_time(level=4)
+            return True
+
+        bm.print_time(level=4)
+        return False
+
     def _pre_cache_cluster_tab_data(self) -> None:
         """
         Pre-caches data for the Cluster Tab view by performing data aggregation and clustering
@@ -173,6 +210,12 @@ class ClusterTabData:
 
         logger.log("🔄 Cluster: Pre-caching Cluster Tab data...", indent_level=3)
         bm_pre_cache_full = Benchmark("Cluster: Pre-caching Cluster Tab data")
+
+        # Try to load caches from disk first
+        if self._load_caches_from_disk():
+            logger.log("✅ Cluster: Successfully loaded caches from disk", indent_level=3)
+            bm_pre_cache_full.print_time(level=4)
+            return
 
         # Cache data for 'All Merchant Groups' first as it's often a dependency
         bm_all_groups = Benchmark("Cluster: Pre-caching data for All Merchant Groups")
@@ -199,6 +242,10 @@ class ClusterTabData:
             results = list(executor.map(cache_merchant_group_data, merchant_groups))
 
         bm_groups.print_time(level=4)
+
+        # Save caches to disk for future use
+        self._save_caches_to_disk()
+
         bm_pre_cache_full.print_time(level=4)
 
     def initialize(self):
