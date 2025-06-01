@@ -118,6 +118,16 @@ def _create_button_row() -> html.Div:
                     "Merchant"
 
                 ]),
+            # for Testing only TODO: delete
+            html.Button(
+                className="settings-button-text option-btn",
+                id="merchant-test-button",
+                children=[
+
+                    html.I(className="bi bi-shop-window me-2"),
+                    "Test"
+
+                ]),
         ])
 
 

@@ -445,8 +445,9 @@ def set_merchant_tab(n_all, n_group, n_indiv):
     Input(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
     Input(ID.MERCHANT_INPUT_MERCHANT_ID, "value"),
     Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks"),
+    Input("merchant-test-button","n_clicks") # todo: delete
 )
-def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dark):
+def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dark,n_test_button):
     """
     Updates the user interface components based on the currently selected merchant
     tab, group, or individual merchant.
@@ -526,6 +527,14 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
         else:
             graph_title = "HISTORY FOR MERCHANT"
             spinner_class = "map-spinner visible"
+
+    # todo: delete test
+    if ctx.triggered_id == "merchant-test-button":
+
+        print("--- TEST BUTTON CLICKED ---")
+        print(f"Selected Tab: {selected}")
+        print(f"Selected Group: {selected_group}")
+        print(f"Selected Merchant ID: {selected_merchant_id}")
 
     # Return all UI component properties
     return (
