@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from dash import Input, Output, callback
+from dash import Input, Output, callback, State
 from dash.exceptions import PreventUpdate
 
 import components.constants as const
@@ -220,9 +220,9 @@ def update_credit_limit_bar(user_id, card_id):
     Input(ID.USER_ID_SEARCH_INPUT, "value"),
     Input(ID.CARD_ID_SEARCH_INPUT, "value"),
     Input(ID.USER_MERCHANT_SORT_DROPDOWN, "value"),
-    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks")
+    Input(ID.APP_STATE_STORE, "data")
 )
-def update_merchant_bar_chart(user_id, card_id, sort_by, n_clicks_dark):
+def update_merchant_bar_chart(user_id, card_id, sort_by, app_state):
     """
     Updates the merchant bar chart figure based on user input and selected options. The chart reflects aggregated
     transaction data for a specific user, with sorting and display options, optionally including dark mode.
@@ -236,12 +236,13 @@ def update_merchant_bar_chart(user_id, card_id, sort_by, n_clicks_dark):
             sort order.
         n_clicks_dark (int or None): The number of clicks toggling dark mode. A `None` value or 0 indicates dark
             mode is disabled.
+        app_state (dict): The current application state containing settings like dark_mode.
 
     Returns:
         plotly.graph_objs._figure.Figure: A figure object representing the merchant bar chart. Returns an empty figure
             if the user ID is invalid, no transactions exist for the user, or no aggregation data is available.
     """
-    dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
+    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
     show_spinner_cls = "map-spinner visible"
     hide_spinner_cls = "map-spinner"
 

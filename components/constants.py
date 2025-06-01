@@ -50,6 +50,8 @@ APP_STATE_STORE_DEFAULT = {
     "map_setting_color_scale": MAP_DEFAULT_COLOR_SCALE,
     "map_setting_text_color": "black" if DEFAULT_DARK_MODE else "white",
     "map_setting_show_color_scale": MAP_DEFAULT_SHOW_COLOR_SCALE,
+    "general_setting_show_tooltips": True,
+    "general_setting_canvas_placement": "start",
     "phase": "initial",
     "update_id": 0,
     "settings_changed": False

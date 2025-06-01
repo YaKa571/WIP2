@@ -344,7 +344,7 @@ def create_circle_diagram_card(
                 children=[
 
                     dcc.Graph(
-                        figure=figure or Figure(),
+                        figure=figure or create_empty_figure(),
                         className="circle-diagram",
                         id=graph_id,
                         responsive=True,
