@@ -30,19 +30,29 @@ def create_merchant_content():
 
 def _create_heading() -> html.Div:
     """
-    Creates a heading section for the tab layout.
+    Creates a heading section for the merchant tab.
 
-    The heading consists of a title, an info icon, and a tooltip describing usage instructions
-    for merchant-related actions within the application interface.
+    This function generates a styled `html.Div` container that acts as the
+    heading for the merchant tab. It contains a button to show all states, a
+    heading for the merchant section, an informational icon with corresponding
+    tooltip instructions, and appropriate layout configurations.
 
     Returns:
-        html.Div: A Dash HTML Div component containing the structured heading elements.
+        html.Div: A Dash Div component styled as the heading section, containing
+            a button, a heading, and a tooltip with instructional text.
     """
     return html.Div(
         className="tab-heading-wrapper",
         children=[
+            html.Button(
+                className="settings-button-text hidden",
+                id=ID.MERCHANT_BTN_MAP,
+                children=[
 
-            html.P(),  # Dummy element for spacing
+                    html.I(className="bi bi-geo-alt-fill me-2"),
+                    "Show all States"
+
+                ]),
             html.H4("Merchant", id=ID.MERCHANT_HEADING, className="green-heading"),
             comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
             dbc.Tooltip(
@@ -67,14 +77,15 @@ def _create_heading() -> html.Div:
 
 def _create_button_row() -> html.Div:
     """
-    Creates a row of buttons wrapped inside an HTML div element. Each button is associated
-    with a unique identifier and a specific label or icon to specify its purpose in a user interface.
+    Creates a horizontal row of buttons used for navigation or action selection.
 
-    Returns
-    -------
-    html.Div
-        A div element containing four buttons: All Merchants, Merchant Group, Merchant,
-        and Map. Each button has a unique identifier and a corresponding icon and text.
+    The function generates a row of buttons wrapped inside a flexible container.
+    Each button represents a specific category or group for merchant navigation.
+    The buttons include icons for visual indication and descriptive text for clarity.
+
+    Returns:
+        html.Div: A div containing a row of buttons with specific IDs, classes,
+        and child elements including icons and text.
     """
     return html.Div(
         className="flex-wrapper",
@@ -109,17 +120,6 @@ def _create_button_row() -> html.Div:
                     "Merchant"
 
                 ]),
-
-            html.Button(
-                className="settings-button-text option-btn",
-                id=ID.MERCHANT_BTN_MAP,
-                children=[
-
-                    html.I(className="bi bi-globe-americas me-2"),
-                    "Map"
-
-                ])
-
         ])
 
 
