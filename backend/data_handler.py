@@ -11,12 +11,16 @@ from components.constants import DATA_DIRECTORY
 from utils.benchmark import Benchmark
 
 
+merchant_other_threshold = 1000 #default value, will be modified in read_parquet_data()
+
+
 def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically: bool = False) -> pd.DataFrame:
     """
-    Reads a Parquet file into a pandas DataFrame.
+    Reads data from a Parquet file and returns it as a Pandas DataFrame. This function provides options for reading
+    a specific number of rows and sorting column names alphabetically. Additionally, if a file named
+    'transactions_data.parquet' is being read and the number of rows is specified, a global threshold for grouping
+    minor merchant groups is dynamically calculated.
 
-    This function loads data from a specified Parquet file, with options to limit the
-    number of rows and to sort column names alphabetically.
 
     Parameters:
     file_name: str
@@ -27,13 +31,13 @@ def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically:
     sort_alphabetically: bool, optional
         If True, sort the column names alphabetically. Default is False.
 
+
+
     Returns:
-    pd.DataFrame
-        The pandas DataFrame containing the data from the Parquet file.
+        pd.DataFrame: A DataFrame object containing the contents of the Parquet file.
 
     Raises:
-    FileNotFoundError
-        If the specified file does not exist in the DATA_DIRECTORY.
+        FileNotFoundError: If the specified Parquet file does not exist in the data directory.
     """
     file_path = DATA_DIRECTORY / file_name
 
@@ -70,6 +74,11 @@ def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically:
     if sort_alphabetically:
         # Use inplace sorting if possible to avoid copying the entire dataframe
         df = df.reindex(sorted(df.columns), axis=1)
+
+    # dynamic threshold for grouping minor merchant groups
+    if file_name == "transactions_data.parquet" and num_rows is not None:
+        global merchant_other_threshold
+        merchant_other_threshold = num_rows/50 #based on testing with 50_000 rows and threshold = 1000
 
     return df
 
