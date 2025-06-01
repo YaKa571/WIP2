@@ -47,7 +47,8 @@ def toggle_settings_canvas(n_clicks, is_open):
     Input(ID.SETTING_GENERAL_CANVAS_PLACEMENT, "value"),
     State(ID.APP_STATE_STORE, "data"),
 )
-def update_app_state(_, n_clicks, map_color_scale, map_text_color, map_show_color_scale, show_tooltips, canvas_placement, current_state):
+def update_app_state(_, n_clicks, map_color_scale, map_text_color, map_show_color_scale, show_tooltips,
+                     canvas_placement, current_state):
     """
     Handles the state updates and UI toggling based on user interaction with the application.
     The function processes different types of inputs to determine the current state and modifies
@@ -114,14 +115,12 @@ def update_app_state(_, n_clicks, map_color_scale, map_text_color, map_show_colo
     elif triggered_id == ID.SETTING_GENERAL_SHOW_TOOLTIPS.value:
         if current_state.get("general_setting_show_tooltips") != show_tooltips:
             current_state["general_setting_show_tooltips"] = show_tooltips
-            current_state["settings_changed"] = True
-            current_state["update_id"] += 1
+            current_state["settings_changed"] = False
 
     elif triggered_id == ID.SETTING_GENERAL_CANVAS_PLACEMENT.value:
         if current_state.get("general_setting_canvas_placement") != canvas_placement:
             current_state["general_setting_canvas_placement"] = canvas_placement
-            current_state["settings_changed"] = True
-            current_state["update_id"] += 1
+            current_state["settings_changed"] = False
 
     # Read dark mode status
     dark = current_state.get("dark_mode", const.DEFAULT_DARK_MODE)
