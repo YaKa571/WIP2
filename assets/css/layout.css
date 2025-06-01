@@ -8,6 +8,7 @@ html, body, #react-entry-point, .dash-application {
     padding: 0;
     min-width: 1124px;
     font-family: "Open Sans", sans-serif;
+    background-color: var(--bg-page);
 }
 
 /* ==========================================================================

@@ -12,7 +12,7 @@ class MerchantTabData:
         self.data_manager = data_manager
         self.df_transactions = data_manager.df_transactions
         self.df_users = data_manager.df_users
-        self.mcc_dict = data_manager.mcc_dict
+        self.df_mcc = data_manager.df_mcc
 
         # Initialize dataframes
         self.mcc = None
@@ -445,7 +445,6 @@ class MerchantTabData:
         None
         """
         import concurrent.futures
-        from functools import partial
 
         bm_pre_cache_full = Benchmark("Pre-caching Merchant Tab data")
         logger.log("🔄 Pre-caching Merchant Tab data...", indent_level=2)
@@ -520,33 +519,11 @@ class MerchantTabData:
         logger.log("ℹ️ Initializing Merchant Tab Data...", 2)
         bm = Benchmark("Initialization")
 
-        # Load MCC codes - do this once and reuse
-        with open("assets/data/mcc_codes.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
+        # Use shared MCC codes from data manager
+        self.mcc = self.data_manager.df_mcc
 
-        # Create DataFrame directly from items for better performance
-        items = list(data.items())
-        self.mcc = pd.DataFrame(items, columns=["mcc", "merchant_group"])
-
-        # Convert to int once
-        if not pd.api.types.is_integer_dtype(self.mcc["mcc"]):
-            self.mcc["mcc"] = self.mcc["mcc"].astype(int)
-
-        # Ensure transactions df has int mcc for efficient merging
-        df_transactions = self.df_transactions
-        if 'mcc' in df_transactions.columns and not pd.api.types.is_integer_dtype(df_transactions['mcc']):
-            df_transactions = df_transactions.copy()
-            df_transactions['mcc'] = df_transactions['mcc'].astype(int)
-            self.df_transactions = df_transactions
-
-        # Join transactions and mcc_codes using efficient merge
-        self.transactions_mcc = pd.merge(
-            df_transactions, 
-            self.mcc, 
-            how="left", 
-            on="mcc",
-            sort=False  # Avoid unnecessary sorting
-        )
+        # Use shared transactions_mcc from data manager
+        self.transactions_mcc = self.data_manager.transactions_mcc
 
         # Aggregate by merchant group - use more efficient named aggregation
         self.transactions_mcc_agg = (
@@ -558,7 +535,7 @@ class MerchantTabData:
 
         # Aggregate by user - use more efficient named aggregation
         self.transactions_agg_by_user = (
-            df_transactions
+            self.df_transactions
             .groupby('client_id', sort=False)  # Avoid sorting for better performance
             .agg(
                 transaction_count=('amount', 'count'),
@@ -567,15 +544,8 @@ class MerchantTabData:
             .reset_index()
         )
 
-        # Transactions join MCC join Users - use efficient merge
-        self.transactions_mcc_users = pd.merge(
-            self.transactions_mcc,
-            self.df_users,
-            how="left", 
-            left_on='client_id', 
-            right_on='id',
-            sort=False  # Avoid unnecessary sorting
-        )
+        # Use shared transactions_mcc_users from data manager
+        self.transactions_mcc_users = self.data_manager.transactions_mcc_users
 
         # Pre-cache merchant data
         self._pre_cache_merchant_tab_data()

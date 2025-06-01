@@ -69,7 +69,7 @@ class UserTabData:
         self._cache_user_merchant_agg = {}
 
         # Create a mapping of MCC codes to descriptions once instead of repeatedly calling the function
-        mcc_dict = self.data_manager.mcc_dict
+        df_mcc = self.data_manager.df_mcc
         unique_mccs = set()
 
         # First collect all unique MCCs
@@ -79,7 +79,7 @@ class UserTabData:
 
         # Create the mapping dictionary
         mcc_to_desc = {
-            int(mcc): get_mcc_description_by_merchant_id(mcc_dict, int(mcc))
+            int(mcc): get_mcc_description_by_merchant_id(df_mcc, int(mcc))
             for mcc in unique_mccs if pd.notna(mcc)
         }
 

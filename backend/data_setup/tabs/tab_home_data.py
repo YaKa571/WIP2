@@ -16,7 +16,7 @@ class HomeTabData:
         self.df_transactions = data_manager.df_transactions
         self.df_users = data_manager.df_users
         self.df_cards = data_manager.df_cards
-        self.mcc_dict = data_manager.mcc_dict
+        self.df_mcc = data_manager.df_mcc
 
         # Caches
         self._cache_most_valuable_merchant: dict[str, pd.DataFrame] = {}
@@ -156,7 +156,7 @@ class HomeTabData:
 
         # Pre-compute MCC descriptions for all unique MCCs
         unique_mccs = df_sums['mcc'].unique()
-        mcc_desc_map = {mcc: get_mcc_description_by_merchant_id(self.mcc_dict, int(mcc)) for mcc in unique_mccs}
+        mcc_desc_map = {mcc: get_mcc_description_by_merchant_id(self.df_mcc, int(mcc)) for mcc in unique_mccs}
 
         # Use vectorized mapping instead of apply
         df_sums["mcc_desc"] = df_sums["mcc"].map(mcc_desc_map)
@@ -188,7 +188,7 @@ class HomeTabData:
         return MerchantKPI(
             id=int(top["merchant_id"]),
             mcc=int(top["mcc"]),
-            mcc_desc=get_mcc_description_by_merchant_id(self.mcc_dict, int(top["mcc"])),
+            mcc_desc=get_mcc_description_by_merchant_id(self.df_mcc, int(top["mcc"])),
             value=f"{float(top['merchant_sum']):,.2f}"
         )
 
@@ -377,7 +377,7 @@ class HomeTabData:
 
         # Pre-compute MCC descriptions for all unique MCCs
         unique_mccs = set(merchant_mcc_map.values())
-        mcc_desc_map = {mcc: get_mcc_description_by_merchant_id(self.mcc_dict, mcc) for mcc in unique_mccs}
+        mcc_desc_map = {mcc: get_mcc_description_by_merchant_id(self.df_mcc, mcc) for mcc in unique_mccs}
 
         # Aggregate visits by merchant more efficiently
         visit_counts = (

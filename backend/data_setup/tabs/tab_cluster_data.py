@@ -213,14 +213,12 @@ class ClusterTabData:
         logger.log("ℹ️ Initializing Cluster Tab Data...", 2)
         bm = Benchmark("Initialization")
 
-        # Load MCC codes
-        with open("assets/data/mcc_codes.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
-        self.mcc = pd.DataFrame(list(data.items()), columns=["mcc", "merchant_group"])
-        self.mcc["mcc"] = self.mcc["mcc"].astype(int)
+        # Use shared MCC codes from data manager
+        self.mcc = self.data_manager.df_mcc
 
-        # Get transaction data from merchant tab data
-        self.data_file = self.data_manager.merchant_tab_data.get_my_transactions_mcc_users()
+        # Use shared transactions_mcc_users from data manager
+        # This avoids duplicate processing and improves performance
+        self.data_file = self.data_manager.transactions_mcc_users.copy()
 
         # Add age_group
         self.data_file['age_group'] = pd.cut(

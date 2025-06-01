@@ -249,18 +249,22 @@ def update_merchant_bar_chart(user_id, card_id, sort_by, n_clicks_dark):
     try:
         valid_user_id = get_valid_user_id(user_id, card_id)
         if valid_user_id is None or str(valid_user_id).strip() == "":
+            print("1")
             return comp_factory.create_empty_figure(), show_spinner_cls
     except ValueError:
+        print("2")
         return comp_factory.create_empty_figure(), show_spinner_cls
 
     # Get transaction data
     df_tx = dm.user_tab_data.get_user_transactions(valid_user_id)
     if df_tx.empty:
+        print("3")
         return comp_factory.create_empty_figure(), show_spinner_cls
 
     # Process transaction data
     agg_data = dm.user_tab_data.get_user_merchant_agg(valid_user_id)
     if agg_data.empty:
+        print("4")
         return comp_factory.create_empty_figure(), show_spinner_cls
 
     # Configure chart parameters

@@ -50,30 +50,6 @@ def get_valid_user_id(user_id, card_id):
         return None
 
 
-def get_mcc_description(mcc):
-    """
-    Fetches the description for a given MCC (Merchant Category Code).
-
-    This function takes an MCC as input, converts it to an integer, and retrieves
-    its description from a predefined dictionary of MCC codes. If the MCC is
-    not found or if any error occurs during processing, a default unknown value
-    is returned.
-
-    Args:
-        mcc: The Merchant Category Code to look up. Can be in any format that
-            can be safely converted to an integer.
-
-    Returns:
-        str: The description associated with the provided MCC. If the MCC is
-        not in the dictionary or an exception occurs, returns a default
-        unknown value.
-    """
-    try:
-        return dm.mcc_dict.get(str(int(mcc)), UNKNOWN_VALUE)
-    except Exception:
-        return UNKNOWN_VALUE
-
-
 def configure_chart_parameters(agg, sort_by):
     """
     Configures chart parameters based on sorting criteria.

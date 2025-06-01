@@ -272,9 +272,9 @@ def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = co
     df["mcc_desc"] = df["mcc_desc"].astype(str).str.upper()
 
     hover_template = (
-        "🏷️ <b>MCC:</b> %{x}<br>"
-        "📝 <b>DESCRIPTION:</b> %{customdata[0]}<br>"
-        "🆔 <b>MERCHANT ID:</b> %{customdata[1]}<br>"
+        "🏷️ <b>MCC:</b> %{customdata[0]}<br>"
+        "📝 <b>DESCRIPTION:</b> %{customdata[1]}<br>"
+        "🆔 <b>MERCHANT ID:</b> %{customdata[2]}<br>"
         "💰 <b>SUM:</b> $%{y:,.2f}<br>"
         "<extra></extra>"
     )
@@ -289,7 +289,7 @@ def get_most_valuable_merchant_bar_chart(state: str = None, dark_mode: bool = co
         df=df,
         x="merchant_id",
         y="merchant_sum",
-        custom_data=["mcc_desc", "merchant_id"],
+        custom_data=["mcc", "mcc_desc", "merchant_id"],
         hover_template=hover_template,
         title=f"TOP 10 MOST VALUABLE {title}",
         labels={"merchant_id": "MERCHANT ID", "merchant_sum": "SUM"},

@@ -44,10 +44,10 @@ def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically:
     if num_rows is None:
         # Read all rows with optimized settings
         df = pd.read_parquet(
-            file_path, 
+            file_path,
             engine="pyarrow",
             use_threads=True,  # Enable multi-threading
-            memory_map=True    # Use memory mapping for better performance
+            memory_map=True  # Use memory mapping for better performance
         )
     else:
         # Read only the specified number of rows
@@ -57,7 +57,7 @@ def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically:
         if num_rows >= total_rows:
             # If requesting more rows than available, read all rows with optimized settings
             df = pd.read_parquet(
-                file_path, 
+                file_path,
                 engine="pyarrow",
                 use_threads=True,
                 memory_map=True
@@ -191,23 +191,32 @@ def json_to_data_frame(file_name: str) -> pd.DataFrame:
     return df
 
 
-def json_to_dict(file_name: str) -> Any:
+def json_to_df(file_name: str, col_names: list) -> Any:
     """
-    Converts a JSON file into a Python dictionary.
+    Converts a JSON file into a pandas DataFrame.
 
-    This function reads a JSON file from the specified path and converts its
-    contents into a Python dictionary. If the file does not exist, a
-    FileNotFoundError is raised.
+    This function reads a JSON file and converts its key-value pairs into
+    a pandas DataFrame. Keys and values in the JSON are extracted and arranged
+    into columns based on the provided column names. If the specified file
+    does not exist, it raises a FileNotFoundError.
 
-    Parameters:
-        file_name (str): The name of the JSON file to be read, located in the
-            DATA_DIRECTORY.
+    Arguments:
+        file_name: str
+            The name of the JSON file to be loaded. Path is resolved under
+            the `DATA_DIRECTORY`.
+        col_names: list
+            A list specifying the column names for the resulting DataFrame.
+            The first column represents the keys, and the second represents
+            the values from the JSON file.
 
     Returns:
-        Any: The data parsed from the JSON file as a Python object.
+        Any
+            A pandas DataFrame containing data from the JSON file arranged
+            in columns defined by `col_names`.
 
     Raises:
-        FileNotFoundError: If the specified JSON file is not found.
+        FileNotFoundError
+            If the specified JSON file does not exist in the resolved path.
     """
     json_path = DATA_DIRECTORY / file_name
     if not json_path.exists():
@@ -216,29 +225,34 @@ def json_to_dict(file_name: str) -> Any:
     with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    return data
+    items = list(data.items())
+    return pd.DataFrame(items, columns=col_names)
 
 
-def get_mcc_description_by_merchant_id(mcc_dict: dict[str, str], merchant_id: int | str) -> str:
+def get_mcc_description_by_merchant_id(df_mcc: pd.DataFrame, merchant_id: int | str) -> str:
     """
-    Fetch the Merchant Category Code (MCC) associated with a given merchant ID from a dictionary.
-    If the merchant ID is invalid or not found in the dictionary, returns "Undefined".
+    Fetch the Merchant Category Code (MCC) description associated with a given merchant ID from a DataFrame.
+    If the merchant ID is invalid or not found in the DataFrame, returns "Undefined".
 
     Args:
-        mcc_dict (dict): A dictionary where merchant IDs (as strings) are mapped to their corresponding MCC.
-        merchant_id (int | str): The merchant ID to lookup in the dictionary.
+        df_mcc (pd.DataFrame): A DataFrame with 'mcc' and 'merchant_group' columns.
+        merchant_id (int | str): The merchant ID to lookup in the DataFrame.
 
     Returns:
-        str: The MCC associated with the given merchant ID, or "Undefined" if the ID is invalid or not found.
+        str: The MCC description associated with the given merchant ID, or "Undefined" if the ID is invalid or not found.
     """
-    # Normalize string-key: Int->Str
+    # Normalize merchant_id: Int->Str
     try:
-        key = str(int(merchant_id))
+        mcc_id = int(merchant_id)
     except (ValueError, TypeError):
         return "Undefined"
 
-    # Lookup in Dictionary
-    return mcc_dict.get(key, "Undefined")
+    # Lookup in DataFrame
+    result = df_mcc[df_mcc['mcc'] == mcc_id]
+    if len(result) > 0:
+        return result.iloc[0]['merchant_group']
+    else:
+        return "Undefined"
 
 
 def convert_transaction_columns_to_int(dataframe: DataFrame, columns: list[str]):
