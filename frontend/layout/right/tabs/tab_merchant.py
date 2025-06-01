@@ -161,7 +161,18 @@ def _create_merchant_input_container():
                         clearable=False,
                         multi=False,
                         style={"width": "100%"}
-                    )
+                    ),
+                    # for Testing only TODO: delete after testing
+                    html.Button(
+                        className="settings-button-text option-btn",
+                        id="merchant-test-button",
+                        children=[
+
+                            html.I(className="bi bi-shop-window me-2"),
+                            "Get Values of KPI Top Merchant by value"
+
+                        ]),
+                    html.Div(id="merchant-dummy-output")
 
                 ]
 
