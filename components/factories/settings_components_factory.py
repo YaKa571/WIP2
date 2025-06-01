@@ -37,7 +37,7 @@ def create_map_setting_color_scale() -> html.Div:
                          id=ID.SETTING_MAP_COLOR_SCALE.value,
                          placeholder="Select a color scale...",
                          style={"width": "100%"},
-                         value="blues",
+                         value=const.MAP_DEFAULT_COLOR_SCALE,
                          clearable=False
                          ),
         ],

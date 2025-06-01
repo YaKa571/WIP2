@@ -40,10 +40,13 @@ CLUSTER_COLORS = {
 # Bools
 DEFAULT_DARK_MODE: bool = True
 
+# Map
+MAP_DEFAULT_COLOR_SCALE = "burgyl"
+
 # Stores
 APP_STATE_STORE_DEFAULT = {
     "dark_mode": DEFAULT_DARK_MODE,
-    "map_setting_color_scale": "blues",
+    "map_setting_color_scale": MAP_DEFAULT_COLOR_SCALE,
     "map_setting_text_color": "black" if DEFAULT_DARK_MODE else "white",
     "phase": "initial",
     "update_id": 0,

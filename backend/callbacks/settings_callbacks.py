@@ -199,7 +199,7 @@ def render_map(animation_state, app_state):
 
     # Render map with current settings
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE)
-    color_scale = app_state.get("map_setting_color_scale", "blues")
+    color_scale = app_state.get("map_setting_color_scale", const.MAP_DEFAULT_COLOR_SCALE)
     text_color = app_state.get("map_setting_text_color", const.TEXT_COLOR_LIGHT if dark_mode else const.TEXT_COLOR_DARK)
 
     map_style = "carto-darkmatter-nolabels" if dark_mode else "carto-positron-nolabels"
