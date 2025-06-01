@@ -30,16 +30,14 @@ def create_merchant_content():
 
 def _create_heading() -> html.Div:
     """
-    Creates a heading section for the merchant tab.
-
-    This function generates a styled `html.Div` container that acts as the
-    heading for the merchant tab. It contains a button to show all states, a
-    heading for the merchant section, an informational icon with corresponding
-    tooltip instructions, and appropriate layout configurations.
+    Creates a heading component for a user interface with interactive elements such
+    as a button, heading, info icon, and tooltip.
 
     Returns:
-        html.Div: A Dash Div component styled as the heading section, containing
-            a button, a heading, and a tooltip with instructional text.
+        html.Div: A Div component composed of interactive elements including a
+        button to toggle all states, a heading for 'Merchant', an info icon for
+        additional information, and a tooltip that provides usage instructions.
+
     """
     return html.Div(
         className="tab-heading-wrapper",
