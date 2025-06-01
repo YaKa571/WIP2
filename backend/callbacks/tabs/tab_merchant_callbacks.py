@@ -11,6 +11,7 @@ from components.tabs.tab_merchant_components import create_merchant_group_line_c
     create_individual_merchant_line_chart
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID
+from backend.data_handler import merchant_other_threshold
 
 # Initialize DataManager instance
 dm: DataManager = DataManager.get_instance()
@@ -372,7 +373,7 @@ def create_merchant_group_distribution_tree_map(dark_mode: bool = const.DEFAULT_
     """
     text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
 
-    treemap_df = dm.merchant_tab_data.get_merchant_group_overview(1000).copy()
+    treemap_df = dm.merchant_tab_data.get_merchant_group_overview(merchant_other_threshold).copy()
     treemap_df["merchant_group"] = treemap_df["merchant_group"].astype(str).str.upper()
 
     fig = px.treemap(

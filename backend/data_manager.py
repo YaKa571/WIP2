@@ -15,7 +15,6 @@ from components.constants import DATA_DIRECTORY
 from utils.benchmark import Benchmark
 from utils.utils import rounded_rect
 
-
 class DataManager:
     """
     Manages data initialization, preprocessing, and storage for use in a larger application.
@@ -112,7 +111,7 @@ class DataManager:
         # Read and clean data
         self.df_users = clean_units(read_parquet_data("users_data.parquet"))
         self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet",
-                                                             num_rows=100)) #100_000
+                                                             num_rows=100_000)) #100_000
         self.df_cards = clean_units(read_parquet_data("cards_data.parquet"))
         self.df_mcc = json_to_data_frame("mcc_codes.json")
 
