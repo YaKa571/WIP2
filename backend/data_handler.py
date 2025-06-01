@@ -16,28 +16,25 @@ merchant_other_threshold = 1000 #default value, will be modified in read_parquet
 
 def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically: bool = False) -> pd.DataFrame:
     """
-    Reads data from a Parquet file and returns it as a Pandas DataFrame. This function provides options for reading
-    a specific number of rows and sorting column names alphabetically. Additionally, if a file named
-    'transactions_data.parquet' is being read and the number of rows is specified, a global threshold for grouping
-    minor merchant groups is dynamically calculated.
+    Reads a Parquet file and returns its content in the form of a pandas DataFrame.
 
+    This function enables efficient reading of Parquet files by leveraging multi-threading,
+    memory mapping, and optimized settings based on the number of rows to read. It optionally
+    sorts the DataFrame's columns alphabetically and dynamically adjusts the threshold for
+    minor merchant groupings when specific criteria are met.
 
-    Parameters:
-    file_name: str
-        The name of the Parquet file to read. Must exist in the DATA_DIRECTORY.
-    num_rows: int, optional
-        The number of rows to load from the Parquet file. By default, all rows
-        are loaded. If specified, only the first num_rows will be loaded.
-    sort_alphabetically: bool, optional
-        If True, sort the column names alphabetically. Default is False.
-
-
+    Args:
+        file_name: The name of the Parquet file to be read.
+        num_rows: The number of rows to read from the Parquet file. If None, all rows will
+            be read.
+        sort_alphabetically: A flag to indicate whether the DataFrame's columns should
+            be sorted alphabetically.
 
     Returns:
-        pd.DataFrame: A DataFrame object containing the contents of the Parquet file.
+        pd.DataFrame: A pandas DataFrame containing the data read from the specified Parquet file.
 
     Raises:
-        FileNotFoundError: If the specified Parquet file does not exist in the data directory.
+        FileNotFoundError: If the specified Parquet file does not exist.
     """
     file_path = DATA_DIRECTORY / file_name
 
