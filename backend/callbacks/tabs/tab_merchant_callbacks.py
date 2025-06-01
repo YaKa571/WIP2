@@ -2,7 +2,7 @@ from enum import Enum
 
 import dash_bootstrap_components as dbc
 import plotly.express as px
-from dash import html, Output, Input, callback, ctx
+from dash import html, Output, Input, callback, ctx, State, callback_context, no_update
 
 import components.constants as const
 from backend.data_manager import DataManager
@@ -444,10 +444,9 @@ def set_merchant_tab(n_all, n_group, n_indiv):
     Input(ID.MERCHANT_SELECTED_BUTTON_STORE, "data"),
     Input(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
     Input(ID.MERCHANT_INPUT_MERCHANT_ID, "value"),
-    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks"),
-    Input("merchant-test-button","n_clicks") # todo: delete
+    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks")
 )
-def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dark,n_test_button):
+def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dark):
     """
     Updates the user interface components based on the currently selected merchant
     tab, group, or individual merchant.
@@ -528,14 +527,6 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
             graph_title = "HISTORY FOR MERCHANT"
             spinner_class = "map-spinner visible"
 
-    # todo: delete test
-    if ctx.triggered_id == "merchant-test-button":
-
-        print("--- TEST BUTTON CLICKED ---")
-        print(f"Selected Tab: {selected}")
-        print(f"Selected Group: {selected_group}")
-        print(f"Selected Merchant ID: {selected_merchant_id}")
-
     # Return all UI component properties
     return (
         get_option_button_class(MerchantTab.ALL.value, selected),
@@ -548,3 +539,24 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
         graph_title,
         spinner_class
     )
+# todo delete after testing
+@callback(
+    Output("merchant-dummy-output", "children"),
+    Input("merchant-test-button", "n_clicks"),
+    State(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "children"),
+    prevent_initial_call=True
+)
+def display_kpi_value(n_clicks, kpi_children):
+    if not kpi_children:
+        # Wenn das Element nicht existiert oder leer ist
+        return no_update
+
+    try:
+        # Sicherstellen, dass es sich um eine Liste handelt
+        if not isinstance(kpi_children, list) or len(kpi_children) < 2:
+            return "KPI structure not as expected"
+
+        lines = [child.get("props", {}).get("children", "—") for child in kpi_children]
+        return f"KPI-Values: {lines[0]} — {lines[1]}"
+    except Exception as e:
+        return f"Error while reading KPI: {e}"
