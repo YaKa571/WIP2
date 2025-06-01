@@ -10,6 +10,7 @@ from frontend.component_ids import ID
 @callback(
     Output({"type": "custom-tab", "index": ALL}, "className"),
     Output({"type": "tab-content", "index": ALL}, "className"),
+    Output(ID.ACTIVE_TAB_STORE, "data"),
     Input({"type": "custom-tab", "index": ALL}, "n_clicks"),
     Input(ID.ACTIVE_TAB_STORE, "data")
 )
@@ -29,13 +30,16 @@ def update_tabs(n_clicks_list, active_from_store):
         A list where each element corresponds to the click count of a respective tab button,
         which the user interacts with. If a button has not been clicked, its count will
         be None.
+    active_from_store : str
+        The ID of the active tab retrieved from the store.
 
     Returns
     -------
-    tuple of (list of str, list of str)
-        A pair of lists representing updated CSS classes. The first list corresponds to
-        the button classes for all tabs, while the second list corresponds to the
-        content wrapper classes for all tabs.
+    tuple of (list of str, list of str, str)
+        A tuple containing:
+        - A list of CSS classes for tab buttons
+        - A list of CSS classes for tab content wrappers
+        - The ID of the active tab to be stored
 
     Raises
     ------
@@ -63,4 +67,4 @@ def update_tabs(n_clicks_list, active_from_store):
         for _, tid in TABS
     ]
 
-    return btn_classes, content_classes
+    return btn_classes, content_classes, active

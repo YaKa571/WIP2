@@ -257,6 +257,7 @@ def _create_merchant_graph():
                             dcc.Graph(
                                 id=ID.MERCHANT_GRAPH_CONTAINER,
                                 className="bar-chart",
+                                figure=comp_factory.create_empty_figure(),
                                 config={
                                     "scrollZoom": True,
                                     "displayModeBar": True,

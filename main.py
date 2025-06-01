@@ -85,7 +85,7 @@ def create_app(suppress_callback_exceptions: bool = True, add_data_tables: bool 
             dcc.Store(id=ID.APP_STATE_STORE, data=const.APP_STATE_STORE_DEFAULT, storage_type="session"),
             dcc.Store(id=ID.ANIMATION_STATE_STORE),
             dcc.Store(id=ID.HOME_TAB_SELECTED_STATE_STORE, data=None),
-            dcc.Store(id=ID.ACTIVE_TAB_STORE, data=ID.TAB_HOME),
+            dcc.Store(id=ID.ACTIVE_TAB_STORE, data=ID.TAB_HOME, storage_type="session"),
             dcc.Store(id=ID.MERCHANT_SELECTED_BUTTON_STORE, data="all"),
             dcc.Store(id=ID.CLUSTER_SELECTED_BUTTON_STORE, data={"main": "total_value", "age": "all_ages"}),
             html.Div(id="app-init-trigger", style={"display": "none"}),
