@@ -196,11 +196,11 @@ def render_map(animation_state, app_state):
         raise PreventUpdate
 
     # Render map with current settings
-    dark = app_state.get("dark_mode", const.DEFAULT_DARK_MODE)
+    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE)
     color_scale = app_state.get("color_scale", "blues")
 
-    map_style = "carto-darkmatter-nolabels" if dark else "carto-positron-nolabels"
-    map_component = create_usa_map(color_scale=color_scale, map_style=map_style)
+    map_style = "carto-darkmatter-nolabels" if dark_mode else "carto-positron-nolabels"
+    map_component = create_usa_map(color_scale=color_scale, map_style=map_style, dark_mode=dark_mode)
 
     # Reset settings changed flag
     app_state["settings_changed"] = False
