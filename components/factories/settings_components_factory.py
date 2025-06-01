@@ -165,6 +165,31 @@ def create_general_setting_toggle_tooltips() -> html.Div:
     )
 
 
+def create_map_setting_show_color_scale() -> html.Div:
+    """
+    Creates a map settings toggle component for showing the color scale.
+
+    This function generates a color scale toggle UI element. The toggle is represented as a
+    switch allowing users to enable or disable the color scale in the map visualization.
+    The component includes a descriptive label and a switch UI component with
+    default settings.
+
+    Returns:
+        html.Div: A Div containing the configuration for showing the color scale with a label
+        and a toggle switch control.
+    """
+    return html.Div(
+        [
+            html.Label("Show Color Scale", className="settings-label"),
+            dbc.Switch(id=ID.SETTING_MAP_SHOW_COLOR_SCALE.value,
+                       value=const.MAP_DEFAULT_SHOW_COLOR_SCALE,
+                       className="settings-switch"
+                       )
+        ],
+        className="settings-item"
+    )
+
+
 ## ICON BUTTONS ##
 
 def create_icon_button(icon: str, id: ID, extra_cls: str = None, n_clicks: int = 0) -> dbc.Button:
@@ -242,7 +267,7 @@ def create_settings_canvas_categories() -> dbc.Row:
     return dbc.Row(
         [
             create_settings_category("Map Settings",
-                                     [create_map_setting_color_scale(), create_map_setting_text_color()]),
+                                     [create_map_setting_color_scale(), create_map_setting_text_color(), create_map_setting_show_color_scale()]),
             create_settings_category("General Settings",
                                      [create_general_setting_position(),
                                       create_general_setting_toggle_tooltips()]),

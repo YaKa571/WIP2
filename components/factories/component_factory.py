@@ -110,7 +110,8 @@ def create_data_table(id_name: str, dataset: pd.DataFrame, visible: bool = True,
 def create_usa_map(color_scale: str = "Blues",
                    map_style: str = "carto-positron-nolabels",
                    text_color: str = "black",
-                   dark_mode: bool = True) -> dcc.Graph:
+                   dark_mode: bool = True,
+                   show_color_scale: bool = True) -> dcc.Graph:
     """
     Creates a choropleth map of the United States illustrating transaction count
     per state. The map is built using Plotly Map and shows states colored by
@@ -127,6 +128,8 @@ def create_usa_map(color_scale: str = "Blues",
         The color to use for text, by default "black"
     dark_mode: bool, optional
         Whether to use dark mode colors, by default True
+    show_color_scale: bool, optional
+        Whether to show the color scale on the map, by default True
     Returns
     -------
     dash_core_components.Graph
@@ -195,7 +198,7 @@ def create_usa_map(color_scale: str = "Blues",
             tickfont=dict(color=text_color_colorbar, family=text_font),
             title_font=dict(color=text_color_colorbar, family=text_font),
         ),
-        showscale=True
+        showscale=show_color_scale
     )
 
     return dcc.Graph(

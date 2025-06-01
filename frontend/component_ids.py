@@ -37,6 +37,7 @@ class ID(str, Enum):
     SETTINGS_CARD_MAP = "settings-card-map"
     SETTING_MAP_COLOR_SCALE = "setting-map-color-scale"
     SETTING_MAP_TEXT_COLOR = "setting-map-text-color"
+    SETTING_MAP_SHOW_COLOR_SCALE = "setting-map-show-color-scale"
     SETTING_GENERAL_SHOW_TOOLTIPS = "setting-general-show-tooltips"
     SETTING_GENERAL_CANVAS_PLACEMENT = "setting-general-canvas-placement"
 
