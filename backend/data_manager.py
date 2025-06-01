@@ -78,7 +78,6 @@ class DataManager:
 
         self.nomi = pgeocode.Nominatim("us")
 
-
         # Home Tab
         self.home_tab_data: Optional[HomeTabData] = None
 
@@ -114,7 +113,7 @@ class DataManager:
         # Read and clean data
         self.df_users = clean_units(read_parquet_data("users_data.parquet"))
         self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet",
-                                                             num_rows=1_000_000))
+                                                             num_rows=100_000))
         self.df_cards = clean_units(read_parquet_data("cards_data.parquet"))
 
         # Convert to int once
@@ -211,6 +210,7 @@ class DataManager:
         logger.log("🔄 Initializing tab data in parallel...", indent_level=2)
         bm_parallel_init = Benchmark("Parallel tab data initialization")
 
+        # Data loading in parallel: -53% start-up time
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Submit all initialization tasks in parallel
             future_home = executor.submit(self.home_tab_data.initialize)
