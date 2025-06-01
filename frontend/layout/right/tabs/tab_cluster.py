@@ -33,24 +33,31 @@ def create_cluster_content():
 
 def _create_heading() -> html.Div:
     """
-    Creates a heading component designed for the Cluster Analysis tab.
+    Creates a heading section for the cluster analysis tab.
 
-    This function generates a `html.Div` component containing a styled
-    heading, an information icon, and a tooltip, with functionality allowing
-    users to interact and understand the options available in the Cluster
-    Analysis interface.
+    This function generates a Dash HTML Division (html.Div) component that serves as
+    the heading section for the cluster analysis feature in a web application. The heading
+    includes a button to toggle views, a title, an informational icon, and a tooltip that
+    provides detailed instructions on using the cluster analysis functionalities. The layout
+    and style are defined using predefined classes and IDs.
 
     Returns:
-        html.Div: A `Div` component containing the formatted heading and
-        associated elements such as an icon and tooltip. The element is styled
-        and structured to be used specifically for the Cluster Analysis tab
-        in the application.
+        html.Div: A Dash HTML Div element containing the cluster analysis tab heading,
+        including all its child components.
     """
     return html.Div(
         className="tab-heading-wrapper",
         children=[
 
-            html.P(),  # Dummy element for spacing
+            html.Button(
+                className="settings-button-text hidden",
+                id=ID.CLUSTER_BTN_MAP,
+                children=[
+
+                    html.I(className="bi bi-globe-americas me-2"),
+                    "Show all States"
+
+                ]),
             html.H4("Cluster Analysis", id=ID.CLUSTER_HEADING, className="green-heading"),
             comp_factory.create_info_icon(ID.CLUSTER_INFO_ICON),
             dbc.Tooltip(
@@ -79,13 +86,15 @@ def _create_heading() -> html.Div:
 
 def _create_button_row():
     """
-        Creates the header section of the cluster tab including buttons
-        for selecting the clustering mode (Total Value, Average Value,
-        Income vs Expenses) and an info icon with tooltip explaining usage.
+    Creates a row of buttons for UI interaction.
 
-        Returns:
-            html.Div: The cluster tab header layout.
-        """
+    The function returns a layout element consisting of a row of buttons. Each button
+    is associated with specific functionality to display financial data based on user
+    selection. Each button includes an associated icon and label.
+
+    Returns:
+        Div: A Dash Div component containing a row of buttons with specific options.
+    """
     return html.Div(
         className="flex-wrapper",
         children=[
@@ -120,15 +129,7 @@ def _create_button_row():
 
                 ]),
 
-            html.Button(
-                className="settings-button-text option-btn",
-                id=ID.CLUSTER_BTN_MAP,
-                children=[
 
-                    html.I(className="bi bi-globe-americas me-2"),
-                    "Map"
-
-                ])
 
         ])
 
