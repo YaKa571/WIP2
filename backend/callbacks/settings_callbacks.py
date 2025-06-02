@@ -41,9 +41,14 @@ def toggle_settings_canvas(n_clicks, is_open):
     Input("app-init-trigger", "children"),
     Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks"),
     Input(ID.SETTING_MAP_COLOR_SCALE, "value"),
+    Input(ID.SETTING_MAP_TEXT_COLOR, "value"),
+    Input(ID.SETTING_MAP_SHOW_COLOR_SCALE, "value"),
+    Input(ID.SETTING_GENERAL_SHOW_TOOLTIPS, "value"),
+    Input(ID.SETTING_GENERAL_CANVAS_PLACEMENT, "value"),
     State(ID.APP_STATE_STORE, "data"),
 )
-def update_app_state(_, n_clicks, color_scale, current_state):
+def update_app_state(_, n_clicks_dark, map_color_scale, map_text_color, map_show_color_scale, show_tooltips,
+                     canvas_placement, current_state):
     """
     Handles the state updates and UI toggling based on user interaction with the application.
     The function processes different types of inputs to determine the current state and modifies
@@ -51,10 +56,18 @@ def update_app_state(_, n_clicks, color_scale, current_state):
 
     Args:
         _: Ignored value, represents the content of the 'app-init-trigger'. Typically, not used.
-        n_clicks: Number of clicks on the dark mode toggle button. Used to determine if the mode
+        n_clicks_dark: Number of clicks on the dark mode toggle button. Used to determine if the mode
             should be switched between dark and light.
-        color_scale: Selected color scale for the map visualization. Changes trigger updates in
+        map_color_scale: Selected color scale for the map visualization. Changes trigger updates in
             the application’s state to align with the new color scale.
+        map_text_color: Selected text color for the map visualization. Changes trigger updates in
+            the application's state to align with the new text color.
+        map_show_color_scale: Boolean indicating whether to show the color scale on the map. Changes
+            trigger updates in the application's state to align with the new setting.
+        show_tooltips: Boolean indicating whether to show tooltips. Changes trigger updates in
+            the application's state to align with the new setting.
+        canvas_placement: String indicating the placement of the settings canvas. Changes trigger
+            updates in the application's state to align with the new setting.
         current_state: Persisted state data of the application. Includes various state elements
             such as dark mode status, color scale, update count, and settings modification flag.
 
@@ -73,25 +86,41 @@ def update_app_state(_, n_clicks, color_scale, current_state):
 
     # Initialize state if necessary
     if current_state is None:
-        current_state = {
-            "dark_mode": const.DEFAULT_DARK_MODE,
-            "color_scale": color_scale if color_scale else "Viridis",  # Default value
-            "phase": "initial",
-            "update_id": 0,
-            "settings_changed": True
-        }
+        current_state = const.APP_STATE_STORE_DEFAULT
 
     # Update state based on trigger
-    if triggered_id == ID.BUTTON_DARK_MODE_TOGGLE.value and n_clicks:
+    if triggered_id == ID.BUTTON_DARK_MODE_TOGGLE.value and n_clicks_dark:
         current_state["dark_mode"] = not current_state.get("dark_mode", const.DEFAULT_DARK_MODE)
         current_state["settings_changed"] = True
         current_state["update_id"] += 1
 
     elif triggered_id == ID.SETTING_MAP_COLOR_SCALE.value:
-        if current_state.get("color_scale") != color_scale:
-            current_state["color_scale"] = color_scale
+        if current_state.get("map_setting_color_scale") != map_color_scale:
+            current_state["map_setting_color_scale"] = map_color_scale
             current_state["settings_changed"] = True
             current_state["update_id"] += 1
+
+    elif triggered_id == ID.SETTING_MAP_TEXT_COLOR.value:
+        if current_state.get("map_setting_text_color") != map_text_color:
+            current_state["map_setting_text_color"] = map_text_color
+            current_state["settings_changed"] = True
+            current_state["update_id"] += 1
+
+    elif triggered_id == ID.SETTING_MAP_SHOW_COLOR_SCALE.value:
+        if current_state.get("map_setting_show_color_scale") != map_show_color_scale:
+            current_state["map_setting_show_color_scale"] = map_show_color_scale
+            current_state["settings_changed"] = True
+            current_state["update_id"] += 1
+
+    elif triggered_id == ID.SETTING_GENERAL_SHOW_TOOLTIPS.value:
+        if current_state.get("general_setting_show_tooltips") != show_tooltips:
+            current_state["general_setting_show_tooltips"] = show_tooltips
+            current_state["settings_changed"] = False
+
+    elif triggered_id == ID.SETTING_GENERAL_CANVAS_PLACEMENT.value:
+        if current_state.get("general_setting_canvas_placement") != canvas_placement:
+            current_state["general_setting_canvas_placement"] = canvas_placement
+            current_state["settings_changed"] = False
 
     # Read dark mode status
     dark = current_state.get("dark_mode", const.DEFAULT_DARK_MODE)
@@ -196,11 +225,14 @@ def render_map(animation_state, app_state):
         raise PreventUpdate
 
     # Render map with current settings
-    dark = app_state.get("dark_mode", const.DEFAULT_DARK_MODE)
-    color_scale = app_state.get("color_scale", "blues")
+    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE)
+    color_scale = app_state.get("map_setting_color_scale", const.MAP_DEFAULT_COLOR_SCALE)
+    text_color = app_state.get("map_setting_text_color", const.TEXT_COLOR_LIGHT if dark_mode else const.TEXT_COLOR_DARK)
+    show_color_scale = app_state.get("map_setting_show_color_scale", const.MAP_DEFAULT_SHOW_COLOR_SCALE)
 
-    map_style = "carto-darkmatter-nolabels" if dark else "carto-positron-nolabels"
-    map_component = create_usa_map(color_scale=color_scale, map_style=map_style)
+    map_style = "carto-darkmatter-nolabels" if dark_mode else "carto-positron-nolabels"
+    map_component = create_usa_map(color_scale=color_scale, text_color=text_color, map_style=map_style,
+                                   dark_mode=dark_mode, show_color_scale=show_color_scale)
 
     # Reset settings changed flag
     app_state["settings_changed"] = False
@@ -313,3 +345,48 @@ def change_settings_position(placement):
         The updated placement value for the settings canvas.
     """
     return placement
+
+
+# === INITIALIZE SETTINGS COMPONENTS ===
+@callback(
+    Output(ID.SETTING_MAP_COLOR_SCALE, "value"),
+    Output(ID.SETTING_MAP_TEXT_COLOR, "value"),
+    Output(ID.SETTING_MAP_SHOW_COLOR_SCALE, "value"),
+    Output(ID.SETTING_GENERAL_SHOW_TOOLTIPS, "value"),
+    Output(ID.SETTING_GENERAL_CANVAS_PLACEMENT, "value"),
+    Input("layout-ready-signal", "children"),
+    State(ID.APP_STATE_STORE, "data"),
+    prevent_initial_call=True,
+)
+def initialize_settings_components(ready_signal, app_state):
+    """
+    Initializes the settings components with values from the application state.
+
+    This callback is triggered when the layout is ready and ensures that all settings
+    components display the correct values from the application state, rather than
+    their default values.
+
+    Args:
+        ready_signal: Signal to indicate readiness for initialization. Expected value
+            is "ready".
+        app_state: The current state of the application containing settings values.
+
+    Returns:
+        tuple: A tuple containing the values for each settings component, retrieved
+        from the application state.
+
+    Raises:
+        PreventUpdate: If the ready signal is not "ready" or the app state is None.
+    """
+    if ready_signal != "ready" or app_state is None:
+        raise PreventUpdate
+
+    # Get values from app state with defaults as fallback
+    color_scale = app_state.get("map_setting_color_scale", const.MAP_DEFAULT_COLOR_SCALE)
+    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE)
+    text_color = app_state.get("map_setting_text_color", "black" if dark_mode else "white")
+    show_color_scale = app_state.get("map_setting_show_color_scale", const.MAP_DEFAULT_SHOW_COLOR_SCALE)
+    show_tooltips = app_state.get("general_setting_show_tooltips", True)
+    canvas_placement = app_state.get("general_setting_canvas_placement", "start")
+
+    return color_scale, text_color, show_color_scale, show_tooltips, canvas_placement

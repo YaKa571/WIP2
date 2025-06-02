@@ -1,4 +1,3 @@
-import json
 from typing import List
 
 import pandas as pd
@@ -17,7 +16,6 @@ class ClusterTabData:
         # Initialize dataframes and data
         self.mcc = None
         self.data_file = None
-
 
         # Age group bins and labels
         self.age_bins = [0, 25, 35, 45, 55, 65, 200]
@@ -156,7 +154,44 @@ class ClusterTabData:
         """
         return self.data_file
 
-    def _pre_cache_cluster_tab_data(self, log_times: bool = True) -> None:
+    def _save_caches_to_disk(self):
+        """
+        Save all cached data to disk.
+        """
+        logger.log("🔄 Cluster: Saving caches to disk...", indent_level=3)
+        bm = Benchmark("Cluster: Saving caches to disk")
+
+        # Save all cache dictionaries
+        cache_data = {
+            "cluster_data": self._cache_cluster_data,
+            "inc_vs_exp_cluster_data": self._cache_inc_vs_exp_cluster_data
+        }
+
+        self.data_manager.save_cache_to_disk("cluster_tab_caches", cache_data)
+        bm.print_time(level=4)
+
+    def _load_caches_from_disk(self) -> bool:
+        """
+        Load all cached data from disk.
+
+        Returns:
+            bool: True if caches were successfully loaded, False otherwise
+        """
+        logger.log("🔄 Cluster: Loading caches from disk...", indent_level=3)
+        bm = Benchmark("Cluster: Loading caches from disk")
+
+        # Load cache dictionaries
+        cache_data = self.data_manager.load_cache_from_disk("cluster_tab_caches", is_dataframe=False)
+        if cache_data is not None:
+            self._cache_cluster_data = cache_data.get("cluster_data", {})
+            self._cache_inc_vs_exp_cluster_data = cache_data.get("inc_vs_exp_cluster_data", {})
+            bm.print_time(level=4)
+            return True
+
+        bm.print_time(level=4)
+        return False
+
+    def _pre_cache_cluster_tab_data(self) -> None:
         """
         Pre-caches data for the Cluster Tab view by performing data aggregation and clustering
         for common merchant groups. This method is intended to optimize subsequent data retrieval
@@ -173,14 +208,20 @@ class ClusterTabData:
         """
         import concurrent.futures
 
-        bm_pre_cache_full = Benchmark("Pre-caching Cluster Tab data")
-        logger.log("🔄 Pre-caching Cluster Tab data...", indent_level=2)
+        logger.log("🔄 Cluster: Pre-caching Cluster Tab data...", indent_level=3)
+        bm_pre_cache_full = Benchmark("Cluster: Pre-caching Cluster Tab data")
+
+        # Try to load caches from disk first
+        if self._load_caches_from_disk():
+            logger.log("✅ Cluster: Successfully loaded caches from disk", indent_level=3)
+            bm_pre_cache_full.print_time(level=4)
+            return
 
         # Cache data for 'All Merchant Groups' first as it's often a dependency
-        bm_all_groups = Benchmark("Pre-caching data for All Merchant Groups")
+        bm_all_groups = Benchmark("Cluster: Pre-caching data for All Merchant Groups")
         self.prepare_cluster_data('All Merchant Groups')
         self.prepare_inc_vs_exp_cluster_data('All Merchant Groups')
-        bm_all_groups.print_time(level=3)
+        bm_all_groups.print_time(level=4)
 
         # Define a function to cache data for a merchant group
         def cache_merchant_group_data(group):
@@ -195,23 +236,24 @@ class ClusterTabData:
         # Use ThreadPoolExecutor for parallel processing
         # This is ideal for CPU-bound operations like clustering
         # The max_workers parameter can be adjusted based on the system's capabilities
-        bm_groups = Benchmark("Pre-caching data for all merchant groups in parallel")
+        bm_groups = Benchmark("Cluster: Pre-caching data for all merchant groups in parallel")
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Process all merchant groups in parallel
             results = list(executor.map(cache_merchant_group_data, merchant_groups))
 
-            if log_times:
-                logger.log(f"✅ Pre-cached data for {len(results)} merchant groups", indent_level=3)
+        bm_groups.print_time(level=4)
 
-        bm_groups.print_time(level=3)
-        bm_pre_cache_full.print_time(level=3)
+        # Save caches to disk for future use
+        self._save_caches_to_disk()
+
+        bm_pre_cache_full.print_time(level=4)
 
     def initialize(self):
         """
         Initialize the cluster tab data by loading and processing the necessary data.
         """
-        logger.log("ℹ️ Initializing Cluster Tab Data...", 2)
-        bm = Benchmark("Initialization")
+        logger.log("ℹ️ Cluster: Initializing Cluster Tab Data...", 3, add_line_before=True)
+        bm = Benchmark("Cluster: Initialization")
 
         # Use shared MCC codes from data manager
         self.mcc = self.data_manager.df_mcc
@@ -230,4 +272,4 @@ class ClusterTabData:
         # Pre-cache cluster data
         self._pre_cache_cluster_tab_data()
 
-        bm.print_time(level=3)
+        bm.print_time(level=4, add_empty_line=True)

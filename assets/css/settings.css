@@ -66,7 +66,7 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    gap: .5rem;
+    gap: 1rem;
     justify-content: flex-start;
     min-height: 0;
     padding: 1rem;
@@ -273,4 +273,18 @@
 /* Text when typing (searching) */
 .settings-dropdown .Select-input > input {
     color: var(--text-main) !important;
+}
+
+.dropdown-span-full,
+.settings-dropdown.dropdown-span-full .Select-value-label,
+.settings-dropdown.dropdown-span-full .Select-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+    padding: 0 8px !important;
+    border-radius: var(--dropdown-border-radius, 12px);
 }

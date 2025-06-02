@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 from backend.data_handler import get_mcc_description_by_merchant_id
@@ -267,13 +266,58 @@ class UserTabData:
         """
         return self._cache_user_merchant_agg.get(int(user_id), pd.DataFrame())
 
-    def _pre_cache_user_tab_data(self) -> None:
-        bm_pre_cache_full = Benchmark("Pre-caching User-Tab data")
-        logger.log("🔄 Pre-caching User-Tab data...", indent_level=2)
+    def _save_caches_to_disk(self):
+        """
+        Save all cached data to disk.
+        """
+        logger.log("🔄 User: Saving caches to disk...", indent_level=3)
+        bm = Benchmark("User: Saving caches to disk")
 
-        self.cache_user_transactions()
-        self.cache_user_merchant_agg()
-        bm_pre_cache_full.print_time(level=3)
+        # Save all cache dictionaries
+        cache_data = {
+            "user_transactions": self._cache_user_transactions,
+            "user_merchant_agg": self._cache_user_merchant_agg
+        }
+
+        self.data_manager.save_cache_to_disk("user_tab_caches", cache_data)
+        bm.print_time(level=4)
+
+    def _load_caches_from_disk(self) -> bool:
+        """
+        Load all cached data from disk.
+
+        Returns:
+            bool: True if caches were successfully loaded, False otherwise
+        """
+        logger.log("🔄 User: Loading caches from disk...", indent_level=3)
+        bm = Benchmark("User: Loading caches from disk")
+
+        # Load cache dictionaries
+        cache_data = self.data_manager.load_cache_from_disk("user_tab_caches", is_dataframe=False)
+        if cache_data is not None:
+            self._cache_user_transactions = cache_data.get("user_transactions", {})
+            self._cache_user_merchant_agg = cache_data.get("user_merchant_agg", {})
+            bm.print_time(level=4)
+            return True
+
+        bm.print_time(level=4)
+        return False
 
     def initialize(self):
-        self._pre_cache_user_tab_data()
+        logger.log("🔄 User: Pre-caching User-Tab data...", indent_level=3, add_line_before=True)
+        bm_pre_cache_full = Benchmark("User: Pre-caching User-Tab data")
+
+        # Try to load caches from disk first
+        if self._load_caches_from_disk():
+            logger.log("✅ User: Successfully loaded caches from disk", indent_level=3)
+            bm_pre_cache_full.print_time(level=4, add_empty_line=True)
+            return
+
+        # If no cache found, compute and save
+        self.cache_user_transactions()
+        self.cache_user_merchant_agg()
+
+        # Save caches to disk for future use
+        self._save_caches_to_disk()
+
+        bm_pre_cache_full.print_time(level=4, add_empty_line=True)

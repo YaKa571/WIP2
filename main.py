@@ -17,7 +17,7 @@ import components.factories.settings_components_factory as settings_comp_factory
 from backend.callbacks.settings_callbacks import (  # noqa: F401
     toggle_settings_canvas, update_app_state, prepare_map_update,
     render_map, initialize_layout, trigger_initial_render,
-    toggle_tooltips, change_settings_position
+    toggle_tooltips, change_settings_position, initialize_settings_components
 )
 from backend.callbacks.data_table_callbacks import DataTableCallbacks  # noqa: F401
 from backend.callbacks.tabs.tab_buttons_callbacks import update_tabs  # noqa: F401
@@ -82,10 +82,10 @@ def create_app(suppress_callback_exceptions: bool = True, add_data_tables: bool 
         children=[
 
             # Stores and Divs needed for the layout to work properly
-            dcc.Store(id=ID.APP_STATE_STORE, data=const.APP_STATE_STORE_DEFAULT),
+            dcc.Store(id=ID.APP_STATE_STORE, data=const.APP_STATE_STORE_DEFAULT, storage_type="session"),
             dcc.Store(id=ID.ANIMATION_STATE_STORE),
             dcc.Store(id=ID.HOME_TAB_SELECTED_STATE_STORE, data=None),
-            dcc.Store(id=ID.ACTIVE_TAB_STORE, data=ID.TAB_HOME),
+            dcc.Store(id=ID.ACTIVE_TAB_STORE, data=ID.TAB_HOME, storage_type="session"),
             dcc.Store(id=ID.MERCHANT_SELECTED_BUTTON_STORE, data="all"),
             dcc.Store(id=ID.CLUSTER_SELECTED_BUTTON_STORE, data={"main": "total_value", "age": "all_ages"}),
             html.Div(id="app-init-trigger", style={"display": "none"}),

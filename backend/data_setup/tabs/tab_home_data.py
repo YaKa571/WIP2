@@ -39,8 +39,8 @@ class HomeTabData:
         to reach 5 digits.
         """
         if not {"latitude", "longitude"}.issubset(self.df_transactions):
-            logger.log("🔄 Processing transaction zip codes...", 2)
-            bm = Benchmark("Processing")
+            logger.log("🔄 Home: Processing transaction zip codes...", 3)
+            bm = Benchmark("Home: Processing transaction zip codes")
 
             df = self.df_transactions.copy()
 
@@ -68,7 +68,7 @@ class HomeTabData:
             self.df_transactions = df
             bm.print_time(level=3)
         else:
-            logger.log("ℹ️ Latitude/Longitude already exist, skipping geocoding", 2)
+            logger.log("ℹ️ Home: Latitude/Longitude already exist, skipping geocoding", 3)
 
     def _process_transaction_states(self):
         """
@@ -82,8 +82,8 @@ class HomeTabData:
         None
         """
         if "state_name" not in self.df_transactions.columns:
-            logger.log("🔄 Mapping transaction state abbreviations to full names...", 2)
-            bm = Benchmark("Mapping")
+            logger.log("🔄 Home: Mapping transaction state abbreviations to full names...", 3)
+            bm = Benchmark("Home: Mapping transaction state abbreviations to full names")
 
             # Build mapping from abbreviation to full state name
             mapping = {s.abbr: s.name for s in us.states.STATES}
@@ -107,7 +107,7 @@ class HomeTabData:
             self.df_transactions = df
             bm.print_time(level=3)
         else:
-            logger.log("ℹ️ State names already exist, skipping mapping", 2)
+            logger.log("ℹ️ Home: State names already exist, skipping mapping", 3)
 
     def _process_transaction_data(self) -> None:
         # Process transaction zip codes
@@ -373,7 +373,8 @@ class HomeTabData:
             df = df[df["state_name"] == state]
 
         # Create a mapping of merchant_id to mcc once
-        merchant_mcc_map = df[['merchant_id', 'mcc']].drop_duplicates('merchant_id').set_index('merchant_id')['mcc'].to_dict()
+        merchant_mcc_map = df[['merchant_id', 'mcc']].drop_duplicates('merchant_id').set_index('merchant_id')[
+            'mcc'].to_dict()
 
         # Pre-compute MCC descriptions for all unique MCCs
         unique_mccs = set(merchant_mcc_map.values())
@@ -424,13 +425,13 @@ class HomeTabData:
         calculation process. It performs several operations to fetch specific KPI values related to
         merchants and users.
         """
-        logger.log("ℹ️ Calculating KPIs for Home Tab...", 2)
-        bm = Benchmark("Calculation")
+        logger.log("ℹ️ Home: Calculating KPIs for Home Tab...", 3)
+        bm = Benchmark("Home: Calculating KPIs for Home Tab")
         self.get_most_valuable_merchant()
         self.get_most_visited_merchant()
         self.get_top_spending_user()
         self.get_peak_hour()
-        bm.print_time(level=3)
+        bm.print_time(level=4)
 
     def get_expenditures_by_gender(self, state: str = None) -> dict[str, float]:
         """
@@ -587,8 +588,16 @@ class HomeTabData:
         return result
 
     def _cache_map_data(self) -> None:
-        bm_cache_map = Benchmark("Pre-caching USA Map data...")
-        logger.log("🔄 Pre-caching USA Map data...", indent_level=2)
+        logger.log("🔄 Home: Pre-caching USA Map data...", indent_level=3)
+        bm_cache_map = Benchmark("Home: Pre-caching USA Map data")
+
+        # Try to load map data from cache first
+        map_data = self.data_manager.load_cache_from_disk("home_tab_map_data")
+        if map_data is not None:
+            self.map_data = map_data
+            logger.log("✅ Home: Loaded map data from cache", indent_level=4)
+            bm_cache_map.print_time(level=4)
+            return
 
         # More efficient approach without copying the entire dataframe
         df = self.df_transactions
@@ -608,9 +617,71 @@ class HomeTabData:
         state_counts["state_name_upper"] = state_counts["state_name"].str.upper()
 
         self.map_data = state_counts
-        bm_cache_map.print_time(level=3)
 
-    def _pre_cache_home_tab_data(self, log_state_times: bool = True) -> None:
+        # Save map data to cache
+        self.data_manager.save_cache_to_disk("home_tab_map_data", self.map_data)
+
+        bm_cache_map.print_time(level=4)
+
+    def _save_caches_to_disk(self):
+        """
+        Save all cached data to disk.
+        """
+        logger.log("🔄 Home: Saving caches to disk...", indent_level=3)
+        bm = Benchmark("Home: Saving caches to disk")
+
+        # Save all cache dictionaries
+        cache_data = {
+            "most_valuable_merchant": self._cache_most_valuable_merchant,
+            "visits_by_merchant": self._cache_visits_by_merchant,
+            "spending_by_user": self._cache_spending_by_user,
+            "transaction_counts_by_hour": self._cache_transaction_counts_by_hour,
+            "expenditures_by_gender": self._cache_expenditures_by_gender,
+            "expenditures_by_age": self._cache_expenditures_by_age,
+            "expenditures_by_channel": self._cache_expenditures_by_channel
+        }
+
+        self.data_manager.save_cache_to_disk("home_tab_caches", cache_data)
+
+        # Save map data separately as it's a DataFrame
+        if not self.map_data.empty:
+            self.data_manager.save_cache_to_disk("home_tab_map_data", self.map_data)
+
+        bm.print_time(level=4)
+
+    def _load_caches_from_disk(self) -> bool:
+        """
+        Load all cached data from disk.
+
+        Returns:
+            bool: True if caches were successfully loaded, False otherwise
+        """
+        logger.log("🔄 Home: Loading caches from disk...", indent_level=3)
+        bm = Benchmark("Home: Loading caches from disk")
+
+        # Load cache dictionaries
+        cache_data = self.data_manager.load_cache_from_disk("home_tab_caches", is_dataframe=False)
+        if cache_data is not None:
+            self._cache_most_valuable_merchant = cache_data.get("most_valuable_merchant", {})
+            self._cache_visits_by_merchant = cache_data.get("visits_by_merchant", {})
+            self._cache_spending_by_user = cache_data.get("spending_by_user", {})
+            self._cache_transaction_counts_by_hour = cache_data.get("transaction_counts_by_hour", {})
+            self._cache_expenditures_by_gender = cache_data.get("expenditures_by_gender", {})
+            self._cache_expenditures_by_age = cache_data.get("expenditures_by_age", {})
+            self._cache_expenditures_by_channel = cache_data.get("expenditures_by_channel", {})
+
+            # Load map data
+            map_data = self.data_manager.load_cache_from_disk("home_tab_map_data")
+            if map_data is not None:
+                self.map_data = map_data
+
+            bm.print_time(level=4)
+            return True
+
+        bm.print_time(level=4)
+        return False
+
+    def _pre_cache_home_tab_data(self) -> None:
         """
         Pre-caches data for the Home-Tab view by performing data aggregation and calculations for
         both overall data and state-specific data. This method is intended to optimize subsequent
@@ -634,8 +705,14 @@ class HomeTabData:
         import concurrent.futures
         import multiprocessing
 
-        bm_pre_cache_full = Benchmark("Pre-caching Home-Tab data")
-        logger.log("🔄 Pre-caching Home-Tab data...", indent_level=2)
+        logger.log("🔄 Home: Pre-caching Home-Tab States data...", indent_level=3)
+        bm_pre_cache_full = Benchmark("Home: Pre-caching Home-Tab States data")
+
+        # Try to load caches from disk first
+        if self._load_caches_from_disk():
+            logger.log("✅ Home: Successfully loaded caches from disk", indent_level=3)
+            bm_pre_cache_full.print_time(level=4)
+            return
 
         # Caching functions to run for each state
         caching_functions: list[Callable[[str | None], Any]] = [
@@ -649,18 +726,18 @@ class HomeTabData:
         ]
 
         # First for overall (state=None) - this is often a dependency for state-specific data
-        bm_usa_wide = Benchmark("Pre-caching of USA-wide data")
+        bm_usa_wide = Benchmark("Home: Pre-caching of USA-wide data")
         for func in caching_functions:
             func(None)
-        bm_usa_wide.print_time(level=3)
+        bm_usa_wide.print_time(level=4)
 
         # Get all states
         states = self.df_transactions['state_name'].dropna().unique().tolist()
 
         # Skip if no states to process
         if not states:
-            logger.log("ℹ️ No states to process", indent_level=3)
-            bm_pre_cache_full.print_time(level=3)
+            logger.log("ℹ️ Home: No states to process", indent_level=3)
+            bm_pre_cache_full.print_time(level=4)
             return
 
         # Determine optimal batch size based on number of states and CPU cores
@@ -682,7 +759,7 @@ class HomeTabData:
             return results
 
         # Use ThreadPoolExecutor for parallel processing of state batches
-        bm_states = Benchmark("Pre-caching data for all states in batches")
+        bm_states = Benchmark("Home: Pre-caching data for all states in batches")
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_cores) as executor:
             # Process batches of states in parallel
             all_results = []
@@ -692,11 +769,12 @@ class HomeTabData:
             for future in concurrent.futures.as_completed(futures):
                 all_results.extend(future.result())
 
-            if log_state_times:
-                logger.log(f"✅ Pre-cached data for {len(all_results)} states in {len(state_batches)} batches", indent_level=3)
+        bm_states.print_time(level=4)
 
-        bm_states.print_time(level=3)
-        bm_pre_cache_full.print_time(level=3)
+        # Save caches to disk for future use
+        self._save_caches_to_disk()
+
+        bm_pre_cache_full.print_time(level=4)
 
     def initialize(self):
         """
@@ -706,7 +784,12 @@ class HomeTabData:
         necessary data for efficient system operation.
 
         """
+        logger.log("ℹ️ Home: Initializing Home Tab Data...", 3, add_line_before=True)
+        bm = Benchmark("Home: Initialization")
+
         self._process_transaction_data()
         self._calc_home_tab_kpis()
         self._pre_cache_home_tab_data()
         self._cache_map_data()
+
+        bm.print_time(level=4, add_empty_line=True)

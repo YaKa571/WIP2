@@ -1,4 +1,3 @@
-import json
 from typing import Dict, Tuple
 
 import pandas as pd
@@ -429,6 +428,67 @@ class MerchantTabData:
         self._cache_user_with_highest_expenditure_at_merchant[merchant] = result
         return result
 
+    def _save_caches_to_disk(self):
+        """
+        Save all cached data to disk.
+        """
+        logger.log("🔄 Merchant: Saving caches to disk...", indent_level=3)
+        bm = Benchmark("Merchant: Saving caches to disk")
+
+        # Save all cache dictionaries
+        cache_data = {
+            "merchant_group_overview": self._cache_merchant_group_overview,
+            "all_merchant_groups": self._cache_all_merchant_groups,
+            "most_transactions_all_merchants": self._cache_most_transactions_all_merchants,
+            "highest_expenditure_all_merchants": self._cache_highest_expenditure_all_merchants,
+            "most_frequently_used_merchant_group": self._cache_most_frequently_used_merchant_group,
+            "highest_value_merchant_group": self._cache_highest_value_merchant_group,
+            "most_frequently_used_merchant_in_group": self._cache_most_frequently_used_merchant_in_group,
+            "highest_value_merchant_in_group": self._cache_highest_value_merchant_in_group,
+            "user_with_most_transactions_in_group": self._cache_user_with_most_transactions_in_group,
+            "user_with_highest_expenditure_in_group": self._cache_user_with_highest_expenditure_in_group,
+            "merchant_transactions": self._cache_merchant_transactions,
+            "merchant_value": self._cache_merchant_value,
+            "user_with_most_transactions_at_merchant": self._cache_user_with_most_transactions_at_merchant,
+            "user_with_highest_expenditure_at_merchant": self._cache_user_with_highest_expenditure_at_merchant
+        }
+
+        self.data_manager.save_cache_to_disk("merchant_tab_caches", cache_data)
+        bm.print_time(level=4)
+
+    def _load_caches_from_disk(self) -> bool:
+        """
+        Load all cached data from disk.
+
+        Returns:
+            bool: True if caches were successfully loaded, False otherwise
+        """
+        logger.log("🔄 Merchant: Loading caches from disk...", indent_level=3)
+        bm = Benchmark("Merchant: Loading caches from disk")
+
+        # Load cache dictionaries
+        cache_data = self.data_manager.load_cache_from_disk("merchant_tab_caches", is_dataframe=False)
+        if cache_data is not None:
+            self._cache_merchant_group_overview = cache_data.get("merchant_group_overview", {})
+            self._cache_all_merchant_groups = cache_data.get("all_merchant_groups")
+            self._cache_most_transactions_all_merchants = cache_data.get("most_transactions_all_merchants")
+            self._cache_highest_expenditure_all_merchants = cache_data.get("highest_expenditure_all_merchants")
+            self._cache_most_frequently_used_merchant_group = cache_data.get("most_frequently_used_merchant_group")
+            self._cache_highest_value_merchant_group = cache_data.get("highest_value_merchant_group")
+            self._cache_most_frequently_used_merchant_in_group = cache_data.get("most_frequently_used_merchant_in_group", {})
+            self._cache_highest_value_merchant_in_group = cache_data.get("highest_value_merchant_in_group", {})
+            self._cache_user_with_most_transactions_in_group = cache_data.get("user_with_most_transactions_in_group", {})
+            self._cache_user_with_highest_expenditure_in_group = cache_data.get("user_with_highest_expenditure_in_group", {})
+            self._cache_merchant_transactions = cache_data.get("merchant_transactions", {})
+            self._cache_merchant_value = cache_data.get("merchant_value", {})
+            self._cache_user_with_most_transactions_at_merchant = cache_data.get("user_with_most_transactions_at_merchant", {})
+            self._cache_user_with_highest_expenditure_at_merchant = cache_data.get("user_with_highest_expenditure_at_merchant", {})
+            bm.print_time(level=4)
+            return True
+
+        bm.print_time(level=4)
+        return False
+
     def _pre_cache_merchant_tab_data(self, log_times: bool = True) -> None:
         """
         Pre-caches data for the Merchant Tab view by performing data aggregation and calculations for
@@ -446,11 +506,17 @@ class MerchantTabData:
         """
         import concurrent.futures
 
-        bm_pre_cache_full = Benchmark("Pre-caching Merchant Tab data")
-        logger.log("🔄 Pre-caching Merchant Tab data...", indent_level=2)
+        logger.log("🔄 Merchant: Pre-caching Merchant Tab data...", indent_level=3)
+        bm_pre_cache_full = Benchmark("Merchant: Pre-caching Merchant Tab data")
+
+        # Try to load caches from disk first
+        if self._load_caches_from_disk():
+            logger.log("✅ Merchant: Successfully loaded caches from disk", indent_level=3)
+            bm_pre_cache_full.print_time(level=4)
+            return
 
         # Cache global data (no parameters) - these are fast and dependencies for other caches
-        bm_global = Benchmark("Pre-caching global merchant data")
+        bm_global = Benchmark("Merchant: Pre-caching global merchant data")
         self.get_all_merchant_groups()
         self.get_user_with_most_transactions_all_merchants()
         self.get_user_with_highest_expenditure_all_merchants()
@@ -461,7 +527,7 @@ class MerchantTabData:
         thresholds = [10, 20, 50]
         for threshold in thresholds:
             self.get_merchant_group_overview(threshold)
-        bm_global.print_time(level=3)
+        bm_global.print_time(level=4)
 
         # Define functions to cache data for a merchant group
         def cache_merchant_group_data(group):
@@ -485,7 +551,7 @@ class MerchantTabData:
         merchant_groups = self.get_all_merchant_groups()
 
         # Get top merchants more efficiently
-        bm_merchants = Benchmark("Identifying top merchants")
+        bm_merchants = Benchmark("Merchant: Identifying top merchants")
         merchant_counts = (
             self.transactions_mcc_users
             .groupby('merchant_id', sort=False)
@@ -495,29 +561,32 @@ class MerchantTabData:
             .head(100)
         )
         top_merchants = merchant_counts['merchant_id'].tolist()
-        bm_merchants.print_time(level=3)
+        bm_merchants.print_time(level=4)
 
         # Use ThreadPoolExecutor for parallel processing
         # This is ideal for I/O-bound operations like these caching operations
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Cache merchant group data in parallel
-            bm_groups = Benchmark("Pre-caching data for all merchant groups")
+            bm_groups = Benchmark("Merchant: Pre-caching data for all merchant groups")
             list(executor.map(cache_merchant_group_data, merchant_groups))
-            bm_groups.print_time(level=3)
+            bm_groups.print_time(level=4)
 
             # Cache merchant data in parallel
-            bm_merchants = Benchmark("Pre-caching data for top merchants")
+            bm_merchants = Benchmark("Merchant: Pre-caching data for top merchants")
             list(executor.map(cache_merchant_data, top_merchants))
-            bm_merchants.print_time(level=3)
+            bm_merchants.print_time(level=4)
 
-        bm_pre_cache_full.print_time(level=3)
+        # Save caches to disk for future use
+        self._save_caches_to_disk()
+
+        bm_pre_cache_full.print_time(level=4)
 
     def initialize(self):
         """
         Initialize the merchant tab data by loading and processing the necessary data.
         """
-        logger.log("ℹ️ Initializing Merchant Tab Data...", 2)
-        bm = Benchmark("Initialization")
+        logger.log("ℹ️ Merchant: Initializing Merchant Tab Data...", 3, add_line_before=True)
+        bm = Benchmark("Merchant: Initialization")
 
         # Use shared MCC codes from data manager
         self.mcc = self.data_manager.df_mcc
@@ -550,4 +619,4 @@ class MerchantTabData:
         # Pre-cache merchant data
         self._pre_cache_merchant_tab_data()
 
-        bm.print_time(level=3)
+        bm.print_time(level=4, add_empty_line=True)

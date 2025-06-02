@@ -2,6 +2,7 @@ from enum import Enum
 
 from dash import dcc, html, callback, Input, Output, ctx, State
 
+import components.constants as const
 import components.factories.component_factory as comp_factory
 from backend.data_manager import DataManager
 from components.tabs.tab_cluster_components import make_cluster_plot, create_cluster_legend, make_inc_vs_exp_plot
@@ -115,9 +116,9 @@ def set_cluster_tab(n_total_value, n_average_value, n_inc_vs_exp, n_all_ages, n_
     Output(ID.CLUSTER_LEGEND, "children"),
     Input(ID.CLUSTER_SELECTED_BUTTON_STORE, "data"),
     Input(ID.CLUSTER_MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
-    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks"),
+    Input(ID.APP_STATE_STORE, "data"),
 )
-def update_cluster(selected, selected_merchant_group, n_clicks_dark):
+def update_cluster(selected, selected_merchant_group, app_state):
     """
     A callback function to update clustering-related interactive components based on user input. It adjusts the visual
     representation and styling of buttons and plots depending on the selected main clustering criterion and age grouping
@@ -130,6 +131,10 @@ def update_cluster(selected, selected_merchant_group, n_clicks_dark):
         dictionary must contain the keys "main" and "age".
     selected_merchant_group : Optional[str]
         The chosen merchant group filter option to be applied when preparing cluster data.
+    n_clicks_dark : int
+        The number of times the dark mode toggle button has been clicked.
+    app_state : dict
+        The current application state containing settings like dark_mode.
 
     Returns
     -------
@@ -137,7 +142,7 @@ def update_cluster(selected, selected_merchant_group, n_clicks_dark):
         Updated class names for each cluster button, a customized plotly figure representing the clustering data,
         and the corresponding legend object as a `Div` element for further interface usability.
     """
-    dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
+    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
     if not selected:
         selected = {

@@ -1,6 +1,7 @@
 from dash import callback, Output, Input, ctx, no_update, State
 from dash.exceptions import PreventUpdate
 
+import components.constants as const
 from backend.callbacks.tabs.tab_merchant_callbacks import ID_TO_MERCHANT_TAB
 from backend.data_manager import DataManager
 from backend.data_setup.tabs.tab_home_data import HomeTabData
@@ -35,10 +36,10 @@ CHART_BUILDERS = {
     Input(ID.HOME_TAB_SELECTED_STATE_STORE, "data"),
     Input(ID.HOME_TAB_BAR_CHART_DROPDOWN, "value"),
     Input(ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES, "n_clicks"),
-    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks"),
+    Input(ID.APP_STATE_STORE, "data"),
     prevent_initial_call=True
 )
-def update_bar_chart(selected_state, chart_option, n_clicks_toggle, n_clicks_dark):
+def update_bar_chart(selected_state, chart_option, n_clicks_toggle, app_state):
     """
     Updates the bar chart figure based on the selected state, chart options, and user interaction.
 
@@ -52,6 +53,7 @@ def update_bar_chart(selected_state, chart_option, n_clicks_toggle, n_clicks_dar
         chart_option: Selected option for bar chart type.
         n_clicks_toggle: Number of clicks on the "Toggle All States" button.
         n_clicks_dark: Number of clicks on the "Dark Mode Toggle" button.
+        app_state: The current application state containing settings like dark_mode.
 
     Returns:
         A plotly figure object for the updated bar chart.
@@ -63,8 +65,8 @@ def update_bar_chart(selected_state, chart_option, n_clicks_toggle, n_clicks_dar
     else:
         state = selected_state
 
-    # Determine dark mode
-    dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
+    # Get dark mode from app state
+    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
     # Validate chart_option
     builder = CHART_BUILDERS.get(chart_option)
@@ -124,11 +126,11 @@ def store_selected_state(clickData, n_clicks):
     Output(ID.HOME_KPI_PEAK_HOUR, "children"),
     Output(ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES, "className"),
     Input(ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES, "n_clicks"),
-    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks"),
     Input(ID.HOME_TAB_SELECTED_STATE_STORE, "data"),
+    Input(ID.APP_STATE_STORE, "data"),
     prevent_initial_call=True
 )
-def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
+def update_all_pies(n_clicks_toggle, selected_state, app_state):
     """
     Updates multiple pie charts, headings, KPIs, and button classes based on user interaction and state selection.
 
@@ -145,6 +147,7 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
             or disable dark mode based on the parity of the number of clicks.
         selected_state (str): The currently selected state, represented as a string. It determines
             the scope of data visualizations (e.g., Gender, Channel, and Age expenditures) and KPIs.
+        app_state: The current application state containing settings like dark_mode.
 
     Returns:
         tuple: A tuple containing the following elements:
@@ -161,7 +164,7 @@ def update_all_pies(n_clicks_toggle, n_clicks_dark, selected_state):
     # Context, State, Dark Mode
     trigger = ctx.triggered_id
     state = None if trigger == ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES else selected_state
-    dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
+    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
     color_green = GREEN_DARK if dark_mode else GREEN_LIGHT
 
     # Gender

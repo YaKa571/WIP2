@@ -444,9 +444,9 @@ def set_merchant_tab(n_all, n_group, n_indiv):
     Input(ID.MERCHANT_SELECTED_BUTTON_STORE, "data"),
     Input(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
     Input(ID.MERCHANT_INPUT_MERCHANT_ID, "value"),
-    Input(ID.BUTTON_DARK_MODE_TOGGLE, "n_clicks")
+    Input(ID.APP_STATE_STORE, "data")
 )
-def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dark):
+def update_merchant(selected, selected_group, selected_merchant_id, app_state):
     """
     Updates the user interface components based on the currently selected merchant
     tab, group, or individual merchant.
@@ -463,6 +463,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
             Can be None or an invalid input.
         n_clicks_dark (int): Number of times the dark mode toggle button is clicked.
             Odd values indicate dark mode is activated.
+        app_state (dict): The current application state containing settings like dark_mode.
 
     Returns:
         tuple: Contains UI component properties (button classes, styles, content, figures, titles).
@@ -471,8 +472,8 @@ def update_merchant(selected, selected_group, selected_merchant_id, n_clicks_dar
     if not selected:
         selected = MerchantTab.ALL.value
 
-    # Determine dark mode state
-    dark_mode = bool(n_clicks_dark and n_clicks_dark % 2 == 1)
+    # Get dark mode from app state
+    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
     # Define display styles based on selected tab
     visible_style = {"display": "flex", "width": "100%"}

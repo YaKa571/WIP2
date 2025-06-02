@@ -14,19 +14,16 @@ from utils.benchmark import Benchmark
 merchant_other_threshold = 1000 #default value, will be modified in read_parquet_data()
 
 
-def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically: bool = False) -> pd.DataFrame:
+def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.DataFrame:
     """
     Reads a Parquet file and returns its content in the form of a pandas DataFrame.
 
     This function enables efficient reading of Parquet files by leveraging multi-threading,
-    memory mapping, and optimized settings based on the number of rows to read. It optionally
-    sorts the DataFrame's columns alphabetically and dynamically adjusts the threshold for
-    minor merchant groupings when specific criteria are met.
+    memory mapping, and optimized settings. It optionally sorts the DataFrame's columns 
+    alphabetically and sets the threshold for minor merchant groupings when specific criteria are met.
 
     Args:
         file_name: The name of the Parquet file to be read.
-        num_rows: The number of rows to read from the Parquet file. If None, all rows will
-            be read.
         sort_alphabetically: A flag to indicate whether the DataFrame's columns should
             be sorted alphabetically.
 
@@ -41,41 +38,25 @@ def read_parquet_data(file_name: str, num_rows: int = None, sort_alphabetically:
     if not file_path.exists():
         raise FileNotFoundError(f"⚠️ Parquet file not found: {file_path}")
 
-    # Use optimized reading approach
-    if num_rows is None:
-        # Read all rows with optimized settings
-        df = pd.read_parquet(
-            file_path,
-            engine="pyarrow",
-            use_threads=True,  # Enable multi-threading
-            memory_map=True  # Use memory mapping for better performance
-        )
-    else:
-        # Read only the specified number of rows
-        pf = ParquetFile(file_path)
-        total_rows = pf.metadata.num_rows
-
-        if num_rows >= total_rows:
-            # If requesting more rows than available, read all rows with optimized settings
-            df = pd.read_parquet(
-                file_path,
-                engine="pyarrow",
-                use_threads=True,
-                memory_map=True
-            )
-        else:
-            # Read only the specified number of rows using batched reading
-            batch = next(pf.iter_batches(batch_size=num_rows))
-            df = pa.Table.from_batches(batches=[batch]).to_pandas()
+    # Read all rows with optimized settings
+    df = pd.read_parquet(
+        file_path,
+        engine="pyarrow",
+        use_threads=True,  # Enable multi-threading
+        memory_map=True  # Use memory mapping for better performance
+    )
 
     if sort_alphabetically:
         # Use inplace sorting if possible to avoid copying the entire dataframe
         df = df.reindex(sorted(df.columns), axis=1)
 
-    # dynamic threshold for grouping minor merchant groups
-    if file_name == "transactions_data.parquet" and num_rows is not None:
+    # Set threshold for grouping minor merchant groups
+    if file_name == "transactions_data.parquet":
         global merchant_other_threshold
-        merchant_other_threshold = num_rows/50 #based on testing with 50_000 rows and threshold = 1000
+        # Get total number of rows in the file
+        pf = ParquetFile(file_path)
+        total_rows = pf.metadata.num_rows
+        merchant_other_threshold = total_rows/50 #based on testing with 50_000 rows and threshold = 1000
 
     return df
 
@@ -102,9 +83,9 @@ def optimize_data(*file_names: str):
 
         # Only convert if Parquet missing or outdated
         if parquet_path.exists() and parquet_path.stat().st_mtime >= csv_mtime:
-            logger.log(f"ℹ️ Loading from Parquet: {parquet_path}", 2)
+            logger.log(f"ℹ️ Loading from Parquet: {parquet_path}", 3)
         else:
-            logger.log(f"🔄 Converting CSV to Parquet: {csv_path}", 2)
+            logger.log(f"🔄 Converting CSV to Parquet: {csv_path}", 3)
             bm = Benchmark("Conversion")
 
             # Read CSV into DataFrame
@@ -115,8 +96,8 @@ def optimize_data(*file_names: str):
                 engine='pyarrow',
                 compression='snappy',
             )
-            logger.log(f"✅ Saved Parquet: {parquet_path}", 3)
-            bm.print_time(level=3)
+            logger.log(f"✅ Saved Parquet: {parquet_path}", 4)
+            bm.print_time(level=4)
 
 
 def clean_units(df: pd.DataFrame) -> pd.DataFrame:

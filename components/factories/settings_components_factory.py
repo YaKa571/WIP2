@@ -5,6 +5,7 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 from dash import html, dcc
 
+import components.constants as const
 from frontend.component_ids import ID
 
 
@@ -33,10 +34,67 @@ def create_map_setting_color_scale() -> html.Div:
             html.Label("Color Scale", className="settings-label"),
             dcc.Dropdown(className="settings-dropdown settings-text-centered",
                          options=color_options,
-                         id=ID.SETTING_MAP_COLOR_SCALE.value,
+                         id=ID.SETTING_MAP_COLOR_SCALE,
                          placeholder="Select a color scale...",
                          style={"width": "100%"},
-                         value="blues",
+                         value=const.MAP_DEFAULT_COLOR_SCALE,
+                         clearable=False
+                         ),
+        ],
+        className="settings-item"
+    )
+
+
+def create_map_setting_text_color() -> html.Div:
+    """
+    Generates a section of the user interface (UI) for selecting a text color for a map.
+
+    This function creates a dropdown menu UI component with a list of available colors.
+    Each color is presented with a label styled in the color it represents and its
+    corresponding value. The dropdown allows a user to select one text color for
+    customizing the map's text appearance.
+
+    Returns
+    -------
+    html.Div
+        A Div component containing a dropdown menu for selecting a text color with
+        relevant labels and settings.
+    """
+    color_options = [
+        {"label": html.Span("WHITE",
+                            className="dropdown-span-full",
+                            style={"color": const.TEXT_COLOR_DARK, "backgroundColor": "#333"}),
+         "value": "white"},
+        {"label": html.Span("BLACK",
+                            className="dropdown-span-full",
+                            style={"color": const.TEXT_COLOR_LIGHT, "backgroundColor": "#ccc"}),
+         "value": "black"},
+        {"label": html.Span("ORANGE",
+                            className="dropdown-span-full",
+                            style={"color": "orange"}), "value": "orange"},
+        {"label": html.Span("RED",
+                            className="dropdown-span-full",
+                            style={"color": "red"}), "value": "red"},
+        {"label": html.Span("GREEN",
+                            className="dropdown-span-full",
+                            style={"color": "green"}), "value": "green"},
+        {"label": html.Span("BLUE",
+                            className="dropdown-span-full",
+                            style={"color": "blue"}), "value": "blue"},
+        {"label": html.Span("PINK",
+                            className="dropdown-span-full",
+                            style={"color": const.COLOR_FEMALE_PINK}), "value": const.COLOR_FEMALE_PINK},
+    ]
+
+    return html.Div(
+        [
+            html.Label("Text Color", className="settings-label"),
+            dcc.Dropdown(className="settings-dropdown settings-text-centered",
+                         options=color_options,
+                         id=ID.SETTING_MAP_TEXT_COLOR,
+                         placeholder="Select a text color...",
+                         style={"width": "100%"},
+                         value="black",
                          clearable=False
                          ),
         ],
@@ -71,7 +129,7 @@ def create_general_setting_position() -> html.Div:
             html.Label("Settings Position", className="settings-label"),
             dcc.Dropdown(className="settings-dropdown settings-text-centered",
                          options=placement_options,
-                         id=ID.SETTING_GENERAL_CANVAS_PLACEMENT.value,
+                         id=ID.SETTING_GENERAL_CANVAS_PLACEMENT,
                          placeholder="Select a placement...",
                          style={"width": "100%"},
                          value="start",
@@ -100,6 +158,31 @@ def create_general_setting_toggle_tooltips() -> html.Div:
             html.Label("Show Tooltips", className="settings-label"),
             dbc.Switch(id=ID.SETTING_GENERAL_SHOW_TOOLTIPS.value,
                        value=True,
+                       className="settings-switch"
+                       )
+        ],
+        className="settings-item"
+    )
+
+
+def create_map_setting_show_color_scale() -> html.Div:
+    """
+    Creates a map settings toggle component for showing the color scale.
+
+    This function generates a color scale toggle UI element. The toggle is represented as a
+    switch allowing users to enable or disable the color scale in the map visualization.
+    The component includes a descriptive label and a switch UI component with
+    default settings.
+
+    Returns:
+        html.Div: A Div containing the configuration for showing the color scale with a label
+        and a toggle switch control.
+    """
+    return html.Div(
+        [
+            html.Label("Show Color Scale", className="settings-label"),
+            dbc.Switch(id=ID.SETTING_MAP_SHOW_COLOR_SCALE.value,
+                       value=const.MAP_DEFAULT_SHOW_COLOR_SCALE,
                        className="settings-switch"
                        )
         ],
@@ -183,7 +266,8 @@ def create_settings_canvas_categories() -> dbc.Row:
     """
     return dbc.Row(
         [
-            create_settings_category("Map Settings", [create_map_setting_color_scale()]),
+            create_settings_category("Map Settings",
+                                     [create_map_setting_color_scale(), create_map_setting_text_color(), create_map_setting_show_color_scale()]),
             create_settings_category("General Settings",
                                      [create_general_setting_position(),
                                       create_general_setting_toggle_tooltips()]),

@@ -1,11 +1,13 @@
 from pathlib import Path
-from pathlib import Path
 from typing import Optional
+import os
+import pickle
 
 import pandas as pd
 import pgeocode
 
 import utils.logger as logger
+from backend.data_cacher import DataCacher
 from backend.data_handler import optimize_data, clean_units, json_to_df, \
     read_parquet_data
 from backend.data_setup.tabs.tab_cluster_data import ClusterTabData
@@ -15,6 +17,7 @@ from backend.data_setup.tabs.tab_user_data import UserTabData
 from components.constants import DATA_DIRECTORY
 from utils.benchmark import Benchmark
 from utils.utils import rounded_rect
+
 
 class DataManager:
     """
@@ -63,6 +66,16 @@ class DataManager:
         logger.log("ℹ️ Initializing DataManager...", indent_level=1)
 
         self.data_dir = data_dir
+        self.cache_dir = data_dir / "cache"
+
+        # Create cache directory if it doesn't exist
+        if not self.cache_dir.exists():
+            os.makedirs(self.cache_dir, exist_ok=True)
+            logger.log(f"ℹ️ Created cache directory: {self.cache_dir}", indent_level=2)
+
+        # Initialize data cacher
+        self.data_cacher = DataCacher(self)
+
         self.df_users: pd.DataFrame = pd.DataFrame()
         self.df_transactions: pd.DataFrame = pd.DataFrame()
         self.df_cards: pd.DataFrame = pd.DataFrame()
@@ -106,17 +119,78 @@ class DataManager:
         Raises:
             FileNotFoundError: If any of the specified files are not found during processing.
         """
+        logger.log("ℹ️ DataManager: Loading from files...", 2, add_line_before=True)
+        bm = Benchmark("DataManager: Loading from files")
+
         # Converts CSV files to parquet files if they don't exist yet and load them as DataFrames
         optimize_data("users_data.csv", "transactions_data.csv", "cards_data.csv")
 
         # Read and clean data
         self.df_users = clean_units(read_parquet_data("users_data.parquet"))
-        self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet",
-                                                             num_rows=100_000)) #100_000
+        self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet"))  # Now using all rows
         self.df_cards = clean_units(read_parquet_data("cards_data.parquet"))
 
         # Convert to int once
         self.df_mcc["mcc"] = self.df_mcc["mcc"].astype(int)
+
+        bm.print_time(level=4, add_empty_line=True)
+
+    def save_cache_to_disk(self, cache_name, data):
+        """
+        Save a cache object to disk.
+
+        Args:
+            cache_name (str): Name of the cache file (without extension)
+            data: The data to cache (DataFrame or dictionary)
+        """
+        try:
+            cache_path = self.cache_dir / f"{cache_name}"
+
+            if isinstance(data, pd.DataFrame):
+                # Save DataFrame as parquet
+                data.to_parquet(f"{cache_path}.parquet", index=False)
+                logger.log(f"✅ Saved DataFrame cache to {cache_path}.parquet", indent_level=3)
+            else:
+                # Save other objects using pickle
+                with open(f"{cache_path}.pkl", 'wb') as f:
+                    pickle.dump(data, f)
+                logger.log(f"✅ Saved object cache to {cache_path}.pkl", indent_level=3)
+
+            return True
+        except Exception as e:
+            logger.log(f"⚠️ Failed to save cache {cache_name}: {str(e)}", indent_level=3)
+            return False
+
+    def load_cache_from_disk(self, cache_name, is_dataframe=True):
+        """
+        Load a cache object from disk.
+
+        Args:
+            cache_name (str): Name of the cache file (without extension)
+            is_dataframe (bool): Whether the cache is a DataFrame (True) or other object (False)
+
+        Returns:
+            The cached data if successful, None otherwise
+        """
+        try:
+            if is_dataframe:
+                cache_path = self.cache_dir / f"{cache_name}.parquet"
+                if cache_path.exists():
+                    data = pd.read_parquet(cache_path)
+                    logger.log(f"✅ Loaded DataFrame cache from {cache_path}", indent_level=3)
+                    return data
+            else:
+                cache_path = self.cache_dir / f"{cache_name}.pkl"
+                if cache_path.exists():
+                    with open(cache_path, 'rb') as f:
+                        data = pickle.load(f)
+                    logger.log(f"✅ Loaded object cache from {cache_path}", indent_level=3)
+                    return data
+
+            return None
+        except Exception as e:
+            logger.log(f"⚠️ Failed to load cache {cache_name}: {str(e)}", indent_level=3)
+            return None
 
     def prepare_shared_data(self):
         """
@@ -127,36 +201,51 @@ class DataManager:
             - transactions_mcc: DataFrame with transactions joined with MCC codes
             - transactions_mcc_users: DataFrame with transactions joined with MCC codes and users
         """
-        logger.log("ℹ️ Preparing shared data for tabs...", indent_level=2)
-        bm = Benchmark("Shared data preparation")
+        logger.log("ℹ️ DataManager: Preparing shared data for tabs...", indent_level=2)
+        bm = Benchmark("DataManager: Shared data preparation")
 
-        # Ensure transactions df has int mcc for efficient merging
-        df_transactions = self.df_transactions
-        if 'mcc' in df_transactions.columns and not pd.api.types.is_integer_dtype(df_transactions['mcc']):
-            df_transactions = df_transactions.copy()
-            df_transactions['mcc'] = df_transactions['mcc'].astype(int)
-            self.df_transactions = df_transactions
+        # Try to load cached data first
+        cached_transactions_mcc = self.load_cache_from_disk("transactions_mcc")
+        cached_transactions_mcc_users = self.load_cache_from_disk("transactions_mcc_users")
 
-        # Join transactions and mcc_codes using efficient merge
-        self.transactions_mcc = pd.merge(
-            df_transactions,
-            self.df_mcc,
-            how="left",
-            on="mcc",
-            sort=False  # Avoid unnecessary sorting
-        )
+        if cached_transactions_mcc is not None and cached_transactions_mcc_users is not None:
+            self.transactions_mcc = cached_transactions_mcc
+            self.transactions_mcc_users = cached_transactions_mcc_users
+            logger.log("✅ DataManager: Loaded shared data from cache", indent_level=3)
+        else:
+            logger.log("ℹ️ DataManager: Cache not found, preparing shared data...", indent_level=3)
 
-        # Transactions join MCC join Users - use efficient merge
-        self.transactions_mcc_users = pd.merge(
-            self.transactions_mcc,
-            self.df_users,
-            how="left",
-            left_on='client_id',
-            right_on='id',
-            sort=False  # Avoid unnecessary sorting
-        )
+            # Ensure transactions df has int mcc for efficient merging
+            df_transactions = self.df_transactions
+            if 'mcc' in df_transactions.columns and not pd.api.types.is_integer_dtype(df_transactions['mcc']):
+                df_transactions = df_transactions.copy()
+                df_transactions['mcc'] = df_transactions['mcc'].astype(int)
+                self.df_transactions = df_transactions
 
-        bm.print_time(level=3)
+            # Join transactions and mcc_codes using efficient merge
+            self.transactions_mcc = pd.merge(
+                df_transactions,
+                self.df_mcc,
+                how="left",
+                on="mcc",
+                sort=False  # Avoid unnecessary sorting
+            )
+
+            # Transactions join MCC join Users - use efficient merge
+            self.transactions_mcc_users = pd.merge(
+                self.transactions_mcc,
+                self.df_users,
+                how="left",
+                left_on='client_id',
+                right_on='id',
+                sort=False  # Avoid unnecessary sorting
+            )
+
+            # Save the prepared data to cache
+            self.save_cache_to_disk("transactions_mcc", self.transactions_mcc)
+            self.save_cache_to_disk("transactions_mcc_users", self.transactions_mcc_users)
+
+        bm.print_time(level=3, add_empty_line=True)
 
     def start(self):
         """
@@ -169,6 +258,9 @@ class DataManager:
         performs calculations on transaction data to determine metrics
         such as the total number, the sum, and the average amount of
         transactions. A graphical shape is also predefined.
+
+        If a cache exists, the data is loaded from the cache instead of
+        being processed from scratch, which significantly improves startup time.
 
         Raises
         ------
@@ -190,42 +282,25 @@ class DataManager:
         online_shape : Shape
             Predefined rounded rectangular shape for graphical visualization.
         """
-        import concurrent.futures
-
+        # First, load the basic data frames regardless of cache
+        # This is needed for both cached and non-cached paths
         self.load_data_frames()
 
-        # Prepare shared data that will be used by multiple tabs
-        # This avoids duplicate processing and improves performance
-        self.prepare_shared_data()
+        # Check if cache exists and load from it if it does
+        if self.data_cacher.cache_exists():
+            logger.log("ℹ️ DataManager: Cache exists, loading data from cache...", indent_level=2)
+            if self.data_cacher.load_from_cache():
+                logger.log("✅ DataManager: Successfully loaded data from cache", indent_level=2)
+            else:
+                logger.log("⚠️ DataManager: Failed to load from cache, falling back to normal initialization", indent_level=2)
+                if not self.data_cacher.create_cache():
+                    logger.log("❌ DataManager: Failed to create cache", indent_level=2)
+        else:
+            logger.log("ℹ️ DataManager: Cache does not exist, creating cache...", indent_level=2)
+            if not self.data_cacher.create_cache():
+                logger.log("❌ DataManager: Failed to create cache", indent_level=2)
 
-        # Create tab data instances
-        self.home_tab_data = HomeTabData(self)
-        self.merchant_tab_data = MerchantTabData(self)
-        self.cluster_tab_data = ClusterTabData(self)
-        self.user_tab_data = UserTabData(self)
-
-        # Initialize tab data in parallel using ThreadPoolExecutor
-        # This significantly improves performance by running initialization concurrently
-        logger.log("🔄 Initializing tab data in parallel...", indent_level=2)
-        bm_parallel_init = Benchmark("Parallel tab data initialization")
-
-        # Data loading in parallel: -53% start-up time
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Submit all initialization tasks in parallel
-            future_home = executor.submit(self.home_tab_data.initialize)
-            future_merchant = executor.submit(self.merchant_tab_data.initialize)
-            future_cluster = executor.submit(self.cluster_tab_data.initialize)
-            future_user = executor.submit(self.user_tab_data.initialize)
-
-            # Wait for all tasks to complete
-            concurrent.futures.wait([future_home, future_merchant, future_cluster, future_user])
-
-        bm_parallel_init.print_time(level=2)
-
-        # Calculations
-        self.amount_of_transactions = len(self.df_transactions)
-        self.sum_of_transactions = self.df_transactions["amount"].sum()
-        self.avg_transaction_amount = self.sum_of_transactions / self.amount_of_transactions
+        # Set up the online shape (this is quick and doesn't need caching)
         self.online_shape = rounded_rect(
             l=-95, b=23, r=-85, t=28,
             radius=0.7,
