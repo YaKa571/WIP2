@@ -62,7 +62,7 @@ def _create_heading() -> html.Div:
         children=[
 
             html.P(),  # Dummy element for spacing
-            html.H4("User", id=ID.USER_TAB_HEADING, className="green-heading"),
+            html.H4("User", id=ID.USER_TAB_HEADING, className="green-text"),
             comp_factory.create_info_icon(ID.USER_TAB_INFO_ICON),
             dbc.Tooltip(
                 target=ID.USER_TAB_INFO_ICON,
@@ -254,9 +254,8 @@ def _create_bottom_merchant_diagram() -> html.Div:
                     dbc.CardHeader(
                         children=[
 
-                            comp_factory.create_icon(IconID.BAR_CHART_LINE_FILL, cls="icon icon-small"),
                             html.Div(
-                                className="settings-item mt-2",
+                                className="settings-item",
                                 children=[
 
                                     dcc.Dropdown(
@@ -294,7 +293,7 @@ def _create_bottom_merchant_diagram() -> html.Div:
                                 icon_id=ID.USER_TAB_BAR_INFO_ICON,
                                 style={
                                     "position": "absolute",
-                                    "top": "111px",
+                                    "top": "80px",
                                     "left": "16px",
                                     "zIndex": 100
                                 }),
