@@ -497,31 +497,34 @@ def create_bar_chart(
 
     def update_axes_style():
         """
-        Creates a bar chart visualization based on the provided parameters and data. The function generates
-        a Plotly bar chart figure using the input dataframe and various customizable options, such as axis
-        labels, colors, hover data, and chart title. This function supports additional configurations like
-        customizing hover templates, ordering of categories on the x-axis, and enabling a dark mode theme.
+        Creates a bar chart from the provided DataFrame and configuration parameters. This function leverages
+        Plotly's graph objects to generate a customizable bar chart and offers configuration for
+        axes styling, color mapping, category order, and other advanced features. The design supports both
+        light and dark mode visualization.
 
         Args:
-            df (pd.DataFrame): The data source to be visualized in the bar chart.
-            x (str): The column name to be used for the x-axis.
-            y (str): The column name to be used for the y-axis.
+            df (pd.DataFrame): The input data as a Pandas DataFrame used to construct the bar chart.
+            x (str): The column name in the DataFrame to be used for the x-axis.
+            y (str): The column name in the DataFrame to be used for the y-axis.
             title (str, optional): The title of the bar chart. Defaults to None.
-            hover_data (list, optional): A list of additional column names to display on hover. Defaults to None.
-            custom_data (list, optional): A list of custom data fields for use in hover templates. Defaults to None.
-            hover_template (str, optional): A custom hover template string for the bar chart. Defaults to None.
-            color (str, optional): The column name to use for bar coloring. Defaults to None.
-            color_discrete_map (dict, optional): A dictionary mapping discrete color categories to specific values. Defaults to None.
-            labels (dict, optional): A mapping of axis or legend labels to more readable names. Defaults to None.
-            x_category_order (str, optional): The order of x-axis categories, e.g., "total descending". Defaults to "total descending".
-            bar_color (str, optional): Custom color for the bars in the chart. Applicable only if `color` is not set. Defaults to None.
-            margin (dict, optional): A dictionary defining chart margins (layout.margin in Plotly). Defaults to None.
-            showlegend (bool, optional): Whether to display the chart legend. Defaults to False.
-            dark_mode (bool, optional): Whether to apply dark mode styling to the chart. Defaults to False.
+            hover_data (list, optional): List of column names to include in hover tooltips. Defaults to None.
+            custom_data (list, optional): List of column names to link with the trace data but not shown.
+                Defaults to None.
+            hover_template (str, optional): Custom string template for hover tooltips. Defaults to None.
+            color (str, optional): Column name for color categories. Defaults to None.
+            color_discrete_map (dict, optional): Dictionary mapping specific color values. Defaults to None.
+            labels (dict, optional): Dictionary to rename axis labels or legend groupings. Defaults to None.
+            x_category_order (str, optional): Specifies how x-axis categories should be ordered.
+                Defaults to "total descending".
+            bar_color (str, optional): Hex code or predefined name for a single bar color. Defaults to None.
+            margin (dict, optional): Dictionary specifying margins (e.g., {"l": 40, "r": 40, "t": 40, "b": 40}).
+                Defaults to None.
+            showlegend (bool, optional): Specifies whether the legend should be displayed. Defaults to False.
+            num_visible_bars (int, optional): Maximum number of bars visible on the x-axis. Defaults to 10.
+            dark_mode (bool, optional): Indicates whether to enable dark mode styling. Defaults to const.DEFAULT_DARK_MODE.
 
         Returns:
-            go.Figure: A Plotly figure object representing the constructed bar chart.
-
+            go.Figure: A Plotly Figure object containing the generated bar chart.
         """
         fig.update_xaxes(
             type="category",
