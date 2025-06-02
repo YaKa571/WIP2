@@ -156,7 +156,24 @@ class ClusterTabData:
 
     def _save_caches_to_disk(self):
         """
-        Save all cached data to disk.
+        Saves cluster-related cache data to disk.
+
+        This method consolidates and saves multiple cache dictionaries to disk to preserve
+        their state. It utilizes a benchmarking utility to measure the time required for
+        this save operation and provides a log entry for tracking purposes. Persisting
+        cache data is crucial for ensuring that cluster-related computations can resume
+        without redundant processing.
+
+        Raises:
+            Any exception or error arising from data storage operations will be logged or
+            handled internally.
+
+        Attributes:
+            _cache_cluster_data: dict
+                A cache dictionary containing general cluster data.
+            _cache_inc_vs_exp_cluster_data: dict
+                A cache dictionary containing incremental versus expansion cluster data.
+
         """
         logger.log("🔄 Cluster: Saving caches to disk...", indent_level=3)
         bm = Benchmark("Cluster: Saving caches to disk")
@@ -193,18 +210,17 @@ class ClusterTabData:
 
     def _pre_cache_cluster_tab_data(self) -> None:
         """
-        Pre-caches data for the Cluster Tab view by performing data aggregation and clustering
-        for common merchant groups. This method is intended to optimize subsequent data retrieval
-        and ensure that necessary insights are readily available for analysis.
+        Caches cluster data to improve data retrieval efficiency for cluster-related operations.
+        The method attempts to load cached data from disk. If not successful, it computes
+        and caches the data for all merchant groups, including 'All Merchant Groups', and
+        saves the cache to disk. Caching for groups is performed in parallel
+        to optimize processing time.
 
-        Parameters
-        ----------
-        log_times : bool, optional
-            Whether to log the time taken for data processing. Defaults to True.
+        Args:
+            None
 
-        Returns
-        -------
-        None
+        Returns:
+            None
         """
         import concurrent.futures
 
