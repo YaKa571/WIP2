@@ -110,12 +110,16 @@ class DataManager:
         self.start()
         benchmark_data_manager.print_time()
 
-    def load_data_frames(self):
+    def load_data_frames(self, num_rows=None):
         """
         Loads and pre-processes the data from specified files to use them as DataFrames. This includes
         optimizing data storage by converting CSV files to parquet format if such files do not exist,
         cleaning the data, and loading it into pandas DataFrames. Additionally, MCC codes are converted
         from a JSON file into a DataFrame.
+
+        Args:
+            num_rows (int, optional): Number of rows to load and cache when no cache exists.
+                When cache exists, the entire cache is loaded. Defaults to None (load all rows).
 
         Raises:
             FileNotFoundError: If any of the specified files are not found during processing.
@@ -162,7 +166,7 @@ class DataManager:
         else:
             logger.log("ℹ️ Processed transactions data not found in cache, creating it...", 3)
             optimize_data("transactions_data.csv")
-            self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet"))
+            self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet", num_rows=num_rows))
             # Process transaction data (add latitude/longitude and state_name)
             self.df_transactions = self.process_transaction_data(self.df_transactions)
             self.save_cache_to_disk("transactions_data_processed", self.df_transactions)
@@ -414,7 +418,7 @@ class DataManager:
         """
         # First, load the basic data frames regardless of cache
         # This is needed for both cached and non-cached paths
-        self.load_data_frames()
+        self.load_data_frames(num_rows=50_000)
 
         # Check if cache exists and load from it if it does
         if self.data_cacher.cache_exists():

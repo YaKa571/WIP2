@@ -12,18 +12,20 @@ from utils.benchmark import Benchmark
 merchant_other_threshold = 1000  # Default value, will be modified in set_minor_merchants_threshold
 
 
-def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.DataFrame:
+def read_parquet_data(file_name: str, sort_alphabetically: bool = False, num_rows: int = None) -> pd.DataFrame:
     """
     Reads a Parquet file and returns its content in the form of a pandas DataFrame.
 
     This function enables efficient reading of Parquet files by leveraging multi-threading,
     memory mapping, and optimized settings. It optionally sorts the DataFrame's columns 
     alphabetically and sets the threshold for minor merchant groupings when specific criteria are met.
+    It can also limit the number of rows read from the file.
 
     Args:
         file_name: The name of the Parquet file to be read.
         sort_alphabetically: A flag to indicate whether the DataFrame's columns should
             be sorted alphabetically.
+        num_rows: The maximum number of rows to read from the file. If None, all rows are read.
 
     Returns:
         pd.DataFrame: A pandas DataFrame containing the data read from the specified Parquet file.
@@ -36,13 +38,17 @@ def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.D
     if not file_path.exists():
         raise FileNotFoundError(f"⚠️ Parquet file not found: {file_path}")
 
-    # Read all rows with optimized settings
+    # Read rows with optimized settings
     df = pd.read_parquet(
         file_path,
         engine="pyarrow",
         use_threads=True,  # Enable multi-threading
         memory_map=True  # Use memory mapping for better performance
     )
+
+    # Limit the number of rows if specified
+    if num_rows is not None:
+        df = df.head(num_rows)
 
     if sort_alphabetically:
         # Use inplace sorting if possible to avoid copying the entire dataframe
