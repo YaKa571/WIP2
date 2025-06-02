@@ -370,6 +370,17 @@ class UserTabData:
         return False
 
     def initialize(self):
+        """
+        Initializes user-tab data by pre-caching required datasets.
+
+        Attempts to load user-tab data caches from disk first. If no valid cache is found,
+        it computes the necessary data and saves it both in memory and on disk for future use.
+        This process involves caching user transactions data and aggregated user-merchant
+        data. Benchmarking is utilized to track and log the time taken for the operation.
+
+        Raises:
+            Exception: If any issues occur during the caching, loading, or saving process.
+        """
         logger.log("🔄 User: Pre-caching User-Tab data...", indent_level=3, add_line_before=True)
         bm_pre_cache_full = Benchmark("User: Pre-caching User-Tab data")
 

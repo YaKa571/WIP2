@@ -113,17 +113,26 @@ class DataManager:
 
     def load_data_frames(self, num_rows=None):
         """
-        Loads and pre-processes the data from specified files to use them as DataFrames. This includes
-        optimizing data storage by converting CSV files to parquet format if such files do not exist,
-        cleaning the data, and loading it into pandas DataFrames. Additionally, MCC codes are converted
-        from a JSON file into a DataFrame.
+        Loads and processes user, transaction, and card data by utilizing optimized and clean data workflows.
+        If cached processed versions of the data exist in the specified cache directory, those are loaded;
+        otherwise, the raw data is processed and saved to cache for future use.
+
+        The method ensures that any unnecessary intermediate files are removed, processes transaction-specific
+        details, and prepares the data for further analysis.
 
         Args:
             num_rows (int, optional): Number of rows to load and cache when no cache exists.
                 When cache exists, the entire cache is loaded. Defaults to None (load all rows).
 
         Raises:
-            FileNotFoundError: If any of the specified files are not found during processing.
+            FileNotFoundError: Raised if expected input data files are not found during processing.
+
+        Attributes:
+            cache_dir (Path): The directory where cache files are stored.
+            df_users (pd.DataFrame): DataFrame containing processed user data.
+            df_transactions (pd.DataFrame): DataFrame containing processed transaction data.
+            df_cards (pd.DataFrame): DataFrame containing processed card data.
+            df_mcc (pd.DataFrame): DataFrame containing merchant category codes (MCC).
         """
         logger.log("ℹ️ DataManager: Loading from files...", 2, add_line_before=True)
         bm = Benchmark("DataManager: Loading from files")
@@ -460,6 +469,14 @@ class DataManager:
             return False
 
     def _delete_unneeded_files(self):
+        """
+        Deletes unneeded temporary files to free up disk space. This is used to remove
+        specific files within the cache directory that are no longer required by the
+        application.
+
+        Raises:
+            Any error raised by `pathlib.Path.unlink` if deletion of a file fails.
+        """
         paths_to_delete = (
             self.cache_dir / "users_data.parquet",
             self.cache_dir / "transactions_data.parquet",

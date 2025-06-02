@@ -223,17 +223,21 @@ def _create_merchant_kpi() -> html.Div:
 
 def _create_merchant_graph():
     """
-    Creates a merchant graph component.
+    Creates a merchant graph user interface component.
 
-    The function constructs a Dash HTML Div element representing a UI section
-    displaying a merchant graph. It uses Dash Bootstrap Components (DBC) and
-    Dash Core Components (DCC) to organize and style the graph section. The
-    returned component includes a card header with an icon and title, and a card
-    body containing a bar chart rendered using Dash's graph component. The bar
-    chart is configured with custom mode bar options.
+    This function generates a Dash HTML Div component representing the UI for a
+    merchant graph. The UI includes a card layout containing a bar chart. The
+    graph is configured with specific options and default settings to enhance
+    usability and provide a visually appealing display.
+
+    The interface includes an icon, a title, and a spinner for loading states.
+    The graph itself is interactive and supports exporting functionality,
+    while some less relevant mode bar buttons are removed for cleaner
+    interaction.
 
     Returns:
-        dash.html.Div: A Div component containing the merchant graph card.
+        dash.development.base_component.Component:
+            A Dash HTML Div component representing the merchant graph UI.
     """
     return html.Div(
         className="flex-wrapper",

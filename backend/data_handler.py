@@ -14,7 +14,9 @@ merchant_other_threshold = 1000  # Default value, will be modified in set_minor_
 
 def read_parquet_data(file_name: str, sort_alphabetically: bool = False, num_rows: int = None) -> pd.DataFrame:
     """
-    Reads a Parquet file and returns its content in the form of a pandas DataFrame.
+    Reads a parquet file and returns its content as a pandas DataFrame. The function provides
+    an option to sort the DataFrame's columns alphabetically.
+
 
     This function enables efficient reading of Parquet files by leveraging multi-threading,
     memory mapping, and optimized settings. It optionally sorts the DataFrame's columns 
@@ -27,11 +29,15 @@ def read_parquet_data(file_name: str, sort_alphabetically: bool = False, num_row
             be sorted alphabetically.
         num_rows: The maximum number of rows to read from the file. If None, all rows are read.
 
+
     Returns:
-        pd.DataFrame: A pandas DataFrame containing the data read from the specified Parquet file.
+        A pandas DataFrame containing the content of the parquet file. If
+        `sort_alphabetically` is True, the column names of the DataFrame are sorted
+        alphabetically.
 
     Raises:
-        FileNotFoundError: If the specified Parquet file does not exist.
+        FileNotFoundError: If the specified parquet file does not exist in the cache
+            directory.
     """
     file_path = CACHE_DIRECTORY / file_name
 

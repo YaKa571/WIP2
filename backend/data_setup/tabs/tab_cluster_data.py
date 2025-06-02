@@ -156,7 +156,24 @@ class ClusterTabData:
 
     def _save_caches_to_disk(self):
         """
-        Save all cached data to disk.
+        Saves cluster-related cache data to disk.
+
+        This method consolidates and saves multiple cache dictionaries to disk to preserve
+        their state. It utilizes a benchmarking utility to measure the time required for
+        this save operation and provides a log entry for tracking purposes. Persisting
+        cache data is crucial for ensuring that cluster-related computations can resume
+        without redundant processing.
+
+        Raises:
+            Any exception or error arising from data storage operations will be logged or
+            handled internally.
+
+        Attributes:
+            _cache_cluster_data: dict
+                A cache dictionary containing general cluster data.
+            _cache_inc_vs_exp_cluster_data: dict
+                A cache dictionary containing incremental versus expansion cluster data.
+
         """
         logger.log("🔄 Cluster: Saving caches to disk...", indent_level=3)
         bm = Benchmark("Cluster: Saving caches to disk")
@@ -193,18 +210,26 @@ class ClusterTabData:
 
     def _pre_cache_cluster_tab_data(self) -> None:
         """
-        Pre-caches data for the Cluster Tab view by performing data aggregation and clustering
-        for common merchant groups. This method is intended to optimize subsequent data retrieval
-        and ensure that necessary insights are readily available for analysis.
+        Caches data for the Cluster Tab by preloading necessary information.
 
-        Parameters
-        ----------
-        log_times : bool, optional
-            Whether to log the time taken for data processing. Defaults to True.
+        This method is responsible for pre-caching the data required for the Cluster Tab in
+        the application. It attempts to load data from disk first and, if unavailable, proceeds to
+        generate and cache the data for both "All Merchant Groups" and individual merchant
+        groups using concurrent processing for efficiency. This caching improves overall
+        application performance and responsiveness during runtime.
 
-        Returns
-        -------
-        None
+        The method utilizes benchmarks for tracking the performance of each step and logs
+        the progress accordingly. If the data is successfully loaded from disk, it will skip
+        the computationally intensive tasks and directly return.
+
+        Attributes:
+            None
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         import concurrent.futures
 
