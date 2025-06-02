@@ -188,8 +188,9 @@
    DASH / REACT-SELECT DROPDOWN
    ================================ */
 
-.settings-dropdown * {
-    padding: 1px 0 !important;
+.settings-dropdown {
+    padding: 0;
+    margin: 0;
 }
 
 .settings-dropdown .Select-control,
@@ -286,5 +287,6 @@
     text-align: center;
     font-weight: bold;
     padding: 0 8px !important;
-    border-radius: var(--dropdown-border-radius, 12px);
+    width: 250px;
+    border-radius: var(--dropdown-border-radius, 5px);
 }

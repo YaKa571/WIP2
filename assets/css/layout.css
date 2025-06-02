@@ -73,7 +73,7 @@ li span:nth-of-type(2) {
     color: var(--text-main) !important;
 }
 
-.green-heading {
+.green-text {
     color: var(--kpi-number-value);
 }
 
@@ -143,6 +143,10 @@ li span:nth-of-type(2) {
 
 .icon-small {
     height: clamp(19px, 1.5vw, 23px) !important;
+}
+
+.icon-xs {
+    height: 1em !important;
 }
 
 .info-icon {
@@ -292,6 +296,16 @@ li span:nth-of-type(2) {
 
 .settings-button-text:active {
     transform: scale(0.95);
+}
+
+.legend-btn {
+    position: absolute;
+    right: 1%;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    border-radius: 16%;
+    padding: 0.175rem 0.4rem;
 }
 
 /* ============================================================

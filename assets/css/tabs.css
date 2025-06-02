@@ -229,6 +229,7 @@
     margin: 0;
     line-height: 1.0;
     padding-top: 0.5rem;
+    vertical-align: middle;
 }
 
 .tab-content-inner .flex-wrapper .kpi-card .kpi-card-value {
@@ -238,6 +239,14 @@
     font-weight: 700;
     margin: 0;
     padding: 0;
+}
+
+.card-header-inline-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* KPI Cards END */
@@ -281,6 +290,10 @@
     font-weight: bold;
     margin: 0;
     line-height: 1.0;
+    vertical-align: middle;
+}
+
+.tab-content-inner .flex-wrapper .graph-card .graph-card-title.pad-top {
     padding-top: 0.5rem;
 }
 
