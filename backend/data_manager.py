@@ -10,7 +10,7 @@ import us
 import utils.logger as logger
 from backend.data_cacher import DataCacher
 from backend.data_handler import optimize_data, clean_units, json_to_df, \
-    read_parquet_data
+    read_parquet_data, set_minor_merchants_threshold
 from backend.data_setup.tabs.tab_cluster_data import ClusterTabData
 from backend.data_setup.tabs.tab_home_data import HomeTabData
 from backend.data_setup.tabs.tab_merchant_data import MerchantTabData
@@ -123,6 +123,8 @@ class DataManager:
         logger.log("ℹ️ DataManager: Loading from files...", 2, add_line_before=True)
         bm = Benchmark("DataManager: Loading from files")
 
+        # =============================================== USERS ===============================================
+
         # Check if users_data_processed.parquet exists in data/cache directory and load it if it does
         # if not run optimize data and clean units
         users_processed_path = self.cache_dir / "users_data_processed.parquet"
@@ -141,6 +143,9 @@ class DataManager:
             optimize_data("users_data.csv")
             self.df_users = clean_units(read_parquet_data("users_data.parquet"))
             self.save_cache_to_disk("users_data_processed", self.df_users)
+
+
+        # =============================================== TRANSACTIONS ===============================================
 
         # Check if transactions_data_processed.parquet exists in data/cache directory and load it if it does
         # if not run optimize data, clean units and process_transaction data
@@ -162,6 +167,10 @@ class DataManager:
             # Process transaction data (add latitude/longitude and state_name)
             self.df_transactions = self.process_transaction_data(self.df_transactions)
             self.save_cache_to_disk("transactions_data_processed", self.df_transactions)
+
+        set_minor_merchants_threshold(transactions_processed_path)
+
+        # =============================================== CARDS ===============================================
 
         # Check if cards_data_processed.parquet exists in data/cache directory and load it if it does
         # if not run optimize data and clean units

@@ -1,15 +1,15 @@
 import json
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
-from pandas import DataFrame
 from pyarrow.parquet import ParquetFile
 
 import utils.logger as logger
 from components.constants import DATA_DIRECTORY, CACHE_DIRECTORY
 from utils.benchmark import Benchmark
 
-merchant_other_threshold = 1000  # default value, will be modified in read_parquet_data()
+merchant_other_threshold = 1000  # Default value, will be modified in set_minor_merchants_threshold
 
 
 def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.DataFrame:
@@ -31,7 +31,7 @@ def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.D
     Raises:
         FileNotFoundError: If the specified Parquet file does not exist.
     """
-    file_path = CACHE_DIRECTORY / file_name
+    file_path = CACHE_DIRECTORY + file_name
 
     if not file_path.exists():
         raise FileNotFoundError(f"⚠️ Parquet file not found: {file_path}")
@@ -48,15 +48,16 @@ def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.D
         # Use inplace sorting if possible to avoid copying the entire dataframe
         df = df.reindex(sorted(df.columns), axis=1)
 
-    # Set threshold for grouping minor merchant groups
-    if file_name == "transactions_data_processed.parquet":
-        global merchant_other_threshold
-        # Get total number of rows in the file
-        pf = ParquetFile(file_path)
-        total_rows = pf.metadata.num_rows
-        merchant_other_threshold = total_rows / 50  # based on testing with 50_000 rows and threshold = 1000
-
     return df
+
+
+def set_minor_merchants_threshold(file_path: Path):
+    global merchant_other_threshold
+
+    # Get total number of rows in the file
+    pf = ParquetFile(file_path)
+    total_rows = pf.metadata.num_rows
+    merchant_other_threshold = total_rows / 50  # based on testing with 50_000 rows and threshold = 1000
 
 
 def optimize_data(*file_names: str):
