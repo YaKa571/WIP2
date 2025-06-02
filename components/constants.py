@@ -59,3 +59,4 @@ APP_STATE_STORE_DEFAULT = {
 
 # Paths
 DATA_DIRECTORY = Path("assets/data/")
+CACHE_DIRECTORY = Path("assets/data/cache/")

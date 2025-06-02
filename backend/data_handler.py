@@ -2,16 +2,14 @@ import json
 from typing import Any
 
 import pandas as pd
-import pyarrow as pa
 from pandas import DataFrame
 from pyarrow.parquet import ParquetFile
 
 import utils.logger as logger
-from components.constants import DATA_DIRECTORY
+from components.constants import DATA_DIRECTORY, CACHE_DIRECTORY
 from utils.benchmark import Benchmark
 
-
-merchant_other_threshold = 1000 #default value, will be modified in read_parquet_data()
+merchant_other_threshold = 1000  # default value, will be modified in read_parquet_data()
 
 
 def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.DataFrame:
@@ -33,7 +31,7 @@ def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.D
     Raises:
         FileNotFoundError: If the specified Parquet file does not exist.
     """
-    file_path = DATA_DIRECTORY / file_name
+    file_path = CACHE_DIRECTORY / file_name
 
     if not file_path.exists():
         raise FileNotFoundError(f"⚠️ Parquet file not found: {file_path}")
@@ -51,12 +49,12 @@ def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.D
         df = df.reindex(sorted(df.columns), axis=1)
 
     # Set threshold for grouping minor merchant groups
-    if file_name == "transactions_data.parquet":
+    if file_name == "transactions_data_processed.parquet":
         global merchant_other_threshold
         # Get total number of rows in the file
         pf = ParquetFile(file_path)
         total_rows = pf.metadata.num_rows
-        merchant_other_threshold = total_rows/50 #based on testing with 50_000 rows and threshold = 1000
+        merchant_other_threshold = total_rows / 50  # based on testing with 50_000 rows and threshold = 1000
 
     return df
 
@@ -78,7 +76,7 @@ def optimize_data(*file_names: str):
         if not csv_path.exists():
             raise FileNotFoundError(f"⚠️ CSV file not found: {csv_path}")
 
-        parquet_path = csv_path.with_suffix('.parquet')
+        parquet_path = (DATA_DIRECTORY / "cache" / file_name).with_suffix('.parquet')
         csv_mtime = csv_path.stat().st_mtime
 
         # Only convert if Parquet missing or outdated
@@ -240,57 +238,3 @@ def get_mcc_description_by_merchant_id(df_mcc: pd.DataFrame, merchant_id: int | 
         return result.iloc[0]['merchant_group']
     else:
         return "Undefined"
-
-
-def convert_transaction_columns_to_int(dataframe: DataFrame, columns: list[str]):
-    """
-    Convert specified transaction columns in the DataFrame to integer, when necessary.
-
-    This function iterates through a list of specified columns in the provided
-    DataFrame. For each column, it checks if the column's data type is integer.
-    If not, it attempts to convert the column's data into integer values using
-    `pandas.to_numeric`. The converted DataFrame is then saved to a predefined parquet
-    file if any column has undergone conversion. For columns already in integer
-    format, the function skips the conversion step for efficiency.
-
-    Parameters:
-    dataframe: DataFrame
-        The input pandas DataFrame containing transaction data that may need
-        type conversion for specified columns.
-
-    columns: list[str]
-        A list of column names within the DataFrame that are checked for integer
-        type conversion.
-
-    Returns:
-    None
-    """
-    bm = Benchmark("Conversion")
-    df = dataframe.copy()
-    changed = False
-
-    for col in columns:
-        if not pd.api.types.is_integer_dtype(df[col]):
-            logger.log(f"🔄 Converting '{col}' to integer...", 2)
-            df[col] = (
-                pd.to_numeric(df[col], errors="coerce")
-                .fillna(0)
-                .astype(int)
-            )
-            changed = True
-        else:
-            logger.log(f"ℹ️ '{col}' is already integer, skipping.", 2)
-
-    if changed:
-        # Write once after all conversions
-        df.to_parquet(
-            DATA_DIRECTORY / "transactions_data.parquet",
-            engine="pyarrow",
-            compression="snappy",
-            index=False
-        )
-        dataframe = df
-        logger.log("✅ Converted columns to integer and updated parquet file", 2)
-        bm.print_time(level=2)
-    else:
-        logger.log("ℹ️ No columns needed conversion, skipping parquet write", 2)
