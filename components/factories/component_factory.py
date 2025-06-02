@@ -418,6 +418,7 @@ def create_bar_chart(
         bar_color: str = None,
         margin: dict = None,
         showlegend: bool = False,
+        num_visible_bars: int = 10,
         dark_mode: bool = const.DEFAULT_DARK_MODE,
 ) -> go.Figure:
     """
@@ -526,7 +527,8 @@ def create_bar_chart(
             type="category",
             categoryorder=x_category_order,
             linecolor=grid_color,
-            gridcolor=const.COLOR_TRANSPARENT
+            gridcolor=const.COLOR_TRANSPARENT,
+            range=[-0.5, num_visible_bars - 0.5]
         )
         fig.update_yaxes(
             showline=False,
