@@ -336,7 +336,7 @@ def create_circle_diagram_card(
                 children=[
 
                     create_icon(icon_id, cls="icon icon-small"),
-                    html.P(children=title_children, className="graph-card-title")
+                    html.P(children=title_children, className="graph-card-title pad-top")
 
                 ]),
 
