@@ -50,36 +50,29 @@ def toggle_settings_canvas(n_clicks, is_open):
 def update_app_state(_, n_clicks_dark, map_color_scale, map_text_color, map_show_color_scale, show_tooltips,
                      canvas_placement, current_state):
     """
-    Handles the state updates and UI toggling based on user interaction with the application.
-    The function processes different types of inputs to determine the current state and modifies
-    the return values for output components accordingly.
+    Updates and synchronizes the application state based on user interactions or
+    initial load. This function reacts to various input triggers to modify the app
+    state, including dark mode toggling, map settings adjustments, tooltip
+    visibility, and canvas placement. It ensures that visual elements are
+    dynamically updated to reflect the current state while maintaining the
+    integrity of the state store.
 
     Args:
-        _: Ignored value, represents the content of the 'app-init-trigger'. Typically, not used.
-        n_clicks_dark: Number of clicks on the dark mode toggle button. Used to determine if the mode
-            should be switched between dark and light.
-        map_color_scale: Selected color scale for the map visualization. Changes trigger updates in
-            the application’s state to align with the new color scale.
-        map_text_color: Selected text color for the map visualization. Changes trigger updates in
-            the application's state to align with the new text color.
-        map_show_color_scale: Boolean indicating whether to show the color scale on the map. Changes
-            trigger updates in the application's state to align with the new setting.
-        show_tooltips: Boolean indicating whether to show tooltips. Changes trigger updates in
-            the application's state to align with the new setting.
-        canvas_placement: String indicating the placement of the settings canvas. Changes trigger
-            updates in the application's state to align with the new setting.
-        current_state: Persisted state data of the application. Includes various state elements
-            such as dark mode status, color scale, update count, and settings modification flag.
+        _: Placeholder for the "children" property of the app-init trigger. Not used.
+        n_clicks_dark: Number of clicks on the dark mode toggle button. Used to toggle dark mode.
+        map_color_scale: Selected color scale for the map.
+        map_text_color: Selected text color for the map.
+        map_show_color_scale: Boolean indicating whether to show the map's color scale.
+        show_tooltips: Boolean indicating whether tooltips should be shown.
+        canvas_placement: Placement option for the settings canvas.
+        current_state: The current state of the application, stored in a JSON object.
 
     Returns:
-        tuple: A tuple containing:
-            - canvas_cls (str): CSS class name for the settings canvas, updated based on the
-              current dark mode status.
-            - dash_cls (str): CSS class name for the dashboard container, updated based on the
-              current dark mode status.
-            - icon (html.I): An HTML icon element representing the current state of the dark mode
-              toggle button (moon for dark mode, sun for light mode).
-            - updated_state (dict): Updated dictionary containing the new state of the application.
+        A tuple containing:
+        - The className for the settings canvas, dynamically updated based on the dark mode state.
+        - The className for the dashboard container, dynamically updated based on the dark mode state.
+        - The children property of the dark mode toggle button, updated with the appropriate icon.
+        - The updated application state as a JSON object.
     """
     # Context determination
     triggered_id = ctx.triggered_id if ctx.triggered_id else "app-init-trigger"
@@ -196,26 +189,29 @@ def prepare_map_update(app_state, animation_state):
 )
 def render_map(animation_state, app_state):
     """
-    Handles the rendering of the map component with specified settings and updates the application
-    state accordingly. This function listens to changes in the animation state and application state,
-    and only updates the map when the application is in the correct phase.
+    Renders the map based on the application's animation state and current settings.
+    Triggered only during the specific phase of animation ("fading_out"). Ensures
+    the map updates accordingly with the settings stored in the app state, including
+    dark mode, color scale, and text color preferences. Updates the app state once
+    the map is rendered.
 
     Args:
-        animation_state (dict): The current state of the animation, including the phase of the
-            animation process.
-        app_state (dict): The current application state, which includes settings such as dark mode,
-            color scale, and flags for setting changes.
+        animation_state: A dictionary containing the state of the animation, necessary
+            to determine if the map rendering should proceed.
+        app_state: A dictionary storing the application's state, including various
+            configuration settings for the map, such as dark mode and color scale.
 
     Returns:
-        tuple: A tuple containing the following elements:
-            - The map component to render.
-            - The class names to be applied to the map container, enabling specific CSS animations
-              or styles.
-            - The updated application state.
+        A tuple containing the following:
+            - The rendered map component.
+            - The updated class name for the map container, which includes the fade-in
+              effect when the map is rendered.
+            - The updated application state, ensuring the state reflects any modifications
+              (such as resetting the settings_changed flag).
 
     Raises:
-        PreventUpdate: If the animation state or application state is invalid or if the phase of
-        the animation is not "fading_out", no update will be triggered.
+        PreventUpdate: If animation_state or app_state is invalid, or if the animation phase
+            is not "fading_out", the rendering process is aborted and updates are prevented.
     """
     if not animation_state or not app_state:
         raise PreventUpdate
