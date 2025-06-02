@@ -51,7 +51,7 @@ def _create_heading() -> html.Div:
                     "Show all States"
 
                 ]),
-            html.H4("Merchant", id=ID.MERCHANT_HEADING, className="green-heading"),
+            html.H4("Merchant", id=ID.MERCHANT_HEADING, className="green-text"),
             comp_factory.create_info_icon(ID.MERCHANT_INFO_ICON),
             dbc.Tooltip(
                 target=ID.MERCHANT_INFO_ICON,
@@ -246,9 +246,15 @@ def _create_merchant_graph():
                     dbc.CardHeader(
                         children=[
 
-                            comp_factory.create_icon(IconID.CLUSTER, cls="icon icon-small"),
-                            html.H3(id=ID.MERCHANT_GRAPH_TITLE, className="graph-card-title")
+                            html.Div(
+                                className="card-header-inline-wrapper",
+                                children=[
 
+                                    comp_factory.create_icon(IconID.CLUSTER, cls="icon icon-xs"),
+                                    html.P(id=ID.MERCHANT_GRAPH_TITLE, className="graph-card-title")
+
+                                ]
+                            )
                         ]
                     ),
                     dbc.CardBody(
