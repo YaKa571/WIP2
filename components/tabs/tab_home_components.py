@@ -26,8 +26,9 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
         data: dict
             A dictionary containing labels as keys and corresponding values as values
             for the pie chart sections.
-        colors: list, optional
-            A list of colors for the pie slices. Defaults to ["#c65ed4", "#5d9cf8"].
+        colors: list or dict, optional
+            Either a list of colors for the pie slices or a dictionary mapping labels to colors.
+            Defaults to ["#c65ed4", "#5d9cf8"].
         textinfo: str, optional
             String specifying which text elements to show on the chart (e.g., 'percent+label').
             Defaults to "percent+label".
@@ -47,6 +48,11 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
 
     labels = list(data.keys())
     values = list(data.values())
+
+    # If colors is a dictionary, map labels to their corresponding colors
+    if isinstance(colors, dict):
+        color_list = [colors.get(label, "#a29bfe") for label in labels]  # Use fallback color if not found
+        colors = color_list
 
     fig = go.Figure(
         data=[
@@ -545,7 +551,7 @@ def get_leader_info(values: dict, label_colors: dict, tie_label="TIE"):
         return label2, label_colors.get(label2, "#000"), val2 - val1
 
 
-def get_age_leader_info(age_sums: dict, age_colors: list):
+def get_age_leader_info(age_sums: dict, age_colors: dict):
     """
     Gets the leader information based on the age group distribution. The leader information includes the
     age group with the highest value, its associated color, the value, the percentage contribution to the
@@ -553,11 +559,11 @@ def get_age_leader_info(age_sums: dict, age_colors: list):
 
     Attributes:
         age_sums (dict): Dictionary mapping age groups to their respective numeric values.
-        age_colors (list): List of colors corresponding to each age group by index.
+        age_colors (dict): Dictionary mapping age groups to their respective color codes.
 
     Args:
         age_sums (dict): A dictionary where keys are age group labels and values are their associated numbers.
-        age_colors (list): A list of string color codes corresponding to the age groups.
+        age_colors (dict): A dictionary where keys are age group labels and values are color codes.
 
     Returns:
         tuple: A tuple containing the following elements:
@@ -569,14 +575,10 @@ def get_age_leader_info(age_sums: dict, age_colors: list):
     """
     if not age_sums:
         return "-", "#aaa", 0, 0, 0
-    age_labels = list(age_sums.keys())
     age_values = list(age_sums.values())
     top_group, top_value = max(age_sums.items(), key=lambda x: x[1])
-    try:
-        leader_idx = age_labels.index(top_group)
-        leader_color = age_colors[leader_idx]
-    except ValueError:
-        leader_color = "#a29bfe"  # Fallback
+    # Get color directly from the age_colors dictionary
+    leader_color = age_colors.get(top_group, "#a29bfe")  # Use fallback color if not found
     total = sum(age_values)
     percent = (top_value / total) * 100 if total > 0 else 0
     return top_group, leader_color, top_value, percent, total
