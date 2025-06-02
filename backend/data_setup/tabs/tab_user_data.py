@@ -266,20 +266,80 @@ class UserTabData:
         """
         return self._cache_user_merchant_agg.get(int(user_id), pd.DataFrame())
 
+    def _convert_dict_to_df(self, cache_dict, cache_name):
+        """
+        Convert a dictionary of dataframes to a single dataframe with user_id column.
+
+        Args:
+            cache_dict (dict): Dictionary mapping user_id to dataframe
+            cache_name (str): Name of the cache for logging
+
+        Returns:
+            pd.DataFrame: Combined dataframe with user_id column
+        """
+        if not cache_dict:
+            logger.log(f"ℹ️ User: Empty {cache_name} cache, returning empty dataframe", indent_level=4)
+            return pd.DataFrame()
+
+        # Create a list to store dataframes with user_id
+        dfs = []
+
+        # Process each user's dataframe
+        for user_id, df in cache_dict.items():
+            if df is not None and not df.empty:
+                # Create a copy to avoid modifying the original
+                df_copy = df.copy()
+                # Add user_id column
+                df_copy['user_id'] = user_id
+                dfs.append(df_copy)
+
+        # Combine all dataframes
+        if dfs:
+            return pd.concat(dfs, ignore_index=True)
+        else:
+            return pd.DataFrame()
+
+    def _convert_df_to_dict(self, df, cache_name):
+        """
+        Convert a dataframe with user_id column back to a dictionary of dataframes.
+
+        Args:
+            df (pd.DataFrame): Combined dataframe with user_id column
+            cache_name (str): Name of the cache for logging
+
+        Returns:
+            dict: Dictionary mapping user_id to dataframe
+        """
+        if df is None or df.empty:
+            logger.log(f"ℹ️ User: Empty {cache_name} dataframe, returning empty dictionary", indent_level=4)
+            return {}
+
+        # Create a dictionary to store the result
+        result = {}
+
+        # Group by user_id
+        for user_id, group in df.groupby('user_id'):
+            # Remove the user_id column from the group
+            group_without_user_id = group.drop('user_id', axis=1)
+            result[int(user_id)] = group_without_user_id
+
+        return result
+
     def _save_caches_to_disk(self):
         """
-        Save all cached data to disk.
+        Save all cached data to disk as separate parquet files.
         """
         logger.log("🔄 User: Saving caches to disk...", indent_level=3)
         bm = Benchmark("User: Saving caches to disk")
 
-        # Save all cache dictionaries
-        cache_data = {
-            "user_transactions": self._cache_user_transactions,
-            "user_merchant_agg": self._cache_user_merchant_agg
-        }
+        # Convert dictionaries to dataframes and save as parquet
+        transactions_df = self._convert_dict_to_df(self._cache_user_transactions, "user_transactions")
+        merchant_agg_df = self._convert_dict_to_df(self._cache_user_merchant_agg, "user_merchant_agg")
 
-        self.data_manager.save_cache_to_disk("user_tab_caches", cache_data)
+        # Save dataframes as parquet files
+        self.data_manager.save_cache_to_disk("user_transactions_df", transactions_df)
+        self.data_manager.save_cache_to_disk("user_merchant_agg_df", merchant_agg_df)
+
         bm.print_time(level=4)
 
     def _load_caches_from_disk(self) -> bool:
@@ -292,14 +352,21 @@ class UserTabData:
         logger.log("🔄 User: Loading caches from disk...", indent_level=3)
         bm = Benchmark("User: Loading caches from disk")
 
-        # Load cache dictionaries
-        cache_data = self.data_manager.load_cache_from_disk("user_tab_caches", is_dataframe=False)
-        if cache_data is not None:
-            self._cache_user_transactions = cache_data.get("user_transactions", {})
-            self._cache_user_merchant_agg = cache_data.get("user_merchant_agg", {})
+        # Load from parquet files
+        transactions_df = self.data_manager.load_cache_from_disk("user_transactions_df")
+        merchant_agg_df = self.data_manager.load_cache_from_disk("user_merchant_agg_df")
+
+        if transactions_df is not None and merchant_agg_df is not None:
+            logger.log("✅ User: Successfully loaded caches from parquet files", indent_level=4)
+
+            # Convert dataframes back to dictionaries
+            self._cache_user_transactions = self._convert_df_to_dict(transactions_df, "user_transactions")
+            self._cache_user_merchant_agg = self._convert_df_to_dict(merchant_agg_df, "user_merchant_agg")
+
             bm.print_time(level=4)
             return True
 
+        logger.log("⚠️ User: Failed to load caches from parquet files", indent_level=4)
         bm.print_time(level=4)
         return False
 

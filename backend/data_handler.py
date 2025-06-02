@@ -31,7 +31,7 @@ def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.D
     Raises:
         FileNotFoundError: If the specified Parquet file does not exist.
     """
-    file_path = CACHE_DIRECTORY + file_name
+    file_path = CACHE_DIRECTORY / file_name
 
     if not file_path.exists():
         raise FileNotFoundError(f"⚠️ Parquet file not found: {file_path}")

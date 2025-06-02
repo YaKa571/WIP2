@@ -48,7 +48,8 @@ class DataCacher:
             "home_tab_map_data.parquet",
             "merchant_tab_caches.pkl",
             "cluster_tab_caches.pkl",
-            "user_tab_caches.pkl",
+            "user_transactions_df.parquet",
+            "user_merchant_agg_df.parquet",
             "cards_data_processed.parquet",
             "users_data_processed.parquet",
             "transactions_data_processed.parquet"

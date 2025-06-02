@@ -144,7 +144,6 @@ class DataManager:
             self.df_users = clean_units(read_parquet_data("users_data.parquet"))
             self.save_cache_to_disk("users_data_processed", self.df_users)
 
-
         # =============================================== TRANSACTIONS ===============================================
 
         # Check if transactions_data_processed.parquet exists in data/cache directory and load it if it does
@@ -383,40 +382,35 @@ class DataManager:
 
         bm.print_time(level=3, add_empty_line=True)
 
+    def _delete_unneeded_files(self):
+        paths_to_delete = (
+            self.cache_dir / "users_data.parquet",
+            self.cache_dir / "transactions_data.parquet",
+            self.cache_dir / "cards_data.parquet"
+        )
+
+        for path in paths_to_delete:
+            if path.exists():
+                path.unlink()  # If the path is a pathlib.Path, which it is in this case (DATA_DIRECTORY)
+                logger.log(f"🗑️ Deleted unneeded temporary file: {path}", 3)
+
     def start(self):
         """
-        Starts the initialization process for various components and performs
-        data calculations for key metrics.
+        Starts the data loading and caching flow, which involves multiple stages such as loading
+        data frames, checking and utilizing the cache, creating cache if required, and finalizing
+        other setups like cleaning unneeded files and initializing a geometric shape.
 
-        This method is responsible for initializing components related
-        to the home and user tabs by loading data into their respective
-        classes and running their setup methods. Additionally, it
-        performs calculations on transaction data to determine metrics
-        such as the total number, the sum, and the average amount of
-        transactions. A graphical shape is also predefined.
+        The method ensures:
+        - Proper fallback to normal initialization if cache loading fails.
+        - Attempting cache creation when it does not already exist.
+        - Cleaning up unnecessary files as part of the finalization.
 
-        If a cache exists, the data is loaded from the cache instead of
-        being processed from scratch, which significantly improves startup time.
+        Raises:
+            RuntimeError: If the cache creation process fails.
 
-        Raises
-        ------
-        KeyError
-            If required keys are missing in the data frames during initialization.
-
-        Attributes
-        ----------
-        home_tab_data : HomeTabData
-            Stores and manages data related to the home tab operations.
-        user_tab_data : UserTabData
-            Stores and manages data related to the user tab operations.
-        amount_of_transactions : int
-            Total count of transactions loaded into the system.
-        sum_of_transactions : float
-            The total sum of all transaction amounts.
-        avg_transaction_amount : float
-            The average amount of transactions calculated.
-        online_shape : Shape
-            Predefined rounded rectangular shape for graphical visualization.
+        Attributes:
+            online_shape: Represents a geometric rounded rectangle with a predefined set of
+            coordinates and styling properties.
         """
         # First, load the basic data frames regardless of cache
         # This is needed for both cached and non-cached paths
@@ -436,6 +430,8 @@ class DataManager:
             logger.log("ℹ️ DataManager: Cache does not exist, creating cache...", indent_level=2)
             if not self.data_cacher.create_cache():
                 logger.log("❌ DataManager: Failed to create cache", indent_level=2)
+
+        self._delete_unneeded_files()
 
         # Set up the online shape (this is quick and doesn't need caching)
         self.online_shape = rounded_rect(
