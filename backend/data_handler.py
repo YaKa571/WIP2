@@ -12,20 +12,23 @@ from utils.benchmark import Benchmark
 merchant_other_threshold = 1000  # Default value, will be modified in set_minor_merchants_threshold
 
 
-def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.DataFrame:
+def read_parquet_data(file_name: str, sort_alphabetically: bool = False, num_rows: int = None) -> pd.DataFrame:
     """
     Reads a parquet file and returns its content as a pandas DataFrame. The function provides
     an option to sort the DataFrame's columns alphabetically.
 
-    If the specified file does not exist in the cache directory, a FileNotFoundError
-    will be raised. Additionally, this function uses optimized settings for parquet
-    file reading, including multi-threading and memory mapping.
+
+    This function enables efficient reading of Parquet files by leveraging multi-threading,
+    memory mapping, and optimized settings. It optionally sorts the DataFrame's columns 
+    alphabetically and sets the threshold for minor merchant groupings when specific criteria are met.
+    It can also limit the number of rows read from the file.
 
     Args:
-        file_name: The name of the parquet file to be read. It is assumed the file
-            resides in the CACHE_DIRECTORY.
-        sort_alphabetically: If True, the columns of the resulting DataFrame will be
-            sorted alphabetically. Defaults to False.
+        file_name: The name of the Parquet file to be read.
+        sort_alphabetically: A flag to indicate whether the DataFrame's columns should
+            be sorted alphabetically.
+        num_rows: The maximum number of rows to read from the file. If None, all rows are read.
+
 
     Returns:
         A pandas DataFrame containing the content of the parquet file. If
@@ -41,13 +44,17 @@ def read_parquet_data(file_name: str, sort_alphabetically: bool = False) -> pd.D
     if not file_path.exists():
         raise FileNotFoundError(f"⚠️ Parquet file not found: {file_path}")
 
-    # Read all rows with optimized settings
+    # Read rows with optimized settings
     df = pd.read_parquet(
         file_path,
         engine="pyarrow",
         use_threads=True,  # Enable multi-threading
         memory_map=True  # Use memory mapping for better performance
     )
+
+    # Limit the number of rows if specified
+    if num_rows is not None:
+        df = df.head(num_rows)
 
     if sort_alphabetically:
         # Use inplace sorting if possible to avoid copying the entire dataframe

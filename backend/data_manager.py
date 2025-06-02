@@ -49,9 +49,9 @@ class DataManager:
     _instance = None
 
     @staticmethod
-    def initialize(data_dir: Path = DATA_DIRECTORY):
+    def initialize(data_dir: Path = DATA_DIRECTORY, num_rows=50_001):  # <-- Change num_rows value here to trigger cache
         if DataManager._instance is None:
-            DataManager._instance = DataManager(data_dir)
+            DataManager._instance = DataManager(data_dir, num_rows=num_rows)
 
     @staticmethod
     def get_instance():
@@ -59,7 +59,7 @@ class DataManager:
             raise Exception("⚠️ DataManager has not been initialized. Call DataManager.initialize() first.")
         return DataManager._instance
 
-    def __init__(self, data_dir: Path = DATA_DIRECTORY):
+    def __init__(self, data_dir: Path = DATA_DIRECTORY, num_rows=50_000):
         if DataManager._instance is not None:
             raise Exception("⚠️ Use DataManager.get_instance() instead of creating a new instance.")
 
@@ -68,6 +68,7 @@ class DataManager:
 
         self.data_dir = data_dir
         self.cache_dir = data_dir / "cache"
+        self._cached_num_rows = None
 
         # Create cache directory if it doesn't exist
         if not self.cache_dir.exists():
@@ -107,10 +108,10 @@ class DataManager:
         self.online_shape = list[list]
 
         # Initializing all data
-        self.start()
+        self.start(num_rows=num_rows)
         benchmark_data_manager.print_time()
 
-    def load_data_frames(self):
+    def load_data_frames(self, num_rows=None):
         """
         Loads and processes user, transaction, and card data by utilizing optimized and clean data workflows.
         If cached processed versions of the data exist in the specified cache directory, those are loaded;
@@ -118,6 +119,10 @@ class DataManager:
 
         The method ensures that any unnecessary intermediate files are removed, processes transaction-specific
         details, and prepares the data for further analysis.
+
+        Args:
+            num_rows (int, optional): Number of rows to load and cache when no cache exists.
+                When cache exists, the entire cache is loaded. Defaults to None (load all rows).
 
         Raises:
             FileNotFoundError: Raised if expected input data files are not found during processing.
@@ -131,6 +136,22 @@ class DataManager:
         """
         logger.log("ℹ️ DataManager: Loading from files...", 2, add_line_before=True)
         bm = Benchmark("DataManager: Loading from files")
+
+        # Check if num_rows has changed
+        cached_num_rows = self._load_num_rows_from_cache()
+        if cached_num_rows is not None and num_rows is not None and cached_num_rows != num_rows:
+            logger.log(
+                f"⚠️ DataManager: num_rows has changed from {cached_num_rows:,} to {num_rows:,}, deleting cache...",
+                3)
+            self._delete_cache_directory()
+            # Reinitialize data cacher after deleting cache
+            self.data_cacher = DataCacher(self)
+            # Save the new num_rows value
+            self._save_num_rows_to_cache(num_rows)
+        elif cached_num_rows is None and num_rows is not None:
+            # First time setting num_rows
+            logger.log(f"ℹ️ DataManager: Setting initial num_rows value to {num_rows}", 2)
+            self._save_num_rows_to_cache(num_rows)
 
         # =============================================== USERS ===============================================
 
@@ -171,7 +192,7 @@ class DataManager:
         else:
             logger.log("ℹ️ Processed transactions data not found in cache, creating it...", 3)
             optimize_data("transactions_data.csv")
-            self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet"))
+            self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet", num_rows=num_rows))
             # Process transaction data (add latitude/longitude and state_name)
             self.df_transactions = self.process_transaction_data(self.df_transactions)
             self.save_cache_to_disk("transactions_data_processed", self.df_transactions)
@@ -391,6 +412,62 @@ class DataManager:
 
         bm.print_time(level=3, add_empty_line=True)
 
+    def _save_num_rows_to_cache(self, num_rows):
+        """
+        Save the num_rows value to a file in the cache directory.
+
+        Args:
+            num_rows: The number of rows value to save
+        """
+        try:
+            cache_path = self.cache_dir / "num_rows.pkl"
+            with open(cache_path, 'wb') as f:
+                pickle.dump(num_rows, f)
+            logger.log(f"✅ Saved num_rows value to {cache_path}", indent_level=3)
+            self._cached_num_rows = num_rows
+            return True
+        except Exception as e:
+            logger.log(f"⚠️ Error saving num_rows value: {str(e)}", indent_level=3)
+            return False
+
+    def _load_num_rows_from_cache(self):
+        """
+        Load the num_rows value from a file in the cache directory.
+
+        Returns:
+            The num_rows value if the file exists, None otherwise
+        """
+        try:
+            cache_path = self.cache_dir / "num_rows.pkl"
+            if cache_path.exists():
+                with open(cache_path, 'rb') as f:
+                    num_rows = pickle.load(f)
+                logger.log(f"✅ Loaded num_rows value from {cache_path}: {num_rows:,}", indent_level=3)
+                self._cached_num_rows = num_rows
+                return num_rows
+            else:
+                logger.log("ℹ️ No cached num_rows value found", indent_level=3)
+                return None
+        except Exception as e:
+            logger.log(f"⚠️ Error loading num_rows value: {str(e)}", indent_level=3)
+            return None
+
+    def _delete_cache_directory(self):
+        """
+        Delete the entire cache directory and recreate it.
+        """
+        import shutil
+        try:
+            if self.cache_dir.exists():
+                shutil.rmtree(self.cache_dir)
+                logger.log(f"🗑️ Deleted cache directory: {self.cache_dir}", indent_level=3)
+            os.makedirs(self.cache_dir, exist_ok=True)
+            logger.log(f"ℹ️ Created new cache directory: {self.cache_dir}", indent_level=3)
+            return True
+        except Exception as e:
+            logger.log(f"⚠️ Error deleting cache directory: {str(e)}", indent_level=3)
+            return False
+
     def _delete_unneeded_files(self):
         """
         Deletes unneeded temporary files to free up disk space. This is used to remove
@@ -411,16 +488,21 @@ class DataManager:
                 path.unlink()  # If the path is a pathlib.Path, which it is in this case (DATA_DIRECTORY)
                 logger.log(f"🗑️ Deleted unneeded temporary file: {path}", 3)
 
-    def start(self):
+    def start(self, num_rows=50_000):
         """
         Starts the data loading and caching flow, which involves multiple stages such as loading
         data frames, checking and utilizing the cache, creating cache if required, and finalizing
         other setups like cleaning unneeded files and initializing a geometric shape.
 
+        Args:
+            num_rows (int, optional): Number of rows to load and cache when no cache exists.
+                When cache exists, the entire cache is loaded. Defaults to 100_000.
+
         The method ensures:
         - Proper fallback to normal initialization if cache loading fails.
         - Attempting cache creation when it does not already exist.
         - Cleaning up unnecessary files as part of the finalization.
+        - If num_rows changes from a previous run, the cache is deleted and recreated.
 
         Raises:
             RuntimeError: If the cache creation process fails.
@@ -431,7 +513,7 @@ class DataManager:
         """
         # First, load the basic data frames regardless of cache
         # This is needed for both cached and non-cached paths
-        self.load_data_frames()
+        self.load_data_frames(num_rows=num_rows)
 
         # Check if cache exists and load from it if it does
         if self.data_cacher.cache_exists():
