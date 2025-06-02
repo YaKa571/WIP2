@@ -501,6 +501,19 @@ class HomeTabData:
         return result
 
     def _cache_map_data(self) -> None:
+        """
+        Caches the USA map data for the home tab by loading it from a cache or computing it from
+        the provided transaction DataFrame. The function optimizes data processing to reduce memory
+        usage and computational overhead.
+
+        Pre-caching involves either directly retrieving data from a previously saved cache file or
+        performing a series of filtering, grouping, and transformation operations on the transaction
+        DataFrame to generate the required map data. The function incorporates various utility
+        methods to load and save cached data and measures performance using benchmarking tools.
+
+        Raises:
+            None
+        """
         logger.log("🔄 Home: Pre-caching USA Map data...", indent_level=3)
         bm_cache_map = Benchmark("Home: Pre-caching USA Map data")
 

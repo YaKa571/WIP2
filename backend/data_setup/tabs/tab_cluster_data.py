@@ -210,11 +210,20 @@ class ClusterTabData:
 
     def _pre_cache_cluster_tab_data(self) -> None:
         """
-        Caches cluster data to improve data retrieval efficiency for cluster-related operations.
-        The method attempts to load cached data from disk. If not successful, it computes
-        and caches the data for all merchant groups, including 'All Merchant Groups', and
-        saves the cache to disk. Caching for groups is performed in parallel
-        to optimize processing time.
+        Caches data for the Cluster Tab by preloading necessary information.
+
+        This method is responsible for pre-caching the data required for the Cluster Tab in
+        the application. It attempts to load data from disk first and, if unavailable, proceeds to
+        generate and cache the data for both "All Merchant Groups" and individual merchant
+        groups using concurrent processing for efficiency. This caching improves overall
+        application performance and responsiveness during runtime.
+
+        The method utilizes benchmarks for tracking the performance of each step and logs
+        the progress accordingly. If the data is successfully loaded from disk, it will skip
+        the computationally intensive tasks and directly return.
+
+        Attributes:
+            None
 
         Args:
             None

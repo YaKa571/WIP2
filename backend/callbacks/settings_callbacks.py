@@ -189,26 +189,29 @@ def prepare_map_update(app_state, animation_state):
 )
 def render_map(animation_state, app_state):
     """
-    Handles the rendering of the map component with specified settings and updates the application
-    state accordingly. This function listens to changes in the animation state and application state,
-    and only updates the map when the application is in the correct phase.
+    Renders the map based on the application's animation state and current settings.
+    Triggered only during the specific phase of animation ("fading_out"). Ensures
+    the map updates accordingly with the settings stored in the app state, including
+    dark mode, color scale, and text color preferences. Updates the app state once
+    the map is rendered.
 
     Args:
-        animation_state (dict): The current state of the animation, including the phase of the
-            animation process.
-        app_state (dict): The current application state, which includes settings such as dark mode,
-            color scale, and flags for setting changes.
+        animation_state: A dictionary containing the state of the animation, necessary
+            to determine if the map rendering should proceed.
+        app_state: A dictionary storing the application's state, including various
+            configuration settings for the map, such as dark mode and color scale.
 
     Returns:
-        tuple: A tuple containing the following elements:
-            - The map component to render.
-            - The class names to be applied to the map container, enabling specific CSS animations
-              or styles.
-            - The updated application state.
+        A tuple containing the following:
+            - The rendered map component.
+            - The updated class name for the map container, which includes the fade-in
+              effect when the map is rendered.
+            - The updated application state, ensuring the state reflects any modifications
+              (such as resetting the settings_changed flag).
 
     Raises:
-        PreventUpdate: If the animation state or application state is invalid or if the phase of
-        the animation is not "fading_out", no update will be triggered.
+        PreventUpdate: If animation_state or app_state is invalid, or if the animation phase
+            is not "fading_out", the rendering process is aborted and updates are prevented.
     """
     if not animation_state or not app_state:
         raise PreventUpdate
