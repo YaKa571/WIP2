@@ -49,7 +49,7 @@ class DataManager:
     _instance = None
 
     @staticmethod
-    def initialize(data_dir: Path = DATA_DIRECTORY, num_rows=50_000):
+    def initialize(data_dir: Path = DATA_DIRECTORY, num_rows=50_001):  # <-- Change num_rows value here to trigger cache
         if DataManager._instance is None:
             DataManager._instance = DataManager(data_dir, num_rows=num_rows)
 
@@ -131,7 +131,9 @@ class DataManager:
         # Check if num_rows has changed
         cached_num_rows = self._load_num_rows_from_cache()
         if cached_num_rows is not None and num_rows is not None and cached_num_rows != num_rows:
-            logger.log(f"⚠️ DataManager: num_rows has changed from {cached_num_rows} to {num_rows}, deleting cache...", 2)
+            logger.log(
+                f"⚠️ DataManager: num_rows has changed from {cached_num_rows:,} to {num_rows:,}, deleting cache...",
+                3)
             self._delete_cache_directory()
             # Reinitialize data cacher after deleting cache
             self.data_cacher = DataCacher(self)
@@ -431,7 +433,7 @@ class DataManager:
             if cache_path.exists():
                 with open(cache_path, 'rb') as f:
                     num_rows = pickle.load(f)
-                logger.log(f"✅ Loaded num_rows value from {cache_path}: {num_rows}", indent_level=3)
+                logger.log(f"✅ Loaded num_rows value from {cache_path}: {num_rows:,}", indent_level=3)
                 self._cached_num_rows = num_rows
                 return num_rows
             else:
@@ -449,12 +451,12 @@ class DataManager:
         try:
             if self.cache_dir.exists():
                 shutil.rmtree(self.cache_dir)
-                logger.log(f"🗑️ Deleted cache directory: {self.cache_dir}", indent_level=2)
+                logger.log(f"🗑️ Deleted cache directory: {self.cache_dir}", indent_level=3)
             os.makedirs(self.cache_dir, exist_ok=True)
-            logger.log(f"ℹ️ Created new cache directory: {self.cache_dir}", indent_level=2)
+            logger.log(f"ℹ️ Created new cache directory: {self.cache_dir}", indent_level=3)
             return True
         except Exception as e:
-            logger.log(f"⚠️ Error deleting cache directory: {str(e)}", indent_level=2)
+            logger.log(f"⚠️ Error deleting cache directory: {str(e)}", indent_level=3)
             return False
 
     def _delete_unneeded_files(self):
