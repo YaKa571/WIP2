@@ -48,12 +48,6 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
     labels = list(data.keys())
     values = list(data.values())
 
-    # Create pull values for single slices
-    if len(values) > 2:
-        pull = [0.1 if v == max(values) else 0 for v in values]
-    else:
-        pull = [0 for _ in values]
-
     fig = go.Figure(
         data=[
             go.Pie(
@@ -64,8 +58,7 @@ def create_pie_graph(data: dict, colors=None, textinfo: str = "percent+label",
                 marker=dict(colors=colors),
                 textinfo=textinfo,
                 textfont=dict(color=textcolor),
-                hovertemplate=hover_template,
-                pull=pull,
+                hovertemplate=hover_template
             )
         ],
         layout=go.Layout(
