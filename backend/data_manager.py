@@ -392,6 +392,14 @@ class DataManager:
         bm.print_time(level=3, add_empty_line=True)
 
     def _delete_unneeded_files(self):
+        """
+        Deletes unneeded temporary files to free up disk space. This is used to remove
+        specific files within the cache directory that are no longer required by the
+        application.
+
+        Raises:
+            Any error raised by `pathlib.Path.unlink` if deletion of a file fails.
+        """
         paths_to_delete = (
             self.cache_dir / "users_data.parquet",
             self.cache_dir / "transactions_data.parquet",
