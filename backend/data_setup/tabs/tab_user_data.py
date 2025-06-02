@@ -366,7 +366,6 @@ class UserTabData:
             bm.print_time(level=4)
             return True
 
-        logger.log("⚠️ User: Failed to load caches from parquet files", indent_level=4)
         bm.print_time(level=4)
         return False
 
