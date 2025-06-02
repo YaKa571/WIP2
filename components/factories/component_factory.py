@@ -113,27 +113,18 @@ def create_usa_map(color_scale: str = const.MAP_DEFAULT_COLOR_SCALE,
                    dark_mode: bool = const.DEFAULT_DARK_MODE,
                    show_color_scale: bool = True) -> dcc.Graph:
     """
-    Creates a choropleth map of the United States illustrating transaction count
-    per state. The map is built using Plotly Map and shows states colored by
-    transaction density on a red color scale. State abbreviations are overlaid as
-    text annotations.
+    Creates a choropleth map of the USA with state-level transaction data. The map is rendered as a Dash Graph
+    component and features customizations such as color scale, map style, state abbreviation text, and more.
 
-    Parameters
-    ----------
-    color_scale : str, optional
-        The graphs color scale to use, by default "Reds"
-    map_style: str, optional
-        Mapbox style to use, by default "carto-positron"
-    text_color: str, optional
-        The color to use for text, by default "black"
-    dark_mode: bool, optional
-        Whether to use dark mode colors, by default True
-    show_color_scale: bool, optional
-        Whether to show the color scale on the map, by default True
-    Returns
-    -------
-    dash_core_components.Graph
-        A Dash Graph component representing the map.
+    Args:
+        color_scale: The name of the continuous color scale to use for representing transaction data.
+        map_style: The mapbox style to use for the map's appearance (e.g., "carto-positron-nolabels").
+        text_color: The color of state abbreviation text displayed on the map.
+        dark_mode: Whether dark mode is enabled, influencing text color and other style elements.
+        show_color_scale: Whether to display the color scale on the map.
+
+    Returns:
+        A Dash Graph component containing the rendered choropleth map for embedding into a Dash application.
     """
     df = dm.home_tab_data.map_data
     text_color_colorbar = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
