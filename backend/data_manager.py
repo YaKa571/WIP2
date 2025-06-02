@@ -1,10 +1,11 @@
-from pathlib import Path
-from typing import Optional
 import os
 import pickle
+from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 import pgeocode
+import us
 
 import utils.logger as logger
 from backend.data_cacher import DataCacher
@@ -14,7 +15,7 @@ from backend.data_setup.tabs.tab_cluster_data import ClusterTabData
 from backend.data_setup.tabs.tab_home_data import HomeTabData
 from backend.data_setup.tabs.tab_merchant_data import MerchantTabData
 from backend.data_setup.tabs.tab_user_data import UserTabData
-from components.constants import DATA_DIRECTORY
+from components.constants import DATA_DIRECTORY, CACHE_DIRECTORY
 from utils.benchmark import Benchmark
 from utils.utils import rounded_rect
 
@@ -122,13 +123,64 @@ class DataManager:
         logger.log("ℹ️ DataManager: Loading from files...", 2, add_line_before=True)
         bm = Benchmark("DataManager: Loading from files")
 
-        # Converts CSV files to parquet files if they don't exist yet and load them as DataFrames
-        optimize_data("users_data.csv", "transactions_data.csv", "cards_data.csv")
+        # Check if users_data_processed.parquet exists in data/cache directory and load it if it does
+        # if not run optimize data and clean units
+        users_processed_path = self.cache_dir / "users_data_processed.parquet"
+        users_to_del_path = self.cache_dir / "users_data.parquet"
 
-        # Read and clean data
-        self.df_users = clean_units(read_parquet_data("users_data.parquet"))
-        self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet"))  # Now using all rows
-        self.df_cards = clean_units(read_parquet_data("cards_data.parquet"))
+        if users_processed_path.exists():
+            logger.log(f"ℹ️ Loading processed users data from cache: {users_processed_path}", 3)
+            self.df_users = pd.read_parquet(users_processed_path)
+
+            if users_to_del_path.exists():
+                os.remove(users_to_del_path)
+                logger.log(f"🗑️ Deleted: {users_to_del_path}", 3)
+
+        else:
+            logger.log("ℹ️ Processed users data not found in cache, creating it...", 3)
+            optimize_data("users_data.csv")
+            self.df_users = clean_units(read_parquet_data("users_data.parquet"))
+            self.save_cache_to_disk("users_data_processed", self.df_users)
+
+        # Check if transactions_data_processed.parquet exists in data/cache directory and load it if it does
+        # if not run optimize data, clean units and process_transaction data
+        transactions_processed_path = self.cache_dir / "transactions_data_processed.parquet"
+        transactions_to_del_path = self.cache_dir / "transactions_data.parquet"
+
+        if transactions_processed_path.exists():
+            logger.log(f"ℹ️ Loading processed transactions data from cache: {transactions_processed_path}", 3)
+            self.df_transactions = pd.read_parquet(transactions_processed_path)
+
+            if transactions_to_del_path.exists():
+                os.remove(transactions_to_del_path)
+                logger.log(f"🗑️ Deleted: {transactions_to_del_path}", 3)
+
+        else:
+            logger.log("ℹ️ Processed transactions data not found in cache, creating it...", 3)
+            optimize_data("transactions_data.csv")
+            self.df_transactions = clean_units(read_parquet_data("transactions_data.parquet"))
+            # Process transaction data (add latitude/longitude and state_name)
+            self.df_transactions = self.process_transaction_data(self.df_transactions)
+            self.save_cache_to_disk("transactions_data_processed", self.df_transactions)
+
+        # Check if cards_data_processed.parquet exists in data/cache directory and load it if it does
+        # if not run optimize data and clean units
+        cards_processed_path = self.cache_dir / "cards_data_processed.parquet"
+        cards_to_del_path = self.cache_dir / "cards_data.parquet"
+
+        if cards_processed_path.exists():
+            logger.log(f"ℹ️ Loading processed cards data from cache: {cards_processed_path}", 3)
+            self.df_cards = pd.read_parquet(cards_processed_path)
+
+            if cards_to_del_path.exists():
+                os.remove(cards_to_del_path)
+                logger.log(f"🗑️ Deleted: {cards_to_del_path}", 3)
+
+        else:
+            logger.log("ℹ️ Processed cards data not found in cache, creating it...", 3)
+            optimize_data("cards_data.csv")
+            self.df_cards = clean_units(read_parquet_data("cards_data.parquet"))
+            self.save_cache_to_disk("cards_data_processed", self.df_cards)
 
         # Convert to int once
         self.df_mcc["mcc"] = self.df_mcc["mcc"].astype(int)
@@ -191,6 +243,81 @@ class DataManager:
         except Exception as e:
             logger.log(f"⚠️ Failed to load cache {cache_name}: {str(e)}", indent_level=3)
             return None
+
+    def process_transaction_data(self, df_transactions) -> pd.DataFrame:
+        """
+        Process transaction data by standardizing ZIP codes and mapping state abbreviations to full names.
+
+        Args:
+            df_transactions (pd.DataFrame): The transactions DataFrame to process
+
+        Returns:
+            pd.DataFrame: The processed transactions DataFrame
+        """
+        # Process transaction zip codes
+        if not {"latitude", "longitude"}.issubset(df_transactions):
+            logger.log("🔄 Home: Processing transaction zip codes...", 3)
+            bm = Benchmark("Home: Processing transaction zip codes")
+
+            # Create a copy to avoid modifying the original
+            df = df_transactions.copy()
+
+            df["zip"] = (
+                df["zip"]
+                .fillna(00000)  # When null
+                .astype(int)  # 60614.0 -> 60614
+                .astype(str)  # 60614 -> "60614"
+                .str.zfill(5)  # "1234" -> "01234"
+            )
+
+            geo = self.nomi.query_postal_code(df["zip"].tolist())
+            df["latitude"] = pd.to_numeric(geo["latitude"], errors="coerce").values
+            df["longitude"] = pd.to_numeric(geo["longitude"], errors="coerce").values
+
+            # Write back to parquet
+            df.to_parquet(
+                CACHE_DIRECTORY / "transactions_data.parquet",
+                engine="pyarrow",
+                compression="snappy",
+                index=False
+            )
+
+            bm.print_time(level=3)
+            df_transactions = df
+        else:
+            logger.log("ℹ️ Home: Latitude/Longitude already exist, skipping geocoding", 3)
+
+        # Creates a 'state_name' column from the 'merchant_state' column (abbreviated state names)
+        if "state_name" not in df_transactions.columns:
+            logger.log("🔄 Home: Mapping transaction state abbreviations to full names...", 3)
+            bm = Benchmark("Home: Mapping transaction state abbreviations to full names")
+
+            # Build mapping from abbreviation to full state name
+            mapping = {s.abbr: s.name for s in us.states.STATES}
+
+            # Create a copy to avoid modifying the original
+            df = df_transactions.copy()
+
+            # Map merchant_state (e.g. "NY") to full name (e.g. "New York")
+            df["state_name"] = df["merchant_state"].map(mapping)
+
+            # Null value -> Online
+            df["state_name"] = df["state_name"].fillna("ONLINE")
+
+            # Write back to parquet
+            df.to_parquet(
+                CACHE_DIRECTORY / "transactions_data.parquet",
+                engine="pyarrow",
+                compression="snappy",
+                index=False
+            )
+
+            bm.print_time(level=3)
+            df_transactions = df
+        else:
+            logger.log("ℹ️ Home: State names already exist, skipping mapping", 3)
+
+        return df_transactions
 
     def prepare_shared_data(self):
         """
@@ -292,7 +419,8 @@ class DataManager:
             if self.data_cacher.load_from_cache():
                 logger.log("✅ DataManager: Successfully loaded data from cache", indent_level=2)
             else:
-                logger.log("⚠️ DataManager: Failed to load from cache, falling back to normal initialization", indent_level=2)
+                logger.log("⚠️ DataManager: Failed to load from cache, falling back to normal initialization",
+                           indent_level=2)
                 if not self.data_cacher.create_cache():
                     logger.log("❌ DataManager: Failed to create cache", indent_level=2)
         else:
