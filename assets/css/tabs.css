@@ -344,7 +344,7 @@
 
 .legend-item-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* Für 4 Cluster */
+    grid-template-columns: repeat(4, 1fr); /* For 4 Clusters */
     gap: 24px;
     align-items: start;
     justify-items: center;
@@ -371,3 +371,5 @@
     font-size: 13px;
     text-transform: uppercase;
 }
+
+/* Cluster Legend END */
