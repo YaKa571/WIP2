@@ -81,7 +81,7 @@ def _create_heading() -> html.Div:
 
                 ]),
 
-            html.H4("All States", id=ID.HOME_TAB_STATE_HEADING, className="green-heading"),
+            html.H4("All States", id=ID.HOME_TAB_STATE_HEADING, className="green-text"),
             comp_factory.create_info_icon(ID.HOME_TAB_INFO_ICON),
             dbc.Tooltip(
                 target=ID.HOME_TAB_INFO_ICON,
@@ -214,9 +214,8 @@ def _create_bottom_bar_diagrams() -> html.Div:
                     dbc.CardHeader(
                         children=[
 
-                            comp_factory.create_icon(IconID.BAR_CHART_LINE_FILL, cls="icon icon-small"),
                             html.Div(
-                                className="settings-item mt-2",
+                                className="settings-item",
                                 children=[
 
                                     dcc.Dropdown(
@@ -244,6 +243,7 @@ def _create_bottom_bar_diagrams() -> html.Div:
                                 responsive=True,
                                 style={
                                     "height": "100%",
+                                    "width": "100%",
                                     "minHeight": 0,
                                     "minWidth": 0
                                 }
@@ -253,7 +253,7 @@ def _create_bottom_bar_diagrams() -> html.Div:
                                 icon_id=ID.HOME_TAB_BAR_INFO_ICON,
                                 style={
                                     "position": "absolute",
-                                    "top": "111px",
+                                    "top": "80px",
                                     "left": "16px",
                                     "zIndex": 100
                                 }),

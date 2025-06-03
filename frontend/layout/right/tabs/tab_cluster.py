@@ -58,7 +58,7 @@ def _create_heading() -> html.Div:
                     "Show all States"
 
                 ]),
-            html.H4("Cluster Analysis", id=ID.CLUSTER_HEADING, className="green-heading"),
+            html.H4("Cluster Analysis", id=ID.CLUSTER_HEADING, className="green-text"),
             comp_factory.create_info_icon(ID.CLUSTER_INFO_ICON),
             dbc.Tooltip(
                 target=ID.CLUSTER_INFO_ICON,
@@ -128,8 +128,6 @@ def _create_button_row():
                     "Income vs. Expenses"
 
                 ]),
-
-
 
         ])
 
@@ -214,21 +212,21 @@ def _create_cluster_legend():
                         style={"position": "relative"},
                         children=[
 
-                            comp_factory.create_icon(IconID.LEGEND, cls="icon icon-small"),
-                            html.P("Cluster Legend", className="graph-card-title"),
+                            html.Div(
+                                className="card-header-inline-wrapper",
+                                children=[
+
+                                    comp_factory.create_icon(IconID.LEGEND, cls="icon icon-xs"),
+                                    html.P("Cluster Legend", className="graph-card-title"),
+
+                                ]
+                            ),
 
                             dbc.Button(
                                 html.I(className="fa fa-chevron-up"),
                                 id=ID.CLUSTER_BTN_TOGGLE_LEGEND,
                                 n_clicks=0,
-                                style={
-                                    "position": "absolute",
-                                    "right": "18px",
-                                    "top": "50%",
-                                    "transform": "translateY(-50%)",
-                                    "zIndex": 2,
-                                    "borderRadius": "16%"
-                                }
+                                className="legend-btn",
                             )
 
                         ]
@@ -267,9 +265,15 @@ def _create_cluster_visualization():
                     dbc.CardHeader(
                         children=[
 
-                            comp_factory.create_icon(IconID.CLUSTER, cls="icon icon-small"),
-                            html.P("Cluster Visualization", className="graph-card-title")
+                            html.Div(
+                                className="card-header-inline-wrapper",
+                                children=[
 
+                                    comp_factory.create_icon(IconID.CLUSTER, cls="icon icon-xs"),
+                                    html.P("Cluster Visualization", className="graph-card-title"),
+
+                                ]
+                            )
                         ]
                     ),
 

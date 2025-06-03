@@ -55,9 +55,37 @@ html, body, #react-entry-point, .dash-application {
     display: flex;
     flex-direction: column;
     width: 50%;
-    flex: 0 1 auto;
     gap: var(--gutter); /* Spacing within column */
     animation: fadeInUp 0.6s ease both;
+    transition: none;
+}
+
+.left-column {
+    flex: 0 0 auto;
+    min-width: 250px;
+    max-width: calc(100% - 760px - 2rem);
+}
+
+.right-column {
+    flex: 1;
+    min-width: 760px;
+}
+
+.resize-handle {
+    width: 5px;
+    min-width: 5px;
+    cursor: ew-resize;
+    border-radius: 10px;
+    z-index: 10;
+    transition: background 0.2s;
+    height: 75%;
+    margin-top: auto;
+    margin-bottom: auto;
+    background: var(--handle-color, #b7c3d8);
+}
+
+.resize-handle:hover, .resize-handle:active {
+    background: var(--handle-color-hover, #999);
 }
 
 /* ==========================================================================
@@ -73,7 +101,7 @@ li span:nth-of-type(2) {
     color: var(--text-main) !important;
 }
 
-.green-heading {
+.green-text {
     color: var(--kpi-number-value);
 }
 
@@ -143,6 +171,10 @@ li span:nth-of-type(2) {
 
 .icon-small {
     height: clamp(19px, 1.5vw, 23px) !important;
+}
+
+.icon-xs {
+    height: 1em !important;
 }
 
 .info-icon {
@@ -292,6 +324,16 @@ li span:nth-of-type(2) {
 
 .settings-button-text:active {
     transform: scale(0.95);
+}
+
+.legend-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    border-radius: 16%;
+    padding: 0.175rem 0.4rem;
 }
 
 /* ============================================================

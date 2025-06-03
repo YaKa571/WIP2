@@ -1,11 +1,9 @@
 from typing import Optional, Callable, Any
 
 import pandas as pd
-import us
 
 from backend.data_handler import get_mcc_description_by_merchant_id
 from backend.kpi_models import MerchantKPI, PeakHourKPI, UserKPI, VisitKPI
-from components.constants import DATA_DIRECTORY
 from utils import logger
 from utils.benchmark import Benchmark
 
@@ -27,7 +25,6 @@ class HomeTabData:
         self._cache_expenditures_by_age: dict[str | None, dict[str, float]] = {}
         self._cache_expenditures_by_channel: dict[str | None, dict[str, float]] = {}
         self.map_data: pd.DataFrame = pd.DataFrame()
-
 
     def get_merchant_values_by_state(self, state: str = None) -> pd.DataFrame:
         """
@@ -614,11 +611,6 @@ class HomeTabData:
         data retrieval and ensure that necessary insights are readily available for analysis. The
         method executes a series of predefined data aggregation functions for all states in the
         transaction dataset.
-
-        Parameters
-        ----------
-        log_state_times : bool, optional
-            Whether to log the time taken for each state's data processing. Defaults to True.
 
         Raises
         ------

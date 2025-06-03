@@ -127,6 +127,7 @@ def create_app(suppress_callback_exceptions: bool = True, add_data_tables: bool 
                 children=[
 
                     create_left_column(),
+                    html.Div(className="resize-handle"),
                     create_right_column()
 
                 ]),

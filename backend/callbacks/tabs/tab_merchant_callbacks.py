@@ -504,7 +504,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
         if merchant_group:
             kpi_content = create_merchant_group_kpi(merchant_group)
             graph_content = create_merchant_group_line_chart(merchant_group, dark_mode=dark_mode)
-            graph_title = f"HISTORY FOR MERCHANT GROUP: {merchant_group}"
+            graph_title = f"HISTORY FOR MERCHANT GROUP ", html.Span(f"{merchant_group}", className="green-text")
         else:
             kpi_content = html.Div("NO MERCHANT GROUPS AVAILABLE.")
             graph_title = "NO MERCHANT GROUP SELECTED"
@@ -523,7 +523,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
         # Create graph content if merchant ID is valid
         if merchant in dm.merchant_tab_data.unique_merchant_ids:
             graph_content, spinner_class = create_individual_merchant_line_chart(merchant, dark_mode=dark_mode)
-            graph_title = f"HISTORY FOR MERCHANT {merchant}"
+            graph_title = f"HISTORY FOR MERCHANT ", html.Span(f"{merchant}", className="green-text")
         else:
             graph_title = "HISTORY FOR MERCHANT"
             spinner_class = "map-spinner visible"

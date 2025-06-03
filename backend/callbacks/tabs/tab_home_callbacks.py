@@ -41,22 +41,25 @@ CHART_BUILDERS = {
 )
 def update_bar_chart(selected_state, chart_option, n_clicks_toggle, app_state):
     """
-    Updates the bar chart figure based on the selected state, chart options, and user interaction.
+    Update the bar chart figure based on the selected state, chart option, button toggle, and application state.
 
-    This callback function dynamically generates a bar chart figure for display.
-    It re-renders the figure when any of its inputs change, including the selected
-    state, chart type option, or toggle actions for all states and dark mode. The
-    function also provides support for toggling dark mode UI representation.
+    @parameters
+    selected_state: str or None
+        The state selected from the user interface. Used to filter the chart data. If None, all states should be included.
+    chart_option: str or None
+        The selected option from the dropdown to determine the type or configuration of the chart.
+    n_clicks_toggle: int
+        The number of times the toggle all states button has been clicked. Used to identify if the toggle button was triggered.
+    app_state: dict or None
+        A dictionary representing the application state. May contain settings like 'dark_mode' to customize the chart display.
 
-    Args:
-        selected_state: Data representing the current state selection.
-        chart_option: Selected option for bar chart type.
-        n_clicks_toggle: Number of clicks on the "Toggle All States" button.
-        n_clicks_dark: Number of clicks on the "Dark Mode Toggle" button.
-        app_state: The current application state containing settings like dark_mode.
+    @raises
+    PreventUpdate
+        Raised when the chart_option is invalid or not found in the CHART_BUILDERS.
 
-    Returns:
-        A plotly figure object for the updated bar chart.
+    @returns
+    plotly.graph_objects.Figure
+        The resulting figure for the bar chart after applying the selected filters and configurations.
     """
     trigger = ctx.triggered_id
 
@@ -73,8 +76,7 @@ def update_bar_chart(selected_state, chart_option, n_clicks_toggle, app_state):
     if builder is None:
         raise PreventUpdate
 
-    fig = builder(state=state, dark_mode=dark_mode)
-    return fig
+    return builder(state=state, dark_mode=dark_mode)
 
 
 @callback(
@@ -282,7 +284,7 @@ def bridge_home_to_user_tab(click_data, chart_option):
     if click_data is None:
         raise PreventUpdate
 
-    # Top Spending User -> User Tab
+    # Top Spending User --> User Tab
     if chart_option == BAR_CHART_OPTIONS[2]["value"]:
         return click_data["points"][0]["x"], no_update, ID.TAB_USER, None, no_update
 
