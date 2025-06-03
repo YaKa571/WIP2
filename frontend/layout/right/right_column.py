@@ -82,7 +82,7 @@ def create_right_column():
         )
 
     return html.Div(
-        className="right-column d-flex flex-column",
+        className="right-column",
         children=[
 
             dbc.Card(

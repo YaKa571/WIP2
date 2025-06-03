@@ -243,6 +243,7 @@ def _create_bottom_bar_diagrams() -> html.Div:
                                 responsive=True,
                                 style={
                                     "height": "100%",
+                                    "width": "100%",
                                     "minHeight": 0,
                                     "minWidth": 0
                                 }
