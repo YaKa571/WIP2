@@ -22,7 +22,6 @@ BAR_CHART_OPTIONS = [
 ]
 
 
-# TODO: @Diego
 def create_home_content() -> html.Div:
     """
     Creates the main content structure for the home tab of a dashboard.

@@ -128,15 +128,15 @@ def clean_units(df: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: A new DataFrame with monetary symbols removed and converted
         to numeric values where applicable.
     """
-    # Create a copy only if we need to modify the dataframe
+    # First identify which columns need cleaning
     columns_to_clean = []
 
-    # First identify which columns need cleaning
     for col in df.columns:
-        sample_values = df[col].dropna().astype(str)
-
-        if not sample_values.empty and sample_values.str.startswith("$").all():
-            columns_to_clean.append(col)
+        # Only check string-like columns to avoid unnecessary conversions
+        if pd.api.types.is_object_dtype(df[col]):
+            sample_values = df[col].dropna()
+            if not sample_values.empty and sample_values.astype(str).str.startswith("$").all():
+                columns_to_clean.append(col)
 
     # If no columns need cleaning, return the original dataframe
     if not columns_to_clean:
