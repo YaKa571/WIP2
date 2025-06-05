@@ -518,6 +518,8 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
 
 @callback(
     Output("merchant-dummy-output", "children"),
+    Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
+    Output(ID.MERCHANT_INPUT_MERCHANT_ID, "value", allow_duplicate=True),
     [
         Input(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP, "n_clicks"),
         Input(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "n_clicks"),
@@ -533,39 +535,35 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
     prevent_initial_call=True,
 )
 def handle_kpi_click(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
-    print(
-        f"Clicks - Most frequently: {n1}, Highest value: {n2}, User most transactions: {n3}, User highest value: {n4}")
     triggered = ctx.triggered_id
+    print(f"Triggered by: {triggered}")
 
     if triggered and n1 < 1 and n2 < 1 and n3 < 1 and n4 < 1:
-        print("load")
-        return no_update
+        return no_update, no_update, no_update
 
-    def extract_kpi_data(kpi_data):
+    def extract_merchant_id(kpi_data):
         try:
-            value_container = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
-            if len(value_container) < 2:
-                return "KPI values not found"
-            entity_id = value_container[0]["props"].get("children", "—")
-            value = value_container[1]["props"].get("children", "—")
-            return f"{entity_id} — {value}"
+            container = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
+            if not container or len(container) < 1:
+                return None
+            id_str = container[0]["props"].get("children", "")
+            return int(id_str.replace("ID", "").strip())
         except Exception as e:
-            return f"Error while reading KPI: {e}"
+            print(f"Error extracting merchant ID: {e}")
+            return None
 
-    if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP:
-        print("MOST FREQUENTLY MERCHANT IN GROUP")
-        return html.Div(f"KPI: {extract_kpi_data(kpi1)}")
-
-    elif triggered == ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP:
-        print("HIGHEST VALUE MERCHANT IN GROUP")
-        return html.Div(f"KPI: {extract_kpi_data(kpi2)}")
+    if triggered in [ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP, ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP]:
+        kpi_data = kpi1 if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP else kpi2
+        merchant_id = extract_merchant_id(kpi_data)
+        if merchant_id is not None:
+            return html.Div(f"Redirecting to merchant {merchant_id}..."), MerchantTab.INDIVIDUAL.value, merchant_id
+        else:
+            return html.Div("Could not extract merchant ID."), no_update, no_update
 
     elif triggered == ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP:
-        print("USER MOST TRANSACTIONS IN GROUP")
-        return html.Div(f"KPI: {extract_kpi_data(kpi3)}")
-
+        return html.Div("User with most transactions in group."), no_update, no_update
     elif triggered == ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP:
-        print("USER HIGHEST VALUE MERCHANT IN GROUP")
-        return html.Div(f"KPI: {extract_kpi_data(kpi4)}")
+        return html.Div("User with highest value in group."), no_update, no_update
 
-    return no_update
+    return no_update, no_update, no_update
+
