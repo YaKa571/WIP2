@@ -548,9 +548,13 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
     State(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
     prevent_initial_call=True,
 )
-def handle_kpi_click(_, __, ___, ____, selected_group):
+def handle_kpi_click(n1, n2, n3, n4, selected_group):
+    print(
+        f"Clicks - Most frequently: {n1}, Highest value: {n2}, User most transactions: {n3}, User highest value: {n4}")
     triggered = ctx.triggered_id
-    if triggered is None:
+    # prevents triggered on load
+    if triggered and n1 < 1 and n2 < 1 and n3 < 1 and n4 < 1:
+        print("load")
         return no_update
 
     if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP:
@@ -568,5 +572,5 @@ def handle_kpi_click(_, __, ___, ____, selected_group):
     elif triggered == ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP:
         print("USER HIGHEST VALUE MERCHANT IN GROUP")
         return html.Div(f"MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP.")
-
+    print()
     return no_update
