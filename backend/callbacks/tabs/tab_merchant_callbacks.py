@@ -60,57 +60,32 @@ def get_option_button_class(option: str, selected_option: str) -> str:
 # === KPI Card Factory ===
 
 def create_kpi_card(icon, title, value_1, value_2, value_id, value_1_class="", value_2_class=""):
-    """
-    Creates a KPI (Key Performance Indicator) card component with an icon, title,
-    and two value fields. The card is styled with predefined CSS classes and allows
-    dynamic updates using a specified value ID.
-
-    Parameters:
-        icon: str
-            The icon displayed in the card header. Should correspond to a supported
-            icon identifier.
-        title: str
-            The title of the KPI card displayed in the card header.
-        value_1: str
-            The primary value displayed inside the KPI card body.
-        value_2: str
-            The secondary value displayed underneath the primary value in the card body.
-        value_id: str
-            Unique identifier for the card's value container, used for dynamic updates.
-
-    Returns:
-        dbc.Card
-            A Dash Bootstrap Card component styled and populated with the
-            specified content.
-    """
-    return dbc.Card(
-        className="card kpi-card",
+    return html.Div(  # <- jetzt klickbar
+        id=value_id,
+        n_clicks=0,
+        style={"cursor": "pointer"},
         children=[
-
-            dbc.CardHeader(
-                className="card-header",
+            dbc.Card(
+                className="card kpi-card",
                 children=[
-
-                    comp_factory.create_icon(icon, cls="icon icon-small"),
-                    html.P(title, className="kpi-card-title"),
-
-                ]
-            ),
-
-            dbc.CardBody(
-                className="card-body",
-                children=[
-
-                    html.Div(
-                        id=value_id,
+                    dbc.CardHeader(
+                        className="card-header",
                         children=[
-
-                            html.P(value_1, className=f"kpi-card-value {value_1_class}"),
-                            html.P(value_2, className=f"kpi-card-value kpi-number-value {value_2_class}"),
-
+                            comp_factory.create_icon(icon, cls="icon icon-small"),
+                            html.P(title, className="kpi-card-title"),
+                        ]
+                    ),
+                    dbc.CardBody(
+                        className="card-body",
+                        children=[
+                            html.Div(
+                                children=[
+                                    html.P(value_1, className=f"kpi-card-value {value_1_class}"),
+                                    html.P(value_2, className=f"kpi-card-value kpi-number-value {value_2_class}"),
+                                ]
+                            )
                         ]
                     )
-
                 ]
             )
         ]
@@ -541,23 +516,56 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
         spinner_class
     )
 # todo delete after testing
+# @callback(
+#     Output("merchant-dummy-output", "children"),
+#     Input("merchant-test-button", "n_clicks"),
+#     State(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "children"),
+#     prevent_initial_call=True
+# )
+# def display_kpi_value(n_clicks, kpi_children):
+#     if not kpi_children:
+#         # Wenn das Element nicht existiert oder leer ist
+#         return no_update
+#
+#     try:
+#         # Sicherstellen, dass es sich um eine Liste handelt
+#         if not isinstance(kpi_children, list) or len(kpi_children) < 2:
+#             return "KPI structure not as expected"
+#
+#         lines = [child.get("props", {}).get("children", "—") for child in kpi_children]
+#         return f"KPI-Values: {lines[0]} — {lines[1]}"
+#     except Exception as e:
+#         return f"Error while reading KPI: {e}"
+
 @callback(
-    Output("merchant-dummy-output", "children"),
-    Input("merchant-test-button", "n_clicks"),
-    State(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "children"),
-    prevent_initial_call=True
+    Output("kpi-output-container", "children"),
+    [
+        Input(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP, "n_clicks"),
+        Input(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "n_clicks"),
+        Input(ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP, "n_clicks"),
+        Input(ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP, "n_clicks"),
+    ],
+    State(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
+    prevent_initial_call=True,  # verhindert Ausführung beim ersten Laden
 )
-def display_kpi_value(n_clicks, kpi_children):
-    if not kpi_children:
-        # Wenn das Element nicht existiert oder leer ist
-        return no_update
+def handle_kpi_click(_, __, ___, ____, selected_group):
+    if not selected_group:
+        return html.Div("Bitte zuerst eine Gruppe auswählen.")
 
-    try:
-        # Sicherstellen, dass es sich um eine Liste handelt
-        if not isinstance(kpi_children, list) or len(kpi_children) < 2:
-            return "KPI structure not as expected"
+    triggered = ctx.triggered_id
+    if triggered is None:
+        return no_update  # Kein Klick passiert
 
-        lines = [child.get("props", {}).get("children", "—") for child in kpi_children]
-        return f"KPI-Values: {lines[0]} — {lines[1]}"
-    except Exception as e:
-        return f"Error while reading KPI: {e}"
+    if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP:
+        return html.Div(f"Gruppe '{selected_group}': Meistgenutzter Händler geklickt.")
+
+    elif triggered == ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP:
+        return html.Div(f"Gruppe '{selected_group}': Händler mit höchstem Umsatz geklickt.")
+
+    elif triggered == ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP:
+        return html.Div(f"Gruppe '{selected_group}': Nutzer mit den meisten Transaktionen geklickt.")
+
+    elif triggered == ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP:
+        return html.Div(f"Gruppe '{selected_group}': Nutzer mit höchstem Umsatz geklickt.")
+
+    return no_update
