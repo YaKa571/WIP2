@@ -519,6 +519,8 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
 @callback(
     Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
     Output(ID.MERCHANT_INPUT_MERCHANT_ID, "value", allow_duplicate=True),
+    Output(ID.ACTIVE_TAB_STORE, "data", allow_duplicate=True),
+    Output(ID.USER_ID_SEARCH_INPUT, "value", allow_duplicate=True),
     [
         Input(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP, "n_clicks"),
         Input(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "n_clicks"),
@@ -537,37 +539,44 @@ def handle_kpi_click_merchant_group(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
     triggered = ctx.triggered_id
 
     if triggered and n1 < 1 and n2 < 1 and n3 < 1 and n4 < 1:
-        return no_update, no_update
+        return no_update, no_update, no_update, no_update
 
-    def extract_merchant_id(kpi_data):
+    def extract_id(kpi_data):
         try:
-            container = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
-            if not container or len(container) < 1:
-                return None
-            id_str = container[0]["props"].get("children", "")
+            children = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
+            id_str = children[0]["props"].get("children", "")
             return int(id_str.replace("ID", "").strip())
         except Exception as e:
-            print(f"Error extracting merchant ID: {e}")
+            print(f"Error extracting ID: {e}")
             return None
 
-    if triggered in [ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP, ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP]:
-        kpi_data = kpi1 if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP else kpi2
-        merchant_id = extract_merchant_id(kpi_data)
+    if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP:
+        merchant_id = extract_id(kpi1)
         if merchant_id is not None:
-            return MerchantTab.INDIVIDUAL.value, merchant_id
-        else:
-            return no_update, no_update
+            return MerchantTab.INDIVIDUAL.value, merchant_id, no_update, no_update
+
+    elif triggered == ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP:
+        merchant_id = extract_id(kpi2)
+        if merchant_id is not None:
+            return MerchantTab.INDIVIDUAL.value, merchant_id, no_update, no_update
 
     elif triggered == ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP:
-        return no_update, no_update
-    elif triggered == ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP:
-        return no_update, no_update
+        user_id = extract_id(kpi3)
+        if user_id is not None:
+            return no_update, no_update, ID.TAB_USER, user_id
 
-    return no_update, no_update
+    elif triggered == ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP:
+        user_id = extract_id(kpi4)
+        if user_id is not None:
+            return no_update, no_update, ID.TAB_USER, user_id
+
+    return no_update, no_update, no_update, no_update
 
 @callback(
     Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
     Output(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value", allow_duplicate=True),
+    Output(ID.ACTIVE_TAB_STORE, "data", allow_duplicate=True),
+    Output(ID.USER_ID_SEARCH_INPUT, "value", allow_duplicate=True),
     [
         Input(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP, "n_clicks"),
         Input(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP, "n_clicks"),
@@ -585,34 +594,38 @@ def handle_kpi_click_merchant_group(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
 def handle_kpi_click_all_merchant_(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
     triggered = ctx.triggered_id
 
-    # Extract label + value from KPI card (reuses logic from group)
-    def extract_kpi_values(kpi_data):
+    def extract_group_label(kpi_data):
         try:
             container = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
-            label = container[0]["props"].get("children", "").strip()
-            value = container[1]["props"].get("children", "").strip()
-            return label, value
-        except Exception as e:
-            return "ERROR", f"Could not extract KPI: {e}"
+            return container[0]["props"].get("children", "").strip()
+        except Exception:
+            return None
 
-    kpi_map = {
-        ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP: kpi1,
-        ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP: kpi2,
-        ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_ALL: kpi3,
-        ID.MERCHANT_KPI_USER_HIGHEST_VALUE_ALL: kpi4,
-    }
+    def extract_user_id(kpi_data):
+        try:
+            container = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
+            user_str = container[0]["props"].get("children", "").strip()
+            return int(user_str.replace("ID", "").strip()) if "ID" in user_str else None
+        except Exception:
+            return None
 
-    if triggered in kpi_map:
-        label, value = extract_kpi_values(kpi_map[triggered])
+    if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP:
+        group_name = extract_group_label(kpi1)
+        return MerchantTab.GROUP.value, group_name, no_update, no_update
 
-        if triggered in [ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP, ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP]:
-            return (
-                MerchantTab.GROUP.value,
-                label  # label = group name
-            )
-        else:
-            return no_update, no_update
+    elif triggered == ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP:
+        group_name = extract_group_label(kpi2)
+        return MerchantTab.GROUP.value, group_name, no_update, no_update
 
-    return no_update, no_update
+    elif triggered == ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_ALL:
+        user_id = extract_user_id(kpi3)
+        return no_update, no_update, ID.TAB_USER, user_id
+
+    elif triggered == ID.MERCHANT_KPI_USER_HIGHEST_VALUE_ALL:
+        user_id = extract_user_id(kpi4)
+        return no_update, no_update, ID.TAB_USER, user_id
+
+    return no_update, no_update, no_update, no_update
+
 
 
