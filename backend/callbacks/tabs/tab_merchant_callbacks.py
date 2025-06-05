@@ -536,6 +536,31 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
     prevent_initial_call=True,
 )
 def handle_kpi_click_merchant_group(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
+    """
+    Handles user interaction with KPIs related to merchant groups and updates
+    the state of the application accordingly. This function manages changes
+    triggered by clicks on specific KPI elements and determines appropriate
+    IDs for merchants or users based on the provided KPI data.
+
+    The outputs of this callback update the current merchant or user ID in the
+    application, as well as the active tab in the user interface. This ensures
+    that the UI reflects the correct details and context based on user interactions
+    with the KPI elements.
+
+    Args:
+        n1: Number of clicks on the 'most frequently merchant' KPI button.
+        n2: Number of clicks on the 'highest value merchant' KPI button.
+        n3: Number of clicks on the 'most transactions user' KPI button.
+        n4: Number of clicks on the 'highest value user' KPI button.
+        kpi1: Button child data associated with the 'most frequently merchant' KPI.
+        kpi2: Button child data associated with the 'highest value merchant' KPI.
+        kpi3: Button child data associated with the 'most transactions user' KPI.
+        kpi4: Button child data associated with the 'highest value user' KPI.
+
+    Returns:
+        list[Union[no_update, Any]]: The updated states for the merchant-selected button,
+        merchant input value, active tab, and user ID search input, based on the triggered input.
+    """
     triggered = ctx.triggered_id
 
     if triggered and n1 < 1 and n2 < 1 and n3 < 1 and n4 < 1:
@@ -592,6 +617,27 @@ def handle_kpi_click_merchant_group(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
     prevent_initial_call=True,
 )
 def handle_kpi_click_all_merchant_(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
+    """
+    Handles user interaction with various merchant KPI buttons in the dashboard. Depending on the triggered
+    input, it extracts relevant data from click events and updates the state of the dashboard components.
+
+    Args:
+        n1: Number of clicks on the "Most Frequently Merchant Group" KPI button.
+        n2: Number of clicks on the "Highest Value Merchant Group" KPI button.
+        n3: Number of clicks on the "User Most Transactions (All)" KPI button.
+        n4: Number of clicks on the "User Highest Value (All)" KPI button.
+        kpi1: Data representing the "Most Frequently Merchant Group" KPI.
+        kpi2: Data representing the "Highest Value Merchant Group" KPI.
+        kpi3: Data representing the "User Most Transactions (All)" KPI.
+        kpi4: Data representing the "User Highest Value (All)" KPI.
+
+    Returns:
+        tuple: A tuple of updated states for the dashboard components:
+            - ID.MERCHANT_SELECTED_BUTTON_STORE (data)
+            - ID.MERCHANT_INPUT_GROUP_DROPDOWN (value)
+            - ID.ACTIVE_TAB_STORE (data)
+            - ID.USER_ID_SEARCH_INPUT (value)
+    """
     triggered = ctx.triggered_id
 
     def extract_group_label(kpi_data):
@@ -626,6 +672,76 @@ def handle_kpi_click_all_merchant_(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
         return no_update, no_update, ID.TAB_USER, user_id
 
     return no_update, no_update, no_update, no_update
+
+# had to use all 4 inputs, otherwise immediate jump to user tab
+@callback(
+    Output(ID.ACTIVE_TAB_STORE, "data", allow_duplicate=True),
+    Output(ID.USER_ID_SEARCH_INPUT, "value", allow_duplicate=True),
+    [
+        Input(ID.MERCHANT_KPI_MERCHANT_TRANSACTIONS, "n_clicks"),
+        Input(ID.MERCHANT_KPI_MERCHANT_VALUE, "n_clicks"),
+        Input(ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS, "n_clicks"),
+        Input(ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE, "n_clicks"),
+    ],
+    [
+        State(ID.MERCHANT_KPI_MERCHANT_TRANSACTIONS, "children"),
+        State(ID.MERCHANT_KPI_MERCHANT_VALUE, "children"),
+        State(ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS, "children"),
+        State(ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE, "children"),
+    ],
+    prevent_initial_call=True,
+)
+def handle_kpi_click_individual_merchant(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
+    """Handles the click events for individual merchant KPIs and updates components based on
+    the specific KPI button clicked. This function processes the triggered input, extracts relevant
+    user ID from the KPI data, and updates the active tab and user ID search input accordingly.
+
+    Args:
+        n1: The number of times the "Merchant Transactions" KPI button is clicked.
+        n2: The number of times the "Merchant Value" KPI button is clicked.
+        n3: The number of times the "Merchant User Most Transactions" KPI button is clicked.
+        n4: The number of times the "Merchant User Highest Value" KPI button is clicked.
+        kpi1: The state data of the "Merchant Transactions" KPI button.
+        kpi2: The state data of the "Merchant Value" KPI button.
+        kpi3: The state data of the "Merchant User Most Transactions" KPI button.
+        kpi4: The state data of the "Merchant User Highest Value" KPI button.
+
+    Returns:
+        Output: A tuple of the updated active tab and user ID search input value, or `no_update`
+        if no valid user ID is extracted.
+
+    Raises:
+        None: This function handles exceptions internally and does not raise them.
+    """
+    triggered = ctx.triggered_id
+
+    if triggered not in [
+        ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS,
+        ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE,
+    ]:
+        return no_update, no_update
+
+    def extract_user_id(kpi_data):
+        try:
+            children = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
+            id_str = children[0]["props"].get("children", "")
+            return int(id_str.replace("ID", "").strip())
+        except Exception as e:
+            print(f"Error extracting user ID: {e}")
+            return None
+
+    if triggered == ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS:
+        user_id = extract_user_id(kpi3)
+    elif triggered == ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE:
+        user_id = extract_user_id(kpi4)
+    else:
+        user_id = None
+
+    if user_id is not None:
+        return ID.TAB_USER, user_id
+
+    return no_update, no_update
+
 
 
 
