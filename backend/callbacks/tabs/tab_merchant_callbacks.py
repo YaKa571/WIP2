@@ -533,9 +533,8 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
     ],
     prevent_initial_call=True,
 )
-def handle_kpi_click(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
+def handle_kpi_click_merchant_group(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
     triggered = ctx.triggered_id
-    print(f"Triggered by: {triggered}")
 
     if triggered and n1 < 1 and n2 < 1 and n3 < 1 and n4 < 1:
         return no_update, no_update
@@ -565,4 +564,55 @@ def handle_kpi_click(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
         return no_update, no_update
 
     return no_update, no_update
+
+@callback(
+    Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
+    Output(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value", allow_duplicate=True),
+    [
+        Input(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP, "n_clicks"),
+        Input(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP, "n_clicks"),
+        Input(ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_ALL, "n_clicks"),
+        Input(ID.MERCHANT_KPI_USER_HIGHEST_VALUE_ALL, "n_clicks"),
+    ],
+    [
+        State(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP, "children"),
+        State(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP, "children"),
+        State(ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_ALL, "children"),
+        State(ID.MERCHANT_KPI_USER_HIGHEST_VALUE_ALL, "children"),
+    ],
+    prevent_initial_call=True,
+)
+def handle_kpi_click_all_merchant_(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
+    triggered = ctx.triggered_id
+
+    # Extract label + value from KPI card (reuses logic from group)
+    def extract_kpi_values(kpi_data):
+        try:
+            container = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
+            label = container[0]["props"].get("children", "").strip()
+            value = container[1]["props"].get("children", "").strip()
+            return label, value
+        except Exception as e:
+            return "ERROR", f"Could not extract KPI: {e}"
+
+    kpi_map = {
+        ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP: kpi1,
+        ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP: kpi2,
+        ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_ALL: kpi3,
+        ID.MERCHANT_KPI_USER_HIGHEST_VALUE_ALL: kpi4,
+    }
+
+    if triggered in kpi_map:
+        label, value = extract_kpi_values(kpi_map[triggered])
+
+        if triggered in [ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP, ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP]:
+            return (
+                MerchantTab.GROUP.value,
+                label  # label = group name
+            )
+        else:
+            return no_update, no_update
+
+    return no_update, no_update
+
 
