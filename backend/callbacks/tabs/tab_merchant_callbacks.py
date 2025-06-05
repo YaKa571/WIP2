@@ -538,7 +538,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
 #         return f"Error while reading KPI: {e}"
 
 @callback(
-    Output("kpi-output-container", "children"),
+    Output("merchant-dummy-output", "children"),
     [
         Input(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP, "n_clicks"),
         Input(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "n_clicks"),
@@ -546,7 +546,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
         Input(ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP, "n_clicks"),
     ],
     State(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
-    prevent_initial_call=True,  # verhindert Ausführung beim ersten Laden
+    prevent_initial_call=True,
 )
 def handle_kpi_click(_, __, ___, ____, selected_group):
     if not selected_group:
