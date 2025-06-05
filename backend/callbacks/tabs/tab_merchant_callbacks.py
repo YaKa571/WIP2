@@ -515,27 +515,6 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
         graph_title,
         spinner_class
     )
-# todo delete after testing
-# @callback(
-#     Output("merchant-dummy-output", "children"),
-#     Input("merchant-test-button", "n_clicks"),
-#     State(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "children"),
-#     prevent_initial_call=True
-# )
-# def display_kpi_value(n_clicks, kpi_children):
-#     if not kpi_children:
-#         # Wenn das Element nicht existiert oder leer ist
-#         return no_update
-#
-#     try:
-#         # Sicherstellen, dass es sich um eine Liste handelt
-#         if not isinstance(kpi_children, list) or len(kpi_children) < 2:
-#             return "KPI structure not as expected"
-#
-#         lines = [child.get("props", {}).get("children", "—") for child in kpi_children]
-#         return f"KPI-Values: {lines[0]} — {lines[1]}"
-#     except Exception as e:
-#         return f"Error while reading KPI: {e}"
 
 @callback(
     Output("merchant-dummy-output", "children"),
@@ -545,32 +524,48 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
         Input(ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP, "n_clicks"),
         Input(ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP, "n_clicks"),
     ],
-    State(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
+    [
+        State(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP, "children"),
+        State(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "children"),
+        State(ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP, "children"),
+        State(ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP, "children"),
+    ],
     prevent_initial_call=True,
 )
-def handle_kpi_click(n1, n2, n3, n4, selected_group):
+def handle_kpi_click(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
     print(
         f"Clicks - Most frequently: {n1}, Highest value: {n2}, User most transactions: {n3}, User highest value: {n4}")
     triggered = ctx.triggered_id
-    # prevents triggered on load
+
     if triggered and n1 < 1 and n2 < 1 and n3 < 1 and n4 < 1:
         print("load")
         return no_update
 
+    def extract_kpi_data(kpi_data):
+        try:
+            value_container = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
+            if len(value_container) < 2:
+                return "KPI values not found"
+            entity_id = value_container[0]["props"].get("children", "—")
+            value = value_container[1]["props"].get("children", "—")
+            return f"{entity_id} — {value}"
+        except Exception as e:
+            return f"Error while reading KPI: {e}"
+
     if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP:
         print("MOST FREQUENTLY MERCHANT IN GROUP")
-        return html.Div(f"MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP.")
+        return html.Div(f"KPI: {extract_kpi_data(kpi1)}")
 
     elif triggered == ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP:
         print("HIGHEST VALUE MERCHANT IN GROUP")
-        return html.Div(f"MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP.")
+        return html.Div(f"KPI: {extract_kpi_data(kpi2)}")
 
     elif triggered == ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP:
         print("USER MOST TRANSACTIONS IN GROUP")
-        return html.Div(f"MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP.")
+        return html.Div(f"KPI: {extract_kpi_data(kpi3)}")
 
     elif triggered == ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP:
         print("USER HIGHEST VALUE MERCHANT IN GROUP")
-        return html.Div(f"MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP.")
-    print()
+        return html.Div(f"KPI: {extract_kpi_data(kpi4)}")
+
     return no_update
