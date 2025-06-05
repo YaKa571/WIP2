@@ -8,6 +8,10 @@ load data from caches if they do, and create caches if they don't.
 import os
 
 import utils.logger as logger
+from backend.data_setup.tabs.tab_cluster_data import ClusterTabData
+from backend.data_setup.tabs.tab_home_data import HomeTabData
+from backend.data_setup.tabs.tab_merchant_data import MerchantTabData
+from backend.data_setup.tabs.tab_user_data import UserTabData
 from utils.benchmark import Benchmark
 
 
@@ -150,11 +154,6 @@ class DataCacher:
             self.data_manager.prepare_shared_data()
 
             # Create tab data instances
-            from backend.data_setup.tabs.tab_home_data import HomeTabData
-            from backend.data_setup.tabs.tab_merchant_data import MerchantTabData
-            from backend.data_setup.tabs.tab_cluster_data import ClusterTabData
-            from backend.data_setup.tabs.tab_user_data import UserTabData
-
             self.data_manager.home_tab_data = HomeTabData(self.data_manager)
             self.data_manager.merchant_tab_data = MerchantTabData(self.data_manager)
             self.data_manager.cluster_tab_data = ClusterTabData(self.data_manager)
