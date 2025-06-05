@@ -2,16 +2,16 @@ from enum import Enum
 
 import dash_bootstrap_components as dbc
 import plotly.express as px
-from dash import html, Output, Input, callback, ctx, State, callback_context, no_update
+from dash import html, Output, Input, callback, ctx, State, no_update
 
 import components.constants as const
+from backend.data_handler import merchant_other_threshold
 from backend.data_manager import DataManager
 from components.factories import component_factory as comp_factory
 from components.tabs.tab_merchant_components import create_merchant_group_line_chart, \
     create_individual_merchant_line_chart
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID
-from backend.data_handler import merchant_other_threshold
 
 # Initialize DataManager instance
 dm: DataManager = DataManager.get_instance()
@@ -63,10 +63,10 @@ def create_kpi_card(icon, title, value_1, value_2, value_id, value_1_class="", v
     return html.Div(  # <- jetzt klickbar
         id=value_id,
         n_clicks=0,
-        style={"cursor": "pointer"},
+        className="clickable-kpi-card-wrapper",
         children=[
             dbc.Card(
-                className="card kpi-card",
+                className="card kpi-card h-100",
                 children=[
                     dbc.CardHeader(
                         className="card-header",
@@ -111,7 +111,7 @@ def create_kpi_dashboard(kpi_data):
             cards.
     """
     return html.Div(
-        className="flex-wrapper",
+        className="flex-wrapper h-100 w-100",
         children=[create_kpi_card(**kpi) for kpi in kpi_data]
     )
 
@@ -516,6 +516,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
         spinner_class
     )
 
+
 @callback(
     Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
     Output(ID.MERCHANT_INPUT_MERCHANT_ID, "value", allow_duplicate=True),
@@ -597,6 +598,7 @@ def handle_kpi_click_merchant_group(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
 
     return no_update, no_update, no_update, no_update
 
+
 @callback(
     Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
     Output(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value", allow_duplicate=True),
@@ -673,6 +675,7 @@ def handle_kpi_click_all_merchant_(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
 
     return no_update, no_update, no_update, no_update
 
+
 # had to use all 4 inputs, otherwise immediate jump to user tab
 @callback(
     Output(ID.ACTIVE_TAB_STORE, "data", allow_duplicate=True),
@@ -741,7 +744,3 @@ def handle_kpi_click_individual_merchant(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4)
         return ID.TAB_USER, user_id
 
     return no_update, no_update
-
-
-
-

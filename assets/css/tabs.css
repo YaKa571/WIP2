@@ -340,6 +340,10 @@
 
 /* Graph Cards END */
 
+/* ============================================================
+   Cluster Tab
+   ============================================================ */
+
 /* Cluster Legend START */
 
 .legend-item-container {
@@ -373,3 +377,15 @@
 }
 
 /* Cluster Legend END */
+
+/* ============================================================
+   Merchant Tab
+   ============================================================ */
+
+.clickable-kpi-card-wrapper {
+    cursor: pointer;
+    flex: 1 1 0;
+    min-width: auto;
+    padding: 0;
+    margin: 0;
+}
