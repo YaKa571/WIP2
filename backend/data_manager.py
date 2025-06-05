@@ -49,7 +49,7 @@ class DataManager:
     _instance = None
 
     @staticmethod
-    def initialize(data_dir: Path = DATA_DIRECTORY, num_rows=50_001):  # <-- Change num_rows value here to trigger cache
+    def initialize(data_dir: Path = DATA_DIRECTORY, num_rows=50):  # <-- Change num_rows value here to trigger cache
         if DataManager._instance is None:
             DataManager._instance = DataManager(data_dir, num_rows=num_rows)
 

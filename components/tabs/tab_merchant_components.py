@@ -64,7 +64,7 @@ def create_merchant_group_line_chart(merchant_group, dark_mode: bool = const.DEF
         y=df_grouped['total_value'],
         name='TOTAL VALUE',
         yaxis='y2',
-        line=dict(color='red')
+        line=dict(color='#6a11cb')
     ))
 
     # Set colors based on dark mode
@@ -88,8 +88,8 @@ def create_merchant_group_line_chart(merchant_group, dark_mode: bool = const.DEF
             zerolinecolor=grid_color
         ),
         yaxis2=dict(
-            title=dict(text='TOTAL VALUE', font=dict(color='red')),
-            tickfont=dict(color='red'),
+            title=dict(text='TOTAL VALUE', font=dict(color='#6a11cb')),
+            tickfont=dict(color='#6a11cb'),
             anchor='x',
             overlaying='y',
             side='right',
@@ -162,7 +162,7 @@ def create_individual_merchant_line_chart(merchant, dark_mode: bool = const.DEFA
         y=df_grouped['total_value'],
         name='TOTAL VALUE',
         yaxis='y2',
-        line=dict(color='red')
+        line=dict(color='#6a11cb')
     ))
 
     # Set colors based on dark mode
@@ -187,8 +187,8 @@ def create_individual_merchant_line_chart(merchant, dark_mode: bool = const.DEFA
             zerolinecolor=grid_color
         ),
         yaxis2=dict(
-            title=dict(text='TOTAL VALUE', font=dict(color='red')),
-            tickfont=dict(color='red'),
+            title=dict(text='TOTAL VALUE', font=dict(color='#6a11cb')),
+            tickfont=dict(color='#6a11cb'),
             anchor='x',
             overlaying='y',
             side='right',
