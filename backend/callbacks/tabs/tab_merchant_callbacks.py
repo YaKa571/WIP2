@@ -549,23 +549,24 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
     prevent_initial_call=True,
 )
 def handle_kpi_click(_, __, ___, ____, selected_group):
-    if not selected_group:
-        return html.Div("Bitte zuerst eine Gruppe auswählen.")
-
     triggered = ctx.triggered_id
     if triggered is None:
-        return no_update  # Kein Klick passiert
+        return no_update
 
     if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP:
-        return html.Div(f"Gruppe '{selected_group}': Meistgenutzter Händler geklickt.")
+        print("MOST FREQUENTLY MERCHANT IN GROUP")
+        return html.Div(f"MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP.")
 
     elif triggered == ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP:
-        return html.Div(f"Gruppe '{selected_group}': Händler mit höchstem Umsatz geklickt.")
+        print("HIGHEST VALUE MERCHANT IN GROUP")
+        return html.Div(f"MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP.")
 
     elif triggered == ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP:
-        return html.Div(f"Gruppe '{selected_group}': Nutzer mit den meisten Transaktionen geklickt.")
+        print("USER MOST TRANSACTIONS IN GROUP")
+        return html.Div(f"MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP.")
 
     elif triggered == ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP:
-        return html.Div(f"Gruppe '{selected_group}': Nutzer mit höchstem Umsatz geklickt.")
+        print("USER HIGHEST VALUE MERCHANT IN GROUP")
+        return html.Div(f"MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP.")
 
     return no_update
