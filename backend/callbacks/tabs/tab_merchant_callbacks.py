@@ -60,57 +60,32 @@ def get_option_button_class(option: str, selected_option: str) -> str:
 # === KPI Card Factory ===
 
 def create_kpi_card(icon, title, value_1, value_2, value_id, value_1_class="", value_2_class=""):
-    """
-    Creates a KPI (Key Performance Indicator) card component with an icon, title,
-    and two value fields. The card is styled with predefined CSS classes and allows
-    dynamic updates using a specified value ID.
-
-    Parameters:
-        icon: str
-            The icon displayed in the card header. Should correspond to a supported
-            icon identifier.
-        title: str
-            The title of the KPI card displayed in the card header.
-        value_1: str
-            The primary value displayed inside the KPI card body.
-        value_2: str
-            The secondary value displayed underneath the primary value in the card body.
-        value_id: str
-            Unique identifier for the card's value container, used for dynamic updates.
-
-    Returns:
-        dbc.Card
-            A Dash Bootstrap Card component styled and populated with the
-            specified content.
-    """
-    return dbc.Card(
-        className="card kpi-card",
+    return html.Div(  # <- jetzt klickbar
+        id=value_id,
+        n_clicks=0,
+        style={"cursor": "pointer"},
         children=[
-
-            dbc.CardHeader(
-                className="card-header",
+            dbc.Card(
+                className="card kpi-card",
                 children=[
-
-                    comp_factory.create_icon(icon, cls="icon icon-small"),
-                    html.P(title, className="kpi-card-title"),
-
-                ]
-            ),
-
-            dbc.CardBody(
-                className="card-body",
-                children=[
-
-                    html.Div(
-                        id=value_id,
+                    dbc.CardHeader(
+                        className="card-header",
                         children=[
-
-                            html.P(value_1, className=f"kpi-card-value {value_1_class}"),
-                            html.P(value_2, className=f"kpi-card-value kpi-number-value {value_2_class}"),
-
+                            comp_factory.create_icon(icon, cls="icon icon-small"),
+                            html.P(title, className="kpi-card-title"),
+                        ]
+                    ),
+                    dbc.CardBody(
+                        className="card-body",
+                        children=[
+                            html.Div(
+                                children=[
+                                    html.P(value_1, className=f"kpi-card-value {value_1_class}"),
+                                    html.P(value_2, className=f"kpi-card-value kpi-number-value {value_2_class}"),
+                                ]
+                            )
                         ]
                     )
-
                 ]
             )
         ]
@@ -540,24 +515,233 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
         graph_title,
         spinner_class
     )
-# todo delete after testing
+
 @callback(
-    Output("merchant-dummy-output", "children"),
-    Input("merchant-test-button", "n_clicks"),
-    State(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "children"),
-    prevent_initial_call=True
+    Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
+    Output(ID.MERCHANT_INPUT_MERCHANT_ID, "value", allow_duplicate=True),
+    Output(ID.ACTIVE_TAB_STORE, "data", allow_duplicate=True),
+    Output(ID.USER_ID_SEARCH_INPUT, "value", allow_duplicate=True),
+    [
+        Input(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP, "n_clicks"),
+        Input(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "n_clicks"),
+        Input(ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP, "n_clicks"),
+        Input(ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP, "n_clicks"),
+    ],
+    [
+        State(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP, "children"),
+        State(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP, "children"),
+        State(ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP, "children"),
+        State(ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP, "children"),
+    ],
+    prevent_initial_call=True,
 )
-def display_kpi_value(n_clicks, kpi_children):
-    if not kpi_children:
-        # Wenn das Element nicht existiert oder leer ist
-        return no_update
+def handle_kpi_click_merchant_group(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
+    """
+    Handles user interaction with KPIs related to merchant groups and updates
+    the state of the application accordingly. This function manages changes
+    triggered by clicks on specific KPI elements and determines appropriate
+    IDs for merchants or users based on the provided KPI data.
 
-    try:
-        # Sicherstellen, dass es sich um eine Liste handelt
-        if not isinstance(kpi_children, list) or len(kpi_children) < 2:
-            return "KPI structure not as expected"
+    The outputs of this callback update the current merchant or user ID in the
+    application, as well as the active tab in the user interface. This ensures
+    that the UI reflects the correct details and context based on user interactions
+    with the KPI elements.
 
-        lines = [child.get("props", {}).get("children", "—") for child in kpi_children]
-        return f"KPI-Values: {lines[0]} — {lines[1]}"
-    except Exception as e:
-        return f"Error while reading KPI: {e}"
+    Args:
+        n1: Number of clicks on the 'most frequently merchant' KPI button.
+        n2: Number of clicks on the 'highest value merchant' KPI button.
+        n3: Number of clicks on the 'most transactions user' KPI button.
+        n4: Number of clicks on the 'highest value user' KPI button.
+        kpi1: Button child data associated with the 'most frequently merchant' KPI.
+        kpi2: Button child data associated with the 'highest value merchant' KPI.
+        kpi3: Button child data associated with the 'most transactions user' KPI.
+        kpi4: Button child data associated with the 'highest value user' KPI.
+
+    Returns:
+        list[Union[no_update, Any]]: The updated states for the merchant-selected button,
+        merchant input value, active tab, and user ID search input, based on the triggered input.
+    """
+    triggered = ctx.triggered_id
+
+    if triggered and n1 < 1 and n2 < 1 and n3 < 1 and n4 < 1:
+        return no_update, no_update, no_update, no_update
+
+    def extract_id(kpi_data):
+        try:
+            children = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
+            id_str = children[0]["props"].get("children", "")
+            return int(id_str.replace("ID", "").strip())
+        except Exception as e:
+            print(f"Error extracting ID: {e}")
+            return None
+
+    if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP:
+        merchant_id = extract_id(kpi1)
+        if merchant_id is not None:
+            return MerchantTab.INDIVIDUAL.value, merchant_id, no_update, no_update
+
+    elif triggered == ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_IN_GROUP:
+        merchant_id = extract_id(kpi2)
+        if merchant_id is not None:
+            return MerchantTab.INDIVIDUAL.value, merchant_id, no_update, no_update
+
+    elif triggered == ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP:
+        user_id = extract_id(kpi3)
+        if user_id is not None:
+            return no_update, no_update, ID.TAB_USER, user_id
+
+    elif triggered == ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP:
+        user_id = extract_id(kpi4)
+        if user_id is not None:
+            return no_update, no_update, ID.TAB_USER, user_id
+
+    return no_update, no_update, no_update, no_update
+
+@callback(
+    Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
+    Output(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value", allow_duplicate=True),
+    Output(ID.ACTIVE_TAB_STORE, "data", allow_duplicate=True),
+    Output(ID.USER_ID_SEARCH_INPUT, "value", allow_duplicate=True),
+    [
+        Input(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP, "n_clicks"),
+        Input(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP, "n_clicks"),
+        Input(ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_ALL, "n_clicks"),
+        Input(ID.MERCHANT_KPI_USER_HIGHEST_VALUE_ALL, "n_clicks"),
+    ],
+    [
+        State(ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP, "children"),
+        State(ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP, "children"),
+        State(ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_ALL, "children"),
+        State(ID.MERCHANT_KPI_USER_HIGHEST_VALUE_ALL, "children"),
+    ],
+    prevent_initial_call=True,
+)
+def handle_kpi_click_all_merchant_(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
+    """
+    Handles user interaction with various merchant KPI buttons in the dashboard. Depending on the triggered
+    input, it extracts relevant data from click events and updates the state of the dashboard components.
+
+    Args:
+        n1: Number of clicks on the "Most Frequently Merchant Group" KPI button.
+        n2: Number of clicks on the "Highest Value Merchant Group" KPI button.
+        n3: Number of clicks on the "User Most Transactions (All)" KPI button.
+        n4: Number of clicks on the "User Highest Value (All)" KPI button.
+        kpi1: Data representing the "Most Frequently Merchant Group" KPI.
+        kpi2: Data representing the "Highest Value Merchant Group" KPI.
+        kpi3: Data representing the "User Most Transactions (All)" KPI.
+        kpi4: Data representing the "User Highest Value (All)" KPI.
+
+    Returns:
+        tuple: A tuple of updated states for the dashboard components:
+            - ID.MERCHANT_SELECTED_BUTTON_STORE (data)
+            - ID.MERCHANT_INPUT_GROUP_DROPDOWN (value)
+            - ID.ACTIVE_TAB_STORE (data)
+            - ID.USER_ID_SEARCH_INPUT (value)
+    """
+    triggered = ctx.triggered_id
+
+    def extract_group_label(kpi_data):
+        try:
+            container = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
+            return container[0]["props"].get("children", "").strip()
+        except Exception:
+            return None
+
+    def extract_user_id(kpi_data):
+        try:
+            container = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
+            user_str = container[0]["props"].get("children", "").strip()
+            return int(user_str.replace("ID", "").strip()) if "ID" in user_str else None
+        except Exception:
+            return None
+
+    if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP:
+        group_name = extract_group_label(kpi1)
+        return MerchantTab.GROUP.value, group_name, no_update, no_update
+
+    elif triggered == ID.MERCHANT_KPI_HIGHEST_VALUE_MERCHANT_GROUP:
+        group_name = extract_group_label(kpi2)
+        return MerchantTab.GROUP.value, group_name, no_update, no_update
+
+    elif triggered == ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_ALL:
+        user_id = extract_user_id(kpi3)
+        return no_update, no_update, ID.TAB_USER, user_id
+
+    elif triggered == ID.MERCHANT_KPI_USER_HIGHEST_VALUE_ALL:
+        user_id = extract_user_id(kpi4)
+        return no_update, no_update, ID.TAB_USER, user_id
+
+    return no_update, no_update, no_update, no_update
+
+# had to use all 4 inputs, otherwise immediate jump to user tab
+@callback(
+    Output(ID.ACTIVE_TAB_STORE, "data", allow_duplicate=True),
+    Output(ID.USER_ID_SEARCH_INPUT, "value", allow_duplicate=True),
+    [
+        Input(ID.MERCHANT_KPI_MERCHANT_TRANSACTIONS, "n_clicks"),
+        Input(ID.MERCHANT_KPI_MERCHANT_VALUE, "n_clicks"),
+        Input(ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS, "n_clicks"),
+        Input(ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE, "n_clicks"),
+    ],
+    [
+        State(ID.MERCHANT_KPI_MERCHANT_TRANSACTIONS, "children"),
+        State(ID.MERCHANT_KPI_MERCHANT_VALUE, "children"),
+        State(ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS, "children"),
+        State(ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE, "children"),
+    ],
+    prevent_initial_call=True,
+)
+def handle_kpi_click_individual_merchant(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
+    """Handles the click events for individual merchant KPIs and updates components based on
+    the specific KPI button clicked. This function processes the triggered input, extracts relevant
+    user ID from the KPI data, and updates the active tab and user ID search input accordingly.
+
+    Args:
+        n1: The number of times the "Merchant Transactions" KPI button is clicked.
+        n2: The number of times the "Merchant Value" KPI button is clicked.
+        n3: The number of times the "Merchant User Most Transactions" KPI button is clicked.
+        n4: The number of times the "Merchant User Highest Value" KPI button is clicked.
+        kpi1: The state data of the "Merchant Transactions" KPI button.
+        kpi2: The state data of the "Merchant Value" KPI button.
+        kpi3: The state data of the "Merchant User Most Transactions" KPI button.
+        kpi4: The state data of the "Merchant User Highest Value" KPI button.
+
+    Returns:
+        Output: A tuple of the updated active tab and user ID search input value, or `no_update`
+        if no valid user ID is extracted.
+
+    Raises:
+        None: This function handles exceptions internally and does not raise them.
+    """
+    triggered = ctx.triggered_id
+
+    if triggered not in [
+        ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS,
+        ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE,
+    ]:
+        return no_update, no_update
+
+    def extract_user_id(kpi_data):
+        try:
+            children = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
+            id_str = children[0]["props"].get("children", "")
+            return int(id_str.replace("ID", "").strip())
+        except Exception as e:
+            print(f"Error extracting user ID: {e}")
+            return None
+
+    if triggered == ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS:
+        user_id = extract_user_id(kpi3)
+    elif triggered == ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE:
+        user_id = extract_user_id(kpi4)
+    else:
+        user_id = None
+
+    if user_id is not None:
+        return ID.TAB_USER, user_id
+
+    return no_update, no_update
+
+
+
+
