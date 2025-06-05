@@ -517,7 +517,6 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
     )
 
 @callback(
-    Output("merchant-dummy-output", "children"),
     Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
     Output(ID.MERCHANT_INPUT_MERCHANT_ID, "value", allow_duplicate=True),
     [
@@ -539,7 +538,7 @@ def handle_kpi_click(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
     print(f"Triggered by: {triggered}")
 
     if triggered and n1 < 1 and n2 < 1 and n3 < 1 and n4 < 1:
-        return no_update, no_update, no_update
+        return no_update, no_update
 
     def extract_merchant_id(kpi_data):
         try:
@@ -556,14 +555,14 @@ def handle_kpi_click(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
         kpi_data = kpi1 if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_IN_GROUP else kpi2
         merchant_id = extract_merchant_id(kpi_data)
         if merchant_id is not None:
-            return html.Div(f"Redirecting to merchant {merchant_id}..."), MerchantTab.INDIVIDUAL.value, merchant_id
+            return MerchantTab.INDIVIDUAL.value, merchant_id
         else:
-            return html.Div("Could not extract merchant ID."), no_update, no_update
+            return no_update, no_update
 
     elif triggered == ID.MERCHANT_KPI_USER_MOST_TRANSACTIONS_IN_GROUP:
-        return html.Div("User with most transactions in group."), no_update, no_update
+        return no_update, no_update
     elif triggered == ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP:
-        return html.Div("User with highest value in group."), no_update, no_update
+        return no_update, no_update
 
-    return no_update, no_update, no_update
+    return no_update, no_update
 
