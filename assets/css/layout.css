@@ -99,7 +99,7 @@ html, body, #react-entry-point, .dash-application {
     width: 75%;
     margin-left: auto;
     margin-right: auto;
-    background: var(--handle-color, #b7c3d8);
+    background: var(--vertical-handle-color, #b7c3d8);
 }
 
 /* ==========================================================================
