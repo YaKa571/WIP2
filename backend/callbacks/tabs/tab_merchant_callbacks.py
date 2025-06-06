@@ -2,16 +2,16 @@ from enum import Enum
 
 import dash_bootstrap_components as dbc
 import plotly.express as px
-from dash import html, Output, Input, callback, ctx, State, callback_context, no_update
+from dash import html, Output, Input, callback, ctx, State, no_update
 
 import components.constants as const
+from backend.data_handler import merchant_other_threshold
 from backend.data_manager import DataManager
 from components.factories import component_factory as comp_factory
 from components.tabs.tab_merchant_components import create_merchant_group_line_chart, \
     create_individual_merchant_line_chart
 from frontend.component_ids import ID
 from frontend.icon_manager import IconID
-from backend.data_handler import merchant_other_threshold
 
 # Initialize DataManager instance
 dm: DataManager = DataManager.get_instance()
@@ -59,14 +59,15 @@ def get_option_button_class(option: str, selected_option: str) -> str:
 
 # === KPI Card Factory ===
 
-def create_kpi_card(icon, title, value_1, value_2, value_id, value_1_class="", value_2_class=""):
+def create_kpi_card(icon, title, value_1, value_2, value_id, value_1_class="", value_2_class="", default_cursor=False):
+    wrapper_class = "clickable-kpi-card-wrapper default-cursor" if default_cursor else "clickable-kpi-card-wrapper"
     return html.Div(  # <- jetzt klickbar
         id=value_id,
         n_clicks=0,
-        style={"cursor": "pointer"},
+        className=wrapper_class,
         children=[
             dbc.Card(
-                className="card kpi-card",
+                className="card kpi-card h-100",
                 children=[
                     dbc.CardHeader(
                         className="card-header",
@@ -92,7 +93,7 @@ def create_kpi_card(icon, title, value_1, value_2, value_id, value_1_class="", v
     )
 
 
-def create_kpi_dashboard(kpi_data):
+def create_kpi_dashboard(kpi_data, default_cursor_ids=None):
     """
     Creates a KPI dashboard as a flexible wrapper containing KPI cards.
 
@@ -104,15 +105,30 @@ def create_kpi_dashboard(kpi_data):
         kpi_data: list
             A list of dictionaries, where each dictionary contains data
             required to create a KPI card.
+        default_cursor_ids: list, optional
+            A list of value_ids for which the default cursor should be applied.
+            If None, all cards will have the clickable cursor.
 
     Returns:
         dash.html.Div
             A Div component acting as a wrapper that includes all created KPI
             cards.
     """
+    if default_cursor_ids is None:
+        default_cursor_ids = []
+
+    children = []
+    for kpi in kpi_data:
+        # Check if this card should have default cursor
+        default_cursor = kpi.get("value_id") in default_cursor_ids
+        # Create a copy of the kpi dict and add default_cursor parameter
+        kpi_with_cursor = kpi.copy()
+        kpi_with_cursor["default_cursor"] = default_cursor
+        children.append(create_kpi_card(**kpi_with_cursor))
+
     return html.Div(
-        className="flex-wrapper",
-        children=[create_kpi_card(**kpi) for kpi in kpi_data]
+        className="flex-wrapper h-100 w-100",
+        children=children
     )
 
 
@@ -164,6 +180,8 @@ def create_all_merchant_kpis():
             "value_id": ID.MERCHANT_KPI_USER_HIGHEST_VALUE_ALL
         },
     ]
+
+    # All cards in this view are clickable, so no default cursor needed
     return create_kpi_dashboard(kpi_data)
 
 
@@ -221,6 +239,8 @@ def create_merchant_group_kpi(merchant_group):
             "value_id": ID.MERCHANT_KPI_USER_HIGHEST_VALUE_IN_GROUP
         },
     ]
+
+    # All cards in this view are clickable, so no default cursor needed
     return create_kpi_dashboard(kpi_data)
 
 
@@ -324,7 +344,12 @@ def create_individual_merchant_kpi(merchant: int = None):
             },
         ]
 
-    return create_kpi_dashboard(kpi_data)
+    # Specify which cards should have the default cursor
+    default_cursor_ids = [
+        ID.MERCHANT_KPI_MERCHANT_TRANSACTIONS,
+        ID.MERCHANT_KPI_MERCHANT_VALUE
+    ]
+    return create_kpi_dashboard(kpi_data, default_cursor_ids)
 
 
 # === GRAPH ===
@@ -516,6 +541,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
         spinner_class
     )
 
+
 @callback(
     Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
     Output(ID.MERCHANT_INPUT_MERCHANT_ID, "value", allow_duplicate=True),
@@ -597,6 +623,7 @@ def handle_kpi_click_merchant_group(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
 
     return no_update, no_update, no_update, no_update
 
+
 @callback(
     Output(ID.MERCHANT_SELECTED_BUTTON_STORE, "data", allow_duplicate=True),
     Output(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value", allow_duplicate=True),
@@ -673,6 +700,7 @@ def handle_kpi_click_all_merchant_(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
 
     return no_update, no_update, no_update, no_update
 
+
 # had to use all 4 inputs, otherwise immediate jump to user tab
 @callback(
     Output(ID.ACTIVE_TAB_STORE, "data", allow_duplicate=True),
@@ -741,7 +769,3 @@ def handle_kpi_click_individual_merchant(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4)
         return ID.TAB_USER, user_id
 
     return no_update, no_update
-
-
-
-
