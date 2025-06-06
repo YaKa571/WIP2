@@ -10,9 +10,26 @@
 
 /* Fraud Tab Grid Layout */
 .tab-content-inner.fraud-tab {
-    grid-template-rows: auto !important;
+    grid-template-rows: auto auto 1fr 1fr !important;  
     align-items: start;
     align-content: start;
+}
+
+.tab-card-row {
+    display: flex;
+    flex-direction: row;
+    gap: var(--gutter);
+    margin-bottom: var(--gutter);
+    flex-wrap: wrap; /* Falls zu wenig Platz, dann umbruch statt overflow */
+}
+
+.tab-card {
+    flex: 1 1 0;
+    min-width: 300px;
+    max-width: 100%;
+    background-color: var(--kpi-card-body-bg);
+    border-radius: var(--inner-border-radius);
+    box-shadow: var(--card-shadow);
 }
 
 /* Cluster Tab Grid Layout */
@@ -327,3 +344,4 @@
 }
 
 /* Graph Cards END */
+

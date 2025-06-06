@@ -139,7 +139,7 @@ class DataManager:
         # User Tab
         self._cache_user_transactions: dict[int, pd.DataFrame] = {}  # user_id -> DataFrame
         self._cache_user_merchant_agg: dict[int, pd.DataFrame] = {}  # user_id -> Aggregated DataFrame
-
+       
         # Map
         self.online_shape = list[list]
 

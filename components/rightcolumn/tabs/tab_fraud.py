@@ -1,53 +1,180 @@
 import dash_bootstrap_components as dbc
-from dash import html
+from dash import dcc, html
 
 from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
 
 
-# Info: Edit grid layout in assets/css/tabs.css
-
-
-# TODO: Free...
 def create_fraud_content():
     return html.Div(
         children=[
-
-        _create_heading()
-
-    ],
+            _create_heading(),
+            _create_kpi_cards(),
+            _create_analysis_tabs(),
+        ],
         className="tab-content-inner fraud-tab"
     )
 
 
 def _create_heading() -> html.Div:
     """
-    Generates a heading layout for the Fraud tab using Dash components.
-
-    The layout includes a dummy placeholder, a header, an information icon, and a tooltip
-    with additional information.
-
-    Returns:
-        html.Div: A Div element containing the structured layout for the Fraud tab heading.
-
+    Generates the heading for the Fraud tab including the info icon and tooltip.
     """
     return html.Div(
         className="tab-heading-wrapper",
         children=[
-
-            html.P(),  # Dummy element
-            html.H4("Fraud", id=ID.FRAUD_TAB_HEADING, className="green-heading"),
+            html.P(),  # Placeholder
+            html.H4("Fraud Overview", id=ID.FRAUD_TAB_HEADING, className="green-heading"),
             comp_factory.create_info_icon(ID.FRAUD_TAB_INFO_ICON),
             dbc.Tooltip(
                 target=ID.FRAUD_TAB_INFO_ICON,
                 is_open=False,
                 placement="bottom-end",
                 children=[
-                    "Placeholder for",
+                    "This tab shows potentially fraudulent activity, trends,",
                     html.Br(),
-                    "the tooltip",
-                    html.Br(),
-                    "..."
-                ])
+                    "and visualizations based on transaction and card data.",
+                ],
+            ),
+        ]
+    )
 
-        ])
+
+def _create_kpi_cards() -> html.Div:
+    """
+    Displays fraud-related KPIs such as total fraud cases and fraud ratio.
+    """
+    return html.Div(
+        className="flex-wrapper",
+        children=[
+            comp_factory.create_kpi_card(
+                title="Total Fraud Cases",
+                icon_id=ID.FRAUD_KPI_TOTAL_FRAUD_ICON,
+                div_id=ID.FRAUD_KPI_TOTAL_FRAUD_DIV_ID
+            ),
+            comp_factory.create_kpi_card(
+                title="Fraud Ratio (%)",
+                icon_id=ID.FRAUD_KPI_FRAUD_RATIO_ICON,
+                div_id=ID.FRAUD_KPI_FRAUD_RATIO_DIV_ID
+            ),
+        ]
+    )
+
+
+
+def _create_analysis_tabs() -> html.Div:
+    return html.Div(
+        className="fraud-analysis-tabs",
+        children=[
+            dcc.Tabs([
+                dcc.Tab(label="Overview", children=[
+                    html.Div(className="tab-card-row", children=[
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Fraud Transactions per US State"),
+                                dcc.Graph(id=ID.FRAUD_STATE_GRAPH, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Share of Online vs In-Store Transactions"),
+                                dcc.Graph(id=ID.FRAUD_PIE_CHART, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                    ]),
+                    html.Div(className="tab-card-row", children=[
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Top Online Merchants by Fraud Count"),
+                                dcc.Graph(id=ID.FRAUD_TOP_MERCHANTS, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                    ]),
+                ]),
+                dcc.Tab(label="Demographics", children=[
+                    html.Div(className="tab-card-row", children=[
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Fraud by Age Group"),
+                                dcc.Graph(id=ID.FRAUD_DEMO_AGE_GRAPH, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Fraud by Gender"),
+                                dcc.Graph(id=ID.FRAUD_DEMO_GENDER_GRAPH, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                    ]),
+                    html.Div(className="tab-card-row", children=[
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Fraud by Income"),
+                                dcc.Graph(id=ID.FRAUD_DEMO_INCOME_GRAPH, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                    ]),
+                ]),
+                dcc.Tab(label="Patterns", children=[
+                    html.Div(className="tab-card-row", children=[
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Fraud by Hour of Day"),
+                                dcc.Graph(id=ID.FRAUD_PATTERN_HOUR_GRAPH, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Fraud by Weekday"),
+                                dcc.Graph(id=ID.FRAUD_PATTERN_WEEKDAY_GRAPH, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                    ]),
+                    html.Div(className="tab-card-row", children=[
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Average Fraud Amount"),
+                                dcc.Graph(id=ID.FRAUD_PATTERN_AMOUNT_GRAPH, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                    ]),
+                ]),
+                dcc.Tab(label="Cards & Merchants", children=[
+                    html.Div(className="tab-card-row", children=[
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Fraud by Card Type"),
+                                dcc.Graph(id=ID.FRAUD_CARD_TYPE_GRAPH, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Fraud by Card Brand"),
+                                dcc.Graph(id=ID.FRAUD_CARD_BRAND_GRAPH, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                    ]),
+                    html.Div(className="tab-card-row", children=[
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H4("Top Merchant Categories (MCC)"),
+                                dcc.Graph(id=ID.FRAUD_MCC_GRAPH, style={"height": "340px", "width": "100%"}),
+                            ]),
+                            className="tab-card"
+                        ),
+                    ]),
+                ]),
+            ])
+        ]
+    )

@@ -24,6 +24,7 @@ from backend.callbacks.tabs.tab_user_callbacks import (update_user_kpis, update_
 from backend.callbacks.tabs.tab_home_callbacks import (store_selected_state, update_all_pies,  # noqa: F401
                                                        update_bar_chart, bridge_home_to_user_tab)  # noqa: F401
 from backend.callbacks.tabs.tab_merchant_callbacks import update_merchant, set_merchant_tab  # noqa: F401
+from backend.callbacks.tabs.tab_fraud_callbacks import *  # noqa: F401
 
 from components.leftcolumn.left_column import create_left_column
 from components.rightcolumn.right_column import create_right_column
