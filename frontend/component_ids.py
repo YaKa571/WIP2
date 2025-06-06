@@ -130,3 +130,4 @@ class ID(str, Enum):
     MERCHANT_SETTINGS_WRAPPER = "merchant-settings-wrapper"
     MERCHANT_SELECTED_BUTTON_STORE = "merchant-selected-button-store"
     MERCHANT_BAR_CHART_SPINNER = "merchant-bar-chart-spinner"
+    MERCHANT_GRAPH_CARD = "merchant-graph-card"

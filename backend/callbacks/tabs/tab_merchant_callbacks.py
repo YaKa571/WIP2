@@ -93,7 +93,7 @@ def create_kpi_card(icon, title, value_1, value_2, value_id, value_1_class="", v
     )
 
 
-def create_kpi_dashboard(kpi_data, default_cursor_ids=None):
+def create_kpi_dashboard(kpi_data, clickable_kpi_card_ids=None):
     """
     Creates a KPI dashboard as a flexible wrapper containing KPI cards.
 
@@ -105,22 +105,23 @@ def create_kpi_dashboard(kpi_data, default_cursor_ids=None):
         kpi_data: list
             A list of dictionaries, where each dictionary contains data
             required to create a KPI card.
-        default_cursor_ids: list, optional
-            A list of value_ids for which the default cursor should be applied.
-            If None, all cards will have the clickable cursor.
+        clickable_kpi_card_ids: list, optional
+            A list of value_ids for which the clickable cursor should be applied,
+            enabling visual effects like hover. If None, all cards will be clickable.
 
     Returns:
         dash.html.Div
             A Div component acting as a wrapper that includes all created KPI
             cards.
     """
-    if default_cursor_ids is None:
-        default_cursor_ids = []
+    if clickable_kpi_card_ids is None:
+        # If no specific clickable IDs are provided, make all cards clickable
+        clickable_kpi_card_ids = [kpi.get("value_id") for kpi in kpi_data]
 
     children = []
     for kpi in kpi_data:
-        # Check if this card should have default cursor
-        default_cursor = kpi.get("value_id") in default_cursor_ids
+        # Check if this card should be clickable
+        default_cursor = kpi.get("value_id") not in clickable_kpi_card_ids
         # Create a copy of the kpi dict and add default_cursor parameter
         kpi_with_cursor = kpi.copy()
         kpi_with_cursor["default_cursor"] = default_cursor
@@ -344,12 +345,12 @@ def create_individual_merchant_kpi(merchant: int = None):
             },
         ]
 
-    # Specify which cards should have the default cursor
-    default_cursor_ids = [
-        ID.MERCHANT_KPI_MERCHANT_TRANSACTIONS,
-        ID.MERCHANT_KPI_MERCHANT_VALUE
+    # Specify which cards should be clickable (have hover effects)
+    clickable_kpi_card_ids = [
+        ID.MERCHANT_KPI_MERCHANT_USER_MOST_TRANSACTIONS,
+        ID.MERCHANT_KPI_MERCHANT_USER_HIGHEST_VALUE
     ]
-    return create_kpi_dashboard(kpi_data, default_cursor_ids)
+    return create_kpi_dashboard(kpi_data, clickable_kpi_card_ids)
 
 
 # === GRAPH ===
@@ -441,6 +442,7 @@ def set_merchant_tab(n_all, n_group, n_indiv):
     Output(ID.MERCHANT_GRAPH_CONTAINER, "figure"),
     Output(ID.MERCHANT_GRAPH_TITLE, "children"),
     Output(ID.MERCHANT_BAR_CHART_SPINNER, "className"),
+    Output(ID.MERCHANT_GRAPH_CARD, "className"),
     Input(ID.MERCHANT_SELECTED_BUTTON_STORE, "data"),
     Input(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
     Input(ID.MERCHANT_INPUT_MERCHANT_ID, "value"),
@@ -478,6 +480,10 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
     # Define display styles based on selected tab
     visible_style = {"display": "flex", "width": "100%"}
     hidden_style = {"display": "none", "width": "100%"}
+
+    # Set modebar class for graph card based on selected Merchant Tab
+    modebar_base_class = "graph-card with-bar-chart"
+    modebar_class = f"{modebar_base_class} higher-modebar" if selected == MerchantTab.ALL.value else f"{modebar_base_class} lowest-modebar"
 
     # Set input wrapper visibility based on selected tab
     group_style = visible_style if selected == MerchantTab.GROUP.value else hidden_style
@@ -538,7 +544,8 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
         kpi_content,
         graph_content,
         graph_title,
-        spinner_class
+        spinner_class,
+        modebar_class,
     )
 
 
