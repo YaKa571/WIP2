@@ -64,7 +64,7 @@ def create_merchant_group_line_chart(merchant_group, dark_mode: bool = const.DEF
         y=df_grouped['total_value'],
         name='TOTAL VALUE',
         yaxis='y2',
-        line=dict(color='#6a11cb')
+        line=dict(color=const.COLOR_ORANGE)
     ))
 
     # Set colors based on dark mode
@@ -88,15 +88,15 @@ def create_merchant_group_line_chart(merchant_group, dark_mode: bool = const.DEF
             zerolinecolor=grid_color
         ),
         yaxis2=dict(
-            title=dict(text='TOTAL VALUE', font=dict(color='#6a11cb')),
-            tickfont=dict(color='#6a11cb'),
+            title=dict(text='TOTAL VALUE', font=dict(color=const.COLOR_ORANGE)),
+            tickfont=dict(color=const.COLOR_ORANGE),
             anchor='x',
             overlaying='y',
             side='right',
             gridcolor=grid_color,
             zerolinecolor=grid_color
         ),
-        legend=dict(x=0.5, y=0.975, xanchor='center', yanchor='top'),
+        legend=dict(x=0.5, y=1, xanchor='center', yanchor='top'),
         margin=dict(l=1, r=1, t=1, b=1)
     )
 
@@ -162,7 +162,7 @@ def create_individual_merchant_line_chart(merchant, dark_mode: bool = const.DEFA
         y=df_grouped['total_value'],
         name='TOTAL VALUE',
         yaxis='y2',
-        line=dict(color='#6a11cb')
+        line=dict(color=const.COLOR_ORANGE)
     ))
 
     # Set colors based on dark mode
@@ -187,15 +187,15 @@ def create_individual_merchant_line_chart(merchant, dark_mode: bool = const.DEFA
             zerolinecolor=grid_color
         ),
         yaxis2=dict(
-            title=dict(text='TOTAL VALUE', font=dict(color='#6a11cb')),
-            tickfont=dict(color='#6a11cb'),
+            title=dict(text='TOTAL VALUE', font=dict(color=const.COLOR_ORANGE)),
+            tickfont=dict(color=const.COLOR_ORANGE),
             anchor='x',
             overlaying='y',
             side='right',
             gridcolor=grid_color,
             zerolinecolor=grid_color
         ),
-        legend=dict(x=0.5, y=0.975, xanchor='center', yanchor='top'),
+        legend=dict(x=0.5, y=1, xanchor='center', yanchor='top'),
         margin=dict(l=1, r=1, t=1, b=1)
     )
 
