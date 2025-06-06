@@ -88,6 +88,7 @@
     --info-text-color: rgba(55, 55, 55, 0.55);
     --handle-color: rgb(215, 215, 215);
     --handle-color-hover: var(--blue-main);
+    --clickable-kpi-card-hover-filter: brightness(0.975);
 }
 
 .dark-mode {
@@ -167,4 +168,5 @@
     --info-text-color: rgba(200, 200, 200, 0.55);
     --handle-color: rgb(40, 40, 40);
     --handle-color-hover: var(--blue-main);
+    --clickable-kpi-card-hover-filter: brightness(1.1);
 }

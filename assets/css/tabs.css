@@ -388,6 +388,13 @@
     min-width: auto;
     padding: 0;
     margin: 0;
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+/* Hover effects for clickable KPI cards */
+.clickable-kpi-card-wrapper:not(.default-cursor) .card:hover {
+    filter: var(--clickable-kpi-card-hover-filter);
+    transform: translateY(-4px);
 }
 
 .default-cursor {
