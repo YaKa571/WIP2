@@ -84,8 +84,22 @@ html, body, #react-entry-point, .dash-application {
     background: var(--handle-color, #b7c3d8);
 }
 
-.resize-handle:hover, .resize-handle:active {
+.resize-handle:hover, .resize-handle:active,
+.vertical-resize-handle:hover, .vertical-resize-handle:active {
     background: var(--handle-color-hover, #999);
+}
+
+.vertical-resize-handle {
+    height: 5px;
+    min-height: 5px;
+    cursor: ns-resize;
+    border-radius: 10px;
+    z-index: 10;
+    transition: background 0.2s;
+    width: 75%;
+    margin-left: auto;
+    margin-right: auto;
+    background: var(--handle-color, #b7c3d8);
 }
 
 /* ==========================================================================

@@ -44,6 +44,7 @@ def create_home_content() -> html.Div:
             _create_heading(),
             _create_top_kpis(),
             _create_middle_circle_diagrams(),
+            html.Div(className="vertical-resize-handle"),
             _create_bottom_bar_diagrams()
 
         ])

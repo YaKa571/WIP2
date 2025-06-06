@@ -3,7 +3,7 @@
    ============================================================ */
 
 .tab-content-inner.home-tab {
-    grid-template-rows: auto auto 7fr 9fr !important; /* 4 rows: heading, KPIs, pies, bar */
+    grid-template-rows: auto auto 7fr 5px 9fr; /* 5 rows: heading, KPIs, pies, resize-handle, bar (min 5fr) */
     align-items: start;
     align-content: start;
 }
