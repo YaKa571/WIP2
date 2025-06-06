@@ -10,6 +10,7 @@ GREEN_LIGHT = "#259d60"
 GREEN_DARK = "#81C784"
 COLOR_ONLINE = "#00bcd4"
 COLOR_INSTORE = "#fb8c00"
+COLOR_ORANGE = "#ff9800"
 AGE_GROUP_COLORS = {
     "10-20": "#16a085",  # dark green/teal
     "20-30": "#2980b9",  # strong blue
