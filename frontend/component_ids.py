@@ -66,6 +66,35 @@ class ID(str, Enum):
     FRAUD_TAB_INFO_ICON = "fraud-tab-info-icon"
     FRAUD_TAB_HEADING = "fraud-tab-heading"
 
+    FRAUD_STATE_GRAPH = "fraud-state-graph"
+    FRAUD_PIE_CHART = "fraud-pie-chart"
+    FRAUD_TOP_MERCHANTS = "fraud-top-merchants"
+
+    FRAUD_DARK_MODE_SWITCH = "fraud-dark-mode-switch"
+    FRAUD_GRAPH_STATE = "fraud-graph-state"
+
+    FRAUD_KPI_TOTAL_FRAUD_ICON = "fraud-kpi-total-fraud-icon"
+    FRAUD_KPI_TOTAL_FRAUD_DIV_ID = "fraud-kpi-total-fraud-div"
+
+    FRAUD_KPI_TOTAL_TRANSACTIONS_ICON = "fraud-kpi-total-transactions-icon"
+    FRAUD_KPI_TOTAL_TRANSACTIONS_DIV_ID = "fraud-kpi-total-transactions-div"
+
+    FRAUD_KPI_FRAUD_RATIO_ICON = "fraud-kpi-fraud-ratio-icon"
+    FRAUD_KPI_FRAUD_RATIO_DIV_ID = "fraud-kpi-fraud-ratio-div"
+
+    FRAUD_DEMO_AGE_GRAPH = "fraud-demo-age-graph"
+    FRAUD_DEMO_GENDER_GRAPH = "fraud-demo-gender-graph"
+    FRAUD_DEMO_INCOME_GRAPH = "fraud-demo-income-graph"
+
+    FRAUD_PATTERN_HOUR_GRAPH = "fraud-pattern-hour-graph"
+    FRAUD_PATTERN_WEEKDAY_GRAPH = "fraud-pattern-weekday-graph"
+    FRAUD_PATTERN_AMOUNT_GRAPH = "fraud-pattern-amount-graph"
+
+    FRAUD_CARD_TYPE_GRAPH = "fraud-card-type-graph"
+    FRAUD_CARD_BRAND_GRAPH = "fraud-card-brand-graph"
+    FRAUD_MCC_GRAPH = "fraud-mcc-graph"
+
+
     # Cluster Tab
     CLUSTER_DROPDOWN = "cluster-dropdown"
     CLUSTER_LEGEND = "cluster-legend"
