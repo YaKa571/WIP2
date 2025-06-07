@@ -233,6 +233,7 @@ def _create_merchant_graph():
         children=[
 
             dbc.Card(
+                id=ID.MERCHANT_GRAPH_CARD,
                 className="graph-card with-bar-chart",
                 children=[
 

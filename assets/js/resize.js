@@ -45,13 +45,13 @@ function activateResizeHandle() {
 }
 
 // Search several times (max 30)
-let tries = 0;
-const maxTries = 30;
-const interval = setInterval(function () {
+let horizontalTries = 0;
+const horizontalMaxTries = 30;
+const horizontalInterval = setInterval(function () {
     if (activateResizeHandle()) {
-        clearInterval(interval);
+        clearInterval(horizontalInterval);
     } else {
-        tries += 1;
-        if (tries >= maxTries) clearInterval(interval);
+        horizontalTries += 1;
+        if (horizontalTries >= horizontalMaxTries) clearInterval(horizontalInterval);
     }
 }, 200);

@@ -84,8 +84,22 @@ html, body, #react-entry-point, .dash-application {
     background: var(--handle-color, #b7c3d8);
 }
 
-.resize-handle:hover, .resize-handle:active {
+.resize-handle:hover, .resize-handle:active,
+.vertical-resize-handle:hover, .vertical-resize-handle:active {
     background: var(--handle-color-hover, #999);
+}
+
+.vertical-resize-handle {
+    height: 5px;
+    min-height: 5px;
+    cursor: ns-resize;
+    border-radius: 10px;
+    z-index: 10;
+    transition: background 0.2s;
+    width: 75%;
+    margin-left: auto;
+    margin-right: auto;
+    background: var(--vertical-handle-color, #b7c3d8);
 }
 
 /* ==========================================================================
@@ -103,21 +117,6 @@ li span:nth-of-type(2) {
 
 .green-text {
     color: var(--kpi-number-value);
-}
-
-/* ==========================================================================
-   Top Cards (KPI)
-   ========================================================================== */
-
-.top-cards {
-    display: flex;
-    flex-wrap: wrap; /* Allow wrapping 3->2->1 per row */
-    gap: var(--gutter);
-}
-
-.top-cards .card {
-    flex: 1 1 0;
-    min-width: 240px;
 }
 
 /* ==========================================================================
@@ -190,12 +189,61 @@ li span:nth-of-type(2) {
    KPI-Specific Styles
    ========================================================================== */
 
+/* ==========================================================================
+   Top Cards (KPI)
+   ========================================================================== */
+
 .top-cards {
+    display: flex;
+    flex-direction: row;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    border-radius: var(--outer-border-radius);
+    gap: var(--gutter);
+    align-items: stretch;
     line-height: 1.2;
 }
 
+.top-cards .card {
+    flex: 1 1 0;
+    min-width: 250px;
+    outline: var(--kpi-graph-card-outline);
+    border: none !important;
+    overflow: hidden;
+}
+
+.top-cards .card-header,
+.top-cards .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin: 0;
+    padding: 1rem;
+}
+
+.top-cards .card-header {
+    background-color: var(--kpi-card-header-bg);
+    border-bottom: 1px solid var(--kpi-card-splitline);
+    height: 55%;
+}
+
+.top-cards .card-body {
+    background-color: var(--kpi-card-body-bg);
+    height: 45%;
+}
+
+.top-cards .kpi-card .card-header .kpi-card-title {
+    font-weight: bold;
+}
+
+.top-cards .kpi-card .card-header .kpi-card-value.kpi-number-value {
+    padding-top: 0.5rem;
+}
+
 .top-cards .kpi-card-icon {
-    width: clamp(21px, 1.5vw, 31px);
+    width: clamp(21px, 1.2vw, 31px);
     height: auto;
     object-fit: contain;
     margin-bottom: 0.33rem;
@@ -209,7 +257,7 @@ li span:nth-of-type(2) {
     width: auto;
     text-align: center;
     padding: 0 0.5rem;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: bold;
     color: var(--text-main);
     white-space: nowrap;
@@ -225,7 +273,7 @@ li span:nth-of-type(2) {
     text-align: center;
     text-transform: uppercase;
     padding: 0 0.5rem;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 500;
     color: var(--text-main);
     white-space: nowrap;

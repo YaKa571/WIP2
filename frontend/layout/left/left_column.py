@@ -47,13 +47,22 @@ def create_map_card() -> dbc.Card:
                 children=[
 
                     html.Div(
-                        id=ID.MAP_CONTAINER.value,
+                        id=ID.MAP_CONTAINER,
                         className="map-container fade-in"
                     ),
 
                     html.Div(
-                        id=ID.MAP_SPINNER.value,
+                        id=ID.MAP_SPINNER,
                         className="map-spinner"
+                    ),
+
+                    html.Button(
+                        className="settings-button-text map-toggle-states-button",
+                        id=ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES,
+                        children=[
+                            html.I(className="bi bi-geo-alt-fill me-2"),
+                            "Show all States"
+                        ]
                     )
 
                 ])

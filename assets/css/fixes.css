@@ -33,8 +33,20 @@
 }
 
 /* Merchant Group Distribution */
+
+/* Higher modebar */
+.graph-card.with-bar-chart.higher-modebar .js-plotly-plot .modebar {
+    top: -6px !important;
+}
+
+/* Lower modebar */
 .graph-card.with-bar-chart.lower-modebar .js-plotly-plot .modebar {
     top: 38px !important;
+}
+
+/* Lowest modebar */
+.graph-card.with-bar-chart.lowest-modebar .js-plotly-plot .modebar {
+    top: 42px !important;
 }
 
 /* When hovering over diagram show modebar */

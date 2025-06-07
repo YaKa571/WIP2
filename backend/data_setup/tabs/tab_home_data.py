@@ -561,7 +561,9 @@ class HomeTabData:
             "transaction_counts_by_hour": self._cache_transaction_counts_by_hour,
             "expenditures_by_gender": self._cache_expenditures_by_gender,
             "expenditures_by_age": self._cache_expenditures_by_age,
-            "expenditures_by_channel": self._cache_expenditures_by_channel
+            "expenditures_by_channel": self._cache_expenditures_by_channel,
+            "state_kpi_values": getattr(self, '_cache_state_kpi_values', {}),
+            "avg_kpi_values_per_state": getattr(self, '_cache_avg_kpi_values_per_state', None)
         }
 
         self.data_manager.save_cache_to_disk("home_tab_caches", cache_data)
@@ -592,6 +594,8 @@ class HomeTabData:
             self._cache_expenditures_by_gender = cache_data.get("expenditures_by_gender", {})
             self._cache_expenditures_by_age = cache_data.get("expenditures_by_age", {})
             self._cache_expenditures_by_channel = cache_data.get("expenditures_by_channel", {})
+            self._cache_state_kpi_values = cache_data.get("state_kpi_values", {})
+            self._cache_avg_kpi_values_per_state = cache_data.get("avg_kpi_values_per_state", None)
 
             # Load map data
             map_data = self.data_manager.load_cache_from_disk("home_tab_map_data")
@@ -603,6 +607,70 @@ class HomeTabData:
 
         bm.print_time(level=4)
         return False
+
+    def get_state_kpi_values(self, state: str = None) -> tuple[int, float, float]:
+        """
+        Calculates the KPI values for a specific state or for all states if state is None.
+
+        Args:
+            state (str, optional): The state to calculate KPIs for. If None, calculates for all states.
+
+        Returns:
+            tuple: A tuple containing (transaction_count, total_value, average_value)
+        """
+        # Check if we have cached values for this state
+        if hasattr(self, '_cache_state_kpi_values') and state in self._cache_state_kpi_values:
+            return self._cache_state_kpi_values[state]
+
+        # Filter transactions by state if provided
+        df = self.df_transactions
+        if state:
+            df = df[df["state_name"] == state]
+
+        # Calculate KPI values
+        transaction_count = len(df)
+        total_value = df["amount"].sum()
+        average_value = total_value / transaction_count if transaction_count > 0 else 0
+
+        # Cache the results
+        if not hasattr(self, '_cache_state_kpi_values'):
+            self._cache_state_kpi_values = {}
+        self._cache_state_kpi_values[state] = (transaction_count, total_value, average_value)
+
+        return transaction_count, total_value, average_value
+
+    def get_average_kpi_values_per_state(self) -> tuple[float, float, float]:
+        """
+        Calculates the average KPI values per state.
+
+        Returns:
+            tuple: A tuple containing (avg_transaction_count_per_state, avg_total_value_per_state, avg_transaction_value)
+        """
+        # Check if we have cached values
+        if hasattr(self, '_cache_avg_kpi_values_per_state'):
+            return self._cache_avg_kpi_values_per_state
+
+        # Get all unique states
+        states = self.df_transactions['state_name'].dropna().unique().tolist()
+        num_states = len(states)
+
+        if num_states == 0:
+            return 0, 0, 0
+
+        # Get USA-wide KPI values
+        usa_transaction_count, usa_total_value, usa_avg_value = self.get_state_kpi_values(None)
+
+        # Calculate average per state
+        avg_transaction_count_per_state = usa_transaction_count / num_states
+        avg_total_value_per_state = usa_total_value / num_states
+
+        # The average transaction value remains the same
+        avg_transaction_value = usa_avg_value
+
+        # Cache the results
+        self._cache_avg_kpi_values_per_state = (avg_transaction_count_per_state, avg_total_value_per_state, avg_transaction_value)
+
+        return avg_transaction_count_per_state, avg_total_value_per_state, avg_transaction_value
 
     def _pre_cache_home_tab_data(self) -> None:
         """
@@ -640,8 +708,12 @@ class HomeTabData:
             self.get_visits_by_merchant,
             self.get_expenditures_by_gender,
             self.get_expenditures_by_age,
-            self.get_expenditures_by_channel
+            self.get_expenditures_by_channel,
+            self.get_state_kpi_values
         ]
+
+        # Also pre-cache the average values per state
+        self.get_average_kpi_values_per_state()
 
         # First for overall (state=None) - this is often a dependency for state-specific data
         bm_usa_wide = Benchmark("Home: Pre-caching of USA-wide data")

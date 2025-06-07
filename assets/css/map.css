@@ -12,6 +12,7 @@
     padding: 0 !important;
     height: 100%;
     border-radius: var(--outer-border-radius) !important;
+    outline: var(--kpi-graph-card-outline);
 }
 
 .map-container {
@@ -71,4 +72,19 @@
 
 .map-container.fade-out ~ .map-spinner {
     opacity: 1;
+}
+
+.map-toggle-states-button {
+    position: absolute;
+    top: calc(2 * var(--gutter));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    padding: 5px 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(3px);
+}
+
+.map-toggle-states-button:hover {
+    transform: translateX(-50%) scale(1.04);
 }

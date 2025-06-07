@@ -3,7 +3,7 @@
    ============================================================ */
 
 .tab-content-inner.home-tab {
-    grid-template-rows: auto auto 7fr 9fr !important; /* 4 rows: heading, KPIs, pies, bar */
+    grid-template-rows: auto auto 7fr 5px 9fr; /* 5 rows: heading, KPIs, pies, resize-handle, bar (min 5fr) */
     align-items: start;
     align-content: start;
 }
@@ -208,18 +208,15 @@
 .tab-content-inner .flex-wrapper .kpi-card .card-header {
     background-color: var(--kpi-card-header-bg);
     border-bottom: 1px solid var(--kpi-card-splitline);
-    height: 50%;
-    padding: 1rem;
+}
+
+.tab-content-inner .flex-wrapper .kpi-card .card-body {
+    background-color: var(--kpi-card-body-bg);
 }
 
 .tab-content-inner .flex-wrapper .kpi-card .card-header.fit-content,
 .tab-content-inner .flex-wrapper .kpi-card .card-body.fit-content {
     height: fit-content !important;
-}
-
-.tab-content-inner .flex-wrapper .kpi-card .card-body {
-    background-color: var(--kpi-card-body-bg);
-    height: 50%;
 }
 
 .tab-content-inner .flex-wrapper .kpi-card .kpi-card-title {
@@ -388,6 +385,13 @@
     min-width: auto;
     padding: 0;
     margin: 0;
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+/* Hover effects for clickable KPI cards */
+.clickable-kpi-card-wrapper:not(.default-cursor) .card:hover {
+    filter: var(--clickable-kpi-card-hover-filter);
+    transform: translateY(-4px);
 }
 
 .default-cursor {

@@ -10,6 +10,11 @@ class ID(str, Enum):
     KPI_CARD_SUM_OF_TRANSACTIONS = "kpi-card-sum-of-transactions"
     KPI_CARD_AVG_TRANSACTION_AMOUNT = "kpi-card-avg-transaction-amount"
 
+    # KPI Card Tooltips
+    KPI_CARD_AMT_TRANSACTIONS_TOOLTIP = "kpi-card-amt-transactions-tooltip"
+    KPI_CARD_SUM_OF_TRANSACTIONS_TOOLTIP = "kpi-card-sum-of-transactions-tooltip"
+    KPI_CARD_AVG_TRANSACTION_AMOUNT_TOOLTIP = "kpi-card-avg-transaction-amount-tooltip"
+
     TABS_BAR = "tabs-bar"
     TAB_HOME = "tab-home"
     TAB_FRAUD = "tab-fraud"
@@ -130,3 +135,4 @@ class ID(str, Enum):
     MERCHANT_SETTINGS_WRAPPER = "merchant-settings-wrapper"
     MERCHANT_SELECTED_BUTTON_STORE = "merchant-selected-button-store"
     MERCHANT_BAR_CHART_SPINNER = "merchant-bar-chart-spinner"
+    MERCHANT_GRAPH_CARD = "merchant-graph-card"
