@@ -54,32 +54,21 @@ def _create_heading() -> html.Div:
     """
     Creates a heading section for the home tab of the application.
 
-    The heading includes a title, a button labeled 'ALL STATES',
-    an informational icon, and a tooltip. The header is styled
-    according to the provided classes, and the tooltip describes
-    the functionality to interact with the map for updating charts
+    The heading includes a title, an informational icon, and a tooltip.
+    The header is styled according to the provided classes, and the tooltip
+    describes the functionality to interact with the map for updating charts
     and KPIs based on selected states.
 
     Returns
     -------
     html.Div
         A Dash HTML Div element containing the heading structure for
-        the home tab, including a title, button, an informational
+        the home tab, including a title, an informational
         icon with an interactive tooltip, and necessary CSS classes.
     """
     return html.Div(
         className="tab-heading-wrapper",
         children=[
-
-            html.Button(
-                className="settings-button-text hidden",
-                id=ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES,
-                children=[
-
-                    html.I(className="bi bi-geo-alt-fill me-2"),
-                    "Show all States"
-
-                ]),
 
             html.H4("All States", id=ID.HOME_TAB_STATE_HEADING, className="green-text"),
             comp_factory.create_info_icon(ID.HOME_TAB_INFO_ICON),

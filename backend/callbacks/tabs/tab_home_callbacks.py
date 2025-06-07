@@ -1,5 +1,6 @@
-from dash import callback, Output, Input, ctx, no_update, State
+from dash import callback, Output, Input, ctx, no_update, State, html
 from dash.exceptions import PreventUpdate
+import dash_bootstrap_components as dbc
 
 import components.constants as const
 from backend.callbacks.tabs.tab_merchant_callbacks import ID_TO_MERCHANT_TAB
@@ -9,6 +10,8 @@ from components.constants import (
     COLOR_BLUE_MAIN, COLOR_FEMALE_PINK, GREEN_DARK, GREEN_LIGHT,
     COLOR_ONLINE, COLOR_INSTORE, AGE_GROUP_COLORS
 )
+from components.factories import component_factory as comp_factory
+from components.factories.kpi_card_factory import create_kpi_card_body
 from components.tabs.tab_home_components import (
     get_most_valuable_merchant_bar_chart, get_most_visited_merchants_bar_chart,
     get_spending_by_user_bar_chart, get_peak_hour_bar_chart, create_pie_graph,
@@ -16,6 +19,7 @@ from components.tabs.tab_home_components import (
     get_top_spending_user_details, get_peak_hour_details, build_center_text,
     get_leader_info, get_age_leader_info
 )
+from frontend.icon_manager import IconID
 from frontend.component_ids import ID
 from frontend.layout.right.tabs.tab_home import BAR_CHART_OPTIONS
 
@@ -82,6 +86,9 @@ def update_bar_chart(selected_state, chart_option, n_clicks_toggle, app_state):
 @callback(
     Output(ID.HOME_TAB_SELECTED_STATE_STORE, "data"),
     Output(ID.MAP, "clickData"),
+    Output(ID.KPI_CARD_AMT_TRANSACTIONS, "children"),
+    Output(ID.KPI_CARD_SUM_OF_TRANSACTIONS, "children"),
+    Output(ID.KPI_CARD_AVG_TRANSACTION_AMOUNT, "children"),
     Input(ID.MAP.value, "clickData"),
     Input(ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES, "n_clicks"),
     prevent_initial_call=True
@@ -90,6 +97,7 @@ def store_selected_state(clickData, n_clicks):
     """
     Handles storing the selected state based on interaction with a map or toggle button. The function processes user
     interactions, such as clicking on a map location or a toggle button, and updates the state data accordingly.
+    It also updates the KPI cards with state-specific data.
 
     Args:
         clickData: Dictionary containing data about a click event on the map. It includes details about the clicked
@@ -97,24 +105,105 @@ def store_selected_state(clickData, n_clicks):
         n_clicks: Number of times the toggle button has been clicked.
 
     Returns:
-        tuple: A tuple containing updated state data and clickData for the map. The returned values depend on the user
-            interaction that triggered the callback. If the toggle button is clicked, both values are set to None. If a map
-            location is clicked, state data is updated with the clicked location, and the map clickData remains unchanged.
+        tuple: A tuple containing updated state data, clickData for the map, and updated KPI card contents.
+            If the toggle button is clicked, state is set to None and KPIs show global data.
+            If a map location is clicked, state data is updated with the clicked location, and KPIs show state-specific data.
     """
     # Get the context
     trigger = ctx.triggered_id
 
     # Set to none if button is clicked
     if trigger == ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES:
-        return None, None
-
+        state = None
     # Save the state when clicked on the map
-    if clickData and clickData.get("points"):
+    elif clickData and clickData.get("points"):
         state = clickData["points"][0]["location"]
-        return state, no_update
+    else:
+        # Otherwise do nothing
+        raise PreventUpdate
 
-    # Otherwise do nothing
-    raise PreventUpdate
+    # Get KPI values for the selected state
+    transaction_count, total_value, avg_value = home_data.get_state_kpi_values(state)
+
+    # Get average KPI values per state for comparison
+    avg_values = home_data.get_average_kpi_values_per_state()
+
+    # Check if avg_values is None and provide default values if it is
+    if avg_values is None:
+        avg_transaction_count = transaction_count
+        avg_total_value = total_value
+        avg_transaction_value = avg_value
+    else:
+        avg_transaction_count, avg_total_value, avg_transaction_value = avg_values
+
+    # Format KPI values for headers
+    transaction_count_str = f"{transaction_count:,}".replace(",", ".")
+    total_value_str = f"${total_value:,.2f}"
+    avg_value_str = f"${avg_value:,.2f}"
+
+    # Create KPI card headers
+    kpi_transactions_header = dbc.CardHeader(
+
+        children=[
+            comp_factory.create_icon(IconID.CHART_PIPE, cls="icon icon-small"),
+            html.Span(transaction_count_str, className="kpi-card-value kpi-number-value pt-1"),
+            html.Span("Transactions", className="kpi-card-title")
+
+        ]
+    )
+
+    kpi_total_value_header = dbc.CardHeader(
+        children=[
+
+            comp_factory.create_icon(IconID.MONEY_DOLLAR, cls="icon icon-small"),
+            html.Span(total_value_str, className="kpi-card-value kpi-number-value pt-1"),
+            html.Span("Total Value", className="kpi-card-title")
+
+        ]
+    )
+
+    kpi_avg_value_header = dbc.CardHeader(
+        children=[
+
+            comp_factory.create_icon(IconID.CHART_AVERAGE, cls="icon icon-small"),
+            html.Span(avg_value_str, className="kpi-card-value kpi-number-value pt-1"),
+            html.Span("Avg. Transaction", className="kpi-card-title")
+
+        ]
+    )
+
+    # Create KPI card bodies with comparison to average per state
+    kpi_transactions_body = create_kpi_card_body(
+        transaction_count,
+        avg_transaction_count,
+        lambda v: f"{v:,.2f}".replace(",", "."),
+        state,
+        ID.KPI_CARD_AMT_TRANSACTIONS_TOOLTIP
+    )
+
+    kpi_total_value_body = create_kpi_card_body(
+        total_value, 
+        avg_total_value, 
+        lambda v: f"${v:,.2f}",
+        state,
+        ID.KPI_CARD_SUM_OF_TRANSACTIONS_TOOLTIP
+    )
+
+    kpi_avg_value_body = create_kpi_card_body(
+        avg_value, 
+        avg_transaction_value, 
+        lambda v: f"${v:,.2f}",
+        state,
+        ID.KPI_CARD_AVG_TRANSACTION_AMOUNT_TOOLTIP
+    )
+
+    # Combine header and body for each KPI card
+    kpi_transactions = [kpi_transactions_header, kpi_transactions_body]
+    kpi_total_value = [kpi_total_value_header, kpi_total_value_body]
+    kpi_avg_value = [kpi_avg_value_header, kpi_avg_value_body]
+
+    # Return updated state, clickData, and KPI card contents
+    return state, no_update if trigger != ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES else None, kpi_transactions, kpi_total_value, kpi_avg_value
 
 
 @callback(
@@ -238,7 +327,7 @@ def update_all_pies(n_clicks_toggle, selected_state, app_state):
     kpi2 = get_most_visited_merchant_details(state=state)
     kpi3 = get_top_spending_user_details(state=state)
     kpi4 = get_peak_hour_details(state=state)
-    base_cls = "settings-button-text"
+    base_cls = "settings-button-text map-toggle-states-button"
     button_cls = base_cls if state is not None else f"{base_cls} hidden"
 
     return (
