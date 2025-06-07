@@ -70,6 +70,7 @@ def _create_heading() -> html.Div:
         className="tab-heading-wrapper",
         children=[
 
+            html.P(),  # Dummy element for spacing
             html.H4("All States", id=ID.HOME_TAB_STATE_HEADING, className="green-text"),
             comp_factory.create_info_icon(ID.HOME_TAB_INFO_ICON),
             dbc.Tooltip(
