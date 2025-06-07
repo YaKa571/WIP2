@@ -146,7 +146,7 @@ def store_selected_state(clickData, n_clicks):
 
         children=[
             comp_factory.create_icon(IconID.CHART_PIPE, cls="icon icon-small"),
-            html.Span(transaction_count_str, className="kpi-card-value kpi-number-value pt-1"),
+            html.Span(transaction_count_str, className="kpi-card-value kpi-number-value"),
             html.Span("Transactions", className="kpi-card-title")
 
         ]
@@ -156,7 +156,7 @@ def store_selected_state(clickData, n_clicks):
         children=[
 
             comp_factory.create_icon(IconID.MONEY_DOLLAR, cls="icon icon-small"),
-            html.Span(total_value_str, className="kpi-card-value kpi-number-value pt-1"),
+            html.Span(total_value_str, className="kpi-card-value kpi-number-value"),
             html.Span("Total Value", className="kpi-card-title")
 
         ]
@@ -166,7 +166,7 @@ def store_selected_state(clickData, n_clicks):
         children=[
 
             comp_factory.create_icon(IconID.CHART_AVERAGE, cls="icon icon-small"),
-            html.Span(avg_value_str, className="kpi-card-value kpi-number-value pt-1"),
+            html.Span(avg_value_str, className="kpi-card-value kpi-number-value"),
             html.Span("Avg. Transaction", className="kpi-card-title")
 
         ]
