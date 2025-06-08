@@ -443,32 +443,48 @@ def set_merchant_tab(n_all, n_group, n_indiv):
     Output(ID.MERCHANT_GRAPH_TITLE, "children"),
     Output(ID.MERCHANT_BAR_CHART_SPINNER, "className"),
     Output(ID.MERCHANT_GRAPH_CARD, "className"),
+    Output(ID.MERCHANT_HEADING, "children"),
     Input(ID.MERCHANT_SELECTED_BUTTON_STORE, "data"),
     Input(ID.MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
     Input(ID.MERCHANT_INPUT_MERCHANT_ID, "value"),
-    Input(ID.APP_STATE_STORE, "data")
+    Input(ID.APP_STATE_STORE, "data"),
+    Input(ID.HOME_TAB_SELECTED_STATE_STORE,"data"),
 )
-def update_merchant(selected, selected_group, selected_merchant_id, app_state):
+def update_merchant(selected, selected_group, selected_merchant_id, app_state, selected_federal_state):
     """
-    Updates the user interface components based on the currently selected merchant
-    tab, group, or individual merchant.
+    Updates UI components and content for the merchant tab based on user selections.
 
-    This function handles the dynamic UI updates for the merchant tab, including button styles,
-    input visibility, KPI content, graph figures, and titles based on the selected merchant type.
+    This callback handles changes to various inputs, determining the selected merchant
+    view (all merchants, merchant group, or individual merchant) and updating UI
+    elements accordingly. This includes adjusting button states, input visibility,
+    key performance indicators (KPIs), and graphical content. The behavior depends
+    on the user’s selection, app state, and external data such as merchant groups
+    and IDs.
 
-    Arguments:
-        selected (str): Identifier for the currently selected merchant type
-            (e.g., "all", "group", or "individual"). Defaults to "all" if not provided.
-        selected_group (str): The currently selected merchant group from the dropdown.
-            Can be None if no group is selected.
-        selected_merchant_id (str or int): The identifier for the selected individual merchant.
-            Can be None or an invalid input.
-        n_clicks_dark (int): Number of times the dark mode toggle button is clicked.
-            Odd values indicate dark mode is activated.
-        app_state (dict): The current application state containing settings like dark_mode.
+    Args:
+        selected: Selected merchant tab identifier.
+        selected_group: Selected merchant group if the group tab is active.
+        selected_merchant_id: Selected individual merchant ID if the
+            individual merchant tab is active.
+        app_state: Application state data, which may include settings like
+            dark mode.
+        selected_federal_state: The selected federal state, or None if
+            "All States" is selected.
 
     Returns:
-        tuple: Contains UI component properties (button classes, styles, content, figures, titles).
+        tuple: Updated properties for UI components:
+            - Class name for the "All Merchants" button.
+            - Class name for the "Merchant Group" button.
+            - Class name for the "Individual Merchant" button.
+            - Style properties for the merchant group input wrapper.
+            - Style properties for the individual merchant input wrapper.
+            - Content for the KPIs section.
+            - Figure object for the graph container.
+            - Title for the graph container.
+            - Class name for the spinner in the bar chart.
+            - Class name for the graph card (influenced by modebar style).
+            - Heading for the merchant tab.
+
     """
     # Set default tab if none selected
     if not selected:
@@ -476,6 +492,14 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
 
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
+
+    # federal state
+    federal_state = None if ctx.triggered_id == ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES else selected_federal_state
+    heading = (
+        "All States" if federal_state is None
+        else "ONLINE" if federal_state == "ONLINE"
+        else f"State: {federal_state}"
+    )
 
     # Define display styles based on selected tab
     visible_style = {"display": "flex", "width": "100%"}
@@ -546,6 +570,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state):
         graph_title,
         spinner_class,
         modebar_class,
+        heading
     )
 
 

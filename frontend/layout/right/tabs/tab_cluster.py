@@ -33,17 +33,17 @@ def create_cluster_content():
 
 def _create_heading() -> html.Div:
     """
-    Creates a heading section for the cluster analysis tab.
+    Creates a heading component for user interface with multiple interactive elements.
 
-    This function generates a Dash HTML Division (html.Div) component that serves as
-    the heading section for the cluster analysis feature in a web application. The heading
-    includes a button to toggle views, a title, an informational icon, and a tooltip that
-    provides detailed instructions on using the cluster analysis functionalities. The layout
-    and style are defined using predefined classes and IDs.
+    This function generates an HTML `Div` element using the Dash framework. It includes
+    a settings button, a heading with customizable options, an information icon, and a tooltip
+    providing detailed information about various UI functionalities. The heading is specifically
+    designed to allow interaction with state-wise data visualization and filtering.
 
     Returns:
-        html.Div: A Dash HTML Div element containing the cluster analysis tab heading,
-        including all its child components.
+        html.Div: A Dash HTML `Div` element containing the structured components: a settings
+        button, a heading, an info icon, and a tooltip. The tooltip contains guidelines for
+        interacting with filtering and visualization options.
     """
     return html.Div(
         className="tab-heading-wrapper",
@@ -58,7 +58,7 @@ def _create_heading() -> html.Div:
                     "Show all States"
 
                 ]),
-            html.H4("Cluster Analysis", id=ID.CLUSTER_HEADING, className="green-text"),
+            html.H4("ALL STATES", id=ID.CLUSTER_HEADING, className="green-text"),
             comp_factory.create_info_icon(ID.CLUSTER_INFO_ICON),
             dbc.Tooltip(
                 target=ID.CLUSTER_INFO_ICON,

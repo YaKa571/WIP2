@@ -114,35 +114,54 @@ def set_cluster_tab(n_total_value, n_average_value, n_inc_vs_exp, n_all_ages, n_
     Output(ID.CLUSTER_BTN_AGE_GROUP, "className"),
     Output(ID.CLUSTER_GRAPH, "figure"),
     Output(ID.CLUSTER_LEGEND, "children"),
+    Output(ID.CLUSTER_HEADING, "children"),
     Input(ID.CLUSTER_SELECTED_BUTTON_STORE, "data"),
     Input(ID.CLUSTER_MERCHANT_INPUT_GROUP_DROPDOWN, "value"),
     Input(ID.APP_STATE_STORE, "data"),
+    Input(ID.HOME_TAB_SELECTED_STATE_STORE,"data"),
 )
-def update_cluster(selected, selected_merchant_group, app_state):
+def update_cluster(selected, selected_merchant_group, app_state, selected_federal_state):
     """
-    A callback function to update clustering-related interactive components based on user input. It adjusts the visual
-    representation and styling of buttons and plots depending on the selected main clustering criterion and age grouping
-    option.
+    Updates the cluster visualization based on user interactions and application state.
 
-    Parameters
-    ----------
-    selected : Optional[Dict[str, str]]
-        The currently selected clustering options, including main clustering criteria and age grouping settings. This
-        dictionary must contain the keys "main" and "age".
-    selected_merchant_group : Optional[str]
-        The chosen merchant group filter option to be applied when preparing cluster data.
-    n_clicks_dark : int
-        The number of times the dark mode toggle button has been clicked.
-    app_state : dict
-        The current application state containing settings like dark_mode.
+    This function is a callback for Dash, intended to update various components of the
+    cluster visualization when user selections or application state data changes. It
+    computes the required cluster visualization data based on the selected options,
+    such as whether data is grouped by age or not, and creates the appropriate plots
+    and legends. This function also interprets and handles the application's dark mode
+    settings and federal/state configurations to customize the displayed information.
 
-    Returns
-    -------
-    Tuple[str, str, str, str, str, Plotly Figure, dbc Div]
-        Updated class names for each cluster button, a customized plotly figure representing the clustering data,
-        and the corresponding legend object as a `Div` element for further interface usability.
+    Args:
+        selected: Dictionary that contains the currently selected options for the
+            visualization. Includes keys `main` (indicating the data type like
+            total value, average value, etc.) and `age` (age grouping or all ages).
+        selected_merchant_group: The merchant group value selected by the user, which
+            determines the data scope for clustering.
+        app_state: Dictionary containing the current application state, such as
+            whether dark mode is enabled.
+        selected_federal_state: The federal state that is currently selected.
+            Determines whether data is filtered to specific states or includes all.
+
+    Returns:
+        A tuple consisting of:
+            - CSS class for the "Total Value" button.
+            - CSS class for the "Average Value" button.
+            - CSS class for the "Income vs Expense" button.
+            - CSS class for the "All Ages" button.
+            - CSS class for the "Age Group" button.
+            - Figure object representing the cluster plot based on selected options.
+            - Legend component rendering details about the cluster visualization.
+            - Heading text for the cluster section that reflects the selected state or "All States".
     """
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
+
+    # federal state
+    federal_state = None if ctx.triggered_id == ID.HOME_TAB_BUTTON_TOGGLE_ALL_STATES else selected_federal_state
+    heading = (
+        "All States" if federal_state is None
+        else "ONLINE" if federal_state == "ONLINE"
+        else f"State: {federal_state}"
+    )
 
     if not selected:
         selected = {
@@ -194,7 +213,8 @@ def update_cluster(selected, selected_merchant_group, app_state):
         get_option_button_class(ClusterAgeOption.ALL_AGES.value, selected_age),
         get_option_button_class(ClusterAgeOption.AGE_GROUPS.value, selected_age),
         fig,
-        legend
+        legend,
+        heading
     )
 
 
