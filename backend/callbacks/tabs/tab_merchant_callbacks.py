@@ -450,36 +450,41 @@ def set_merchant_tab(n_all, n_group, n_indiv):
     Input(ID.APP_STATE_STORE, "data"),
     Input(ID.HOME_TAB_SELECTED_STATE_STORE,"data"),
 )
-def update_merchant(selected, selected_group, selected_merchant_id, app_state,selected_federal_state):
+def update_merchant(selected, selected_group, selected_merchant_id, app_state, selected_federal_state):
     """
-    Updates various UI components related to merchants based on the selected tab,
-    input values, and application state. The function dynamically adjusts button
-    styles, visibility of input wrappers, the content of graphs, KPI cards, and
-    other UI elements to reflect the selected merchant tab and user interactions.
+    Updates UI components and content for the merchant tab based on user selections.
+
+    This callback handles changes to various inputs, determining the selected merchant
+    view (all merchants, merchant group, or individual merchant) and updating UI
+    elements accordingly. This includes adjusting button states, input visibility,
+    key performance indicators (KPIs), and graphical content. The behavior depends
+    on the user’s selection, app state, and external data such as merchant groups
+    and IDs.
 
     Args:
-        selected (str): Merchant tab currently selected by the user. Possible values
-            are defined in `MerchantTab`.
-        selected_group (str | None): Merchant group selected from the dropdown.
-            `None` if no merchant group is selected.
-        selected_merchant_id (int | str | None): Merchant ID entered by the user. Can
-            be an integer, string, or `None` if not provided.
-        app_state (dict | None): Dictionary representing the current state of the app.
-            Should include keys like `dark_mode`.
-        selected_federal_state (str | None): Current federal state selected. `None`
-            indicates all states are selected.
+        selected: Selected merchant tab identifier.
+        selected_group: Selected merchant group if the group tab is active.
+        selected_merchant_id: Selected individual merchant ID if the
+            individual merchant tab is active.
+        app_state: Application state data, which may include settings like
+            dark mode.
+        selected_federal_state: The selected federal state, or None if
+            "All States" is selected.
 
     Returns:
-        tuple: A tuple consisting of the following UI updates:
-            - Classes for "All Merchants", "Merchant Group", and "Individual Merchant"
-              buttons, reflecting selected tab state.
-            - Visibility styles for group and individual merchant input wrappers.
-            - Content for merchant KPI container.
-            - Figure for the merchant graph container.
-            - Title for the merchant graph.
-            - Spinner visibility class for the bar chart.
-            - Modebar className for the graph container.
-            - Heading content indicating selected federal state.
+        tuple: Updated properties for UI components:
+            - Class name for the "All Merchants" button.
+            - Class name for the "Merchant Group" button.
+            - Class name for the "Individual Merchant" button.
+            - Style properties for the merchant group input wrapper.
+            - Style properties for the individual merchant input wrapper.
+            - Content for the KPIs section.
+            - Figure object for the graph container.
+            - Title for the graph container.
+            - Class name for the spinner in the bar chart.
+            - Class name for the graph card (influenced by modebar style).
+            - Heading for the merchant tab.
+
     """
     # Set default tab if none selected
     if not selected:
