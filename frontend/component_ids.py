@@ -93,6 +93,7 @@ class ID(str, Enum):
     FRAUD_CARD_TYPE_GRAPH = "fraud-card-type-graph"
     FRAUD_CARD_BRAND_GRAPH = "fraud-card-brand-graph"
     FRAUD_MCC_GRAPH = "fraud-mcc-graph"
+    
 
 
     # Cluster Tab
