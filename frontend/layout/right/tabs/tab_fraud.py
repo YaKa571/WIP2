@@ -3,6 +3,7 @@ from dash import dcc, html
 
 from components.factories import component_factory as comp_factory
 from frontend.component_ids import ID
+from frontend.icon_manager import IconID
 
 
 def create_fraud_content():
@@ -17,12 +18,15 @@ def create_fraud_content():
         html.Div: A Dash HTML Div element containing the fraud tab's content layout.
     """
     return html.Div(
+        className="tab-content-inner fraud-tab",
         children=[
+
             _create_heading(),
             _create_kpi_cards(),
-            _create_analysis_tabs(),
+            _create_overview_section(),
+            _create_detailed_analysis_section(),
+
         ],
-        className="tab-content-inner fraud-tab"
     )
 
 
@@ -41,19 +45,22 @@ def _create_heading() -> html.Div:
     return html.Div(
         className="tab-heading-wrapper",
         children=[
+
             html.P(),  # Placeholder
-            html.H4("Fraud Overview", id=ID.FRAUD_TAB_HEADING, className="green-heading"),
+            html.H4("Fraud Overview", id=ID.FRAUD_TAB_HEADING, className="green-text"),
             comp_factory.create_info_icon(ID.FRAUD_TAB_INFO_ICON),
             dbc.Tooltip(
                 target=ID.FRAUD_TAB_INFO_ICON,
                 is_open=False,
                 placement="bottom-end",
                 children=[
+
                     "This tab shows potentially fraudulent activity, trends,",
                     html.Br(),
                     "and visualizations based on transaction and card data.",
-                ],
-            ),
+
+                ]
+            )
         ]
     )
 
@@ -73,24 +80,55 @@ def _create_kpi_cards() -> html.Div:
     return html.Div(
         className="flex-wrapper",
         children=[
+
             comp_factory.create_kpi_card(
                 title="Total Fraud Cases",
-                icon_id=ID.FRAUD_KPI_TOTAL_FRAUD_ICON,
+                icon_id=IconID.FRAUD,
                 div_id=ID.FRAUD_KPI_TOTAL_FRAUD_DIV_ID
             ),
             comp_factory.create_kpi_card(
                 title="Fraud Ratio (%)",
-                icon_id=ID.FRAUD_KPI_FRAUD_RATIO_ICON,
+                icon_id=IconID.FUEL,
                 div_id=ID.FRAUD_KPI_FRAUD_RATIO_DIV_ID
-            ),
+            )
+
         ]
     )
 
 
-
-def _create_analysis_tabs() -> html.Div:
+def _create_overview_section() -> html.Div:
     """
-    Creates an interactive dashboard component with multiple tabs for fraud analysis.
+    Creates the overview section for the fraud tab.
+
+    This section contains key visualizations for fraud analysis including
+    a map of fraud transactions by state and a pie chart showing online vs in-store
+    transactions. The layout uses flex-wrapper for responsive design.
+
+    Returns:
+        html.Div: A Div component containing the overview visualizations.
+    """
+    return html.Div(
+        className="flex-wrapper",
+        children=[
+
+            comp_factory.create_circle_diagram_card(
+                icon_id=IconID.BAR_CHART_LINE_FILL,
+                title=["Fraud Transactions", "per US State"],
+                graph_id=ID.FRAUD_STATE_GRAPH,
+            ),
+            comp_factory.create_circle_diagram_card(
+                icon_id=IconID.CART,
+                title=["Online vs In-Store", "Transactions"],
+                graph_id=ID.FRAUD_PIE_CHART,
+            )
+
+        ]
+    )
+
+
+def _create_detailed_analysis_section() -> html.Div:
+    """
+    Creates an interactive dashboard component with multiple tabs for detailed fraud analysis.
 
     This function generates a tabbed layout using Dash and Plotly components,
     organizing various types of fraud analyses into tabs such as "Overview",
@@ -105,117 +143,279 @@ def _create_analysis_tabs() -> html.Div:
         layout and its subcomponents.
     """
     return html.Div(
-        className="fraud-analysis-tabs",
+        className="flex-wrapper flex-fill",
         children=[
-            dcc.Tabs([
-                dcc.Tab(label="Overview", children=[
-                    html.Div(className="tab-card-row", children=[
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Fraud Transactions per US State"),
-                                dcc.Graph(id=ID.FRAUD_STATE_GRAPH, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Share of Online vs In-Store Transactions"),
-                                dcc.Graph(id=ID.FRAUD_PIE_CHART, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                    ]),
-                    html.Div(className="tab-card-row", children=[
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Top Online Merchants by Fraud Count"),
-                                dcc.Graph(id=ID.FRAUD_TOP_MERCHANTS, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                    ]),
-                ]),
-                dcc.Tab(label="Demographics", children=[
-                    html.Div(className="tab-card-row", children=[
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Fraud by Age Group"),
-                                dcc.Graph(id=ID.FRAUD_DEMO_AGE_GRAPH, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Fraud by Gender"),
-                                dcc.Graph(id=ID.FRAUD_DEMO_GENDER_GRAPH, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                    ]),
-                    html.Div(className="tab-card-row", children=[
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Fraud by Income"),
-                                dcc.Graph(id=ID.FRAUD_DEMO_INCOME_GRAPH, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                    ]),
-                ]),
-                dcc.Tab(label="Patterns", children=[
-                    html.Div(className="tab-card-row", children=[
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Fraud by Hour of Day"),
-                                dcc.Graph(id=ID.FRAUD_PATTERN_HOUR_GRAPH, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Fraud by Weekday"),
-                                dcc.Graph(id=ID.FRAUD_PATTERN_WEEKDAY_GRAPH, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                    ]),
-                    html.Div(className="tab-card-row", children=[
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Average Fraud Amount"),
-                                dcc.Graph(id=ID.FRAUD_PATTERN_AMOUNT_GRAPH, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                    ]),
-                ]),
-                dcc.Tab(label="Cards & Merchants", children=[
-                    html.Div(className="tab-card-row", children=[
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Fraud by Card Type"),
-                                dcc.Graph(id=ID.FRAUD_CARD_TYPE_GRAPH, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Fraud by Card Brand"),
-                                dcc.Graph(id=ID.FRAUD_CARD_BRAND_GRAPH, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                    ]),
-                    html.Div(className="tab-card-row", children=[
-                        dbc.Card(
-                            dbc.CardBody([
-                                html.H4("Top Merchant Categories (MCC)"),
-                                dcc.Graph(id=ID.FRAUD_MCC_GRAPH, style={"height": "340px", "width": "100%"}),
-                            ]),
-                            className="tab-card"
-                        ),
-                    ]),
-                ]),
-            ])
+
+            dbc.Card(
+                className="graph-card with-bar-chart",
+                children=[
+
+                    dbc.CardHeader(
+                        children=[
+
+                            # Custom Tab Bar
+                            html.Div(
+                                className="d-flex custom-tab-bar",
+                                children=[
+                                    dbc.Button(
+                                        "Overview",
+                                        id=ID.FRAUD_ANALYSIS_TAB_OVERVIEW,
+                                        n_clicks=0,
+                                        className="custom-tab-button active"
+                                    ),
+                                    dbc.Button(
+                                        "Demographics",
+                                        id=ID.FRAUD_ANALYSIS_TAB_DEMOGRAPHICS,
+                                        n_clicks=0,
+                                        className="custom-tab-button"
+                                    ),
+                                    dbc.Button(
+                                        "Patterns",
+                                        id=ID.FRAUD_ANALYSIS_TAB_PATTERNS,
+                                        n_clicks=0,
+                                        className="custom-tab-button"
+                                    ),
+                                    dbc.Button(
+                                        "Cards",
+                                        id=ID.FRAUD_ANALYSIS_TAB_CARDS,
+                                        n_clicks=0,
+                                        className="custom-tab-button"
+                                    ),
+                                    dbc.Button(
+                                        "Merchants",
+                                        id=ID.FRAUD_ANALYSIS_TAB_MERCHANTS,
+                                        n_clicks=0,
+                                        className="custom-tab-button"
+                                    )
+                                ]
+                            )
+
+                        ]
+                    ),
+                    dbc.CardBody(
+                        className="d-flex flex-column p-0",
+                        children=[
+
+                            # Tab Content Wrapper
+                            html.Div(
+                                id="fraud-analysis-tab-content",
+                                className="tab-content-wrapper flex-fill",
+                                children=[
+
+                                    # Overview Tab Content
+                                    html.Div(
+                                        id=ID.FRAUD_ANALYSIS_CONTENT_OVERVIEW,
+                                        className="tab-item active",
+                                        children=[
+                                            html.Div(
+                                                className="flex-wrapper",
+                                                children=[
+
+                                                    dcc.Graph(
+                                                        id=ID.FRAUD_TOP_MERCHANTS,
+                                                        responsive=True,
+                                                        style={"height": "100%", "width": "100%"}
+                                                    )
+
+                                                ]
+                                            )
+                                        ]
+                                    ),
+
+                                    # Demographics Tab Content
+                                    html.Div(
+                                        id=ID.FRAUD_ANALYSIS_CONTENT_DEMOGRAPHICS,
+                                        className="tab-item hidden",
+                                        children=[
+                                            html.Div(
+                                                className="flex-wrapper",
+                                                children=[
+                                                    dbc.Card(
+                                                        className="graph-card",
+                                                        children=[
+                                                            dbc.CardBody(
+                                                                children=[
+                                                                    dcc.Graph(
+                                                                        id=ID.FRAUD_DEMO_AGE_GRAPH,
+                                                                        responsive=True,
+                                                                        style={"height": "100%", "width": "100%"}
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                    ),
+                                                    dbc.Card(
+                                                        className="graph-card",
+                                                        children=[
+                                                            dbc.CardBody(
+                                                                children=[
+                                                                    dcc.Graph(
+                                                                        id=ID.FRAUD_DEMO_GENDER_GRAPH,
+                                                                        responsive=True,
+                                                                        style={"height": "100%", "width": "100%"}
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                            ),
+                                            html.Div(
+                                                className="flex-wrapper",
+                                                style={"marginTop": "var(--gutter)"},
+                                                children=[
+                                                    dbc.Card(
+                                                        className="graph-card",
+                                                        children=[
+                                                            dbc.CardBody(
+                                                                children=[
+                                                                    dcc.Graph(
+                                                                        id=ID.FRAUD_DEMO_INCOME_GRAPH,
+                                                                        responsive=True,
+                                                                        style={"height": "100%", "width": "100%"}
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                    ),
+
+                                    # Patterns Tab Content
+                                    html.Div(
+                                        id=ID.FRAUD_ANALYSIS_CONTENT_PATTERNS,
+                                        className="tab-item hidden",
+                                        children=[
+                                            html.Div(
+                                                className="flex-wrapper",
+                                                children=[
+                                                    dbc.Card(
+                                                        className="graph-card",
+                                                        children=[
+                                                            dbc.CardBody(
+                                                                children=[
+                                                                    dcc.Graph(
+                                                                        id=ID.FRAUD_PATTERN_HOUR_GRAPH,
+                                                                        responsive=True,
+                                                                        style={"height": "100%", "width": "100%"}
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                    ),
+                                                    dbc.Card(
+                                                        className="graph-card",
+                                                        children=[
+                                                            dbc.CardBody(
+                                                                children=[
+                                                                    dcc.Graph(
+                                                                        id=ID.FRAUD_PATTERN_WEEKDAY_GRAPH,
+                                                                        responsive=True,
+                                                                        style={"height": "100%", "width": "100%"}
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                            ),
+                                            html.Div(
+                                                className="flex-wrapper",
+                                                style={"marginTop": "var(--gutter)"},
+                                                children=[
+                                                    dbc.Card(
+                                                        className="graph-card",
+                                                        children=[
+                                                            dbc.CardBody(
+                                                                children=[
+                                                                    dcc.Graph(
+                                                                        id=ID.FRAUD_PATTERN_AMOUNT_GRAPH,
+                                                                        responsive=True,
+                                                                        style={"height": "100%", "width": "100%"}
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                    ),
+
+                                    # Cards & Merchants Tab Content
+                                    html.Div(
+                                        id=ID.FRAUD_ANALYSIS_CONTENT_CARDS,
+                                        className="tab-item hidden",
+                                        children=[
+                                            html.Div(
+                                                className="flex-wrapper",
+                                                children=[
+                                                    dbc.Card(
+                                                        className="graph-card",
+                                                        children=[
+                                                            dbc.CardBody(
+                                                                children=[
+                                                                    dcc.Graph(
+                                                                        id=ID.FRAUD_CARD_TYPE_GRAPH,
+                                                                        responsive=True,
+                                                                        style={"height": "100%", "width": "100%"}
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                    ),
+                                                    dbc.Card(
+                                                        className="graph-card",
+                                                        children=[
+                                                            dbc.CardBody(
+                                                                children=[
+                                                                    dcc.Graph(
+                                                                        id=ID.FRAUD_CARD_BRAND_GRAPH,
+                                                                        responsive=True,
+                                                                        style={"height": "100%", "width": "100%"}
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                    ),
+
+                                    # Merchants Tab Content
+                                    html.Div(
+                                        id=ID.FRAUD_ANALYSIS_CONTENT_MERCHANTS,
+                                        className="tab-item hidden",
+                                        children=[
+                                            html.Div(
+                                                className="flex-wrapper",
+                                                children=[
+                                                    dbc.Card(
+                                                        className="graph-card",
+                                                        children=[
+                                                            dbc.CardBody(
+                                                                children=[
+                                                                    dcc.Graph(
+                                                                        id=ID.FRAUD_MCC_GRAPH,
+                                                                        responsive=True,
+                                                                        style={"height": "100%", "width": "100%"}
+                                                                    )
+                                                                ]
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                ]
+            )
         ]
     )
