@@ -93,21 +93,7 @@ class ID(str, Enum):
     FRAUD_CARD_TYPE_GRAPH = "fraud-card-type-graph"
     FRAUD_CARD_BRAND_GRAPH = "fraud-card-brand-graph"
     FRAUD_MCC_GRAPH = "fraud-mcc-graph"
-
-    # Fraud Analysis Tab Buttons
-    FRAUD_ANALYSIS_TAB_OVERVIEW = "fraud-analysis-tab-overview"
-    FRAUD_ANALYSIS_TAB_DEMOGRAPHICS = "fraud-analysis-tab-demographics"
-    FRAUD_ANALYSIS_TAB_PATTERNS = "fraud-analysis-tab-patterns"
-    FRAUD_ANALYSIS_TAB_CARDS = "fraud-analysis-tab-cards"
-    FRAUD_ANALYSIS_TAB_MERCHANTS = "fraud-analysis-tab-merchants"
-
-    # Fraud Analysis Tab Content
-    FRAUD_ANALYSIS_CONTENT_OVERVIEW = "fraud-analysis-content-overview"
-    FRAUD_ANALYSIS_CONTENT_DEMOGRAPHICS = "fraud-analysis-content-demographics"
-    FRAUD_ANALYSIS_CONTENT_PATTERNS = "fraud-analysis-content-patterns"
-    FRAUD_ANALYSIS_CONTENT_CARDS = "fraud-analysis-content-cards"
-    FRAUD_ANALYSIS_CONTENT_MERCHANTS = "fraud-analysis-content-merchants"
-
+    
 
 
     # Cluster Tab

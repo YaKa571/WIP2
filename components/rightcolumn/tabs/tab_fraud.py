@@ -6,16 +6,6 @@ from frontend.component_ids import ID
 
 
 def create_fraud_content():
-    """
-    Creates the content layout for the fraud tab in the application.
-
-    This function generates and returns the main layout encapsulating a heading,
-    KPI cards, and analysis tabs specific to the fraud section of the application.
-    It structures the content using Dash's `html.Div` element.
-
-    Returns:
-        html.Div: A Dash HTML Div element containing the fraud tab's content layout.
-    """
     return html.Div(
         children=[
             _create_heading(),
@@ -28,15 +18,7 @@ def create_fraud_content():
 
 def _create_heading() -> html.Div:
     """
-    Creates the heading component for the Fraud Overview tab.
-
-    The heading component includes a placeholder paragraph, a heading element with
-    specific styles and identifier, an information icon, and a tooltip that provides
-    additional details about the Fraud Overview functionality.
-
-    Returns:
-        html.Div: A Dash HTML Div component that contains the heading of the Fraud
-        Overview tab, along with related styled elements.
+    Generates the heading for the Fraud tab including the info icon and tooltip.
     """
     return html.Div(
         className="tab-heading-wrapper",
@@ -60,15 +42,7 @@ def _create_heading() -> html.Div:
 
 def _create_kpi_cards() -> html.Div:
     """
-    Creates KPI cards for a dashboard interface.
-
-    This function generates a flex-wrapper division containing KPI cards. Each card
-    includes a title, an icon identifier, and a division identifier for visual
-    representation and interactivity. The cards are dynamically created using the
-    `create_kpi_card` method from the `comp_factory` component factory.
-
-    Returns:
-        html.Div: A division element containing the created KPI cards.
+    Displays fraud-related KPIs such as total fraud cases and fraud ratio.
     """
     return html.Div(
         className="flex-wrapper",
@@ -89,21 +63,6 @@ def _create_kpi_cards() -> html.Div:
 
 
 def _create_analysis_tabs() -> html.Div:
-    """
-    Creates an interactive dashboard component with multiple tabs for fraud analysis.
-
-    This function generates a tabbed layout using Dash and Plotly components,
-    organizing various types of fraud analyses into tabs such as "Overview",
-    "Demographics", "Patterns", and "Cards & Merchants". Each tab contains multiple
-    dashboard cards showcasing specific graphs and visualizations related to fraud
-    data. The design integrates graphs for fraud trends, demographics, transaction
-    patterns, and merchant/card details, styled for clear and organized
-    presentation.
-
-    Returns:
-        html.Div: A Dash HTML division component containing the entire tabbed
-        layout and its subcomponents.
-    """
     return html.Div(
         className="fraud-analysis-tabs",
         children=[

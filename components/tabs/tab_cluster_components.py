@@ -11,37 +11,22 @@ cluster_data = dm.cluster_tab_data
 
 def make_cluster_plot(df_agg, mode='total_value', age_group_mode='all', dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
-    Generates a cluster plot based on the input data and visualization settings.
+    Generates a cluster plot visualizing transaction data segmented by cluster and other grouping parameters.
 
-    This function creates a scatter plot to visualize clusters of clients based on their
-    transaction counts and either total or average transaction values. The plot can be
-    customized for dark or light mode and can optionally group data by age categories.
+    This function creates a scatter plot using transaction data, where data points represent individual
+    clients grouped by clusters. Clusters are visualized with different colors and symbols. The plot
+    can optionally group data by age groups and supports customization for light and dark themes.
 
-    Args:
-        df_agg (pd.DataFrame): The aggregated dataset to visualize. It must include columns
-            like 'transaction_count', 'total_value', 'average_value', 'age_group', and
-            cluster-related fields such as 'cluster_total_str' or 'cluster_avg_str', depending
-            on the selected mode.
-        mode (str): The mode that determines the y-axis representation and the clustering
-            column. Options are:
-                - 'total_value': The plot uses 'total_value' for the y-axis and
-                  'cluster_total_str' for clusters.
-                - 'average_value': The plot uses 'average_value' for the y-axis and
-                  'cluster_avg_str' for clusters.
-            Default is 'total_value'.
-        age_group_mode (str): Controls whether the data is separated into facets
-            by age categories. Options are:
-                - 'all': No separation by age group.
-                - 'grouped': Creates facets for specific age groups.
-            Default is 'all'.
-        dark_mode (bool): Determines the color theme of the plot. If True,
-            the plot is generated with a dark theme. Default value is specified
-            by the `const.DEFAULT_DARK_MODE` constant.
+    Parameters:
+        df_agg (DataFrame): Aggregated transaction data containing columns like 'transaction_count',
+                            'total_value', 'average_value', and cluster information.
+        mode (str, optional): Determines the y-axis metric ('total_value' or 'average_value'). Default is 'total_value'.
+        age_group_mode (str, optional): Controls grouping by age groups. Available options are 'all' or 'grouped'.
+                                        Default is 'all'.
+        dark_mode (bool, optional): Toggles between dark and light modes for the plot. Default is False.
 
     Returns:
-        plotly.graph_objects.Figure: A scatter plot object ready to
-        be displayed or further modified with Plotly.
-
+        Figure: A Plotly scatter plot figure object configured as per the input parameters.
     """
     cluster_column = 'cluster_total_str' if mode == 'total_value' else 'cluster_avg_str'
     y_column = 'total_value' if mode == 'total_value' else 'average_value'
@@ -268,27 +253,26 @@ def create_cluster_legend(mode: str, df) -> list:
 
 def make_inc_vs_exp_plot(df_agg, age_group_mode='all', dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
-    Generates a scatter plot comparing yearly income and total expenses, with clustering
-    information and optional age group categorization.
+    Generates a scatter plot visualizing yearly income versus total expenses, segmented by clusters
+    and optionally grouped by age groups, with customization options for dark mode. The function
+    leverages Plotly to create an interactive, aesthetically customizable plot for exploratory data
+    analysis.
 
-    This function creates a scatter plot using the input aggregated data, where markers
-    represent income versus expense clusters. The visualization supports optional grouping
-    by age categories and can dynamically adapt to dark mode for improved readability. The
-    plot incorporates various graphical settings such as marker symbols, hover information,
-    and axis customizations to make the information visually comprehensive.
-
-    Args:
-        df_agg: A pandas DataFrame containing aggregated data with columns for yearly income,
-            total expenses, cluster labels, and optional age group information.
-        age_group_mode: A string indicating whether age grouping should be applied. Possible
-            values are 'all' for no grouping (default) or 'grouped' for facet grouping by
-            age categories.
-        dark_mode: A boolean value indicating whether the plot should be styled for dark mode.
-            Defaults to const.DEFAULT_DARK_MODE from package constants.
+    Parameters:
+        df_agg: pandas.DataFrame
+            The aggregated DataFrame containing client data including yearly income,
+            total expenses, clusters, and optional age group information.
+        age_group_mode: str, optional
+            Specifies how age groups are handled in the plot. Acceptable values are
+            'all' for no grouping or 'grouped' for facetting by age groups. Defaults to 'all'.
+        dark_mode: bool, optional
+            Determines whether the plot should use colors suitable for dark mode.
+            Defaults to False.
 
     Returns:
-        plotly.graph_objects.Figure: A scatter plot object configured with the provided
-        data and display settings.
+        plotly.graph_objs._figure.Figure
+            A Plotly scatter plot figure object visualizing income and expenses grouped
+            by clusters, optionally facetted by age groups.
     """
 
     text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
