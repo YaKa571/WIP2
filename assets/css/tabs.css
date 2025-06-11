@@ -10,7 +10,7 @@
 
 /* Fraud Tab Grid Layout */
 .tab-content-inner.fraud-tab {
-    grid-template-rows: auto auto 2fr 3fr !important;
+    grid-template-rows: auto !important;
     align-items: start;
     align-content: start;
 }
@@ -152,7 +152,6 @@
     flex-direction: column;
     flex: 1 1 auto;
     min-height: 0;
-    height: 100%;
 }
 
 /* ============================================================
@@ -176,19 +175,13 @@
 .tab-content-inner .flex-wrapper {
     display: flex;
     flex-direction: row;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     flex-wrap: nowrap;
     border-radius: var(--inner-border-radius);
     gap: var(--gutter);
     align-items: stretch;
     min-height: 0 !important;
     min-width: 0;
-    height: 100%;
-}
-
-/* When there are multiple flex-wrappers in a tab-item, distribute space evenly */
-.tab-item > .flex-wrapper {
-    flex: 1;
 }
 
 /* KPI Cards START */
@@ -264,7 +257,6 @@
     outline: var(--kpi-graph-card-outline);
     border: none !important;
     overflow: hidden;
-    height: 100%;
 }
 
 .tab-content-inner .flex-wrapper .graph-card .card-header {

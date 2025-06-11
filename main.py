@@ -40,7 +40,7 @@ from backend.callbacks.tabs.tab_merchant_callbacks import (  # noqa: F401
 from backend.callbacks.tabs.tab_fraud_callbacks import (  # noqa: F401
     update_total_fraud_cases, update_total_transactions,
     update_fraud_ratio, update_fraud_by_state,
-    update_fraud_by_age, update_fraud_analysis_tabs
+    update_fraud_by_age
 )
 
 from frontend.layout.left.left_column import create_left_column

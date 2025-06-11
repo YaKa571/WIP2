@@ -1,24 +1,9 @@
-import pandas as pd
-import plotly.express as px
 import plotly.graph_objs as go
-from dash import Input, Output, callback, callback_context
-
-import components.constants as const
-import components.factories.component_factory as comp_factory
-from backend.data_manager import DataManager
+import plotly.express as px
+import pandas as pd
+from dash import Input, Output, callback
 from frontend.component_ids import ID
-
-dm: DataManager = DataManager.get_instance()
-
-# Define the tab IDs and their corresponding content IDs
-FRAUD_ANALYSIS_TABS = [
-    (ID.FRAUD_ANALYSIS_TAB_OVERVIEW, ID.FRAUD_ANALYSIS_CONTENT_OVERVIEW),
-    (ID.FRAUD_ANALYSIS_TAB_DEMOGRAPHICS, ID.FRAUD_ANALYSIS_CONTENT_DEMOGRAPHICS),
-    (ID.FRAUD_ANALYSIS_TAB_PATTERNS, ID.FRAUD_ANALYSIS_CONTENT_PATTERNS),
-    (ID.FRAUD_ANALYSIS_TAB_CARDS, ID.FRAUD_ANALYSIS_CONTENT_CARDS),
-    (ID.FRAUD_ANALYSIS_TAB_MERCHANTS, ID.FRAUD_ANALYSIS_CONTENT_MERCHANTS),
-]
-
+from backend.data_manager import DataManager
 
 # --- KPI: Total Fraud Cases ---
 @callback(
@@ -27,26 +12,25 @@ FRAUD_ANALYSIS_TABS = [
 )
 def update_total_fraud_cases(_):
     """
-    Callback function to update the total fraud cases displayed in the Fraud KPI section.
+    Updates the total number of fraud cases displayed on the application.
 
-    This function listens to changes in the application state and calculates the
-    number of fraudulent transactions based on the presence of non-null and
-    non-empty error fields in the transaction data. The result is returned as a
-    formatted string with commas as thousand separators.
+    This callback function calculates the total number of fraud cases in the
+    current dataset and updates the specified UI component with the calculated
+    value. Fraud cases are determined based on the presence of non-empty "errors"
+    in the dataset.
 
     Args:
-        _: Dummy argument to satisfy the callback input signature. The value is
-           provided automatically by Dash's callback mechanism and represents the
-           application state data.
+        _: Ignored parameter used to trigger the callback when the application
+           state is updated.
 
     Returns:
-        str: A formatted string representing the total number of fraud cases with
-        commas as thousand separators.
+        str: A formatted string representing the total number of fraud cases,
+        with commas as thousand separators.
     """
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
     return f"{len(df_fraud):,}"
-
 
 # --- KPI: Total Transactions ---
 @callback(
@@ -55,22 +39,22 @@ def update_total_fraud_cases(_):
 )
 def update_total_transactions(_):
     """
-    Updates the display for the total number of transactions.
-
-    This callback function listens for changes in the application state store
-    and updates the total transactions count displayed on the corresponding UI
-    element. It calculates the count based on the presence and length of the
-    `df_transactions` attribute in the `dm` object.
+    Updates and returns the total number of transactions to be displayed in the fraud KPI
+    dashboard. This function extracts the transaction data from the global application state via
+    a data manager instance, calculates the total number of transactions, and formats it as a
+    human-readable string with commas as thousand separators.
 
     Args:
-        _: Data from the application state that triggers this callback.
+        _: Placeholder input parameter to correspond with Dash callback dependencies, not used
+            in the computation.
 
     Returns:
-        str: Formatted string representing the total transactions count.
+        str: The total number of transactions formatted as a string with commas separating
+            thousands.
     """
+    dm = DataManager.get_instance()
     total_transactions = len(dm.df_transactions) if hasattr(dm, "df_transactions") else 0
     return f"{total_transactions:,}"
-
 
 # --- KPI: Fraud Ratio (%) ---
 @callback(
@@ -79,22 +63,19 @@ def update_total_transactions(_):
 )
 def update_fraud_ratio(_):
     """
-    Updates and returns the fraud ratio percentage based on the number of fraudulent
-    transactions and total transactions in the data.
-
-    The fraud ratio is calculated as the percentage of fraudulent transactions over
-    the total transactions. If there are no transactions, the ratio is set to 0.
+    Updates the fraud ratio KPI display. This callback function calculates the percentage
+    of fraudulent transactions from the total transactions and returns the calculated
+    value as a formatted string.
 
     Args:
-        _: Dict[str, Any]
-            The application state data, passed automatically by the callback
-            mechanism, but not specifically utilized in the function.
+        _: Unused parameter included to match the callback's input signature. It takes
+            the value of 'data' from the APP_STATE_STORE input.
 
     Returns:
-        str:
-            The fraud ratio as a formatted string with two decimal places followed
-            by a percentage sign, such as "12.34 %".
+        str: The fraud ratio as a formatted string with two decimal places followed by
+            a percent symbol (e.g., '12.34 %').
     """
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
     total_fraud = len(df_fraud)
@@ -102,39 +83,31 @@ def update_fraud_ratio(_):
     ratio = (total_fraud / total_transactions * 100) if total_transactions else 0
     return f"{ratio:.2f} %"
 
-
 # --- Graph: Fraud Cases by US State (Bar & Line) ---
 @callback(
     Output(ID.FRAUD_STATE_GRAPH, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_fraud_by_state(app_state):
+def update_fraud_by_state(_):
     """
-    Updates and returns a Plotly figure displaying fraud data by state. The figure includes
-    a bar chart of the number of fraud cases per state and a line chart showing the total
-    fraud amount. It adapts the colors and styles based on the application's dark mode setting.
+    Updates the fraud statistics by state visualization in the form of a bar and
+    line chart. The bar chart represents the number of fraud cases by state, while
+    the line chart displays the total fraud amount. The chart includes hover
+    information detailing the total cost and average cost per fraud case for each
+    state.
 
     Args:
-        app_state (dict): Dictionary containing application state data. It must include
-            a "dark_mode" key if dark mode settings are to be considered. If not provided,
-            default settings are used.
+        _: Any input data, typically unused but required for the callback mechanism.
 
     Returns:
-        plotly.graph_objects.Figure: A Plotly figure object combining a bar chart and line
-        chart with styling and hover capabilities. If no data is available, an empty figure
-        is returned.
+        A Plotly Figure object containing the fraud statistics visualization by
+        state. If no fraud cases are found in the data, returns an empty figure.
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-    grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
     if "merchant_state" not in df_fraud.columns or df_fraud.empty:
-        return comp_factory.create_empty_figure()
+        return go.Figure()
     grouped = df_fraud.groupby("merchant_state").agg(
         cases=("amount", "count"),
         costs=("amount", "sum")
@@ -145,9 +118,7 @@ def update_fraud_by_state(app_state):
     fig.add_bar(
         x=grouped.index, y=grouped["cases"],
         name="Fraud Cases",
-        marker_color=const.COLOR_BLUE_MAIN,
-        marker_line_width=0,
-        opacity=0.95,
+        marker_color="#636EFA",
         yaxis="y1",
         hovertemplate="State: %{x}<br>Cases: %{y}<br>Total Cost: $%{customdata[0]:,.2f}<br>Avg Cost/Case: $%{customdata[1]:,.2f}",
         customdata=grouped[["costs", "avg_cost"]].values
@@ -160,137 +131,87 @@ def update_fraud_by_state(app_state):
         yaxis="y2"
     ))
     fig.update_layout(
-        title="FRAUD BY STATE: NUMBER OF CASES & TOTAL AMOUNT",
-        title_x=0.5,
-        xaxis_title="STATE",
-        legend=dict(x=0.01, y=0.99),
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        font=dict(color=text_color),
-        margin=dict(l=32, r=32, t=32, b=32),
-        barcornerradius="16%",
-        xaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        ),
-        yaxis=dict(
-            title="NUMBER OF FRAUD CASES",
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color),
-            side="left"
-        ),
-        yaxis2=dict(
-            title="TOTAL FRAUD AMOUNT ($)",
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color),
-            overlaying="y",
-            side="right"
-        )
+        title="Fraud by State: Number of Cases (Bar) & Total Amount (Line)",
+        xaxis_title="State",
+        yaxis=dict(title="Number of Fraud Cases", side="left"),
+        yaxis2=dict(title="Total Fraud Amount ($)", overlaying="y", side="right"),
+        legend=dict(x=0.01, y=0.99)
     )
     return fig
-
 
 # --- Graph: Online vs. In-Store Fraud Cases (Pie Chart) ---
 @callback(
     Output(ID.FRAUD_PIE_CHART, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_online_vs_inperson(app_state):
+def update_online_vs_inperson(_):
     """
-    Updates the pie chart visualization displaying the distribution of fraud occurrences
-    between online and in-person transactions based on the provided application state.
-    The function dynamically adjusts the chart's appearance based on the app's dark mode
-    setting and creates a pie chart using transaction data, categorized as online or
-    in-store.
+    Updates the pie chart visualization displaying the distribution of fraud cases
+    as either online or in-person based on the data stored in the application state.
 
     Args:
-        app_state (dict or None): The current application state containing
-            configurations such as dark mode. If `app_state` is None, default
-            values for configurations will be used.
+        _: Any input placeholder value. This input value is not used directly
+           by the function but is required for callback structure in the framework.
 
     Returns:
-        Plotly.graph_objs._figure.Figure: A plotly Figure object representing the
-            pie chart. If no relevant fraud data is found, an empty figure is returned.
+        plotly.graph_objects.Figure: A pie chart visualization providing a
+        breakdown of fraud case occurrences categorized as either online or
+        in-store. If no valid data is available, returns an empty figure.
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
     # Setze is_online, falls nicht vorhanden
     if "is_online" not in df_fraud.columns and "merchant_city" in df_fraud.columns:
-        df_fraud = df_fraud.copy()
-        df_fraud.loc[:, "is_online"] = df_fraud["merchant_city"].isna() | (
-                df_fraud["merchant_city"].str.lower() == "online")
+        df_fraud = df_fraud.copy()  
+        df_fraud.loc[:, "is_online"] = df_fraud["merchant_city"].isna() | (df_fraud["merchant_city"].str.lower() == "online")
     if not df_fraud.empty and "is_online" in df_fraud.columns:
         value_counts = df_fraud["is_online"].value_counts()
-        labels = value_counts.index.map({True: "ONLINE", False: "IN-STORE"})
+        labels = value_counts.index.map({True: "Online", False: "In-Store"})
         fig = px.pie(
             names=labels,
             values=value_counts.values,
-            color_discrete_sequence=[const.COLOR_ONLINE, const.COLOR_INSTORE]
+            title="Fraud Cases: Online vs. In-Store"
         )
         fig.update_traces(
             textinfo='label+value+percent',
-            textfont_size=16,
-            textfont_color=text_color,
-            textposition='inside'
-        )
-        fig.update_layout(
-            title_x=0.5,
-            paper_bgcolor=const.COLOR_TRANSPARENT,
-            plot_bgcolor=const.COLOR_TRANSPARENT,
-            font=dict(color=text_color),
-            margin=dict(l=1, r=1, t=1, b=1),
-            showlegend=False
+            textfont_size=16
         )
         return fig
-    return comp_factory.create_empty_figure()
-
+    return go.Figure()
 
 # --- Graph: Top 10 Online Merchants by Fraud Amount ---
 @callback(
     Output(ID.FRAUD_TOP_MERCHANTS, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_top_merchants(app_state):
+def update_top_merchants(_):
     """
-    Updates and returns a bar chart figure displaying the top 10 online merchants based on
-    the total fraud amount. The figure is styled according to the application's dark mode
-    setting and displays the number of fraud cases per merchant.
+    Updates the top merchants chart data based on the application's state. This
+    function processes the transaction data to identify fraudulent online
+    transactions, aggregates the data by merchant, and generates a bar chart of
+    the top 10 online merchants with the highest total fraud amounts.
 
     Args:
-        app_state: dict. The application state, containing information such as whether dark
-            mode is enabled. If not provided, default values are used.
+        _: Unused placeholder for the input data, typically representing the
+            application's state store information.
 
     Returns:
-        plotly.graph_objects.Figure: A bar chart figure showing the top 10 online merchants
-        by total fraud amount, with corresponding fraud case counts.
+        plotly.graph_objects.Figure: A Plotly figure representing a bar chart of
+        the top 10 online merchants by total fraud amount, including textual data
+        for the fraud amount displayed on each bar. Returns an empty figure if
+        there is no adequate data available to process.
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-    grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
     if "is_online" not in df_fraud.columns and "merchant_city" in df_fraud.columns:
         df_fraud = df_fraud.copy()
-        df_fraud.loc[:, "is_online"] = df_fraud["merchant_city"].isna() | (
-                df_fraud["merchant_city"].str.lower() == "online")
+        df_fraud.loc[:, "is_online"] = df_fraud["merchant_city"].isna() | (df_fraud["merchant_city"].str.lower() == "online")
     online_df = df_fraud[df_fraud["is_online"] == True]
-    merchant_col = "merchant_name" if "merchant_name" in online_df.columns and online_df[
-        "merchant_name"].notnull().any() else "merchant_id"
+    merchant_col = "merchant_name" if "merchant_name" in online_df.columns and online_df["merchant_name"].notnull().any() else "merchant_id"
     if online_df.empty or merchant_col not in online_df.columns:
-        return comp_factory.create_empty_figure()
+        return go.Figure()
     grouped = online_df.groupby(merchant_col).agg(
         cases=("amount", "count"),
         costs=("amount", "sum")
@@ -299,72 +220,43 @@ def update_top_merchants(app_state):
     fig = px.bar(
         x=grouped.index.astype(str),
         y=grouped["cases"],
-        labels={"x": "MERCHANT", "y": "NUMBER OF FRAUD CASES"},
-        title="TOP 10 ONLINE MERCHANTS BY TOTAL FRAUD AMOUNT",
+        labels={"x": "Merchant", "y": "Number of Fraud Cases"},
+        title="Top 10 Online Merchants by Total Fraud Amount",
         text=bar_text
     )
     fig.update_traces(
         texttemplate='%{text}',
-        textposition='inside',
-        marker_color=const.COLOR_BLUE_MAIN,
-        marker_line_width=0,
-        opacity=0.95,
-        textfont=dict(color=const.TEXT_COLOR_DARK)
+        textposition='outside',
+        marker_color="#636EFA"
     )
     fig.update_layout(
-        title_x=0.5,
-        xaxis_title="MERCHANT",
-        yaxis_title="NUMBER OF FRAUD CASES",
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        font=dict(color=text_color),
-        margin=dict(l=32, r=32, t=32, b=32),
-        barcornerradius="16%",
-        xaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        ),
-        yaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        )
+        xaxis_title="Merchant",
+        yaxis_title="Number of Fraud Cases"
     )
     return fig
-
 
 # --- Demographics: Fraud by Age Group (Bar & Line) ---
 @callback(
     Output(ID.FRAUD_DEMO_AGE_GRAPH, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_fraud_by_age(app_state):
+def update_fraud_by_age(_):
     """
-    Updates a graph displaying fraud cases and total fraud amount by age group.
-
-    This callback function is responsible for generating a plotly figure that shows
-    the number of fraudulent transactions and total fraudulent amounts segmented
-    by age groups. It uses the application's state to configure visual preferences
-    such as dark mode and retrieves data from predefined data sources for analysis.
-    The generated plot contains a bar graph for the number of fraud cases and a line
-    graph for the total fraud amount overlaid within the same figure.
+    Updates the figure displaying fraud statistics segmented by age group. It computes
+    various metrics, including the count of fraud cases, total fraud amount, and average
+    cost per fraud case for each age group, and generates a Plotly figure combining bar
+    and line plots for visualization.
 
     Args:
-        app_state: A dictionary containing the current state of the application.
-            Includes configurations such as dark mode.
+        _: Unused parameter that receives data from the application state store.
 
     Returns:
-        plotly.graph_objects.Figure: A figure that visualizes the number of fraud cases
-        and total fraud amount by age group.
+        plotly.graph_objects.Figure: A bar and line plot representing fraud statistics
+        by age group. The bar chart shows the number of fraud cases, and the line chart
+        shows the total fraud amount. Secondary information, like average fraud cost per
+        case, is included in the hover tooltips.
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-    grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     users = dm.df_users
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")].copy()
@@ -384,9 +276,7 @@ def update_fraud_by_age(app_state):
     fig.add_bar(
         x=grouped.index.astype(str), y=grouped["cases"],
         name="Fraud Cases",
-        marker_color=const.COLOR_BLUE_MAIN,
-        marker_line_width=0,
-        opacity=0.95,
+        marker_color="#636EFA",
         yaxis="y1",
         hovertemplate="Age Group: %{x}<br>Cases: %{y}<br>Total Amount: $%{customdata[0]:,.2f}<br>Avg Amount/Case: $%{customdata[1]:,.2f}",
         customdata=grouped[["costs", "avg_cost"]].values
@@ -399,71 +289,37 @@ def update_fraud_by_age(app_state):
         yaxis="y2"
     ))
     fig.update_layout(
-        title="FRAUD BY AGE GROUP: NUMBER OF CASES & TOTAL AMOUNT",
-        title_x=0.5,
-        xaxis_title="AGE GROUP",
-        legend=dict(x=0.01, y=0.99),
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        font=dict(color=text_color),
-        margin=dict(l=32, r=32, t=32, b=32),
-        barcornerradius="16%",
-        xaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        ),
-        yaxis=dict(
-            title="NUMBER OF FRAUD CASES",
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color),
-            side="left"
-        ),
-        yaxis2=dict(
-            title="TOTAL FRAUD AMOUNT ($)",
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color),
-            overlaying="y",
-            side="right"
-        )
+        title="Fraud by Age Group: Number of Cases (Bar) & Total Amount (Line)",
+        xaxis_title="Age Group",
+        yaxis=dict(title="Number of Fraud Cases", side="left"),
+        yaxis2=dict(title="Total Fraud Amount ($)", overlaying="y", side="right"),
+        legend=dict(x=0.01, y=0.99)
     )
     return fig
-
 
 # --- Demographics: Fraud by Gender (Pie Chart & Summary) ---
 @callback(
     Output(ID.FRAUD_DEMO_GENDER_GRAPH, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_fraud_by_gender(app_state):
+def update_fraud_by_gender(_):
     """
-    Updates the fraud by gender pie chart figure based on the application state.
-
-    The function calculates the number of fraud cases, total fraud costs, and average
-    fraud cost per case for each gender. It generates a pie chart visualizing the number
-    of fraud cases by gender and includes additional data annotations displaying aggregate
-    statistics for each gender. The appearance of the chart adapts to the application's
-    dark mode settings.
+    Generates and updates a pie chart figure representing cases and associated
+    costs of fraud categorized by gender. The function retrieves transaction
+    and user data, processes them to compute the necessary metrics, and builds
+    a visual representation of fraud distribution.
 
     Args:
-        app_state (dict or None): The current state of the application. It provides
-            configuration parameters such as whether dark mode is enabled. If None,
-            default values are used for configuration.
+        _: dict
+            Placeholder for Input `ID.APP_STATE_STORE, "data"`. This input is not
+            utilized in the function directly but required for callback compatibility.
 
     Returns:
-        plotly.graph_objs._figure.Figure: A Plotly figure object representing a pie chart
-        of fraud cases by gender, along with annotations detailing fraud statistics.
+        plotly.graph_objects.Figure
+            A pie chart showing fraud cases by gender with annotations that include
+            total and average costs per gender.
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-    annotation_bg_color = "rgba(30,30,30,0.8)" if dark_mode else "white"
-    annotation_border_color = "white" if dark_mode else "black"
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     users = dm.df_users
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
@@ -477,13 +333,9 @@ def update_fraud_by_gender(app_state):
     fig = px.pie(
         names=grouped.index,
         values=grouped["cases"],
-        title="FRAUD BY GENDER (NUMBER OF CASES)",
-        color_discrete_sequence=[const.COLOR_FEMALE_PINK, const.COLOR_BLUE_MAIN]
+        title="Fraud by Gender (Number of Cases)"
     )
-    fig.update_traces(
-        textinfo='label+value',
-        textfont_color=text_color
-    )
+    fig.update_traces(textinfo='label+value')
 
     annotation_text = "<b>Totals:</b><br>"
     for gender, row in grouped.iterrows():
@@ -494,50 +346,41 @@ def update_fraud_by_gender(app_state):
         )
     fig.add_annotation(
         text=annotation_text,
-        x=0, y=0.5, xref="paper", yref="paper",
+        x=1.15, y=0.5, xref="paper", yref="paper",
         showarrow=False, align="left",
-        bordercolor=annotation_border_color, borderwidth=1,
-        bgcolor=annotation_bg_color,
-        font=dict(size=13, color=text_color)
+        bordercolor="black", borderwidth=1, bgcolor="white", font=dict(size=13)
     )
     fig.update_layout(
-        title_x=0.5,
-        legend_title="GENDER",
-        margin=dict(l=32, r=32, t=32, b=1),
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        font=dict(color=text_color)
+        legend_title="Gender",
+        margin=dict(r=120)
     )
     return fig
-
 
 # --- Demographics: Fraud by Income (Violin Plot) ---
 @callback(
     Output(ID.FRAUD_DEMO_INCOME_GRAPH, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_fraud_by_income(app_state):
+def update_fraud_by_income(_):
     """
-    Updates the fraud-by-income graph by creating a violin plot that visualizes the
-    distribution, outliers, and median of yearly incomes of users associated with fraudulent
-    transactions. The visualization updates based on the application's dark mode settings.
+    Updates the fraud distribution graph by income.
+
+    This callback function generates a violin plot visualization of income
+    distribution among fraud cases using transaction and user data from the
+    DataManager singleton instance. It computes and highlights the statistical
+    mean and median of yearly income for fraud cases. The plot provides insights
+    into the distribution, outliers, and key statistics of fraud by income.
 
     Args:
-        app_state (dict): The current state of the application, which includes settings
-            such as dark mode.
+        _: Placeholder for callback input data, typically provided by the state
+            store defined in the Input decorator.
 
     Returns:
-        plotly.graph_objects.Figure: A violin plot figure showing the income distribution
-            among users with fraudulent transactions. Includes indicators for the mean and
-            median yearly incomes.
+        plotly.graph_objects.Figure: A configured violin plot figure object
+        visualizing fraud by income distribution, including mean and median
+        annotations.
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-    grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     users = dm.df_users
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
@@ -548,8 +391,8 @@ def update_fraud_by_income(app_state):
         y="yearly_income",
         box=True,
         points="all",
-        color_discrete_sequence=[const.COLOR_BLUE_MAIN],
-        title="FRAUD BY INCOME (DISTRIBUTION, OUTLIERS & MEDIAN)"
+        color_discrete_sequence=["#636EFA"],
+        title="Fraud by Income (Distribution, Outliers & Median)"
     )
     mean_income = merged["yearly_income"].mean()
     fig.add_hline(
@@ -557,8 +400,7 @@ def update_fraud_by_income(app_state):
         line_dash="dash",
         line_color="red",
         annotation_text=f"Mean: ${mean_income:,.0f}",
-        annotation_position="top right",
-        annotation_font=dict(color=text_color)
+        annotation_position="top right"
     )
     median_income = merged["yearly_income"].median()
     fig.add_scatter(
@@ -568,57 +410,39 @@ def update_fraud_by_income(app_state):
         name="Median"
     )
     fig.update_layout(
-        title_x=0.5,
-        yaxis_title="YEARLY INCOME ($)",
+        yaxis_title="Yearly Income ($)",
         showlegend=False,
         violingap=0.2,
         violingroupgap=0.3,
         violinmode='overlay',
-        margin=dict(l=60, r=60, t=60, b=40),
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        font=dict(color=text_color),
-        xaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        ),
-        yaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        )
+        margin=dict(l=60, r=60, t=60, b=40)
     )
     return fig
-
 
 # --- Patterns: Fraud by Hour (Bar & Line) ---
 @callback(
     Output(ID.FRAUD_PATTERN_HOUR_GRAPH, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_fraud_by_hour(app_state):
+def update_fraud_by_hour(_):
     """
-    Updates the fraud by hour graph figure based on the application state. The graph visualizes the number of fraud cases
-    and the total fraud amounts by each hour of the day, using bar and line chart representations respectively. The figure
-    adjusts its appearance dynamically based on the dark mode setting provided in the application state.
+    Updates the fraud pattern by hour graph based on the provided application state data.
+
+    This function processes transactional data to extract information about fraudulent
+    transactions, groups the data by hour, and generates a figure combining a bar chart
+    for the number of fraud cases and a line chart for the total fraud amount. The x-axis
+    represents the hours of the day, while the y-axis includes dual axes: number of fraud
+    cases on the left and the total fraud amount on the right.
 
     Args:
-        app_state (dict): A dictionary representing the current application state, containing various configuration
-            options. It includes the key `dark_mode` (a boolean indicating whether dark mode is enabled), with a default
-            fallback value if not provided.
+        _: The application state data, typically passed in as JSON serialized data from the
+            application state store.
 
     Returns:
-        plotly.graph_objs.Figure: A Plotly figure object displaying the fraud by hour graph with configured layout,
-        colors, and data visualization elements.
+        plotly.graph_objects.Figure: A figure object representing the fraud pattern by hour,
+            containing both a bar and a line chart.
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-    grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")].copy()
     df_fraud["hour"] = pd.to_datetime(df_fraud["date"]).dt.hour
@@ -631,9 +455,7 @@ def update_fraud_by_hour(app_state):
     fig.add_bar(
         x=grouped.index, y=grouped["cases"],
         name="Fraud Cases",
-        marker_color=const.COLOR_BLUE_MAIN,
-        marker_line_width=0,
-        opacity=0.95,
+        marker_color="#636EFA",
         yaxis="y1",
         hovertemplate="Hour: %{x}<br>Cases: %{y}<br>Total Amount: $%{customdata[0]:,.2f}<br>Avg Amount/Case: $%{customdata[1]:,.2f}",
         customdata=grouped[["costs", "avg_cost"]].values
@@ -646,73 +468,33 @@ def update_fraud_by_hour(app_state):
         yaxis="y2"
     ))
     fig.update_layout(
-        title="FRAUD BY HOUR: NUMBER OF CASES & TOTAL AMOUNT",
-        title_x=0.5,
-        xaxis_title="HOUR OF DAY",
-        legend=dict(x=0.01, y=0.99),
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        font=dict(color=text_color),
-        margin=dict(l=32, r=32, t=32, b=32),
-        barcornerradius="16%",
-        xaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        ),
-        yaxis=dict(
-            title="NUMBER OF FRAUD CASES",
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color),
-            side="left"
-        ),
-        yaxis2=dict(
-            title="TOTAL FRAUD AMOUNT ($)",
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color),
-            overlaying="y",
-            side="right"
-        )
+        title="Fraud by Hour: Number of Cases (Bar) & Total Amount (Line)",
+        xaxis_title="Hour of Day",
+        yaxis=dict(title="Number of Fraud Cases", side="left"),
+        yaxis2=dict(title="Total Fraud Amount ($)", overlaying="y", side="right"),
+        legend=dict(x=0.01, y=0.99)
     )
     return fig
-
 
 # --- Patterns: Fraud by Weekday (Bar & Line) ---
 @callback(
     Output(ID.FRAUD_PATTERN_WEEKDAY_GRAPH, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_fraud_by_weekday(app_state):
+def update_fraud_by_weekday(_):
     """
-    Generates a Plotly figure illustrating the number of fraudulent cases and
-    the total fraud amount across weekdays, based on transaction data.
-
-    This function processes data from the application state to determine
-    whether dark mode is enabled. Based on dark mode or light mode, it selects
-    appropriate color schemes for gridlines, text, and other graphical
-    elements. It filters and groups transaction data to calculate weekday-based
-    statistics such as fraud cases, total fraud costs, and the average fraud cost
-    per case. The resulting figure contains a bar graph of fraud cases alongside
-    a line plot of total fraud amounts.
+    Generates and returns a Plotly figure representing fraud data distributed by weekday. The figure
+    includes a bar graph for the number of fraud cases and a line graph for the total fraud amount.
 
     Args:
-        app_state (dict): The current application state data, which contains a
-            "dark_mode" key indicating whether dark mode is active. If `app_state`
-            is `None`, default values are used.
+        _ (dict): Placeholder for Dash input callback data. The data from Input(ID.APP_STATE_STORE, "data")
+            is not used directly in this function.
 
     Returns:
-        plotly.graph_objects.Figure: A Plotly figure object visualizing fraud cases
-        and total fraud costs by weekday.
+        plotly.graph_objects.Figure: A figure visualizing fraud data by weekday, including the total
+        number of fraud cases per day, the total fraud amount, and the average fraud cost per case.
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-    grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")].copy()
     df_fraud["weekday"] = pd.to_datetime(df_fraud["date"]).dt.day_name()
@@ -726,9 +508,7 @@ def update_fraud_by_weekday(app_state):
     fig.add_bar(
         x=grouped.index, y=grouped["cases"],
         name="Fraud Cases",
-        marker_color=const.COLOR_BLUE_MAIN,
-        marker_line_width=0,
-        opacity=0.95,
+        marker_color="#636EFA",
         yaxis="y1",
         hovertemplate="Day: %{x}<br>Cases: %{y}<br>Total Amount: $%{customdata[0]:,.2f}<br>Avg Amount/Case: $%{customdata[1]:,.2f}",
         customdata=grouped[["costs", "avg_cost"]].values
@@ -741,118 +521,68 @@ def update_fraud_by_weekday(app_state):
         yaxis="y2"
     ))
     fig.update_layout(
-        title="FRAUD BY WEEKDAY: NUMBER OF CASES (BAR) & TOTAL AMOUNT",
-        title_x=0.5,
-        xaxis_title="WEEKDAY",
-        legend=dict(x=0.01, y=0.99),
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        font=dict(color=text_color),
-        margin=dict(l=32, r=32, t=32, b=32),
-        barcornerradius="16%",
-        xaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        ),
-        yaxis=dict(
-            title="NUMBER OF FRAUD CASES",
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color),
-            side="left"
-        ),
-        yaxis2=dict(
-            title="TOTAL FRAUD AMOUNT ($)",
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color),
-            overlaying="y",
-            side="right"
-        )
+        title="Fraud by Weekday: Number of Cases (Bar) & Total Amount (Line)",
+        xaxis_title="Weekday",
+        yaxis=dict(title="Number of Fraud Cases", side="left"),
+        yaxis2=dict(title="Total Fraud Amount ($)", overlaying="y", side="right"),
+        legend=dict(x=0.01, y=0.99)
     )
     return fig
-
 
 # --- Patterns: Fraud Transaction Amounts (Box Plot) ---
 @callback(
     Output(ID.FRAUD_PATTERN_AMOUNT_GRAPH, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_fraud_by_amount(app_state):
+def update_fraud_by_amount(_):
     """
-    Updates the figure of the fraud transaction amount box plot based on the application
-    state. It filters the fraudulent transactions from the dataset and creates a box
-    plot with appropriate formatting and coloring based on the application's dark mode
-    setting.
+    Updates and provides a box plot visualization of fraud transaction amounts.
+
+    This callback function retrieves transaction data from the DataManager instance,
+    filters transactions marked with errors (non-null and non-empty), and generates
+    a box plot using Plotly to display the distribution of fraud transaction amounts.
+    The resulting figure is updated in the specified output target.
 
     Args:
-        app_state (dict): The application state data from a dashboard store. It should
-            include the "dark_mode" key to determine UI color mode preferences. If
-            unavailable, a default value is used.
+        _: Any
+            Unused input data, often related to the application state.
 
     Returns:
-        plotly.graph_objects.Figure: The updated box plot figure visualizing fraudulent
-            transaction amounts with configurations suitable for the current UI mode.
+        plotly.graph_objs._figure.Figure:
+            A Plotly figure object representing a box plot of fraud transaction amounts.
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-    grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
-    fig = px.box(df_fraud, y="amount", points="all", title="FRAUD TRANSACTION AMOUNTS", color_discrete_sequence=[const.COLOR_BLUE_MAIN])
-    fig.update_layout(
-        title_x=0.5,
-        yaxis_title="FRAUD TRANSACTION AMOUNT ($)",
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        font=dict(color=text_color),
-        margin=dict(l=32, r=32, t=32, b=32),
-        xaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        ),
-        yaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        )
-    )
+    fig = px.box(df_fraud, y="amount", points="all", title="Fraud Transaction Amounts (Box Plot)")
+    fig.update_layout(yaxis_title="Fraud Transaction Amount ($)")
     return fig
-
 
 # --- Cards & Merchants: Fraud by Card Type (Bar) ---
 @callback(
     Output(ID.FRAUD_CARD_TYPE_GRAPH, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_fraud_by_card_type(app_state):
+def update_fraud_by_card_type(_):
     """
-    Updates and returns a Plotly bar chart visualization of the fraud distribution by card type.
+    Updates the fraud by card type bar chart figure for a given application state.
 
-    This function processes the transactional data and card metadata to generate a bar chart
-    representing the number of fraud cases by card type, along with the aggregated fraud amount.
-    It dynamically adjusts the chart appearance based on the dark mode setting stored in the app state.
+    This callback function generates a bar chart showing the number of fraud cases
+    grouped by card type. The visualization also includes the total fraud amount
+    and the number of cases per card type as textual annotations. The data is
+    retrieved and processed from a central data manager to filter and aggregate
+    fraudulent transactions by card type.
 
     Args:
-        app_state (Optional[dict]): A dictionary containing the application state data. It is used to
-            determine the dark mode state to adjust the chart's visual properties, such as text color and grid color.
+        _: dict | None: The application state data, typically used as a trigger
+            for the callback. Its details are not utilized in this function.
 
     Returns:
-        plotly.graph_objects.Figure: A Plotly figure object representing the bar chart of fraud cases by card type.
+        plotly.graph_objs._figure.Figure: A Plotly bar chart visualizing the fraud
+        cases grouped by card type, with respective fraud amount annotations.
+
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-    grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     cards = dm.df_cards
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
@@ -863,67 +593,36 @@ def update_fraud_by_card_type(app_state):
     bar_text = [f"{count:,} Cases<br>${amt:,.2f}" for count, amt in zip(card_counts.values, amount_per_type.values)]
     fig = px.bar(
         x=card_counts.index, y=card_counts.values,
-        labels={"x": "CARD TYPE", "y": "NUMBER OF FRAUD CASES"},
-        title=f"FRAUD BY CARD TYPE<br><sup>TOTAL FRAUD AMOUNT: ${total_amount:,.2f}</sup>",
+        labels={"x": "Card Type", "y": "Number of Fraud Cases"},
+        title=f"Fraud by Card Type (Bar Chart)<br><sup>Total Fraud Amount: ${total_amount:,.2f}</sup>",
         text=bar_text
     )
-    fig.update_traces(
-        textposition='inside',
-        marker_color=const.COLOR_BLUE_MAIN,
-        marker_line_width=0,
-        opacity=0.95,
-        textfont=dict(color=const.TEXT_COLOR_DARK)
-    )
+    fig.update_traces(textposition='outside')
     fig.update_layout(
-        title_x=0.5,
-        xaxis_title="CARD TYPE",
-        yaxis_title="NUMBER OF FRAUD CASES",
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        font=dict(color=text_color),
-        margin=dict(l=32, r=32, t=32, b=32),
-        barcornerradius="16%",
-        xaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        ),
-        yaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        )
+        xaxis_title="Card Type",
+        yaxis_title="Number of Fraud Cases"
     )
     return fig
-
 
 # --- Cards & Merchants: Fraud by Card Brand (Pie Chart) ---
 @callback(
     Output(ID.FRAUD_CARD_BRAND_GRAPH, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_fraud_by_card_brand(app_state):
+def update_fraud_by_card_brand(_):
     """
-    Updates the fraud by card brand pie chart figure based on the provided application
-    state by analyzing transaction and card data. The function prepares a pie chart
-    displaying the count of fraudulent transactions categorized by card brand. The
-    appearance of the chart (e.g., text color) adapts based on the application's dark
-    mode setting.
+    Callback that updates the "Fraud by Card Brand" pie chart based on the application state
+    data. Processes transaction and card data to generate a figure visualization for the
+    distribution of fraudulent transactions categorized by card brand.
 
     Args:
-        app_state: The current application state, provided as a dictionary. It contains
-            information such as the dark mode setting. If None, default settings are used.
+        _: Input value representing application state data.
 
     Returns:
-        plotly.graph_objects.Figure: A pie chart figure that visualizes fraudulent
-            transaction counts by card brand, styled dynamically based on application state.
+        plotly.graph_objs.Figure: A pie chart figure representing the count of fraudulent
+        transactions for each card brand.
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     cards = dm.df_cards
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
@@ -932,26 +631,13 @@ def update_fraud_by_card_brand(app_state):
     fig = px.pie(
         names=brand_counts.index,
         values=brand_counts.values,
-        title="FRAUD BY CARD BRAND"
+        title="Fraud by Card Brand (Pie Chart)"
     )
-    fig.update_traces(
-        textinfo='label+value',
-        textfont_color=text_color,
-        textposition='inside'
-    )
-    fig.update_layout(
-        title_x=0.5,
-        legend_title="CARD BRAND",
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        font=dict(color=text_color),
-        margin=dict(l=32, r=32, t=32, b=1)
-    )
+    fig.update_traces(textinfo='label+value')
+    fig.update_layout(legend_title="Card Brand")
     return fig
 
-
 # --- Cards & Merchants: Top 10 Merchant Categories by Fraud Amount (Bar & Line) ---
-# TODO: Automatically, not hardcoded
 mcc_map = {
     "4829": "Wire Transfer Money Orders",
     "5912": "Pharmacies",
@@ -965,63 +651,57 @@ mcc_map = {
     "5499": "Miscellaneous Food Stores"
 }
 
-
 def get_mcc_name(mcc_code, mcc_map):
     """
-    Fetches the MCC (Merchant Category Code) name from the provided MCC map.
+    Retrieves the name of a Merchant Category Code (MCC) from a mapping.
 
-    This function takes an MCC code and a mapping of MCC codes to their names.
-    It returns the corresponding name if the MCC code is found in the map. If the
-    MCC code is not found, it returns a default string indicating the code is unknown.
+    The function takes an MCC code as input, converts it to a string, and looks it up
+    in a provided mapping to determine the corresponding MCC name. If the MCC code
+    does not exist in the mapping, a string indicating "Unknown" along with the MCC
+    code is returned.
 
     Args:
-        mcc_code (int or str): The MCC (Merchant Category Code) to look up.
-            It can be provided as either an integer or a string.
-        mcc_map (dict): A dictionary mapping MCC codes (as strings) to their
-            respective names.
+        mcc_code: The Merchant Category Code (MCC) to look up.
+        mcc_map: A dictionary mapping MCC codes (as strings) to their corresponding
+            names.
 
     Returns:
-        str: The name corresponding to the given MCC code if found in the map.
-            If the MCC code is not present in the map, a string indicating
-            "Unknown" along with the MCC code is returned.
+        A string representing the name of the MCC if found in the mapping. If not
+        found, a string in the format "Unknown (MCC_CODE)" is returned, where
+        MCC_CODE is the input code converted to a string.
     """
     code_str = str(mcc_code)
     return mcc_map.get(code_str, f"Unknown ({code_str})")
-
 
 @callback(
     Output(ID.FRAUD_MCC_GRAPH, "figure"),
     Input(ID.APP_STATE_STORE, "data"),
 )
-def update_fraud_by_mcc(app_state):
+def update_fraud_by_mcc(_):
     """
-    Generates a line chart visualization displaying the top 10 merchant categories
-    with the highest total fraud amount based on transaction data. The data includes
-    cases of errors or fraudulent activity, grouped by merchant category code (MCC).
-    The chart dynamically adapts visual styling according to the selected dark mode
-    preference.
+    Updates a line graph visualizing the top 10 merchant categories by fraud costs.
+
+    This callback function generates a line chart that represents the total fraud
+    amount associated with the top 10 merchant categories by fraud costs. Fraudulent
+    transactions are identified based on non-empty values in the "errors" column
+    of the transaction data. It calculates the total fraud amount, the number of
+    cases, and the average fraud amount per category. The function filters out the
+    relevant data, performs necessary aggregations, sorts the categories by total
+    costs in descending order, and maps merchant category codes (MCC) to their
+    respective names. Finally, a line chart is constructed using Plotly express.
 
     Args:
-        app_state (dict): Application state data containing user preferences, including
-            dark mode settings.
+        _: Any: Triggering input data (not used explicitly in this function).
 
     Returns:
-        plotly.graph_objects.Figure: A Plotly line chart figure depicting the top
-        merchant categories ranked by total fraud amount, with styling adapted to
-        the dark mode preference. If no fraud data is available, an empty figure
-        is returned.
+        go.Figure: A Plotly line chart figure representing the top 10 merchant
+            categories by total fraud costs, with markers for data points.
     """
-    # Get dark mode from app state
-    dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
-
-    # Set colors based on dark mode
-    text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
-    grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
-
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
     if "mcc" not in df_fraud.columns or df_fraud.empty:
-        return comp_factory.create_empty_figure()
+        return go.Figure()
     grouped = df_fraud.groupby("mcc").agg(
         cases=("amount", "count"),
         costs=("amount", "sum")
@@ -1034,74 +714,9 @@ def update_fraud_by_mcc(app_state):
         x=grouped.index,
         y="costs",
         markers=True,
-        title="TOP 10 MERCHANT CATEGORIES BY TOTAL FRAUD AMOUNT",
-        labels={"x": "MERCHANT CATEGORY", "costs": "TOTAL FRAUD AMOUNT ($)"}
+        title="Top 10 Merchant Categories by Total Fraud Amount (Line Chart)",
+        labels={"x": "Merchant Category", "costs": "Total Fraud Amount ($)"}
     )
     fig.update_traces(mode="lines+markers", marker_color="#EF553B")
-    fig.update_layout(
-        title_x=0.5,
-        paper_bgcolor=const.COLOR_TRANSPARENT,
-        plot_bgcolor=const.COLOR_TRANSPARENT,
-        font=dict(color=text_color),
-        margin=dict(l=32, r=32, t=32, b=32),
-        xaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        ),
-        yaxis=dict(
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color)
-        )
-    )
     return fig
 
-
-@callback(
-    [Output(tab_id, "className") for tab_id, _ in FRAUD_ANALYSIS_TABS],
-    [Output(content_id, "className") for _, content_id in FRAUD_ANALYSIS_TABS],
-    [Input(tab_id, "n_clicks") for tab_id, _ in FRAUD_ANALYSIS_TABS]
-)
-def update_fraud_analysis_tabs(*n_clicks_list):
-    """
-    Updates the class names for fraud analysis tabs and their associated content based on the
-    button click. It dynamically determines which tab and content should be displayed as active
-    while marking others as inactive or hidden.
-
-    This function ensures that the active state is visually highlighted for the currently
-    selected tab while hiding the content for non-active tabs.
-
-    Args:
-        *n_clicks_list: A variable-length argument that represents the number of clicks for
-            each tab button. This input determines the active tab based on the triggered
-            button's click.
-
-    Returns:
-        list[str]: A list of class names for both tabs and tab content, determining their
-            visibility and active state. The returned list combines button class names
-            indicating their active/inactive state and content class names indicating
-            visibility or hidden state.
-    """
-    ctx = callback_context
-
-    if not ctx.triggered:
-        # Default to the first tab (Overview) if no button has been clicked
-        active_tab_id = ID.FRAUD_ANALYSIS_TAB_OVERVIEW
-    else:
-        # Get the ID of the button that was clicked
-        active_tab_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    # Button classes
-    btn_classes = [
-        "custom-tab-button active" if tab_id == active_tab_id else "custom-tab-button"
-        for tab_id, _ in FRAUD_ANALYSIS_TABS
-    ]
-
-    # Content classes
-    content_classes = [
-        "tab-item active" if tab_id == active_tab_id else "tab-item hidden"
-        for tab_id, content_id in FRAUD_ANALYSIS_TABS
-    ]
-
-    return btn_classes + content_classes
