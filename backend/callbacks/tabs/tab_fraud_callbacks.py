@@ -26,6 +26,23 @@ FRAUD_ANALYSIS_TABS = [
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_total_fraud_cases(_):
+    """
+    Callback function to update the total fraud cases displayed in the Fraud KPI section.
+
+    This function listens to changes in the application state and calculates the
+    number of fraudulent transactions based on the presence of non-null and
+    non-empty error fields in the transaction data. The result is returned as a
+    formatted string with commas as thousand separators.
+
+    Args:
+        _: Dummy argument to satisfy the callback input signature. The value is
+           provided automatically by Dash's callback mechanism and represents the
+           application state data.
+
+    Returns:
+        str: A formatted string representing the total number of fraud cases with
+        commas as thousand separators.
+    """
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
     return f"{len(df_fraud):,}"
@@ -37,6 +54,20 @@ def update_total_fraud_cases(_):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_total_transactions(_):
+    """
+    Updates the display for the total number of transactions.
+
+    This callback function listens for changes in the application state store
+    and updates the total transactions count displayed on the corresponding UI
+    element. It calculates the count based on the presence and length of the
+    `df_transactions` attribute in the `dm` object.
+
+    Args:
+        _: Data from the application state that triggers this callback.
+
+    Returns:
+        str: Formatted string representing the total transactions count.
+    """
     total_transactions = len(dm.df_transactions) if hasattr(dm, "df_transactions") else 0
     return f"{total_transactions:,}"
 
@@ -47,6 +78,23 @@ def update_total_transactions(_):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_fraud_ratio(_):
+    """
+    Updates and returns the fraud ratio percentage based on the number of fraudulent
+    transactions and total transactions in the data.
+
+    The fraud ratio is calculated as the percentage of fraudulent transactions over
+    the total transactions. If there are no transactions, the ratio is set to 0.
+
+    Args:
+        _: Dict[str, Any]
+            The application state data, passed automatically by the callback
+            mechanism, but not specifically utilized in the function.
+
+    Returns:
+        str:
+            The fraud ratio as a formatted string with two decimal places followed
+            by a percentage sign, such as "12.34 %".
+    """
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
     total_fraud = len(df_fraud)
@@ -61,6 +109,21 @@ def update_fraud_ratio(_):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_fraud_by_state(app_state):
+    """
+    Updates and returns a Plotly figure displaying fraud data by state. The figure includes
+    a bar chart of the number of fraud cases per state and a line chart showing the total
+    fraud amount. It adapts the colors and styles based on the application's dark mode setting.
+
+    Args:
+        app_state (dict): Dictionary containing application state data. It must include
+            a "dark_mode" key if dark mode settings are to be considered. If not provided,
+            default settings are used.
+
+    Returns:
+        plotly.graph_objects.Figure: A Plotly figure object combining a bar chart and line
+        chart with styling and hover capabilities. If no data is available, an empty figure
+        is returned.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -136,6 +199,22 @@ def update_fraud_by_state(app_state):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_online_vs_inperson(app_state):
+    """
+    Updates the pie chart visualization displaying the distribution of fraud occurrences
+    between online and in-person transactions based on the provided application state.
+    The function dynamically adjusts the chart's appearance based on the app's dark mode
+    setting and creates a pie chart using transaction data, categorized as online or
+    in-store.
+
+    Args:
+        app_state (dict or None): The current application state containing
+            configurations such as dark mode. If `app_state` is None, default
+            values for configurations will be used.
+
+    Returns:
+        Plotly.graph_objs._figure.Figure: A plotly Figure object representing the
+            pie chart. If no relevant fraud data is found, an empty figure is returned.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -181,6 +260,19 @@ def update_online_vs_inperson(app_state):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_top_merchants(app_state):
+    """
+    Updates and returns a bar chart figure displaying the top 10 online merchants based on
+    the total fraud amount. The figure is styled according to the application's dark mode
+    setting and displays the number of fraud cases per merchant.
+
+    Args:
+        app_state: dict. The application state, containing information such as whether dark
+            mode is enabled. If not provided, default values are used.
+
+    Returns:
+        plotly.graph_objects.Figure: A bar chart figure showing the top 10 online merchants
+        by total fraud amount, with corresponding fraud case counts.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -248,6 +340,24 @@ def update_top_merchants(app_state):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_fraud_by_age(app_state):
+    """
+    Updates a graph displaying fraud cases and total fraud amount by age group.
+
+    This callback function is responsible for generating a plotly figure that shows
+    the number of fraudulent transactions and total fraudulent amounts segmented
+    by age groups. It uses the application's state to configure visual preferences
+    such as dark mode and retrieves data from predefined data sources for analysis.
+    The generated plot contains a bar graph for the number of fraud cases and a line
+    graph for the total fraud amount overlaid within the same figure.
+
+    Args:
+        app_state: A dictionary containing the current state of the application.
+            Includes configurations such as dark mode.
+
+    Returns:
+        plotly.graph_objects.Figure: A figure that visualizes the number of fraud cases
+        and total fraud amount by age group.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -328,6 +438,24 @@ def update_fraud_by_age(app_state):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_fraud_by_gender(app_state):
+    """
+    Updates the fraud by gender pie chart figure based on the application state.
+
+    The function calculates the number of fraud cases, total fraud costs, and average
+    fraud cost per case for each gender. It generates a pie chart visualizing the number
+    of fraud cases by gender and includes additional data annotations displaying aggregate
+    statistics for each gender. The appearance of the chart adapts to the application's
+    dark mode settings.
+
+    Args:
+        app_state (dict or None): The current state of the application. It provides
+            configuration parameters such as whether dark mode is enabled. If None,
+            default values are used for configuration.
+
+    Returns:
+        plotly.graph_objs._figure.Figure: A Plotly figure object representing a pie chart
+        of fraud cases by gender, along with annotations detailing fraud statistics.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -389,6 +517,20 @@ def update_fraud_by_gender(app_state):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_fraud_by_income(app_state):
+    """
+    Updates the fraud-by-income graph by creating a violin plot that visualizes the
+    distribution, outliers, and median of yearly incomes of users associated with fraudulent
+    transactions. The visualization updates based on the application's dark mode settings.
+
+    Args:
+        app_state (dict): The current state of the application, which includes settings
+            such as dark mode.
+
+    Returns:
+        plotly.graph_objects.Figure: A violin plot figure showing the income distribution
+            among users with fraudulent transactions. Includes indicators for the mean and
+            median yearly incomes.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -456,6 +598,20 @@ def update_fraud_by_income(app_state):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_fraud_by_hour(app_state):
+    """
+    Updates the fraud by hour graph figure based on the application state. The graph visualizes the number of fraud cases
+    and the total fraud amounts by each hour of the day, using bar and line chart representations respectively. The figure
+    adjusts its appearance dynamically based on the dark mode setting provided in the application state.
+
+    Args:
+        app_state (dict): A dictionary representing the current application state, containing various configuration
+            options. It includes the key `dark_mode` (a boolean indicating whether dark mode is enabled), with a default
+            fallback value if not provided.
+
+    Returns:
+        plotly.graph_objs.Figure: A Plotly figure object displaying the fraud by hour graph with configured layout,
+        colors, and data visualization elements.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -529,6 +685,27 @@ def update_fraud_by_hour(app_state):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_fraud_by_weekday(app_state):
+    """
+    Generates a Plotly figure illustrating the number of fraudulent cases and
+    the total fraud amount across weekdays, based on transaction data.
+
+    This function processes data from the application state to determine
+    whether dark mode is enabled. Based on dark mode or light mode, it selects
+    appropriate color schemes for gridlines, text, and other graphical
+    elements. It filters and groups transaction data to calculate weekday-based
+    statistics such as fraud cases, total fraud costs, and the average fraud cost
+    per case. The resulting figure contains a bar graph of fraud cases alongside
+    a line plot of total fraud amounts.
+
+    Args:
+        app_state (dict): The current application state data, which contains a
+            "dark_mode" key indicating whether dark mode is active. If `app_state`
+            is `None`, default values are used.
+
+    Returns:
+        plotly.graph_objects.Figure: A Plotly figure object visualizing fraud cases
+        and total fraud costs by weekday.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -603,6 +780,21 @@ def update_fraud_by_weekday(app_state):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_fraud_by_amount(app_state):
+    """
+    Updates the figure of the fraud transaction amount box plot based on the application
+    state. It filters the fraudulent transactions from the dataset and creates a box
+    plot with appropriate formatting and coloring based on the application's dark mode
+    setting.
+
+    Args:
+        app_state (dict): The application state data from a dashboard store. It should
+            include the "dark_mode" key to determine UI color mode preferences. If
+            unavailable, a default value is used.
+
+    Returns:
+        plotly.graph_objects.Figure: The updated box plot figure visualizing fraudulent
+            transaction amounts with configurations suitable for the current UI mode.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -640,6 +832,20 @@ def update_fraud_by_amount(app_state):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_fraud_by_card_type(app_state):
+    """
+    Updates and returns a Plotly bar chart visualization of the fraud distribution by card type.
+
+    This function processes the transactional data and card metadata to generate a bar chart
+    representing the number of fraud cases by card type, along with the aggregated fraud amount.
+    It dynamically adjusts the chart appearance based on the dark mode setting stored in the app state.
+
+    Args:
+        app_state (Optional[dict]): A dictionary containing the application state data. It is used to
+            determine the dark mode state to adjust the chart's visual properties, such as text color and grid color.
+
+    Returns:
+        plotly.graph_objects.Figure: A Plotly figure object representing the bar chart of fraud cases by card type.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -697,6 +903,21 @@ def update_fraud_by_card_type(app_state):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_fraud_by_card_brand(app_state):
+    """
+    Updates the fraud by card brand pie chart figure based on the provided application
+    state by analyzing transaction and card data. The function prepares a pie chart
+    displaying the count of fraudulent transactions categorized by card brand. The
+    appearance of the chart (e.g., text color) adapts based on the application's dark
+    mode setting.
+
+    Args:
+        app_state: The current application state, provided as a dictionary. It contains
+            information such as the dark mode setting. If None, default settings are used.
+
+    Returns:
+        plotly.graph_objects.Figure: A pie chart figure that visualizes fraudulent
+            transaction counts by card brand, styled dynamically based on application state.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -746,6 +967,24 @@ mcc_map = {
 
 
 def get_mcc_name(mcc_code, mcc_map):
+    """
+    Fetches the MCC (Merchant Category Code) name from the provided MCC map.
+
+    This function takes an MCC code and a mapping of MCC codes to their names.
+    It returns the corresponding name if the MCC code is found in the map. If the
+    MCC code is not found, it returns a default string indicating the code is unknown.
+
+    Args:
+        mcc_code (int or str): The MCC (Merchant Category Code) to look up.
+            It can be provided as either an integer or a string.
+        mcc_map (dict): A dictionary mapping MCC codes (as strings) to their
+            respective names.
+
+    Returns:
+        str: The name corresponding to the given MCC code if found in the map.
+            If the MCC code is not present in the map, a string indicating
+            "Unknown" along with the MCC code is returned.
+    """
     code_str = str(mcc_code)
     return mcc_map.get(code_str, f"Unknown ({code_str})")
 
@@ -755,6 +994,23 @@ def get_mcc_name(mcc_code, mcc_map):
     Input(ID.APP_STATE_STORE, "data"),
 )
 def update_fraud_by_mcc(app_state):
+    """
+    Generates a line chart visualization displaying the top 10 merchant categories
+    with the highest total fraud amount based on transaction data. The data includes
+    cases of errors or fraudulent activity, grouped by merchant category code (MCC).
+    The chart dynamically adapts visual styling according to the selected dark mode
+    preference.
+
+    Args:
+        app_state (dict): Application state data containing user preferences, including
+            dark mode settings.
+
+    Returns:
+        plotly.graph_objects.Figure: A Plotly line chart figure depicting the top
+        merchant categories ranked by total fraud amount, with styling adapted to
+        the dark mode preference. If no fraud data is available, an empty figure
+        is returned.
+    """
     # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -808,6 +1064,25 @@ def update_fraud_by_mcc(app_state):
     [Input(tab_id, "n_clicks") for tab_id, _ in FRAUD_ANALYSIS_TABS]
 )
 def update_fraud_analysis_tabs(*n_clicks_list):
+    """
+    Updates the class names for fraud analysis tabs and their associated content based on the
+    button click. It dynamically determines which tab and content should be displayed as active
+    while marking others as inactive or hidden.
+
+    This function ensures that the active state is visually highlighted for the currently
+    selected tab while hiding the content for non-active tabs.
+
+    Args:
+        *n_clicks_list: A variable-length argument that represents the number of clicks for
+            each tab button. This input determines the active tab based on the triggered
+            button's click.
+
+    Returns:
+        list[str]: A list of class names for both tabs and tab content, determining their
+            visibility and active state. The returned list combines button class names
+            indicating their active/inactive state and content class names indicating
+            visibility or hidden state.
+    """
     ctx = callback_context
 
     if not ctx.triggered:
