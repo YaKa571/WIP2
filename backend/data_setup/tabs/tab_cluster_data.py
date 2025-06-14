@@ -103,27 +103,37 @@ class ClusterTabData:
 
         return agg
 
-    def prepare_inc_vs_exp_cluster_data(self, merchant_group) -> pd.DataFrame:
+    def prepare_inc_vs_exp_cluster_data(self, merchant_group, state: str = None) -> pd.DataFrame:
         """
-        Prepare and cluster data based on yearly income versus total expenses.
+        Prepare income versus expenses cluster data for a specified merchant group and state.
+
+        Processes and aggregates transactional and demographic data per `client_id` to compute
+        income and expense clusters. The function allows for filtering by `merchant_group` and `state`,
+        and results are cached to improve performance during subsequent calls with the same parameters.
 
         Args:
-            merchant_group (str): Merchant group filter; if not 'All Merchant Groups', filter the data.
+            merchant_group: Merchant group to filter data. If set to 'All Merchant Groups',
+                data for all merchant groups is used.
+            state: Optional; state to further filter the data. If not provided, data across all states
+                is used.
 
         Returns:
-            pd.DataFrame: Aggregated data with clusters for income vs expenses.
+            pd.DataFrame: Aggregated data per client with added income-expense cluster labels.
         """
         # Check cache
-        cache_key = f"inc_vs_exp_cluster_data_{merchant_group}"
+        cache_key = f"inc_vs_exp_cluster_data_{merchant_group}_{state}"
         if cache_key in self._cache_inc_vs_exp_cluster_data:
             return self._cache_inc_vs_exp_cluster_data[cache_key]
 
         # Use view instead of copy when possible
         if merchant_group != 'All Merchant Groups':
-            # Filter data without creating an unnecessary copy
             df_view = self.data_file[self.data_file['merchant_group'] == merchant_group]
         else:
             df_view = self.data_file
+
+        # Filter by state if provided
+        if state:
+            df_view = df_view[df_view['state_name'] == state]
 
         # Aggregation per client_id - more efficient with named aggregation
         agg = df_view.groupby('client_id').agg(

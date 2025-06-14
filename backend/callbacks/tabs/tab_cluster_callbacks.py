@@ -122,30 +122,23 @@ def set_cluster_tab(n_total_value, n_average_value, n_inc_vs_exp, n_all_ages, n_
 )
 def update_cluster(selected, selected_merchant_group, app_state, selected_federal_state):
     """
-    Updates the cluster-related components, such as buttons, graph, legend, and the heading,
-    based on user interaction and selected input data. Determines which cluster data to display
-    (total value, average value, or income vs expenditure) and whether this data should be grouped
-    by age. Applies a dark mode theme if necessary and adjusts the federal state selection.
+    Updates the cluster visualization based on the selected options, merchant group, application state,
+    and currently selected federal state. The function dynamically adjusts visualization for different
+    modes and states, including total value, average value, income versus expenses, and age group or
+    non-grouped data.
 
     Args:
-        selected (dict): Data representing the currently selected options for main
-            cluster criteria and age grouping.
-        selected_merchant_group (str): Group of merchants selected for filtering the data.
-        app_state (dict): Dictionary containing application state data such as
-            whether dark mode is enabled.
-        selected_federal_state (str): Selected federal state identifier, used to filter
-            data to a specific state or to represent all states.
+        selected: Dictionary specifying the currently selected primary and age clustering options.
+        selected_merchant_group: Merchant group selected from the dropdown for clustering.
+        app_state: Dictionary containing the current application state, including dark mode setting.
+        selected_federal_state: Currently selected federal state or toggle option ("All States" or "ONLINE").
 
     Returns:
-        tuple: A tuple containing the following outputs:
-            - str: CSS class for the 'Total Value' button.
-            - str: CSS class for the 'Average Value' button.
-            - str: CSS class for the 'Income vs Expenditure' button.
-            - str: CSS class for the 'All Ages' button.
-            - str: CSS class for the 'Age Group' button.
-            - plotly.graph_objs.Figure: Figure object for cluster visualization.
-            - dash.development.base_component.Component: Legend component for cluster visualization.
-            - str: Heading text for the cluster section.
+        Tuple of outputs for updating:
+            - Styles of the cluster option buttons reflecting the selected state.
+            - The cluster graph visualization as a Plotly figure.
+            - Components of the cluster legend description.
+            - The header text displaying the current state (All States, ONLINE, or specific state).
     """
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -187,12 +180,12 @@ def update_cluster(selected, selected_merchant_group, app_state, selected_federa
         legend = create_cluster_legend(mode="average_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.INC_VS_EXP.value and selected_age == ClusterAgeOption.ALL_AGES.value:
-        df_clustered = cluster_data.prepare_inc_vs_exp_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_inc_vs_exp_cluster_data(selected_merchant_group, federal_state)
         fig = make_inc_vs_exp_plot(df_clustered, age_group_mode="not grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="inc_vs_exp", df=df_clustered)
 
     elif selected_main == ClusterMainOption.INC_VS_EXP.value and selected_age == ClusterAgeOption.AGE_GROUPS.value:
-        df_clustered = cluster_data.prepare_inc_vs_exp_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_inc_vs_exp_cluster_data(selected_merchant_group, federal_state)
         fig = make_inc_vs_exp_plot(df_clustered, age_group_mode="grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="inc_vs_exp", df=df_clustered)
 
