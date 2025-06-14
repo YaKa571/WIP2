@@ -27,7 +27,7 @@ class MerchantTabData:
         self._cache_highest_expenditure_all_merchants = None
         self._cache_most_frequently_used_merchant_group: dict[Optional[str], tuple[str, int]] = {}
         self._cache_highest_value_merchant_group: dict[Optional[str], tuple[str, float]] = {}
-        self._cache_most_frequently_used_merchant_in_group: Dict[str, Tuple[int, int]] = {}
+        self._cache_most_frequently_used_merchant_in_group: Dict[Tuple[str, Optional[str]], Tuple[int, int]] = {}
         self._cache_highest_value_merchant_in_group: Dict[str, Tuple[int, float]] = {}
         self._cache_user_with_most_transactions_in_group: Dict[str, Tuple[int, int]] = {}
         self._cache_user_with_highest_expenditure_in_group: Dict[str, Tuple[int, float]] = {}
@@ -233,25 +233,34 @@ class MerchantTabData:
         self._cache_highest_value_merchant_group[state] = result
         return result
 
-    def get_most_frequently_used_merchant_in_group(self, merchant_group):
+    def get_most_frequently_used_merchant_in_group(self, merchant_group, state: str = None):
         """
-        Find the merchant within the specified merchant group with the highest number of transactions.
+        Gets the most frequently used merchant in a specified merchant group. If a state
+        is provided, the search is filtered within that state. The result is cached to
+        optimize subsequent calls with the same parameters.
 
         Args:
-            merchant_group (str): The name of the merchant group.
+            merchant_group: The identifier of the merchant group for which the most
+                frequently used merchant is to be determined.
+            state: Optional; the state name to filter the transactions within a
+                specific region.
 
         Returns:
-            tuple: (merchant_id, transaction_count)
-                merchant_id (int): ID of the merchant with the most transactions.
-                transaction_count (int): Number of transactions for this merchant.
-                Returns (-1, -1) if no transactions exist for the group.
+            Tuple[int, int]: A tuple containing the merchant ID of the most frequently
+            used merchant and its transaction count. Returns (-1, -1) if there are no
+            transactions matching the criteria.
         """
         # Check cache
-        if merchant_group in self._cache_most_frequently_used_merchant_in_group:
-            return self._cache_most_frequently_used_merchant_in_group[merchant_group]
+        cache_key = (merchant_group, state)
+        if cache_key in self._cache_most_frequently_used_merchant_in_group:
+            return self._cache_most_frequently_used_merchant_in_group[cache_key]
 
-        # Calculate
+        # Filter
         df = self.transactions_mcc_users[self.transactions_mcc_users['merchant_group'] == merchant_group]
+        if state:
+            df = df[df["state_name"] == state]
+
+        # Compute
         agg_df = df.groupby('merchant_id').size().reset_index(name='transaction_count')
         if agg_df.empty:
             result = (-1, -1)
@@ -259,8 +268,8 @@ class MerchantTabData:
             top_row = agg_df.sort_values(by='transaction_count', ascending=False).iloc[0]
             result = (int(top_row['merchant_id']), int(top_row['transaction_count']))
 
-        # Cache result
-        self._cache_most_frequently_used_merchant_in_group[merchant_group] = result
+        # Cache
+        self._cache_most_frequently_used_merchant_in_group[cache_key] = result
         return result
 
     def get_highest_value_merchant_in_group(self, merchant_group):
