@@ -133,7 +133,7 @@ def create_kpi_dashboard(kpi_data, clickable_kpi_card_ids=None):
     )
 
 
-def create_all_merchant_kpis():
+def create_all_merchant_kpis(state: str = None):
     """
     Generates and compiles a list of merchant-related key performance indicators (KPIs) and returns a KPI dashboard.
 
@@ -147,7 +147,7 @@ def create_all_merchant_kpis():
 
     """
     group_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_group()
-    group_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_group()
+    group_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_group(state)
     user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_all_merchants()
     user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_all_merchants()
 
@@ -521,7 +521,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state, s
 
     # Handle content based on selected tab
     if selected == MerchantTab.ALL.value:
-        kpi_content = create_all_merchant_kpis()
+        kpi_content = create_all_merchant_kpis(federal_state)
         graph_content = create_merchant_group_distribution_tree_map(dark_mode=dark_mode)
         graph_title = "MERCHANT GROUP DISTRIBUTION"
 
