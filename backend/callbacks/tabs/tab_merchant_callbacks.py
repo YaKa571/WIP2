@@ -247,20 +247,20 @@ def create_merchant_group_kpi(merchant_group, state: str = None):
 
 def create_individual_merchant_kpi(merchant: int = None, state: str = None):
     """
-    Generates and returns individual merchant KPI (Key Performance Indicator) dashboard data for
-    display. The function processes input data provided in the parameters or defaults to placeholder
-    content if no data is specified. KPI data is used to visualize metrics such as number of
-    transactions, total transaction value, and user-specific statistics.
+    Generates and returns a KPI dashboard for an individual merchant. This dashboard provides
+    key performance indicators such as transactions, transaction values, and top users based
+    on various metrics. If no merchant is specified, placeholder KPI data with "WAITING FOR
+    INPUT..." values is returned.
 
     Args:
-        merchant (int): Identifier for the merchant whose KPI data is retrieved. If None,
-            placeholder data will be used instead.
-        state (str): The state filter applied to calculate data for the merchant. This
-            typically specifies the geographical area or subset of data of interest.
+        merchant (int, optional): The identifier of the merchant for whom the KPI dashboard
+            is to be generated. Defaults to None, which returns a dashboard with placeholder values.
+        state (str, optional): The state or region of the merchant. This may filter the data
+            used for KPI generation. Defaults to None.
 
     Returns:
-        dict: A dictionary containing the configuration and data for an individual merchant
-            KPI dashboard, with keys for KPI data and clickable items.
+        dict: A representation of the KPI dashboard containing various metrics, as well as information
+        on which cards within the dashboard are clickable.
     """
     if merchant is None:
         # If merchant is None, set all values to "WAITING FOR INPUT..."
@@ -306,8 +306,8 @@ def create_individual_merchant_kpi(merchant: int = None, state: str = None):
     else:
         count_1 = dm.merchant_tab_data.get_merchant_transactions(merchant, state)
         value_2 = dm.merchant_tab_data.get_merchant_value(merchant, state)
-        user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_at_merchant(merchant)
-        user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_at_merchant(merchant)
+        user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_at_merchant(merchant, state)
+        user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_at_merchant(merchant, state)
 
         no_transactions = count_1 == 0
         transactions_str = "Transaction" if count_1 == 1 else "Transactions"

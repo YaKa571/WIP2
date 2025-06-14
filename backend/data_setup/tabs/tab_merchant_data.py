@@ -35,8 +35,8 @@ class MerchantTabData:
         self._cache_user_with_highest_expenditure_in_group: dict[tuple[str, Optional[str]], tuple[int, float]] = {}
         self._cache_merchant_transactions: Dict[Tuple[int, Optional[str]], int] = {}
         self._cache_merchant_value: Dict[Tuple[int, Optional[str]], float] = {}
-        self._cache_user_with_most_transactions_at_merchant: Dict[int, Tuple[int, int]] = {}
-        self._cache_user_with_highest_expenditure_at_merchant: Dict[int, Tuple[int, float]] = {}
+        self._cache_user_with_most_transactions_at_merchant: dict[tuple[int, Optional[str]], tuple[int, int]] = {}
+        self._cache_user_with_highest_expenditure_at_merchant: dict[tuple[int, Optional[str]], tuple[int, float]] = {}
         self.unique_merchant_ids = set(self.df_transactions["merchant_id"].unique())
 
     def get_my_transactions_mcc_users(self):
@@ -495,25 +495,35 @@ class MerchantTabData:
         self._cache_merchant_value[cache_key] = total_value
         return total_value
 
-    def get_user_with_most_transactions_at_merchant(self, merchant):
+    def get_user_with_most_transactions_at_merchant(self, merchant, state: str = None):
         """
-        Identify the user with the most transactions at a specific merchant.
+        Finds the user with the most transactions at a given merchant, optionally filtered by state.
+
+        This method analyzes transaction data to determine the client with the highest number
+        of transactions for a specific merchant. If a state is provided, it filters the data
+        to include only transactions within that state. Results are cached to improve
+        performance for subsequent calls with the same parameters.
 
         Args:
-            merchant (int): The merchant ID.
+            merchant: ID of the merchant for whom the transactions should be analyzed.
+            state: Optional; name of the state to filter transactions.
 
         Returns:
-            tuple: (client_id, transaction_count)
-                client_id (int): ID of the user with the most transactions at this merchant.
-                transaction_count (int): Number of transactions by this user.
-                Returns (-2, -2) if no transactions exist for this merchant.
+            A tuple of two integers:
+            - The client ID of the user with the most transactions.
+            - The count of transactions made by that user.
+            If no transactions are found, (-2, -2) is returned.
         """
         # Check cache
-        if merchant in self._cache_user_with_most_transactions_at_merchant:
-            return self._cache_user_with_most_transactions_at_merchant[merchant]
+        cache_key = (merchant, state)
+        if cache_key in self._cache_user_with_most_transactions_at_merchant:
+            return self._cache_user_with_most_transactions_at_merchant[cache_key]
 
         # Calculate
         df = self.transactions_mcc_users[self.transactions_mcc_users['merchant_id'] == merchant]
+        if state:
+            df = df[df['state_name'] == state]
+
         agg_df = df.groupby('client_id').size().reset_index(name='transaction_count')
         if agg_df.empty:
             result = (-2, -2)
@@ -522,28 +532,39 @@ class MerchantTabData:
             result = (int(top_row['client_id']), int(top_row['transaction_count']))
 
         # Cache result
-        self._cache_user_with_most_transactions_at_merchant[merchant] = result
+        self._cache_user_with_most_transactions_at_merchant[cache_key] = result
         return result
 
-    def get_user_with_highest_expenditure_at_merchant(self, merchant):
+    def get_user_with_highest_expenditure_at_merchant(self, merchant, state: str = None):
         """
-        Identify the user with the highest total expenditure at a specific merchant.
+        Fetches the user with the highest expenditure at a specified merchant, optionally filtered
+        by state, and caches the result.
+
+        This method processes transaction data to calculate the total expenditure of each user
+        for the specified merchant. If a state is provided, the data is filtered for transactions
+        matching the specified state. The user with the highest expenditure is identified, and
+        their client ID along with their total expenditure is returned. Results are cached to
+        optimize future calls with the same inputs.
 
         Args:
-            merchant (int): The merchant ID.
+            merchant: Identifier for the merchant whose transactions are to be analyzed.
+            state: Optional; The state filter to limit the analysis to a specific geographic location.
 
         Returns:
-            tuple: (client_id, total_value)
-                client_id (int): ID of the user with the highest spending at this merchant.
-                total_value (float): Sum of all transaction amounts by this user.
-                Returns (-2, -2) if no transactions exist for this merchant.
+            tuple: A tuple containing the client ID (int) of the user with the highest expenditure
+            at the specified merchant and the total amount spent (float). If there are no matching
+            transactions, returns a tuple (-2, -2).
         """
         # Check cache
-        if merchant in self._cache_user_with_highest_expenditure_at_merchant:
-            return self._cache_user_with_highest_expenditure_at_merchant[merchant]
+        cache_key = (merchant, state)
+        if cache_key in self._cache_user_with_highest_expenditure_at_merchant:
+            return self._cache_user_with_highest_expenditure_at_merchant[cache_key]
 
         # Calculate
         df = self.transactions_mcc_users[self.transactions_mcc_users['merchant_id'] == merchant]
+        if state:
+            df = df[df['state_name'] == state]
+
         agg_df = df.groupby('client_id')['amount'].sum().reset_index(name='total_value')
         if agg_df.empty:
             result = (-2, -2)
@@ -552,7 +573,7 @@ class MerchantTabData:
             result = (int(top_row['client_id']), float(top_row['total_value']))
 
         # Cache result
-        self._cache_user_with_highest_expenditure_at_merchant[merchant] = result
+        self._cache_user_with_highest_expenditure_at_merchant[cache_key] = result
         return result
 
     def _save_caches_to_disk(self):
