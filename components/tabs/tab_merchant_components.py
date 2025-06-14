@@ -108,34 +108,33 @@ def create_merchant_group_line_chart(merchant_group, state: str = None, dark_mod
     return fig
 
 
-def create_individual_merchant_line_chart(merchant, dark_mode: bool = const.DEFAULT_DARK_MODE):
+def create_individual_merchant_line_chart(merchant,state=None,dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
-    Creates a line chart for a specific merchant, displaying:
-    - The number of transactions per day (left Y-axis)
-    - The total transaction value per day (right Y-axis)
+    Creates an individual line chart for a specified merchant's transactions over time. The function
+    processes transaction data, aggregates metrics, and visualizes them in an interactive plotly
+    graph, enabling dual-axis comparison of transaction count and total value across a date range.
 
-    This dual-axis layout is used to visualize metrics with different scales
-    simultaneously without losing granularity in the smaller values.
-    The chart adapts to dark mode when enabled.
-
-    Parameters:
-    ----------
-    merchant : str
-        The unique merchant ID to filter the transactions dataset.
-    dark_mode : bool, optional
-        Whether to use dark mode styling. Defaults to False.
+    Args:
+        merchant: The identifier of the merchant for which the chart is created.
+        state: Optional filter specifying the state of transactions to be included. Defaults to None.
+        dark_mode: Indicates if the chart should use a dark mode color scheme. Defaults to
+            const.DEFAULT_DARK_MODE.
 
     Returns:
-    -------
-    plotly.graph_objects.Figure
-        A Plotly figure object containing the time series chart with dual Y-axes.
+        tuple: A plotly `Figure` object representing the line chart and a spinner class string. The
+            spinner class corresponds to the visibility state of a spinner element.
     """
-
     show_spinner_cls = "map-spinner visible"
     hide_spinner_cls = "map-spinner"
 
     df = merchant_data.get_my_transactions_mcc_users()
-    df = df[df['merchant_id'] == merchant].copy()
+    df = df[df['merchant_id'] == merchant]
+
+    if state is not None and 'state_name' in df.columns:
+        df = df[df['state_name'] == state]
+
+    df = df.copy()  # prevents warning
+
     if df.empty:
         return comp_factory.create_empty_figure(), show_spinner_cls
 
