@@ -187,7 +187,7 @@ def create_all_merchant_kpis(state: str = None):
     return create_kpi_dashboard(kpi_data)
 
 
-def create_merchant_group_kpi(merchant_group, state: str = None):
+def create_merchant_group_kpi(merchant_group, state: str = None): #todo comment
     """
     Creates a KPI dashboard for a merchant group by analyzing key performance
     indicators (KPI) such as the most frequently used merchant, the highest value
@@ -201,7 +201,7 @@ def create_merchant_group_kpi(merchant_group, state: str = None):
     """
     merchant_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_in_group(merchant_group, state)
     merchant_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_in_group(merchant_group, state)
-    user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_in_group(merchant_group)
+    user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_in_group(merchant_group, state)
     user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_in_group(merchant_group)
 
     kpi_data = [

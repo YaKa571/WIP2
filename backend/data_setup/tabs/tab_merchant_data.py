@@ -31,7 +31,7 @@ class MerchantTabData:
         self._cache_highest_value_merchant_group: dict[Optional[str], tuple[str, float]] = {}
         self._cache_most_frequently_used_merchant_in_group: Dict[Tuple[str, Optional[str]], Tuple[int, int]] = {}
         self._cache_highest_value_merchant_in_group: Dict[Tuple[str, Optional[str]], Tuple[int, float]] = {}
-        self._cache_user_with_most_transactions_in_group: Dict[str, Tuple[int, int]] = {}
+        self._cache_user_with_most_transactions_in_group: dict[tuple[str, Optional[str]], tuple[int, int]] = {}
         self._cache_user_with_highest_expenditure_in_group: Dict[str, Tuple[int, float]] = {}
         self._cache_merchant_transactions: Dict[Tuple[int, Optional[str]], int] = {}
         self._cache_merchant_value: Dict[Tuple[int, Optional[str]], float] = {}
@@ -355,25 +355,31 @@ class MerchantTabData:
         self._cache_highest_value_merchant_in_group[cache_key] = result
         return result
 
-    def get_user_with_most_transactions_in_group(self, merchant_group):
+    def get_user_with_most_transactions_in_group(self, merchant_group, state: str = None):
         """
-        Identify the user with the most transactions within the specified merchant group.
+        Retrieves the user with the most transactions within a specified merchant group,
+        and optionally filters by state. The result is cached for subsequent queries
+        with identical merchant group and state.
 
         Args:
-            merchant_group (str): The name of the merchant group.
+            merchant_group: Merchant group for which the transactions are queried.
+            state: Optional; State by which to filter transactions.
 
         Returns:
-            tuple: (client_id, transaction_count)
-                client_id (int): ID of the user with the most transactions.
-                transaction_count (int): Number of transactions by this user.
-                Returns (-1, -1) if no transactions exist for the group.
+            Tuple[int, int]: A tuple containing the client ID of the user with the most
+            transactions and the corresponding transaction count. Returns (-1, -1) if
+            there are no transactions matching the criteria.
         """
         # Check cache
-        if merchant_group in self._cache_user_with_most_transactions_in_group:
-            return self._cache_user_with_most_transactions_in_group[merchant_group]
+        cache_key = (merchant_group, state)
+        if cache_key in self._cache_user_with_most_transactions_in_group:
+            return self._cache_user_with_most_transactions_in_group[cache_key]
 
         # Calculate
         df = self.transactions_mcc_users[self.transactions_mcc_users['merchant_group'] == merchant_group]
+        if state:
+            df = df[df['state_name'] == state]
+
         agg_df = df.groupby('client_id').size().reset_index(name='transaction_count')
         if agg_df.empty:
             result = (-1, -1)
@@ -382,7 +388,7 @@ class MerchantTabData:
             result = (int(top_row['client_id']), int(top_row['transaction_count']))
 
         # Cache result
-        self._cache_user_with_most_transactions_in_group[merchant_group] = result
+        self._cache_user_with_most_transactions_in_group[cache_key] = result
         return result
 
     def get_user_with_highest_expenditure_in_group(self, merchant_group):
