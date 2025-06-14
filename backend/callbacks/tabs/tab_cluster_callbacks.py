@@ -122,36 +122,23 @@ def set_cluster_tab(n_total_value, n_average_value, n_inc_vs_exp, n_all_ages, n_
 )
 def update_cluster(selected, selected_merchant_group, app_state, selected_federal_state):
     """
-    Updates the cluster visualization based on user interactions and application state.
-
-    This function is a callback for Dash, intended to update various components of the
-    cluster visualization when user selections or application state data changes. It
-    computes the required cluster visualization data based on the selected options,
-    such as whether data is grouped by age or not, and creates the appropriate plots
-    and legends. This function also interprets and handles the application's dark mode
-    settings and federal/state configurations to customize the displayed information.
+    Updates the cluster visualization based on the selected options, merchant group, application state,
+    and currently selected federal state. The function dynamically adjusts visualization for different
+    modes and states, including total value, average value, income versus expenses, and age group or
+    non-grouped data.
 
     Args:
-        selected: Dictionary that contains the currently selected options for the
-            visualization. Includes keys `main` (indicating the data type like
-            total value, average value, etc.) and `age` (age grouping or all ages).
-        selected_merchant_group: The merchant group value selected by the user, which
-            determines the data scope for clustering.
-        app_state: Dictionary containing the current application state, such as
-            whether dark mode is enabled.
-        selected_federal_state: The federal state that is currently selected.
-            Determines whether data is filtered to specific states or includes all.
+        selected: Dictionary specifying the currently selected primary and age clustering options.
+        selected_merchant_group: Merchant group selected from the dropdown for clustering.
+        app_state: Dictionary containing the current application state, including dark mode setting.
+        selected_federal_state: Currently selected federal state or toggle option ("All States" or "ONLINE").
 
     Returns:
-        A tuple consisting of:
-            - CSS class for the "Total Value" button.
-            - CSS class for the "Average Value" button.
-            - CSS class for the "Income vs Expense" button.
-            - CSS class for the "All Ages" button.
-            - CSS class for the "Age Group" button.
-            - Figure object representing the cluster plot based on selected options.
-            - Legend component rendering details about the cluster visualization.
-            - Heading text for the cluster section that reflects the selected state or "All States".
+        Tuple of outputs for updating:
+            - Styles of the cluster option buttons reflecting the selected state.
+            - The cluster graph visualization as a Plotly figure.
+            - Components of the cluster legend description.
+            - The header text displaying the current state (All States, ONLINE, or specific state).
     """
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -173,32 +160,32 @@ def update_cluster(selected, selected_merchant_group, app_state, selected_federa
     selected_age = selected["age"]
 
     if selected_main == ClusterMainOption.TOTAL_VALUE.value and selected_age == ClusterAgeOption.ALL_AGES.value:
-        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group, federal_state)
         fig = make_cluster_plot(df_clustered, mode="total_value", age_group_mode="not grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="total_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.TOTAL_VALUE.value and selected_age == ClusterAgeOption.AGE_GROUPS.value:
-        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group, federal_state)
         fig = make_cluster_plot(df_clustered, mode="total_value", age_group_mode="grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="total_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.AVERAGE_VALUE.value and selected_age == ClusterAgeOption.ALL_AGES.value:
-        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group, federal_state)
         fig = make_cluster_plot(df_clustered, mode="average_value", age_group_mode="not grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="average_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.AVERAGE_VALUE.value and selected_age == ClusterAgeOption.AGE_GROUPS.value:
-        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group, federal_state)
         fig = make_cluster_plot(df_clustered, mode="average_value", age_group_mode="grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="average_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.INC_VS_EXP.value and selected_age == ClusterAgeOption.ALL_AGES.value:
-        df_clustered = cluster_data.prepare_inc_vs_exp_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_inc_vs_exp_cluster_data(selected_merchant_group, federal_state)
         fig = make_inc_vs_exp_plot(df_clustered, age_group_mode="not grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="inc_vs_exp", df=df_clustered)
 
     elif selected_main == ClusterMainOption.INC_VS_EXP.value and selected_age == ClusterAgeOption.AGE_GROUPS.value:
-        df_clustered = cluster_data.prepare_inc_vs_exp_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_inc_vs_exp_cluster_data(selected_merchant_group, federal_state)
         fig = make_inc_vs_exp_plot(df_clustered, age_group_mode="grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="inc_vs_exp", df=df_clustered)
 

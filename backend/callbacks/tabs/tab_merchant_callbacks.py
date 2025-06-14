@@ -546,7 +546,9 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state, s
         else:
             graph_title = "HISTORY FOR MERCHANT"
             spinner_class = "map-spinner visible"
-
+    print("tab_merchant_callbacks update_merchant")
+    print("ctx.triggered_id:", ctx.triggered_id)
+    print("selected (from MERCHANT_SELECTED_BUTTON_STORE):", selected)
     # Return all UI component properties
     return (
         get_option_button_class(MerchantTab.ALL.value, selected),

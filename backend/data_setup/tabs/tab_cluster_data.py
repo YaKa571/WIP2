@@ -36,18 +36,24 @@ class ClusterTabData:
         my_list.insert(0, 'All Merchant Groups')
         return my_list
 
-    def prepare_cluster_data(self, merchant_group) -> pd.DataFrame:
+    def prepare_cluster_data(self, merchant_group, state: str = None) -> pd.DataFrame:
         """
-        Prepare and cluster transaction data based on transaction count and value.
+        Prepares clustered data based on transaction and other metrics for the given merchant group
+        and optionally by a specific state. This method filters the data, performs aggregation by
+        client ID, and applies KMeans clustering on specific metrics.
 
         Args:
-            merchant_group (str): Merchant group filter; if not 'All Merchant Groups', filter the data.
+            merchant_group: The merchant group name to filter the data. If 'All Merchant Groups'
+                is provided, data for all merchant groups is considered.
+            state: (Optional) The state name to filter the data. If None, no filtering by state
+                is applied.
 
         Returns:
-            pd.DataFrame: Aggregated data with cluster labels based on total and average transaction values.
+            pd.DataFrame: A DataFrame containing aggregated and clustered data with fields such as
+            transaction_count, total_value, average_value, and cluster assignments.
         """
         # Check cache
-        cache_key = f"cluster_data_{merchant_group}"
+        cache_key = f"cluster_data_{merchant_group}_{state}"
         if cache_key in self._cache_cluster_data:
             return self._cache_cluster_data[cache_key]
 
@@ -56,6 +62,9 @@ class ClusterTabData:
             df_view = self.data_file[self.data_file['merchant_group'] == merchant_group]
         else:
             df_view = self.data_file
+        # Filter by state if provided
+        if state:
+            df_view = df_view[df_view['state_name'] == state]
 
         # Aggregation per client_id
         agg = df_view.groupby('client_id').agg(
@@ -94,27 +103,37 @@ class ClusterTabData:
 
         return agg
 
-    def prepare_inc_vs_exp_cluster_data(self, merchant_group) -> pd.DataFrame:
+    def prepare_inc_vs_exp_cluster_data(self, merchant_group, state: str = None) -> pd.DataFrame:
         """
-        Prepare and cluster data based on yearly income versus total expenses.
+        Prepare income versus expenses cluster data for a specified merchant group and state.
+
+        Processes and aggregates transactional and demographic data per `client_id` to compute
+        income and expense clusters. The function allows for filtering by `merchant_group` and `state`,
+        and results are cached to improve performance during subsequent calls with the same parameters.
 
         Args:
-            merchant_group (str): Merchant group filter; if not 'All Merchant Groups', filter the data.
+            merchant_group: Merchant group to filter data. If set to 'All Merchant Groups',
+                data for all merchant groups is used.
+            state: Optional; state to further filter the data. If not provided, data across all states
+                is used.
 
         Returns:
-            pd.DataFrame: Aggregated data with clusters for income vs expenses.
+            pd.DataFrame: Aggregated data per client with added income-expense cluster labels.
         """
         # Check cache
-        cache_key = f"inc_vs_exp_cluster_data_{merchant_group}"
+        cache_key = f"inc_vs_exp_cluster_data_{merchant_group}_{state}"
         if cache_key in self._cache_inc_vs_exp_cluster_data:
             return self._cache_inc_vs_exp_cluster_data[cache_key]
 
         # Use view instead of copy when possible
         if merchant_group != 'All Merchant Groups':
-            # Filter data without creating an unnecessary copy
             df_view = self.data_file[self.data_file['merchant_group'] == merchant_group]
         else:
             df_view = self.data_file
+
+        # Filter by state if provided
+        if state:
+            df_view = df_view[df_view['state_name'] == state]
 
         # Aggregation per client_id - more efficient with named aggregation
         agg = df_view.groupby('client_id').agg(
@@ -210,26 +229,21 @@ class ClusterTabData:
 
     def _pre_cache_cluster_tab_data(self) -> None:
         """
-        Caches data for the Cluster Tab by preloading necessary information.
+        Pre-cache cluster tab data by loading cached data from disk, or generating new
+        data and caching it. The process includes pre-loading merchant group data and
+        state-specific data, and is optimized using parallel processing to improve
+        efficiency.
 
-        This method is responsible for pre-caching the data required for the Cluster Tab in
-        the application. It attempts to load data from disk first and, if unavailable, proceeds to
-        generate and cache the data for both "All Merchant Groups" and individual merchant
-        groups using concurrent processing for efficiency. This caching improves overall
-        application performance and responsiveness during runtime.
+        If the cached data is already available on disk, it will be loaded directly,
+        skipping the generation process. Otherwise, combinations of merchant groups and
+        states are prepared, and data is generated and cached in parallel using a
+        ThreadPoolExecutor. Once complete, the caching results are saved back to disk
+        for future use.
 
-        The method utilizes benchmarks for tracking the performance of each step and logs
-        the progress accordingly. If the data is successfully loaded from disk, it will skip
-        the computationally intensive tasks and directly return.
+        Raises:
+            Any exceptions raised during concurrent execution or data processing will
+            propagate through this function.
 
-        Attributes:
-            None
-
-        Args:
-            None
-
-        Returns:
-            None
         """
         import concurrent.futures
 
@@ -242,35 +256,35 @@ class ClusterTabData:
             bm_pre_cache_full.print_time(level=4)
             return
 
-        # Cache data for 'All Merchant Groups' first as it's often a dependency
-        bm_all_groups = Benchmark("Cluster: Pre-caching data for All Merchant Groups")
-        self.prepare_cluster_data('All Merchant Groups')
-        self.prepare_inc_vs_exp_cluster_data('All Merchant Groups')
-        bm_all_groups.print_time(level=4)
+        # Get all merchant groups (first one is 'All Merchant Groups')
+        merchant_groups = self.get_cluster_merchant_group_dropdown()
 
-        # Define a function to cache data for a merchant group
-        def cache_merchant_group_data(group):
-            # Cache both types of cluster data for this merchant group
-            self.prepare_cluster_data(group)
-            self.prepare_inc_vs_exp_cluster_data(group)
-            return group
+        # Get all unique states from data_file
+        all_states = self.data_file["merchant_state"].dropna().unique().tolist()
+        all_states.append(None)  # Include None for overall aggregation
 
-        # Get merchant groups (skip 'All Merchant Groups' as it's already cached)
-        merchant_groups = self.get_cluster_merchant_group_dropdown()[1:]
+        # Build combinations of merchant_group × state
+        param_combinations = [
+            (merchant_group, state)
+            for merchant_group in merchant_groups
+            for state in all_states
+        ]
 
-        # Use ThreadPoolExecutor for parallel processing
-        # This is ideal for CPU-bound operations like clustering
-        # The max_workers parameter can be adjusted based on the system's capabilities
-        bm_groups = Benchmark("Cluster: Pre-caching data for all merchant groups in parallel")
+        # Define a caching task
+        def cache_combination(params):
+            merchant_group, state = params
+            self.prepare_cluster_data(merchant_group, state)
+            self.prepare_inc_vs_exp_cluster_data(merchant_group, state)
+            return params
+
+        # Use thread pool to parallelize caching
+        bm_groups = Benchmark("Cluster: Pre-caching data for all group/state combinations")
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Process all merchant groups in parallel
-            results = list(executor.map(cache_merchant_group_data, merchant_groups))
-
+            results = list(executor.map(cache_combination, param_combinations))
         bm_groups.print_time(level=4)
 
         # Save caches to disk for future use
         self._save_caches_to_disk()
-
         bm_pre_cache_full.print_time(level=4)
 
     def initialize(self):
