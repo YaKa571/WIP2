@@ -19,6 +19,7 @@ class MerchantTabData:
         self.transactions_mcc_agg = None
         self.transactions_agg_by_user = None
         self.transactions_mcc_users = None
+        self.transactions_mcc_agg_by_state = None
 
         # Caches
         self._cache_merchant_group_overview = {}
@@ -62,40 +63,62 @@ class MerchantTabData:
         self._cache_all_merchant_groups = result
         return result
 
-    def get_merchant_group_overview(self, threshold):
+    def get_merchant_group_overview(self, threshold, state: Optional[str] = None):
         """
-        Aggregates merchant groups by transaction count, grouping smaller groups into 'Other'.
-
-        This function takes a threshold value and separates merchant groups into "large" groups
-        (with transaction counts greater than or equal to the threshold) and "small" groups
-        (with counts below the threshold). It then sums the transaction counts of all small
-        groups and adds them as a single 'Other' group to the large groups if the sum is greater than zero.
+        Retrieves an overview of merchant groups with transaction counts based on a threshold
+        and optional state filter. The result is cached to improve performance for repeated
+        queries with the same parameters.
 
         Args:
-            threshold (int): The minimum transaction count for a merchant group to be considered "large".
+            threshold (int): Minimum transaction count to categorize a merchant group as
+                significant. Merchant groups with transaction counts below this threshold
+                may be aggregated into an 'OTHER' category if necessary.
+            state (Optional[str]): Optional filter for transactions by state. If provided, only
+                transactions within the specified state are considered.
 
         Returns:
-            pandas.DataFrame: A DataFrame containing merchant groups with transaction counts,
-                              where groups below the threshold are combined into an 'Other' group.
-                              The DataFrame has columns 'merchant_group' and 'transaction_count'.
+            pd.DataFrame: A DataFrame containing merchant groups and their corresponding
+                transaction counts. Includes an 'OTHER' category if smaller groups are
+                aggregated.
         """
-        # Check cache
-        if threshold in self._cache_merchant_group_overview:
-            return self._cache_merchant_group_overview[threshold]
+        # Create cache key (tuple of threshold and state)
+        cache_key = (threshold, state)
+        if cache_key in self._cache_merchant_group_overview:
+            return self._cache_merchant_group_overview[cache_key]
 
-        df = self.transactions_mcc_agg.copy()
-        large_groups = df[df['transaction_count'] >= threshold]
-        small_groups = df[df['transaction_count'] < threshold]
-        other_sum = small_groups['transaction_count'].sum()
-        if other_sum > 0:
-            other_df = pd.DataFrame([{
-                'merchant_group': 'OTHER',
-                'transaction_count': other_sum
+        # Select appropriate data source
+        if state is not None:
+            df = self.transactions_mcc_agg_by_state
+            df = df[df["state_name"] == state].copy()
+            df.drop(columns=["state_name"], inplace=True)
+        else:
+            df = self.transactions_mcc_agg.copy()
+
+        # Sort by transaction count descending
+        df = df.sort_values(by="transaction_count", ascending=False).reset_index(drop=True)
+
+        # Apply threshold logic
+        large_groups = df[df["transaction_count"] >= threshold]
+        small_groups = df[df["transaction_count"] < threshold]
+
+        # Ensure at least 10 groups remain (adjust threshold dynamically)
+        if len(large_groups) < 10 and not small_groups.empty:
+            num_needed = 10 - len(large_groups)
+            extra = small_groups.head(num_needed)
+            large_groups = pd.concat([large_groups, extra], ignore_index=True)
+            small_groups = small_groups.iloc[num_needed:]
+
+        # Add 'OTHER' category if remaining small groups exist
+        if not small_groups.empty:
+            other_sum = small_groups["transaction_count"].sum()
+            other_row = pd.DataFrame([{
+                "merchant_group": "OTHER",
+                "transaction_count": other_sum
             }])
-            large_groups = pd.concat([large_groups, other_df], ignore_index=True)
+            large_groups = pd.concat([large_groups, other_row], ignore_index=True)
 
-        # Cache result
-        self._cache_merchant_group_overview[threshold] = large_groups
+        # Cache and return
+        self._cache_merchant_group_overview[cache_key] = large_groups
         return large_groups
 
     def get_user_with_most_transactions_all_merchants(self):
@@ -662,6 +685,13 @@ class MerchantTabData:
         self.transactions_mcc_agg = (
             self.transactions_mcc
             .groupby('merchant_group', sort=False)  # Avoid sorting for better performance
+            .agg(transaction_count=('merchant_group', 'count'))
+            .reset_index()
+        )
+        # Aggregate by merchant group AND state
+        self.transactions_mcc_agg_by_state = (
+            self.transactions_mcc
+            .groupby(['state_name', 'merchant_group'], sort=False)
             .agg(transaction_count=('merchant_group', 'count'))
             .reset_index()
         )

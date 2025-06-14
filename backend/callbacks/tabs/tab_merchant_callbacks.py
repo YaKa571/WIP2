@@ -351,26 +351,25 @@ def create_individual_merchant_kpi(merchant: int = None, state: str = None):
 
 # === GRAPH ===
 
-def create_merchant_group_distribution_tree_map(dark_mode: bool = const.DEFAULT_DARK_MODE) -> px.treemap:
+def create_merchant_group_distribution_tree_map(state: str = None, dark_mode: bool = const.DEFAULT_DARK_MODE) -> px.treemap:
     """
-    Generates a treemap visualization of merchant group distribution.
-
-    This function creates a treemap displaying the distribution of merchant groups
-    based on the transaction count. It allows customization of the appearance based
-    on whether dark mode is enabled or not.
+    Generates a treemap visualization for merchant group distribution based on transaction
+    counts. The treemap represents the hierarchical structure of merchant groups, with
+    custom coloring, text formatting, and hover details based on the provided parameters.
 
     Args:
-        dark_mode (bool): Determines the color mode of the treemap. If True, the
-        treemap text will use white color. If False, it will use black. Defaults to
-        False.
+        state: A string representing the state filter for the merchant group data. Defaults
+            to None, indicating no state-specific filtering.
+        dark_mode: A boolean indicating whether the treemap should use a dark mode color
+            scheme. Defaults to const.DEFAULT_DARK_MODE.
 
     Returns:
-        px.treemap: A Plotly Treemap object representing the merchant group
-        distribution.
+        px.treemap: A Plotly treemap object visualizing the merchant group distribution with
+        transaction counts and percentage shares.
     """
     text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
 
-    treemap_df = dm.merchant_tab_data.get_merchant_group_overview(merchant_other_threshold).copy()
+    treemap_df = dm.merchant_tab_data.get_merchant_group_overview(merchant_other_threshold, state).copy()
     treemap_df["merchant_group"] = treemap_df["merchant_group"].astype(str).str.upper()
 
     fig = px.treemap(
@@ -448,30 +447,29 @@ def set_merchant_tab(n_all, n_group, n_indiv):
 )
 def update_merchant(selected, selected_group, selected_merchant_id, app_state, selected_federal_state):
     """
-    Updates the user interface and data visualization components in the merchant
-    management dashboard based on the currently selected filter options.
-
-    The function adjusts the displayed elements, such as buttons, charts, key
-    performance indicators (KPIs), and dropdown inputs, to match the user's selected
-    merchant tab (e.g., All Merchants, Merchant Group, Individual Merchant), as
-    well as additional filters like federal state or merchant ID.
+    Updates UI components and content related to merchant visualization, such as buttons, input
+    wrappers, key performance indicators (KPIs), graphs, and headings. The updates are based on the
+    selected merchant tab, input data, and application state.
 
     Args:
-        selected: The selected merchant tab, determined by the `MerchantTab` enum.
-        selected_group: The identifier of the selected merchant group, if applicable.
-        selected_merchant_id: The ID of the selected individual merchant, if any.
-        app_state: A dictionary representing the current application state. This
-            typically includes variables such as dark mode settings.
-        selected_federal_state: The currently selected federal state, or `None`
-            if no specific state is selected.
+        selected (str): Identifier for the currently selected merchant tab.
+        selected_group (str): Selected merchant group identifier.
+        selected_merchant_id (str | None): Selected individual merchant identifier.
+        app_state (dict | None): A dictionary containing the current application state, including
+            theme settings like dark mode.
+        selected_federal_state (str | None): Selected federal state or 'ONLINE' if no specific state
+            is selected.
 
     Returns:
-        tuple: Contains the updated values for multiple UI components:
-            - Styles and class names for buttons and input elements.
-            - Content for KPIs and graph visualizations, based on the selected merchant tab.
-            - The title for the graph visualization.
-            - Spinner and card styles for loading indicators and modebar appearance.
-            - The heading text for the merchant management interface.
+        tuple: Contains updated properties for various UI elements:
+            - Class names for merchant tab buttons (to reflect the currently selected tab).
+            - Display styles for the merchant group and individual input wrappers.
+            - Children (contents) for the KPI container.
+            - Updated Plotly figure for the graph container.
+            - Children (contents) for the graph title.
+            - Class name for the bar chart spinner (to show/hide based on graph loading state).
+            - Class name for the graph card (containing the modebar style).
+            - Heading content reflecting the selected or default federal state.
     """
     # Set default tab if none selected
     if not selected:
@@ -509,7 +507,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state, s
     # Handle content based on selected tab
     if selected == MerchantTab.ALL.value:
         kpi_content = create_all_merchant_kpis(federal_state)
-        graph_content = create_merchant_group_distribution_tree_map(dark_mode=dark_mode)
+        graph_content = create_merchant_group_distribution_tree_map(federal_state, dark_mode=dark_mode)
         graph_title = "MERCHANT GROUP DISTRIBUTION"
 
     elif selected == MerchantTab.GROUP.value:
