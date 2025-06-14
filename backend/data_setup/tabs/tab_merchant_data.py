@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 
 import pandas as pd
 
@@ -25,14 +25,14 @@ class MerchantTabData:
         self._cache_all_merchant_groups = None
         self._cache_most_transactions_all_merchants = None
         self._cache_highest_expenditure_all_merchants = None
-        self._cache_most_frequently_used_merchant_group = None
-        self._cache_highest_value_merchant_group = None
-        self._cache_most_frequently_used_merchant_in_group: Dict[str, Tuple[int, int]] = {}
-        self._cache_highest_value_merchant_in_group: Dict[str, Tuple[int, float]] = {}
+        self._cache_most_frequently_used_merchant_group: dict[Optional[str], tuple[str, int]] = {}
+        self._cache_highest_value_merchant_group: dict[Optional[str], tuple[str, float]] = {}
+        self._cache_most_frequently_used_merchant_in_group: Dict[Tuple[str, Optional[str]], Tuple[int, int]] = {}
+        self._cache_highest_value_merchant_in_group: Dict[Tuple[str, Optional[str]], Tuple[int, float]] = {}
         self._cache_user_with_most_transactions_in_group: Dict[str, Tuple[int, int]] = {}
         self._cache_user_with_highest_expenditure_in_group: Dict[str, Tuple[int, float]] = {}
-        self._cache_merchant_transactions: Dict[int, int] = {}
-        self._cache_merchant_value: Dict[int, float] = {}
+        self._cache_merchant_transactions: Dict[Tuple[int, Optional[str]], int] = {}
+        self._cache_merchant_value: Dict[Tuple[int, Optional[str]], float] = {}
         self._cache_user_with_most_transactions_at_merchant: Dict[int, Tuple[int, int]] = {}
         self._cache_user_with_highest_expenditure_at_merchant: Dict[int, Tuple[int, float]] = {}
         self.unique_merchant_ids = set(self.df_transactions["merchant_id"].unique())
@@ -151,78 +151,116 @@ class MerchantTabData:
         self._cache_highest_expenditure_all_merchants = (user_return, value_return)
         return user_return, value_return
 
-    def get_most_frequently_used_merchant_group(self):
+    def get_most_frequently_used_merchant_group(self, state: str = None):
         """
-        Calculate the merchant group with the highest number of transactions.
+        Determines the most frequently used merchant group from transaction data
+        for a specified state. If a state is not specified, the calculation uses
+        data for all states.
 
-        This function counts how many transactions are associated with each merchant group
-        by using the 'merchant_group' column in the DataFrame 'my_transactions_mcc'.
-        It returns the merchant group that appears most frequently along with the count of transactions.
-
-        Returns:
-            tuple: (group_return, count_return)
-                group_return (str): The name of the most frequently used merchant group.
-                count_return (int): The number of transactions for this merchant group.
-        """
-        # Check cache
-        if self._cache_most_frequently_used_merchant_group is not None:
-            return self._cache_most_frequently_used_merchant_group
-
-        # Calculate
-        freq_agg = self.transactions_mcc["merchant_group"].value_counts()
-        freq = freq_agg.reset_index().sort_values(by="count", ascending=False)
-        group_return = freq.loc[0, "merchant_group"]
-        count_return = freq.loc[0, "count"]
-
-        # Cache result
-        self._cache_most_frequently_used_merchant_group = (group_return, count_return)
-        return group_return, count_return
-
-    def get_highest_value_merchant_group(self):
-        """
-        Calculate the merchant group with the highest total transaction value.
-
-        This function sums the 'amount' values for each merchant group in the DataFrame 'my_transactions_mcc'.
-        It returns the merchant group with the highest aggregated transaction amount along with the total value.
-
-        Returns:
-            tuple: (group_return, value_return)
-                group_return (str): The name of the merchant group with the highest transaction value.
-                value_return (float): The total summed transaction amount for this merchant group.
-        """
-        # Check cache
-        if self._cache_highest_value_merchant_group is not None:
-            return self._cache_highest_value_merchant_group
-
-        # Calculate
-        value_agg = self.transactions_mcc.groupby("merchant_group")["amount"].sum()
-        value = value_agg.reset_index().sort_values(by="amount", ascending=False)
-        group_return = value.loc[0, "merchant_group"]
-        value_return = value.loc[0, "amount"]
-
-        # Cache result
-        self._cache_highest_value_merchant_group = (group_return, value_return)
-        return group_return, value_return
-
-    def get_most_frequently_used_merchant_in_group(self, merchant_group):
-        """
-        Find the merchant within the specified merchant group with the highest number of transactions.
+        The method utilizes a cache to store results for previously computed states
+        to optimize performance.
 
         Args:
-            merchant_group (str): The name of the merchant group.
+            state (str, optional): The name of the state for which the most frequently
+                used merchant group will be calculated. Defaults to None.
 
         Returns:
-            tuple: (merchant_id, transaction_count)
-                merchant_id (int): ID of the merchant with the most transactions.
-                transaction_count (int): Number of transactions for this merchant.
-                Returns (-1, -1) if no transactions exist for the group.
+            tuple: A tuple containing the most frequently used merchant group as a
+                string and its count as an integer. If the filtered data is empty, it
+                returns ("UNKNOWN", 0).
         """
         # Check cache
-        if merchant_group in self._cache_most_frequently_used_merchant_in_group:
-            return self._cache_most_frequently_used_merchant_in_group[merchant_group]
+        if state in self._cache_most_frequently_used_merchant_group:
+            return self._cache_most_frequently_used_merchant_group[state]
+
+        # Filter data by state if provided
+        df = self.transactions_mcc
+        if state:
+            df = df[df["state_name"] == state]
+        # Calculate
+        if df.empty:
+            result = ("UNKNOWN", 0)
+        else:
+            freq = (
+                df.groupby("merchant_group")
+                .size()
+                .reset_index(name="count")
+                .sort_values(by="count", ascending=False)
+            )
+            result = (freq.iloc[0]["merchant_group"], freq.iloc[0]["count"])
+
+        # Cache & return
+        self._cache_most_frequently_used_merchant_group[state] = result
+        return result
+
+    def get_highest_value_merchant_group(self, state: str = None):
+        """Retrieves the merchant group with the highest total transaction value for a
+        given state or overall if no state is specified. Caches the result for faster
+        retrieval in subsequent calls.
+
+        Args:
+            state (str, optional): The name of the state for which to find the merchant
+                group with the highest total transaction value. If None, calculations
+                will be done using all available data.
+
+        Returns:
+            tuple[str, float]: A tuple where the first element is the name of the
+                merchant group with the highest total transaction value and the second
+                element is the corresponding total transaction value.
+        """
+        # Check cache
+        if state in self._cache_highest_value_merchant_group:
+            return self._cache_highest_value_merchant_group[state]
+
+        # Filter data by state if provided
+        df = self.transactions_mcc
+        if state:
+            df = df[df["state_name"] == state]
 
         # Calculate
+        if df.empty:
+            result = ("UNKNOWN", 0.0)
+        else:
+            value = (
+                df.groupby("merchant_group")["amount"]
+                .sum()
+                .reset_index()
+                .sort_values(by="amount", ascending=False)
+            )
+            result = (value.iloc[0]["merchant_group"], value.iloc[0]["amount"])
+
+        # Cache & return
+        self._cache_highest_value_merchant_group[state] = result
+        return result
+
+    def get_most_frequently_used_merchant_in_group(self, merchant_group, state: str = None):
+        """
+        Gets the most frequently used merchant in a specified merchant group. If a state
+        is provided, the search is filtered within that state. The result is cached to
+        optimize subsequent calls with the same parameters.
+
+        Args:
+            merchant_group: The identifier of the merchant group for which the most
+                frequently used merchant is to be determined.
+            state: Optional; the state name to filter the transactions within a
+                specific region.
+
+        Returns:
+            Tuple[int, int]: A tuple containing the merchant ID of the most frequently
+            used merchant and its transaction count. Returns (-1, -1) if there are no
+            transactions matching the criteria.
+        """
+        # Check cache
+        cache_key = (merchant_group, state)
+        if cache_key in self._cache_most_frequently_used_merchant_in_group:
+            return self._cache_most_frequently_used_merchant_in_group[cache_key]
+
+        # Filter
         df = self.transactions_mcc_users[self.transactions_mcc_users['merchant_group'] == merchant_group]
+        if state:
+            df = df[df["state_name"] == state]
+
+        # Compute
         agg_df = df.groupby('merchant_id').size().reset_index(name='transaction_count')
         if agg_df.empty:
             result = (-1, -1)
@@ -230,38 +268,48 @@ class MerchantTabData:
             top_row = agg_df.sort_values(by='transaction_count', ascending=False).iloc[0]
             result = (int(top_row['merchant_id']), int(top_row['transaction_count']))
 
-        # Cache result
-        self._cache_most_frequently_used_merchant_in_group[merchant_group] = result
+        # Cache
+        self._cache_most_frequently_used_merchant_in_group[cache_key] = result
         return result
 
-    def get_highest_value_merchant_in_group(self, merchant_group):
+    def get_highest_value_merchant_in_group(self, merchant_group, state: str = None):
         """
-        Find the merchant within the specified merchant group with the highest total transaction value.
+        Finds the merchant with the highest transaction value within a specified merchant
+        group, optionally filtered by state.
+
+        This function calculates the merchant with the highest total transaction amount
+        for a given merchant group. Optionally, if a state is provided, the calculation
+        will consider only transactions within the specified state. The result is cached
+        to optimize repeated calls with the same parameters.
 
         Args:
-            merchant_group (str): The name of the merchant group.
+            merchant_group: The merchant group for which the analysis should be performed.
+            state: The name of the state to filter transactions by. Defaults to None.
 
         Returns:
-            tuple: (merchant_id, total_value)
-                merchant_id (int): ID of the merchant with the highest total transaction amount.
-                total_value (float): Sum of transaction amounts for this merchant.
-                Returns (-1, -1) if no transactions exist for the group.
+            A tuple containing:
+                - An integer representing the ID of the highest value merchant.
+                - A float representing the total transaction value of this merchant.
         """
         # Check cache
-        if merchant_group in self._cache_highest_value_merchant_in_group:
-            return self._cache_highest_value_merchant_in_group[merchant_group]
+        cache_key = (merchant_group, state)
+        if cache_key in self._cache_highest_value_merchant_in_group:
+            return self._cache_highest_value_merchant_in_group[cache_key]
 
         # Calculate
         df = self.transactions_mcc_users[self.transactions_mcc_users['merchant_group'] == merchant_group]
-        agg_df = df.groupby('merchant_id')['amount'].sum().reset_index(name='total_value')
-        if agg_df.empty:
-            result = (-1, -1)
+        if state:
+            df = df[df["state_name"] == state]
+
+        if df.empty:
+            result = (-1, 0.0)
         else:
-            top_row = agg_df.sort_values(by='total_value', ascending=False).iloc[0]
-            result = (int(top_row['merchant_id']), float(top_row['total_value']))
+            agg_df = df.groupby('merchant_id')['amount'].sum().reset_index()
+            top_row = agg_df.sort_values(by='amount', ascending=False).iloc[0]
+            result = (int(top_row['merchant_id']), float(top_row['amount']))
 
         # Cache result
-        self._cache_highest_value_merchant_in_group[merchant_group] = result
+        self._cache_highest_value_merchant_in_group[cache_key] = result
         return result
 
     def get_user_with_most_transactions_in_group(self, merchant_group):
@@ -324,49 +372,65 @@ class MerchantTabData:
         self._cache_user_with_highest_expenditure_in_group[merchant_group] = result
         return result
 
-    def get_merchant_transactions(self, merchant):
+    def get_merchant_transactions(self, merchant, state: str = None):
         """
-        Calculate the total number of transactions for a given merchant.
+        Gets the number of transactions associated with a given merchant, optionally
+        filtered by state. If the result is already available in the cache, it retrieves
+        the value from the cache. Otherwise, it calculates the count and stores it in
+        the cache for future requests.
 
         Args:
-            merchant (int): The merchant ID.
+            merchant: Identifier of the merchant for which transactions are being queried.
+            state (str, optional): State name to filter transactions. If not provided,
+                transactions are not filtered by state.
 
         Returns:
-            int: The number of transactions for this merchant.
+            int: The number of transactions associated with the given merchant, optionally
+                filtered by state.
         """
         # Check cache
-        if merchant in self._cache_merchant_transactions:
-            return self._cache_merchant_transactions[merchant]
+        cache_key = (merchant, state)
+        if cache_key in self._cache_merchant_transactions:
+            return self._cache_merchant_transactions[cache_key]
 
         # Calculate
-        df = self.transactions_mcc_users[self.transactions_mcc_users['merchant_id'] == merchant]
-        result = len(df)
+        df = self.transactions_mcc_users
+        if state:
+            df = df[df["state_name"] == state]
+
+        count = df[df["merchant_id"] == merchant].shape[0]
 
         # Cache result
-        self._cache_merchant_transactions[merchant] = result
-        return result
+        self._cache_merchant_transactions[cache_key] = count
+        return count
 
-    def get_merchant_value(self, merchant):
+    def get_merchant_value(self, merchant, state: str = None):
         """
-        Calculate the total transaction value for a given merchant.
+        Calculates and retrieves the total transaction value for a specific merchant, optionally
+        filtering by state. Uses an internal caching mechanism to reduce redundant calculations.
 
         Args:
-            merchant (int): The merchant ID.
+            merchant: The identifier of the merchant for which to calculate the total transaction value.
+            state: Optional; the name of the state to filter the transactions by before calculation.
 
         Returns:
-            float: The sum of all transaction amounts for this merchant.
+            float: The total transaction value for the given merchant, filtered by state if specified.
         """
         # Check cache
-        if merchant in self._cache_merchant_value:
-            return self._cache_merchant_value[merchant]
+        cache_key = (merchant, state)
+        if cache_key in self._cache_merchant_value:
+            return self._cache_merchant_value[cache_key]
 
         # Calculate
-        df = self.transactions_mcc_users[self.transactions_mcc_users['merchant_id'] == merchant]
-        result = df['amount'].sum()
+        df = self.transactions_mcc_users
+        if state:
+            df = df[df["state_name"] == state]
+
+        total_value = df[df["merchant_id"] == merchant]["amount"].sum()
 
         # Cache result
-        self._cache_merchant_value[merchant] = result
-        return result
+        self._cache_merchant_value[cache_key] = total_value
+        return total_value
 
     def get_user_with_most_transactions_at_merchant(self, merchant):
         """

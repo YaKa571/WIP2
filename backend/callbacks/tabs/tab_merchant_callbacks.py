@@ -133,21 +133,22 @@ def create_kpi_dashboard(kpi_data, clickable_kpi_card_ids=None):
     )
 
 
-def create_all_merchant_kpis():
+def create_all_merchant_kpis(state: str = None):
     """
-    Generates and compiles a list of merchant-related key performance indicators (KPIs) and returns a KPI dashboard.
+    Generates a dashboard containing KPIs (Key Performance Indicators) for merchant-related data.
+    The KPIs include metrics such as the top merchant group by transaction count, top merchant group by value,
+    top user by transaction count, and top user by expenditure. The function compiles this information
+    into a structured format, which is then used to create and return a KPI dashboard.
 
-    The function utilizes data from merchant groups and user transactions to calculate four KPIs: the most frequently
-    used merchant group, the merchant group with the highest transfer value, the user with the most transactions across
-    all merchants, and the user with the highest expenditure. Each KPI is structured and styled with corresponding icons,
-    titles, and values before being compiled into a dashboard format.
+    Args:
+        state (str, optional): A specific state or region to filter the merchant data. If not provided,
+        the calculations are performed on all available data.
 
     Returns:
-        Dashboard: A dashboard object containing the calculated merchant KPIs.
-
+        Any: A KPI dashboard created using the provided KPI data structure.
     """
-    group_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_group()
-    group_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_group()
+    group_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_group(state)
+    group_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_group(state)
     user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_all_merchants()
     user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_all_merchants()
 
@@ -186,27 +187,20 @@ def create_all_merchant_kpis():
     return create_kpi_dashboard(kpi_data)
 
 
-def create_merchant_group_kpi(merchant_group):
+def create_merchant_group_kpi(merchant_group, state: str = None):
     """
-    Generates KPI data for a given merchant group and creates a KPI dashboard.
-
-    This function calculates various key performance indicators (KPIs) for a
-    specified merchant group. It does so by identifying metrics such as the
-    most frequently used merchant, the merchant with the highest total
-    transactions, the user with the most transactions, and the user with the
-    highest expenditure in the merchant group. These metrics are then used to
-    construct a structured KPI data set, which is passed to a helper function
-    to generate a KPI dashboard.
+    Creates a KPI dashboard for a merchant group by analyzing key performance
+    indicators (KPI) such as the most frequently used merchant, the highest value
+    merchant, the user with the most transactions, and the user with the highest
+    expenditure. The function returns a dashboard representing this data.
 
     Args:
-        merchant_group: The group of merchants for which the KPI data is to be
-            generated.
-
-    Returns:
-        A dashboard object created from the generated KPI data.
+        merchant_group: The merchant group for which to compute KPIs.
+        state: Optional; The state filter to limit merchants considered within
+            the group.
     """
-    merchant_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_in_group(merchant_group)
-    merchant_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_in_group(merchant_group)
+    merchant_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_in_group(merchant_group, state)
+    merchant_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_in_group(merchant_group, state)
     user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_in_group(merchant_group)
     user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_in_group(merchant_group)
 
@@ -245,20 +239,22 @@ def create_merchant_group_kpi(merchant_group):
     return create_kpi_dashboard(kpi_data)
 
 
-def create_individual_merchant_kpi(merchant: int = None):
+def create_individual_merchant_kpi(merchant: int = None, state: str = None):
     """
-    Generate individual Key Performance Indicators (KPIs) for a merchant by collecting relevant transaction and
-    user data.
+    Generates and returns individual merchant KPI (Key Performance Indicator) dashboard data for
+    display. The function processes input data provided in the parameters or defaults to placeholder
+    content if no data is specified. KPI data is used to visualize metrics such as number of
+    transactions, total transaction value, and user-specific statistics.
 
     Args:
-        merchant (int, optional): A unique identifier for the merchant whose KPIs are to be generated.
-                                 If None, all values will display "NO DATA". Defaults to None.
+        merchant (int): Identifier for the merchant whose KPI data is retrieved. If None,
+            placeholder data will be used instead.
+        state (str): The state filter applied to calculate data for the merchant. This
+            typically specifies the geographical area or subset of data of interest.
 
     Returns:
-        dict: A dashboard representation of the merchant's KPIs, formatted for display.
-
-    Raises:
-        None
+        dict: A dictionary containing the configuration and data for an individual merchant
+            KPI dashboard, with keys for KPI data and clickable items.
     """
     if merchant is None:
         # If merchant is None, set all values to "WAITING FOR INPUT..."
@@ -302,8 +298,8 @@ def create_individual_merchant_kpi(merchant: int = None):
         ]
 
     else:
-        count_1 = dm.merchant_tab_data.get_merchant_transactions(merchant)
-        value_2 = dm.merchant_tab_data.get_merchant_value(merchant)
+        count_1 = dm.merchant_tab_data.get_merchant_transactions(merchant, state)
+        value_2 = dm.merchant_tab_data.get_merchant_value(merchant, state)
         user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_at_merchant(merchant)
         user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_at_merchant(merchant)
 
@@ -452,39 +448,30 @@ def set_merchant_tab(n_all, n_group, n_indiv):
 )
 def update_merchant(selected, selected_group, selected_merchant_id, app_state, selected_federal_state):
     """
-    Updates UI components and content for the merchant tab based on user selections.
+    Updates the user interface and data visualization components in the merchant
+    management dashboard based on the currently selected filter options.
 
-    This callback handles changes to various inputs, determining the selected merchant
-    view (all merchants, merchant group, or individual merchant) and updating UI
-    elements accordingly. This includes adjusting button states, input visibility,
-    key performance indicators (KPIs), and graphical content. The behavior depends
-    on the user’s selection, app state, and external data such as merchant groups
-    and IDs.
+    The function adjusts the displayed elements, such as buttons, charts, key
+    performance indicators (KPIs), and dropdown inputs, to match the user's selected
+    merchant tab (e.g., All Merchants, Merchant Group, Individual Merchant), as
+    well as additional filters like federal state or merchant ID.
 
     Args:
-        selected: Selected merchant tab identifier.
-        selected_group: Selected merchant group if the group tab is active.
-        selected_merchant_id: Selected individual merchant ID if the
-            individual merchant tab is active.
-        app_state: Application state data, which may include settings like
-            dark mode.
-        selected_federal_state: The selected federal state, or None if
-            "All States" is selected.
+        selected: The selected merchant tab, determined by the `MerchantTab` enum.
+        selected_group: The identifier of the selected merchant group, if applicable.
+        selected_merchant_id: The ID of the selected individual merchant, if any.
+        app_state: A dictionary representing the current application state. This
+            typically includes variables such as dark mode settings.
+        selected_federal_state: The currently selected federal state, or `None`
+            if no specific state is selected.
 
     Returns:
-        tuple: Updated properties for UI components:
-            - Class name for the "All Merchants" button.
-            - Class name for the "Merchant Group" button.
-            - Class name for the "Individual Merchant" button.
-            - Style properties for the merchant group input wrapper.
-            - Style properties for the individual merchant input wrapper.
-            - Content for the KPIs section.
-            - Figure object for the graph container.
-            - Title for the graph container.
-            - Class name for the spinner in the bar chart.
-            - Class name for the graph card (influenced by modebar style).
-            - Heading for the merchant tab.
-
+        tuple: Contains the updated values for multiple UI components:
+            - Styles and class names for buttons and input elements.
+            - Content for KPIs and graph visualizations, based on the selected merchant tab.
+            - The title for the graph visualization.
+            - Spinner and card styles for loading indicators and modebar appearance.
+            - The heading text for the merchant management interface.
     """
     # Set default tab if none selected
     if not selected:
@@ -521,7 +508,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state, s
 
     # Handle content based on selected tab
     if selected == MerchantTab.ALL.value:
-        kpi_content = create_all_merchant_kpis()
+        kpi_content = create_all_merchant_kpis(federal_state)
         graph_content = create_merchant_group_distribution_tree_map(dark_mode=dark_mode)
         graph_title = "MERCHANT GROUP DISTRIBUTION"
 
@@ -532,7 +519,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state, s
         merchant_group = selected_group or default_group
 
         if merchant_group:
-            kpi_content = create_merchant_group_kpi(merchant_group)
+            kpi_content = create_merchant_group_kpi(merchant_group, federal_state)
             graph_content = create_merchant_group_line_chart(merchant_group, dark_mode=dark_mode)
             graph_title = f"HISTORY FOR MERCHANT GROUP ", html.Span(f"{merchant_group}", className="green-text")
         else:
@@ -548,7 +535,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state, s
             pass
 
         # Create KPI content for the merchant
-        kpi_content = create_individual_merchant_kpi(merchant)
+        kpi_content = create_individual_merchant_kpi(merchant, federal_state)
 
         # Create graph content if merchant ID is valid
         if merchant in dm.merchant_tab_data.unique_merchant_ids:
