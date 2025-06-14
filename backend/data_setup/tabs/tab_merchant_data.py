@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 
 import pandas as pd
 
@@ -26,7 +26,7 @@ class MerchantTabData:
         self._cache_most_transactions_all_merchants = None
         self._cache_highest_expenditure_all_merchants = None
         self._cache_most_frequently_used_merchant_group = None
-        self._cache_highest_value_merchant_group = None
+        self._cache_highest_value_merchant_group: dict[Optional[str], tuple[str, float]] = {}
         self._cache_most_frequently_used_merchant_in_group: Dict[str, Tuple[int, int]] = {}
         self._cache_highest_value_merchant_in_group: Dict[str, Tuple[int, float]] = {}
         self._cache_user_with_most_transactions_in_group: Dict[str, Tuple[int, int]] = {}
@@ -178,31 +178,33 @@ class MerchantTabData:
         self._cache_most_frequently_used_merchant_group = (group_return, count_return)
         return group_return, count_return
 
-    def get_highest_value_merchant_group(self):
-        """
-        Calculate the merchant group with the highest total transaction value.
+    def get_highest_value_merchant_group(self, state: str = None):
+        print("bin in der get_highest_value_merchant_group funktion") #todo delete
 
-        This function sums the 'amount' values for each merchant group in the DataFrame 'my_transactions_mcc'.
-        It returns the merchant group with the highest aggregated transaction amount along with the total value.
-
-        Returns:
-            tuple: (group_return, value_return)
-                group_return (str): The name of the merchant group with the highest transaction value.
-                value_return (float): The total summed transaction amount for this merchant group.
-        """
         # Check cache
-        if self._cache_highest_value_merchant_group is not None:
-            return self._cache_highest_value_merchant_group
+        if state in self._cache_highest_value_merchant_group:
+            return self._cache_highest_value_merchant_group[state]
+
+        # Filter data by state if provided
+        df = self.transactions_mcc
+        if state:
+            df = df[df["state_name"] == state]
 
         # Calculate
-        value_agg = self.transactions_mcc.groupby("merchant_group")["amount"].sum()
-        value = value_agg.reset_index().sort_values(by="amount", ascending=False)
-        group_return = value.loc[0, "merchant_group"]
-        value_return = value.loc[0, "amount"]
+        if df.empty:
+            result = ("UNKNOWN", 0.0)
+        else:
+            value = (
+                df.groupby("merchant_group")["amount"]
+                .sum()
+                .reset_index()
+                .sort_values(by="amount", ascending=False)
+            )
+            result = (value.iloc[0]["merchant_group"], value.iloc[0]["amount"])
 
-        # Cache result
-        self._cache_highest_value_merchant_group = (group_return, value_return)
-        return group_return, value_return
+        print(result)
+        print("Staat: " +str(state))
+        return result
 
     def get_most_frequently_used_merchant_in_group(self, merchant_group):
         """
