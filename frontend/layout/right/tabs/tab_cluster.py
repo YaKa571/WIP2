@@ -78,7 +78,11 @@ def _create_heading() -> html.Div:
                     html.Hr(),
                     "Choose Filter for Merchant Groups",
                     html.Br(),
-                    "using Dropdown"
+                    "using Dropdown",
+                    html.Hr(),
+                    "Click on any state on map to filter",
+                    html.Br(),
+                    "to reset click on All States on map"
 
                 ]),
         ])
