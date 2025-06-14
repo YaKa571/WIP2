@@ -187,22 +187,28 @@ def create_all_merchant_kpis(state: str = None):
     return create_kpi_dashboard(kpi_data)
 
 
-def create_merchant_group_kpi(merchant_group, state: str = None): #todo comment
+def create_merchant_group_kpi(merchant_group, state: str = None):
     """
-    Creates a KPI dashboard for a merchant group by analyzing key performance
-    indicators (KPI) such as the most frequently used merchant, the highest value
-    merchant, the user with the most transactions, and the user with the highest
-    expenditure. The function returns a dashboard representing this data.
+    Creates a KPI dashboard for a merchant group, summarizing key metrics. This function retrieves
+    and processes data about the top-performing merchants and users within the specified merchant
+    group, either globally or filtered by state. The resulting KPI dashboard includes clickable
+    cards with details such as the most frequently used merchant, merchant with the highest value,
+    user with the most transactions, and user with the highest expenditure in the group.
 
     Args:
-        merchant_group: The merchant group for which to compute KPIs.
-        state: Optional; The state filter to limit merchants considered within
-            the group.
+        merchant_group: The identifier or data structure representing the group of merchants
+            to generate the KPI dashboard for.
+        state: str, optional. A specific state to filter the merchant group data. Defaults to None.
+
+    Returns:
+        Dashboard: An object representing a KPI dashboard containing metrics and details
+            for the specified merchant group. Each card contains an icon, title, values,
+            and an ID for further reference or interaction.
     """
     merchant_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_in_group(merchant_group, state)
     merchant_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_in_group(merchant_group, state)
     user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_in_group(merchant_group, state)
-    user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_in_group(merchant_group)
+    user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_in_group(merchant_group, state)
 
     kpi_data = [
         {

@@ -32,7 +32,7 @@ class MerchantTabData:
         self._cache_most_frequently_used_merchant_in_group: Dict[Tuple[str, Optional[str]], Tuple[int, int]] = {}
         self._cache_highest_value_merchant_in_group: Dict[Tuple[str, Optional[str]], Tuple[int, float]] = {}
         self._cache_user_with_most_transactions_in_group: dict[tuple[str, Optional[str]], tuple[int, int]] = {}
-        self._cache_user_with_highest_expenditure_in_group: Dict[str, Tuple[int, float]] = {}
+        self._cache_user_with_highest_expenditure_in_group: dict[tuple[str, Optional[str]], tuple[int, float]] = {}
         self._cache_merchant_transactions: Dict[Tuple[int, Optional[str]], int] = {}
         self._cache_merchant_value: Dict[Tuple[int, Optional[str]], float] = {}
         self._cache_user_with_most_transactions_at_merchant: Dict[int, Tuple[int, int]] = {}
@@ -391,25 +391,39 @@ class MerchantTabData:
         self._cache_user_with_most_transactions_in_group[cache_key] = result
         return result
 
-    def get_user_with_highest_expenditure_in_group(self, merchant_group):
+    def get_user_with_highest_expenditure_in_group(self, merchant_group, state: str = None):
         """
-        Identify the user with the highest total expenditure within the specified merchant group.
+        Retrieves the user with the highest expenditure within a specified merchant group and
+        optionally within a specified state. This method utilizes a caching mechanism to store
+        the results of previous calculations and optimize performance.
+
+        The calculation is performed by filtering transaction data for the given merchant group
+        and state (if provided), then aggregating the expenditure data by client ID to determine
+        the user with the highest total expenditure.
 
         Args:
-            merchant_group (str): The name of the merchant group.
+            merchant_group: The merchant group for which the user with the highest expenditure
+                is to be determined.
+            state: An optional parameter representing the state within which the calculation
+                should be performed. If not specified, calculations are done for all states.
 
         Returns:
-            tuple: (client_id, total_value)
-                client_id (int): ID of the user with the highest total spending.
-                total_value (float): Sum of all transaction amounts by this user.
-                Returns (-1, -1) if no transactions exist for the group.
+            A tuple containing two elements:
+                - The client ID of the user with the highest expenditure. If the data set is empty,
+                  returns -1.
+                - The total expenditure value associated with the highest-spending user. If the
+                  data set is empty, returns -1.0.
         """
         # Check cache
-        if merchant_group in self._cache_user_with_highest_expenditure_in_group:
-            return self._cache_user_with_highest_expenditure_in_group[merchant_group]
+        cache_key = (merchant_group, state)
+        if cache_key in self._cache_user_with_highest_expenditure_in_group:
+            return self._cache_user_with_highest_expenditure_in_group[cache_key]
 
         # Calculate
         df = self.transactions_mcc_users[self.transactions_mcc_users['merchant_group'] == merchant_group]
+        if state:
+            df = df[df['state_name'] == state]
+
         agg_df = df.groupby('client_id')['amount'].sum().reset_index(name='total_value')
         if agg_df.empty:
             result = (-1, -1)
@@ -418,7 +432,7 @@ class MerchantTabData:
             result = (int(top_row['client_id']), float(top_row['total_value']))
 
         # Cache result
-        self._cache_user_with_highest_expenditure_in_group[merchant_group] = result
+        self._cache_user_with_highest_expenditure_in_group[cache_key] = result
         return result
 
     def get_merchant_transactions(self, merchant, state: str = None):
