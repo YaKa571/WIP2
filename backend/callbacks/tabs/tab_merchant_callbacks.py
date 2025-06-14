@@ -149,7 +149,7 @@ def create_all_merchant_kpis(state: str = None):
     """
     group_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_group(state)
     group_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_group(state)
-    user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_all_merchants()
+    user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_all_merchants(state)
     user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_all_merchants()
 
     kpi_data = [

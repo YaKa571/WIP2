@@ -20,11 +20,12 @@ class MerchantTabData:
         self.transactions_agg_by_user = None
         self.transactions_mcc_users = None
         self.transactions_mcc_agg_by_state = None
+        self.transactions_agg_by_user_and_state = None
 
         # Caches
         self._cache_merchant_group_overview = {}
         self._cache_all_merchant_groups = None
-        self._cache_most_transactions_all_merchants = None
+        self._cache_most_transactions_all_merchants: dict[Optional[str], tuple[int, int]] = {}
         self._cache_highest_expenditure_all_merchants = None
         self._cache_most_frequently_used_merchant_group: dict[Optional[str], tuple[str, int]] = {}
         self._cache_highest_value_merchant_group: dict[Optional[str], tuple[str, float]] = {}
@@ -121,32 +122,41 @@ class MerchantTabData:
         self._cache_merchant_group_overview[cache_key] = large_groups
         return large_groups
 
-    def get_user_with_most_transactions_all_merchants(self):
+    def get_user_with_most_transactions_all_merchants(self, state: str = None):
         """
-        Identify the user with the highest number of transactions across all merchant groups.
+        Retrieves the user with the highest number of transactions across all merchants. The user and
+        their transaction count are fetched either across all states or filtered by a specific state.
+        Results are cached to speed up subsequent queries.
 
-        This function sorts the transaction data aggregated by user in descending order
-        based on transaction count, then selects the user with the most transactions.
+        Args:
+            state: The state name to filter transactions by. If None, considers transactions
+                across all states.
 
         Returns:
-            tuple: (user_id, transaction_count)
-                user_id (int): ID of the user with the most transactions.
-                transaction_count (int): Number of transactions made by this user.
+            Tuple[int, int]: A tuple containing the user ID with the highest number of
+            transactions and the corresponding transaction count. If the data is empty,
+            returns (-1, 0).
         """
         # Check cache
-        if self._cache_most_transactions_all_merchants is not None:
-            return self._cache_most_transactions_all_merchants
+        if state in self._cache_most_transactions_all_merchants:
+            return self._cache_most_transactions_all_merchants[state]
 
-        # Calculate
-        df = self.transactions_agg_by_user.reset_index().sort_values(by='transaction_count',
-                                                                     ascending=False)
+        # Select appropriate DataFrame
+        if state is None:
+            df = self.transactions_agg_by_user
+        else:
+            df = self.transactions_agg_by_user_and_state
+            df = df[df["state_name"] == state]
 
-        user_return = int(df.iloc[0]["client_id"])
-        count_return = int(df.iloc[0]["transaction_count"])
+        if df.empty:
+            result = (-1, 0)
+        else:
+            top_row = df.sort_values(by='transaction_count', ascending=False).iloc[0]
+            result = (int(top_row["client_id"]), int(top_row["transaction_count"]))
 
         # Cache result
-        self._cache_most_transactions_all_merchants = (user_return, count_return)
-        return user_return, count_return
+        self._cache_most_transactions_all_merchants[state] = result
+        return result
 
     def get_user_with_highest_expenditure_all_merchants(self):
         """
@@ -700,6 +710,17 @@ class MerchantTabData:
         self.transactions_agg_by_user = (
             self.df_transactions
             .groupby('client_id', sort=False)  # Avoid sorting for better performance
+            .agg(
+                transaction_count=('amount', 'count'),
+                total_value=('amount', 'sum')
+            )
+            .reset_index()
+        )
+
+        # Aggregate by user AND state
+        self.transactions_agg_by_user_and_state = (
+            self.df_transactions
+            .groupby(['state_name', 'client_id'], sort=False)
             .agg(
                 transaction_count=('amount', 'count'),
                 total_value=('amount', 'sum')
