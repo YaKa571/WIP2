@@ -229,26 +229,21 @@ class ClusterTabData:
 
     def _pre_cache_cluster_tab_data(self) -> None:
         """
-        Caches data for the Cluster Tab by preloading necessary information.
+        Pre-cache cluster tab data by loading cached data from disk, or generating new
+        data and caching it. The process includes pre-loading merchant group data and
+        state-specific data, and is optimized using parallel processing to improve
+        efficiency.
 
-        This method is responsible for pre-caching the data required for the Cluster Tab in
-        the application. It attempts to load data from disk first and, if unavailable, proceeds to
-        generate and cache the data for both "All Merchant Groups" and individual merchant
-        groups using concurrent processing for efficiency. This caching improves overall
-        application performance and responsiveness during runtime.
+        If the cached data is already available on disk, it will be loaded directly,
+        skipping the generation process. Otherwise, combinations of merchant groups and
+        states are prepared, and data is generated and cached in parallel using a
+        ThreadPoolExecutor. Once complete, the caching results are saved back to disk
+        for future use.
 
-        The method utilizes benchmarks for tracking the performance of each step and logs
-        the progress accordingly. If the data is successfully loaded from disk, it will skip
-        the computationally intensive tasks and directly return.
+        Raises:
+            Any exceptions raised during concurrent execution or data processing will
+            propagate through this function.
 
-        Attributes:
-            None
-
-        Args:
-            None
-
-        Returns:
-            None
         """
         import concurrent.futures
 
@@ -261,35 +256,35 @@ class ClusterTabData:
             bm_pre_cache_full.print_time(level=4)
             return
 
-        # Cache data for 'All Merchant Groups' first as it's often a dependency
-        bm_all_groups = Benchmark("Cluster: Pre-caching data for All Merchant Groups")
-        self.prepare_cluster_data('All Merchant Groups')
-        self.prepare_inc_vs_exp_cluster_data('All Merchant Groups')
-        bm_all_groups.print_time(level=4)
+        # Get all merchant groups (first one is 'All Merchant Groups')
+        merchant_groups = self.get_cluster_merchant_group_dropdown()
 
-        # Define a function to cache data for a merchant group
-        def cache_merchant_group_data(group):
-            # Cache both types of cluster data for this merchant group
-            self.prepare_cluster_data(group)
-            self.prepare_inc_vs_exp_cluster_data(group)
-            return group
+        # Get all unique states from data_file
+        all_states = self.data_file["merchant_state"].dropna().unique().tolist()
+        all_states.append(None)  # Include None for overall aggregation
 
-        # Get merchant groups (skip 'All Merchant Groups' as it's already cached)
-        merchant_groups = self.get_cluster_merchant_group_dropdown()[1:]
+        # Build combinations of merchant_group × state
+        param_combinations = [
+            (merchant_group, state)
+            for merchant_group in merchant_groups
+            for state in all_states
+        ]
 
-        # Use ThreadPoolExecutor for parallel processing
-        # This is ideal for CPU-bound operations like clustering
-        # The max_workers parameter can be adjusted based on the system's capabilities
-        bm_groups = Benchmark("Cluster: Pre-caching data for all merchant groups in parallel")
+        # Define a caching task
+        def cache_combination(params):
+            merchant_group, state = params
+            self.prepare_cluster_data(merchant_group, state)
+            self.prepare_inc_vs_exp_cluster_data(merchant_group, state)
+            return params
+
+        # Use thread pool to parallelize caching
+        bm_groups = Benchmark("Cluster: Pre-caching data for all group/state combinations")
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Process all merchant groups in parallel
-            results = list(executor.map(cache_merchant_group_data, merchant_groups))
-
+            results = list(executor.map(cache_combination, param_combinations))
         bm_groups.print_time(level=4)
 
         # Save caches to disk for future use
         self._save_caches_to_disk()
-
         bm_pre_cache_full.print_time(level=4)
 
     def initialize(self):
