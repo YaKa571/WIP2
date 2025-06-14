@@ -68,7 +68,11 @@ def _create_heading() -> html.Div:
                     html.Hr(),
                     "Click on Merchant",
                     html.Br(),
-                    "and type in Merchant ID"
+                    "and type in Merchant ID",
+                    html.Hr(),
+                    "Click on any state on map to filter",
+                    html.Br(),
+                    "to reset click on All States on map"
                 ]),
         ])
 
