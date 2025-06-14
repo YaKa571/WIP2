@@ -639,18 +639,15 @@ class MerchantTabData:
 
     def _pre_cache_merchant_tab_data(self, log_times: bool = True) -> None:
         """
-        Pre-caches data for the Merchant Tab view by performing data aggregation and calculations for
-        merchant groups and merchants. This method is intended to optimize subsequent data retrieval
-        and ensure that necessary insights are readily available for analysis.
+        Pre-caches data for merchant-related tabs in the system. This involves loading
+        caches from disk if available or generating intermediary and top-level caches
+        for merchant and merchant group data based on various filters, including user
+        transactions, expenditures, and thresholds. The function leverages concurrent
+        processing to optimize the pre-cache process.
 
-        Parameters
-        ----------
-        log_times : bool, optional
-            Whether to log the time taken for data processing. Defaults to True.
-
-        Returns
-        -------
-        None
+        Args:
+            log_times (bool): Indicates whether to log the benchmarking times of each
+                caching stage. Defaults to True.
         """
         import concurrent.futures
 
@@ -663,42 +660,42 @@ class MerchantTabData:
             bm_pre_cache_full.print_time(level=4)
             return
 
-        # Cache global data (no parameters) - these are fast and dependencies for other caches
+        # Get all relevant states
+        all_states = self.transactions_mcc_users["merchant_state"].dropna().unique().tolist()
+        all_states.append(None)  # also pre-cache unfiltered version
+
+        # Cache global data (no parameters)
         bm_global = Benchmark("Merchant: Pre-caching global merchant data")
         self.get_all_merchant_groups()
-        self.get_user_with_most_transactions_all_merchants()
-        self.get_user_with_highest_expenditure_all_merchants()
-        self.get_most_frequently_used_merchant_group()
-        self.get_highest_value_merchant_group()
-
-        # Cache merchant group overview with common thresholds
-        thresholds = [10, 20, 50]
-        for threshold in thresholds:
-            self.get_merchant_group_overview(threshold)
+        for state in all_states:
+            self.get_user_with_most_transactions_all_merchants(state)
+            self.get_user_with_highest_expenditure_all_merchants(state)
+            self.get_most_frequently_used_merchant_group(state)
+            self.get_highest_value_merchant_group(state)
+            for threshold in [10, 20, 50]:
+                self.get_merchant_group_overview(threshold, state)
         bm_global.print_time(level=4)
 
-        # Define functions to cache data for a merchant group
+        # Define merchant group cache function with state
         def cache_merchant_group_data(group):
-            # Cache all data for this merchant group
-            self.get_most_frequently_used_merchant_in_group(group)
-            self.get_highest_value_merchant_in_group(group)
-            self.get_user_with_most_transactions_in_group(group)
-            self.get_user_with_highest_expenditure_in_group(group)
+            for state in all_states:
+                self.get_most_frequently_used_merchant_in_group(group, state)
+                self.get_highest_value_merchant_in_group(group, state)
+                self.get_user_with_most_transactions_in_group(group, state)
+                self.get_user_with_highest_expenditure_in_group(group, state)
             return group
 
-        # Define function to cache data for a merchant
+        # Define merchant cache function with state
         def cache_merchant_data(merchant):
-            # Cache all data for this merchant
-            self.get_merchant_transactions(merchant)
-            self.get_merchant_value(merchant)
-            self.get_user_with_most_transactions_at_merchant(merchant)
-            self.get_user_with_highest_expenditure_at_merchant(merchant)
+            for state in all_states:
+                self.get_merchant_transactions(merchant, state)
+                self.get_merchant_value(merchant, state)
+                self.get_user_with_most_transactions_at_merchant(merchant, state)
+                self.get_user_with_highest_expenditure_at_merchant(merchant, state)
             return merchant
 
-        # Get merchant groups and top merchants
         merchant_groups = self.get_all_merchant_groups()
 
-        # Get top merchants more efficiently
         bm_merchants = Benchmark("Merchant: Identifying top merchants")
         merchant_counts = (
             self.transactions_mcc_users
@@ -711,22 +708,16 @@ class MerchantTabData:
         top_merchants = merchant_counts['merchant_id'].tolist()
         bm_merchants.print_time(level=4)
 
-        # Use ThreadPoolExecutor for parallel processing
-        # This is ideal for I/O-bound operations like these caching operations
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Cache merchant group data in parallel
             bm_groups = Benchmark("Merchant: Pre-caching data for all merchant groups")
             list(executor.map(cache_merchant_group_data, merchant_groups))
             bm_groups.print_time(level=4)
 
-            # Cache merchant data in parallel
             bm_merchants = Benchmark("Merchant: Pre-caching data for top merchants")
             list(executor.map(cache_merchant_data, top_merchants))
             bm_merchants.print_time(level=4)
 
-        # Save caches to disk for future use
         self._save_caches_to_disk()
-
         bm_pre_cache_full.print_time(level=4)
 
     def initialize(self):
