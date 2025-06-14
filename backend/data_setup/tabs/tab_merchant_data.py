@@ -31,7 +31,7 @@ class MerchantTabData:
         self._cache_highest_value_merchant_in_group: Dict[Tuple[str, Optional[str]], Tuple[int, float]] = {}
         self._cache_user_with_most_transactions_in_group: Dict[str, Tuple[int, int]] = {}
         self._cache_user_with_highest_expenditure_in_group: Dict[str, Tuple[int, float]] = {}
-        self._cache_merchant_transactions: Dict[int, int] = {}
+        self._cache_merchant_transactions: Dict[Tuple[int, Optional[str]], int] = {}
         self._cache_merchant_value: Dict[int, float] = {}
         self._cache_user_with_most_transactions_at_merchant: Dict[int, Tuple[int, int]] = {}
         self._cache_user_with_highest_expenditure_at_merchant: Dict[int, Tuple[int, float]] = {}
@@ -372,27 +372,37 @@ class MerchantTabData:
         self._cache_user_with_highest_expenditure_in_group[merchant_group] = result
         return result
 
-    def get_merchant_transactions(self, merchant):
+    def get_merchant_transactions(self, merchant, state: str = None):
         """
-        Calculate the total number of transactions for a given merchant.
+        Gets the number of transactions associated with a given merchant, optionally
+        filtered by state. If the result is already available in the cache, it retrieves
+        the value from the cache. Otherwise, it calculates the count and stores it in
+        the cache for future requests.
 
         Args:
-            merchant (int): The merchant ID.
+            merchant: Identifier of the merchant for which transactions are being queried.
+            state (str, optional): State name to filter transactions. If not provided,
+                transactions are not filtered by state.
 
         Returns:
-            int: The number of transactions for this merchant.
+            int: The number of transactions associated with the given merchant, optionally
+                filtered by state.
         """
         # Check cache
-        if merchant in self._cache_merchant_transactions:
-            return self._cache_merchant_transactions[merchant]
+        cache_key = (merchant, state)
+        if cache_key in self._cache_merchant_transactions:
+            return self._cache_merchant_transactions[cache_key]
 
         # Calculate
-        df = self.transactions_mcc_users[self.transactions_mcc_users['merchant_id'] == merchant]
-        result = len(df)
+        df = self.transactions_mcc_users
+        if state:
+            df = df[df["state_name"] == state]
+
+        count = df[df["merchant_id"] == merchant].shape[0]
 
         # Cache result
-        self._cache_merchant_transactions[merchant] = result
-        return result
+        self._cache_merchant_transactions[cache_key] = count
+        return count
 
     def get_merchant_value(self, merchant):
         """
