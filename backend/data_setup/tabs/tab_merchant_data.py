@@ -32,7 +32,7 @@ class MerchantTabData:
         self._cache_user_with_most_transactions_in_group: Dict[str, Tuple[int, int]] = {}
         self._cache_user_with_highest_expenditure_in_group: Dict[str, Tuple[int, float]] = {}
         self._cache_merchant_transactions: Dict[Tuple[int, Optional[str]], int] = {}
-        self._cache_merchant_value: Dict[int, float] = {}
+        self._cache_merchant_value: Dict[Tuple[int, Optional[str]], float] = {}
         self._cache_user_with_most_transactions_at_merchant: Dict[int, Tuple[int, int]] = {}
         self._cache_user_with_highest_expenditure_at_merchant: Dict[int, Tuple[int, float]] = {}
         self.unique_merchant_ids = set(self.df_transactions["merchant_id"].unique())
@@ -404,27 +404,33 @@ class MerchantTabData:
         self._cache_merchant_transactions[cache_key] = count
         return count
 
-    def get_merchant_value(self, merchant):
+    def get_merchant_value(self, merchant, state: str = None):
         """
-        Calculate the total transaction value for a given merchant.
+        Calculates and retrieves the total transaction value for a specific merchant, optionally
+        filtering by state. Uses an internal caching mechanism to reduce redundant calculations.
 
         Args:
-            merchant (int): The merchant ID.
+            merchant: The identifier of the merchant for which to calculate the total transaction value.
+            state: Optional; the name of the state to filter the transactions by before calculation.
 
         Returns:
-            float: The sum of all transaction amounts for this merchant.
+            float: The total transaction value for the given merchant, filtered by state if specified.
         """
         # Check cache
-        if merchant in self._cache_merchant_value:
-            return self._cache_merchant_value[merchant]
+        cache_key = (merchant, state)
+        if cache_key in self._cache_merchant_value:
+            return self._cache_merchant_value[cache_key]
 
         # Calculate
-        df = self.transactions_mcc_users[self.transactions_mcc_users['merchant_id'] == merchant]
-        result = df['amount'].sum()
+        df = self.transactions_mcc_users
+        if state:
+            df = df[df["state_name"] == state]
+
+        total_value = df[df["merchant_id"] == merchant]["amount"].sum()
 
         # Cache result
-        self._cache_merchant_value[merchant] = result
-        return result
+        self._cache_merchant_value[cache_key] = total_value
+        return total_value
 
     def get_user_with_most_transactions_at_merchant(self, merchant):
         """
