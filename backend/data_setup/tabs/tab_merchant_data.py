@@ -179,8 +179,23 @@ class MerchantTabData:
         return group_return, count_return
 
     def get_highest_value_merchant_group(self, state: str = None):
-        print("bin in der get_highest_value_merchant_group funktion") #todo delete
+        """
+        Retrieves the highest value merchant group based on the total transaction
+        amounts. Optionally filters the data by a specific state to determine the
+        highest value merchant group within that state.
 
+        Caches the results for quicker access on subsequent calls for the same state.
+
+        Args:
+            state (str, optional): The state for which to calculate the highest value
+                merchant group. If None, considers all states.
+
+        Returns:
+            tuple: A tuple where the first element is the name of the merchant group
+                with the highest total transaction amount, and the second element is
+                the total transaction amount for that merchant group. If no data is
+                available, returns ("UNKNOWN", 0.0).
+        """
         # Check cache
         if state in self._cache_highest_value_merchant_group:
             return self._cache_highest_value_merchant_group[state]
@@ -202,8 +217,6 @@ class MerchantTabData:
             )
             result = (value.iloc[0]["merchant_group"], value.iloc[0]["amount"])
 
-        print(result)
-        print("Staat: " +str(state))
         return result
 
     def get_most_frequently_used_merchant_in_group(self, merchant_group):
