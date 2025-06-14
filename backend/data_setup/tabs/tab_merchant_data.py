@@ -26,7 +26,7 @@ class MerchantTabData:
         self._cache_merchant_group_overview = {}
         self._cache_all_merchant_groups = None
         self._cache_most_transactions_all_merchants: dict[Optional[str], tuple[int, int]] = {}
-        self._cache_highest_expenditure_all_merchants = None
+        self._cache_highest_expenditure_all_merchants: dict[Optional[str], tuple[int, float]] = {}
         self._cache_most_frequently_used_merchant_group: dict[Optional[str], tuple[str, int]] = {}
         self._cache_highest_value_merchant_group: dict[Optional[str], tuple[str, float]] = {}
         self._cache_most_frequently_used_merchant_in_group: Dict[Tuple[str, Optional[str]], Tuple[int, int]] = {}
@@ -158,31 +158,41 @@ class MerchantTabData:
         self._cache_most_transactions_all_merchants[state] = result
         return result
 
-    def get_user_with_highest_expenditure_all_merchants(self):
+    def get_user_with_highest_expenditure_all_merchants(self, state: str = None):
         """
-        Identify the user with the highest total expenditure across all merchant groups.
+        Retrieves the user with the highest expenditure across all merchants, optionally
+        filtered by a specific state. Caches the result for future queries to improve
+        performance.
 
-        This function sorts the transaction data aggregated by user in descending order
-        based on total transaction value, then selects the user with the highest spending.
+        Args:
+            state (str, optional): The name of the state to filter the search by. If
+                None, considers all states. Defaults to None.
 
         Returns:
-            tuple: (user_id, total_value)
-                user_id (int): ID of the user with the highest total expenditure.
-                total_value (float): Sum of all transaction amounts by this user.
+            tuple: A tuple containing the client ID (int) and their total expenditure
+                (float). Returns (-1, 0.0) if no data is available for the given state
+                or if the DataFrame is empty.
         """
         # Check cache
-        if self._cache_highest_expenditure_all_merchants is not None:
-            return self._cache_highest_expenditure_all_merchants
+        if state in self._cache_highest_expenditure_all_merchants:
+            return self._cache_highest_expenditure_all_merchants[state]
 
-        # Calculate
-        df = self.transactions_agg_by_user.reset_index().sort_values(by='total_value', ascending=False)
+        # Select appropriate DataFrame
+        if state is None:
+            df = self.transactions_agg_by_user
+        else:
+            df = self.transactions_agg_by_user_and_state
+            df = df[df["state_name"] == state]
 
-        user_return = int(df.iloc[0]["client_id"])
-        value_return = df.iloc[0]["total_value"]
+        if df.empty:
+            result = (-1, 0.0)
+        else:
+            top_row = df.sort_values(by='total_value', ascending=False).iloc[0]
+            result = (int(top_row["client_id"]), float(top_row["total_value"]))
 
         # Cache result
-        self._cache_highest_expenditure_all_merchants = (user_return, value_return)
-        return user_return, value_return
+        self._cache_highest_expenditure_all_merchants[state] = result
+        return result
 
     def get_most_frequently_used_merchant_group(self, state: str = None):
         """

@@ -135,22 +135,22 @@ def create_kpi_dashboard(kpi_data, clickable_kpi_card_ids=None):
 
 def create_all_merchant_kpis(state: str = None):
     """
-    Generates a dashboard containing KPIs (Key Performance Indicators) for merchant-related data.
-    The KPIs include metrics such as the top merchant group by transaction count, top merchant group by value,
-    top user by transaction count, and top user by expenditure. The function compiles this information
-    into a structured format, which is then used to create and return a KPI dashboard.
+    Generates and returns KPI data for merchant-related metrics, including the top merchant
+    groups by transactions and value, as well as the top users by transaction count and
+    expenditure. The function retrieves data from the merchant data module, processes the
+    information, and organizes it into a formatted structure suitable for a KPI dashboard.
 
     Args:
-        state (str, optional): A specific state or region to filter the merchant data. If not provided,
-        the calculations are performed on all available data.
+        state (str, optional): A filter for specifying the state for which the merchant
+            KPIs should be generated. If None, KPIs are generated for all states.
 
     Returns:
-        Any: A KPI dashboard created using the provided KPI data structure.
+        Any: A KPI dashboard generated using the configured merchant-related KPI data.
     """
     group_1, count_1 = dm.merchant_tab_data.get_most_frequently_used_merchant_group(state)
     group_2, value_2 = dm.merchant_tab_data.get_highest_value_merchant_group(state)
     user_3, count_3 = dm.merchant_tab_data.get_user_with_most_transactions_all_merchants(state)
-    user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_all_merchants()
+    user_4, value_4 = dm.merchant_tab_data.get_user_with_highest_expenditure_all_merchants(state)
 
     kpi_data = [
         {
