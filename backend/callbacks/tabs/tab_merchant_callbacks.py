@@ -447,29 +447,40 @@ def set_merchant_tab(n_all, n_group, n_indiv):
 )
 def update_merchant(selected, selected_group, selected_merchant_id, app_state, selected_federal_state):
     """
-    Updates UI components and content related to merchant visualization, such as buttons, input
-    wrappers, key performance indicators (KPIs), graphs, and headings. The updates are based on the
-    selected merchant tab, input data, and application state.
+    Updates the UI components and state for the merchant tab based on user interactions and application state.
+
+    This function handles updates for the merchant tab of the dashboard and dynamically adjusts its
+    content, styles, and properties based on inputs such as the selected merchant tab, merchant group,
+    individual merchant ID, application state, and selected federal state. Depending on the selected
+    tab (All, Merchant Group, or Individual Merchant), the function updates the key performance indicators (KPIs),
+    graph content, titles, and display configurations of the respective tab.
 
     Args:
-        selected (str): Identifier for the currently selected merchant tab.
-        selected_group (str): Selected merchant group identifier.
-        selected_merchant_id (str | None): Selected individual merchant identifier.
-        app_state (dict | None): A dictionary containing the current application state, including
-            theme settings like dark mode.
-        selected_federal_state (str | None): Selected federal state or 'ONLINE' if no specific state
-            is selected.
+        selected (str | None): The currently selected merchant tab. Possible values include options from
+            the `MerchantTab` enum, e.g., `MerchantTab.ALL.value`, `MerchantTab.GROUP.value`, and
+            `MerchantTab.INDIVIDUAL.value`. If None, a default tab is set.
+        selected_group (str | None): The identifier for the selected merchant group. If not provided, the
+            first merchant group from the available data is used as a default.
+        selected_merchant_id (str | int | None): The ID of the selected individual merchant. Can be a string
+            or an integer and is converted to integer internally if valid.
+        app_state (dict | None): The state of the application, containing additional context such as
+            whether dark mode is active. If None, the function uses predefined defaults.
+        selected_federal_state (str | None): The selected federal state for which data is being filtered.
+            If the toggle for "All States" is activated, this will be set to None.
 
     Returns:
-        tuple: Contains updated properties for various UI elements:
-            - Class names for merchant tab buttons (to reflect the currently selected tab).
-            - Display styles for the merchant group and individual input wrappers.
-            - Children (contents) for the KPI container.
-            - Updated Plotly figure for the graph container.
-            - Children (contents) for the graph title.
-            - Class name for the bar chart spinner (to show/hide based on graph loading state).
-            - Class name for the graph card (containing the modebar style).
-            - Heading content reflecting the selected or default federal state.
+        tuple: A tuple containing the updated properties for various UI components:
+            - First three elements correspond to the class names of the "All Merchants", "Merchant Group",
+              and "Individual Merchant" buttons, respectively.
+            - Fourth and fifth elements mark the visibility of the merchant group and individual merchant
+              input wrappers, respectively.
+            - Sixth element contains the KPI content for the selected tab.
+            - Seventh element defines the graph content (e.g., a bar chart or line chart figure).
+            - Eighth element is the title content for the graph (can include additional HTML-structured
+              spans or text blocks).
+            - Ninth element determines the spinner class used for loading animations within the bar chart.
+            - Tenth element provides the appropriate modebar class to be applied to the graph card.
+            - Last element holds the merchant tab heading, reflecting the current federal state or "All States."
     """
     # Set default tab if none selected
     if not selected:
@@ -518,7 +529,7 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state, s
 
         if merchant_group:
             kpi_content = create_merchant_group_kpi(merchant_group, federal_state)
-            graph_content = create_merchant_group_line_chart(merchant_group, dark_mode=dark_mode)
+            graph_content = create_merchant_group_line_chart(merchant_group, federal_state, dark_mode=dark_mode)
             graph_title = f"HISTORY FOR MERCHANT GROUP ", html.Span(f"{merchant_group}", className="green-text")
         else:
             kpi_content = html.Div("NO MERCHANT GROUPS AVAILABLE.")

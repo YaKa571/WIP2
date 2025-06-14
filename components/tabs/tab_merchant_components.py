@@ -9,41 +9,45 @@ dm: DataManager = DataManager.get_instance()
 merchant_data = dm.merchant_tab_data
 
 
-def create_merchant_group_line_chart(merchant_group, dark_mode: bool = const.DEFAULT_DARK_MODE):
+def create_merchant_group_line_chart(merchant_group, state: str = None, dark_mode: bool = const.DEFAULT_DARK_MODE):
     """
-    Creates a line chart for a merchant group, displaying:
-    - The number of transactions per day (left Y-axis)
-    - The total transaction value per day (right Y-axis)
+    Generates a line chart displaying transaction count and total value over time for a specific merchant
+    group. The chart features dual axes to represent transaction count and total value, and is
+    customized based on user preferences like state and display mode (dark or light theme).
+    The chart adapts to varying time periods and handles scenarios with no data gracefully.
 
-    Dual Y-axes are used to accommodate the typically different magnitudes
-    of transaction count and total value, making both trends visible.
-    The chart adapts to dark mode when enabled.
-
-    Parameters:
-    ----------
-    merchant_group : str
-        The merchant group identifier to filter transactions.
-    dark_mode : bool, optional
-        Whether to use dark mode styling. Defaults to False.
+    Args:
+        merchant_group: Name of the merchant group for which the line chart is generated.
+        state: Optional; filter to transactions within a specific state. Default is None.
+        dark_mode: Determines if the chart should be rendered in dark mode. Defaults to the global
+            setting in `const.DEFAULT_DARK_MODE`.
 
     Returns:
-    -------
-    plotly.graph_objects.Figure
-        A Plotly figure object showing daily transaction count and value.
+        Figure object: A Plotly figure representing the generated line chart.
     """
     df = merchant_data.get_my_transactions_mcc_users()
-    df = df[df['merchant_group'] == merchant_group].copy()
+
+    # Apply filters
+    df = df[df['merchant_group'] == merchant_group]
+    if state is not None and 'state_name' in df.columns:
+        df = df[df['state_name'] == state]
+
+    df = df.copy() # prevents warning
+
     if df.empty:
         return comp_factory.create_empty_figure()
 
+    # Convert and normalize date
     df['date'] = pd.to_datetime(df['date'])
     df['date_only'] = df['date'].dt.normalize()
 
+    # Aggregate
     df_grouped = df.groupby('date_only').agg(
         transaction_count=('amount', 'count'),
         total_value=('amount', 'sum')
     ).reset_index()
 
+    # Axis bounds
     start_date = df_grouped['date_only'].min()
     end_date = df_grouped['date_only'].max()
 
@@ -67,10 +71,11 @@ def create_merchant_group_line_chart(merchant_group, dark_mode: bool = const.DEF
         line=dict(color=const.COLOR_ORANGE)
     ))
 
-    # Set colors based on dark mode
+    # Theme colors
     text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
     grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
 
+    # Layout
     fig.update_layout(
         font=dict(color=text_color),
         plot_bgcolor=const.COLOR_TRANSPARENT,
