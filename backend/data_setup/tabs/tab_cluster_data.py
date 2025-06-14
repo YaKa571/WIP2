@@ -36,18 +36,24 @@ class ClusterTabData:
         my_list.insert(0, 'All Merchant Groups')
         return my_list
 
-    def prepare_cluster_data(self, merchant_group) -> pd.DataFrame:
+    def prepare_cluster_data(self, merchant_group, state: str = None) -> pd.DataFrame:
         """
-        Prepare and cluster transaction data based on transaction count and value.
+        Prepares clustered data based on transaction and other metrics for the given merchant group
+        and optionally by a specific state. This method filters the data, performs aggregation by
+        client ID, and applies KMeans clustering on specific metrics.
 
         Args:
-            merchant_group (str): Merchant group filter; if not 'All Merchant Groups', filter the data.
+            merchant_group: The merchant group name to filter the data. If 'All Merchant Groups'
+                is provided, data for all merchant groups is considered.
+            state: (Optional) The state name to filter the data. If None, no filtering by state
+                is applied.
 
         Returns:
-            pd.DataFrame: Aggregated data with cluster labels based on total and average transaction values.
+            pd.DataFrame: A DataFrame containing aggregated and clustered data with fields such as
+            transaction_count, total_value, average_value, and cluster assignments.
         """
         # Check cache
-        cache_key = f"cluster_data_{merchant_group}"
+        cache_key = f"cluster_data_{merchant_group}_{state}"
         if cache_key in self._cache_cluster_data:
             return self._cache_cluster_data[cache_key]
 
@@ -56,6 +62,9 @@ class ClusterTabData:
             df_view = self.data_file[self.data_file['merchant_group'] == merchant_group]
         else:
             df_view = self.data_file
+        # Filter by state if provided
+        if state:
+            df_view = df_view[df_view['state_name'] == state]
 
         # Aggregation per client_id
         agg = df_view.groupby('client_id').agg(

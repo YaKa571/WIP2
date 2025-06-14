@@ -122,36 +122,30 @@ def set_cluster_tab(n_total_value, n_average_value, n_inc_vs_exp, n_all_ages, n_
 )
 def update_cluster(selected, selected_merchant_group, app_state, selected_federal_state):
     """
-    Updates the cluster visualization based on user interactions and application state.
-
-    This function is a callback for Dash, intended to update various components of the
-    cluster visualization when user selections or application state data changes. It
-    computes the required cluster visualization data based on the selected options,
-    such as whether data is grouped by age or not, and creates the appropriate plots
-    and legends. This function also interprets and handles the application's dark mode
-    settings and federal/state configurations to customize the displayed information.
+    Updates the cluster-related components, such as buttons, graph, legend, and the heading,
+    based on user interaction and selected input data. Determines which cluster data to display
+    (total value, average value, or income vs expenditure) and whether this data should be grouped
+    by age. Applies a dark mode theme if necessary and adjusts the federal state selection.
 
     Args:
-        selected: Dictionary that contains the currently selected options for the
-            visualization. Includes keys `main` (indicating the data type like
-            total value, average value, etc.) and `age` (age grouping or all ages).
-        selected_merchant_group: The merchant group value selected by the user, which
-            determines the data scope for clustering.
-        app_state: Dictionary containing the current application state, such as
+        selected (dict): Data representing the currently selected options for main
+            cluster criteria and age grouping.
+        selected_merchant_group (str): Group of merchants selected for filtering the data.
+        app_state (dict): Dictionary containing application state data such as
             whether dark mode is enabled.
-        selected_federal_state: The federal state that is currently selected.
-            Determines whether data is filtered to specific states or includes all.
+        selected_federal_state (str): Selected federal state identifier, used to filter
+            data to a specific state or to represent all states.
 
     Returns:
-        A tuple consisting of:
-            - CSS class for the "Total Value" button.
-            - CSS class for the "Average Value" button.
-            - CSS class for the "Income vs Expense" button.
-            - CSS class for the "All Ages" button.
-            - CSS class for the "Age Group" button.
-            - Figure object representing the cluster plot based on selected options.
-            - Legend component rendering details about the cluster visualization.
-            - Heading text for the cluster section that reflects the selected state or "All States".
+        tuple: A tuple containing the following outputs:
+            - str: CSS class for the 'Total Value' button.
+            - str: CSS class for the 'Average Value' button.
+            - str: CSS class for the 'Income vs Expenditure' button.
+            - str: CSS class for the 'All Ages' button.
+            - str: CSS class for the 'Age Group' button.
+            - plotly.graph_objs.Figure: Figure object for cluster visualization.
+            - dash.development.base_component.Component: Legend component for cluster visualization.
+            - str: Heading text for the cluster section.
     """
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
@@ -173,22 +167,22 @@ def update_cluster(selected, selected_merchant_group, app_state, selected_federa
     selected_age = selected["age"]
 
     if selected_main == ClusterMainOption.TOTAL_VALUE.value and selected_age == ClusterAgeOption.ALL_AGES.value:
-        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group, federal_state)
         fig = make_cluster_plot(df_clustered, mode="total_value", age_group_mode="not grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="total_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.TOTAL_VALUE.value and selected_age == ClusterAgeOption.AGE_GROUPS.value:
-        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group, federal_state)
         fig = make_cluster_plot(df_clustered, mode="total_value", age_group_mode="grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="total_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.AVERAGE_VALUE.value and selected_age == ClusterAgeOption.ALL_AGES.value:
-        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group, federal_state)
         fig = make_cluster_plot(df_clustered, mode="average_value", age_group_mode="not grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="average_value", df=df_clustered)
 
     elif selected_main == ClusterMainOption.AVERAGE_VALUE.value and selected_age == ClusterAgeOption.AGE_GROUPS.value:
-        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group)
+        df_clustered = cluster_data.prepare_cluster_data(selected_merchant_group, federal_state)
         fig = make_cluster_plot(df_clustered, mode="average_value", age_group_mode="grouped", dark_mode=dark_mode)
         legend = create_cluster_legend(mode="average_value", df=df_clustered)
 
