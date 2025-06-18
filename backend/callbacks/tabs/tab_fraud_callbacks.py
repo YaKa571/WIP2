@@ -301,7 +301,8 @@ def update_top_merchants(app_state):
         y=grouped["cases"],
         labels={"x": "MERCHANT", "y": "NUMBER OF FRAUD CASES"},
         title="TOP 10 ONLINE MERCHANTS BY TOTAL FRAUD AMOUNT",
-        text=bar_text
+        text=bar_text,
+        template="plotly_dark" if dark_mode else "plotly_white"  # <- NEU
     )
     fig.update_traces(
         texttemplate='%{text}',
@@ -358,48 +359,59 @@ def update_fraud_by_age(app_state):
         plotly.graph_objects.Figure: A figure that visualizes the number of fraud cases
         and total fraud amount by age group.
     """
-    # Get dark mode from app state
     dark_mode = app_state.get("dark_mode", const.DEFAULT_DARK_MODE) if app_state else const.DEFAULT_DARK_MODE
 
-    # Set colors based on dark mode
     text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
     grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
 
     df = dm.df_transactions
     users = dm.df_users
-    df_fraud = df[df["errors"].notnull() & (df["errors"] != "")].copy()
-    merged = df_fraud.merge(users, left_on="client_id", right_on="id", how="left")
-    merged["age_group"] = pd.cut(
-        merged["current_age"],
+
+    merged_all = df.merge(users, left_on="client_id", right_on="id", how="left")
+    merged_all["age_group"] = pd.cut(
+        merged_all["current_age"],
         bins=[0, 18, 25, 35, 45, 55, 65, 100],
         labels=['<18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+']
+    )
+    trans_count = merged_all.groupby("age_group", observed=False).size().rename("transaction_count")
 
+    df_fraud = df[df["errors"].notnull() & (df["errors"] != "")].copy()
+    merged_fraud = df_fraud.merge(users, left_on="client_id", right_on="id", how="left")
+    merged_fraud["age_group"] = pd.cut(
+        merged_fraud["current_age"],
+        bins=[0, 18, 25, 35, 45, 55, 65, 100],
+        labels=['<18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+']
     )
-    grouped = merged.groupby("age_group", observed=False).agg(
-        cases=("amount", "count"),
-        costs=("amount", "sum")
+    grouped_fraud = merged_fraud.groupby("age_group", observed=False).agg(
+        fraud_cases=("amount", "count")
     )
-    grouped["avg_cost"] = grouped["costs"] / grouped["cases"]
+
+    combined = pd.concat([trans_count, grouped_fraud], axis=1).fillna(0)
+
     fig = go.Figure()
-    fig.add_bar(
-        x=grouped.index.astype(str), y=grouped["cases"],
-        name="Fraud Cases",
-        marker_color=const.COLOR_BLUE_MAIN,
-        marker_line_width=0,
-        opacity=0.95,
-        yaxis="y1",
-        hovertemplate="Age Group: %{x}<br>Cases: %{y}<br>Total Amount: $%{customdata[0]:,.2f}<br>Avg Amount/Case: $%{customdata[1]:,.2f}",
-        customdata=grouped[["costs", "avg_cost"]].values
-    )
+
     fig.add_trace(go.Scatter(
-        x=grouped.index.astype(str), y=grouped["costs"],
-        name="Total Fraud Amount",
+        x=combined.index.astype(str),
+        y=combined["transaction_count"],
+        name="Total Transactions",
         mode="lines+markers",
-        marker_color="#EF553B",
-        yaxis="y2"
+        marker=dict(color="grey"),
+        yaxis="y1",
+        hovertemplate="Age Group: %{x}<br>Total Transactions: %{y}<extra></extra>",
     ))
+
+    fig.add_trace(go.Scatter(
+        x=combined.index.astype(str),
+        y=combined["fraud_cases"],
+        name="Fraud Cases",
+        mode="lines+markers",
+        marker=dict(color=const.COLOR_BLUE_MAIN),
+        yaxis="y1",
+        hovertemplate="Age Group: %{x}<br>Fraud Cases: %{y}<extra></extra>",
+    ))
+
     fig.update_layout(
-        title="FRAUD BY AGE GROUP: NUMBER OF CASES & TOTAL AMOUNT",
+        title="FRAUD BY AGE GROUP: NUMBER OF CASES & TOTAL TRANSACTIONS",
         title_x=0.5,
         xaxis_title="AGE GROUP",
         legend=dict(x=0.01, y=0.99),
@@ -407,29 +419,23 @@ def update_fraud_by_age(app_state):
         plot_bgcolor=const.COLOR_TRANSPARENT,
         font=dict(color=text_color),
         margin=dict(l=32, r=32, t=32, b=32),
-        barcornerradius="16%",
         xaxis=dict(
             gridcolor=grid_color,
             title_font=dict(color=text_color),
             tickfont=dict(color=text_color)
         ),
         yaxis=dict(
-            title="NUMBER OF FRAUD CASES",
+            title="NUMBER OF FRAUD CASES & TRANSACTIONS",
             gridcolor=grid_color,
             title_font=dict(color=text_color),
             tickfont=dict(color=text_color),
             side="left"
-        ),
-        yaxis2=dict(
-            title="TOTAL FRAUD AMOUNT ($)",
-            gridcolor=grid_color,
-            title_font=dict(color=text_color),
-            tickfont=dict(color=text_color),
-            overlaying="y",
-            side="right"
         )
     )
+
     return fig
+
+
 
 
 # --- Demographics: Fraud by Gender (Pie Chart & Summary) ---
@@ -493,12 +499,12 @@ def update_fraud_by_gender(app_state):
             f"&nbsp;&nbsp;Avg Amount/Case: ${row['avg_cost']:,.2f}<br>"
         )
     fig.add_annotation(
-        text=annotation_text,
-        x=0, y=0.5, xref="paper", yref="paper",
-        showarrow=False, align="left",
-        bordercolor=annotation_border_color, borderwidth=1,
-        bgcolor=annotation_bg_color,
-        font=dict(size=13, color=text_color)
+    text=annotation_text,
+    x=0, y=0.5, xref="paper", yref="paper",
+    showarrow=False, align="left",
+    bordercolor=annotation_border_color, borderwidth=1,
+    bgcolor=annotation_bg_color,
+    font=dict(size=13, color=text_color)
     )
     fig.update_layout(
         title_x=0.5,
@@ -561,11 +567,14 @@ def update_fraud_by_income(app_state):
         annotation_font=dict(color=text_color)
     )
     median_income = merged["yearly_income"].median()
-    fig.add_scatter(
-        y=[median_income], x=[0],
+    fig.add_trace(
+    go.Scatter(
+        y=[median_income],
+        x=[0],  
         mode="markers",
         marker=dict(color="green", size=12, symbol="diamond"),
         name="Median"
+    )
     )
     fig.update_layout(
         title_x=0.5,
@@ -628,16 +637,17 @@ def update_fraud_by_hour(app_state):
     ).reindex(range(24), fill_value=0)
     grouped["avg_cost"] = grouped["costs"] / grouped["cases"]
     fig = go.Figure()
-    fig.add_bar(
-        x=grouped.index, y=grouped["cases"],
-        name="Fraud Cases",
-        marker_color=const.COLOR_BLUE_MAIN,
-        marker_line_width=0,
-        opacity=0.95,
-        yaxis="y1",
-        hovertemplate="Hour: %{x}<br>Cases: %{y}<br>Total Amount: $%{customdata[0]:,.2f}<br>Avg Amount/Case: $%{customdata[1]:,.2f}",
-        customdata=grouped[["costs", "avg_cost"]].values
-    )
+    fig.add_trace(go.Bar(
+    x=grouped.index,
+    y=grouped["cases"],
+    name="Fraud Cases",
+    marker_color=const.COLOR_BLUE_MAIN,
+    marker_line_width=0,
+    opacity=0.95,
+    yaxis="y1",
+    hovertemplate="Hour: %{x}<br>Cases: %{y}<br>Total Amount: $%{customdata[0]:,.2f}<br>Avg Amount/Case: $%{customdata[1]:,.2f}",
+    customdata=grouped[["costs", "avg_cost"]].values
+    ))
     fig.add_trace(go.Scatter(
         x=grouped.index, y=grouped["costs"],
         name="Total Fraud Amount",
@@ -723,16 +733,17 @@ def update_fraud_by_weekday(app_state):
     ).reindex(categories, fill_value=0)
     grouped["avg_cost"] = grouped["costs"] / grouped["cases"]
     fig = go.Figure()
-    fig.add_bar(
-        x=grouped.index, y=grouped["cases"],
-        name="Fraud Cases",
-        marker_color=const.COLOR_BLUE_MAIN,
-        marker_line_width=0,
-        opacity=0.95,
-        yaxis="y1",
-        hovertemplate="Day: %{x}<br>Cases: %{y}<br>Total Amount: $%{customdata[0]:,.2f}<br>Avg Amount/Case: $%{customdata[1]:,.2f}",
-        customdata=grouped[["costs", "avg_cost"]].values
-    )
+    fig.add_trace(go.Bar(
+    x=grouped.index,
+    y=grouped["cases"],
+    name="Fraud Cases",
+    marker_color=const.COLOR_BLUE_MAIN,
+    marker_line_width=0,
+    opacity=0.95,
+    yaxis="y1",
+    hovertemplate="Day: %{x}<br>Cases: %{y}<br>Total Amount: $%{customdata[0]:,.2f}<br>Avg Amount/Case: $%{customdata[1]:,.2f}",
+    customdata=grouped[["costs", "avg_cost"]].values
+    ))
     fig.add_trace(go.Scatter(
         x=grouped.index, y=grouped["costs"],
         name="Total Fraud Amount",
@@ -951,20 +962,6 @@ def update_fraud_by_card_brand(app_state):
 
 
 # --- Cards & Merchants: Top 10 Merchant Categories by Fraud Amount (Bar & Line) ---
-# TODO: Automatically, not hardcoded
-mcc_map = {
-    "4829": "Wire Transfer Money Orders",
-    "5912": "Pharmacies",
-    "5411": "Supermarkets",
-    "5300": "Wholesale Clubs",
-    "5311": "Department Stores",
-    "5541": "Service Stations",
-    "4900": "Utilities",
-    "4814": "Telecommunication Services",
-    "7538": "Automotive Service Shops",
-    "5499": "Miscellaneous Food Stores"
-}
-
 
 def get_mcc_name(mcc_code, mcc_map):
     """
@@ -981,12 +978,13 @@ def get_mcc_name(mcc_code, mcc_map):
             respective names.
 
     Returns:
-        str: The name corresponding to the given MCC code if found in the map.
+        str: The name corresponding to the given MCC code if found in the map.F
             If the MCC code is not present in the map, a string indicating
             "Unknown" along with the MCC code is returned.
     """
     code_str = str(mcc_code)
     return mcc_map.get(code_str, f"Unknown ({code_str})")
+
 
 
 @callback(
@@ -1018,10 +1016,15 @@ def update_fraud_by_mcc(app_state):
     text_color = const.TEXT_COLOR_DARK if dark_mode else const.TEXT_COLOR_LIGHT
     grid_color = const.GRAPH_GRID_COLOR_DARK if dark_mode else const.GRAPH_GRID_COLOR_LIGHT
 
+    dm = DataManager.get_instance()
     df = dm.df_transactions
     df_fraud = df[df["errors"].notnull() & (df["errors"] != "")]
+
     if "mcc" not in df_fraud.columns or df_fraud.empty:
-        return comp_factory.create_empty_figure()
+        return go.Figure()
+
+    mcc_map = dict(zip(dm.df_mcc["mcc"].astype(str), dm.df_mcc["merchant_group"]))
+
     grouped = df_fraud.groupby("mcc").agg(
         cases=("amount", "count"),
         costs=("amount", "sum")
@@ -1029,21 +1032,26 @@ def update_fraud_by_mcc(app_state):
     grouped["avg_cost"] = grouped["costs"] / grouped["cases"]
     grouped = grouped.sort_values("costs", ascending=False).head(10)
     grouped.index = grouped.index.map(lambda x: get_mcc_name(x, mcc_map))
-    fig = px.line(
+
+    fig = px.bar(
         grouped,
         x=grouped.index,
         y="costs",
-        markers=True,
-        title="TOP 10 MERCHANT CATEGORIES BY TOTAL FRAUD AMOUNT",
-        labels={"x": "MERCHANT CATEGORY", "costs": "TOTAL FRAUD AMOUNT ($)"}
+        title="Top 10 Merchant Categories by Total Fraud Amount (Bar Chart)",
+        labels={"x": "Merchant Category", "costs": "Total Fraud Amount ($)"}
     )
-    fig.update_traces(mode="lines+markers", marker_color="#EF553B")
+    fig.update_traces(
+        marker_color=const.COLOR_BLUE_MAIN,
+        marker_line_width=0,
+        opacity=0.95
+    )
     fig.update_layout(
-        title_x=0.5,
+        template="plotly_dark" if dark_mode else "plotly",
         paper_bgcolor=const.COLOR_TRANSPARENT,
         plot_bgcolor=const.COLOR_TRANSPARENT,
         font=dict(color=text_color),
         margin=dict(l=32, r=32, t=32, b=32),
+        barcornerradius="16%",
         xaxis=dict(
             gridcolor=grid_color,
             title_font=dict(color=text_color),
@@ -1055,7 +1063,10 @@ def update_fraud_by_mcc(app_state):
             tickfont=dict(color=text_color)
         )
     )
+
     return fig
+
+
 
 
 @callback(
