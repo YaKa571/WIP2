@@ -546,9 +546,6 @@ def update_merchant(selected, selected_group, selected_merchant_id, app_state, s
         else:
             graph_title = "HISTORY FOR MERCHANT"
             spinner_class = "map-spinner visible"
-    print("tab_merchant_callbacks update_merchant")
-    print("ctx.triggered_id:", ctx.triggered_id)
-    print("selected (from MERCHANT_SELECTED_BUTTON_STORE):", selected)
     # Return all UI component properties
     return (
         get_option_button_class(MerchantTab.ALL.value, selected),
@@ -689,7 +686,6 @@ def handle_kpi_click_all_merchant_(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
             - ID.USER_ID_SEARCH_INPUT (value)
     """
     triggered = ctx.triggered_id
-
     def extract_group_label(kpi_data):
         try:
             container = kpi_data[0]["props"]["children"][1]["props"]["children"][0]["props"]["children"]
@@ -705,7 +701,7 @@ def handle_kpi_click_all_merchant_(n1, n2, n3, n4, kpi1, kpi2, kpi3, kpi4):
         except Exception:
             return None
 
-    if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP:
+    if triggered == ID.MERCHANT_KPI_MOST_FREQUENTLY_MERCHANT_GROUP and n1:
         group_name = extract_group_label(kpi1)
         return MerchantTab.GROUP.value, group_name, no_update, no_update
 
