@@ -1,5 +1,5 @@
 from typing import List
-
+import datetime
 import pandas as pd
 from sklearn.cluster import KMeans
 
@@ -258,10 +258,12 @@ class ClusterTabData:
 
         # Get all merchant groups (first one is 'All Merchant Groups')
         merchant_groups = self.get_cluster_merchant_group_dropdown()
+        logger.log(f"ℹ️ Cluster: Found {len(merchant_groups)} merchant groups to process", indent_level=4)
 
         # Get all unique states from data_file
-        all_states = self.data_file["merchant_state"].dropna().unique().tolist()
+        all_states = self.data_file["state_name"].dropna().unique().tolist()
         all_states.append(None)  # Include None for overall aggregation
+        logger.log(f"ℹ️ Cluster: Found {len(all_states)-1} states plus overall aggregation", indent_level=4)
 
         # Build combinations of merchant_group × state
         param_combinations = [
@@ -269,22 +271,62 @@ class ClusterTabData:
             for merchant_group in merchant_groups
             for state in all_states
         ]
+        logger.log(f"ℹ️ Cluster: Preparing to cache {len(param_combinations)} merchant group/state combinations", indent_level=4)
 
         # Define a caching task
         def cache_combination(params):
             merchant_group, state = params
-            self.prepare_cluster_data(merchant_group, state)
-            self.prepare_inc_vs_exp_cluster_data(merchant_group, state)
+            state_name = state if state else "All States"
+            logger.log(f"🔄 Cluster: Processing group '{merchant_group}' in {state_name}", indent_level=5, debug=True)
+
+            # Run the two data preparation methods in parallel
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as inner_executor:
+                future_cluster = inner_executor.submit(self.prepare_cluster_data, merchant_group, state)
+                future_inc_vs_exp = inner_executor.submit(self.prepare_inc_vs_exp_cluster_data, merchant_group, state)
+
+                # Wait for both tasks to complete
+                concurrent.futures.wait([future_cluster, future_inc_vs_exp])
+
+                # Get results (and propagate any exceptions)
+                cluster_data = future_cluster.result()
+                inc_vs_exp_data = future_inc_vs_exp.result()
+
             return params
 
         # Use thread pool to parallelize caching
         bm_groups = Benchmark("Cluster: Pre-caching data for all group/state combinations")
+        logger.log("🔄 Cluster: Starting parallel caching of all combinations...", indent_level=4)
+
+        # Track progress for combinations
+        total_combinations = len(param_combinations)
+        completed_combinations = 0
+
+        # Define a callback function to update progress
+        def combination_completed(future):
+            nonlocal completed_combinations
+            completed_combinations += 1
+            percentage = (completed_combinations / total_combinations) * 100
+            current_time = datetime.datetime.now().strftime("%H:%M:%S")
+            logger.log(f"ℹ️ Cluster: Progress: {completed_combinations}/{total_combinations} ({percentage:.1f}%) [{current_time}]", indent_level=4)
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = list(executor.map(cache_combination, param_combinations))
+            # Submit all tasks and add callbacks for progress tracking
+            futures = []
+            for params in param_combinations:
+                future = executor.submit(cache_combination, params)
+                future.add_done_callback(combination_completed)
+                futures.append(future)
+
+            # Wait for all tasks to complete
+            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+
+        logger.log(f"✅ Cluster: Successfully cached {len(results)} combinations", indent_level=4)
         bm_groups.print_time(level=4)
 
         # Save caches to disk for future use
+        logger.log("💾 Cluster: Saving all cached data to disk...", indent_level=4)
         self._save_caches_to_disk()
+        logger.log("✅ Cluster: Pre-caching completed successfully", indent_level=3)
         bm_pre_cache_full.print_time(level=4)
 
     def initialize(self):
