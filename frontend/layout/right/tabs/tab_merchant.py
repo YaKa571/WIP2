@@ -72,7 +72,13 @@ def _create_heading() -> html.Div:
                     html.Hr(),
                     "Click on any state on map to filter",
                     html.Br(),
-                    "to reset click on All States on map"
+                    "to reset click on All States on map",
+                    html.Hr(),
+                    "Click on KPI Card",
+                    html.Br(),
+                    "to navigate to the relevant Tab",
+                    html.Br(),
+                    "with value pre-filled"
                 ]),
         ])
 

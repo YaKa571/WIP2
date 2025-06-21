@@ -72,7 +72,7 @@ def _create_heading() -> html.Div:
                     html.Br(),
                     "or choose Income vs. Expenses",
                     html.Hr(),
-                    "choose to show Plot for all Ages",
+                    "Choose to show Plot for all Ages",
                     html.Br(),
                     "or show Plot for different Age Groups",
                     html.Hr(),
