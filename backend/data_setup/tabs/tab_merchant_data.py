@@ -1,5 +1,5 @@
 from typing import Dict, Tuple, Optional
-
+import datetime
 import pandas as pd
 
 from utils import logger
@@ -661,41 +661,92 @@ class MerchantTabData:
             return
 
         # Get all relevant states
-        all_states = self.transactions_mcc_users["merchant_state"].dropna().unique().tolist()
+        all_states = self.transactions_mcc_users["state_name"].dropna().unique().tolist()
         all_states.append(None)  # also pre-cache unfiltered version
+        logger.log(f"ℹ️ Merchant: Found {len(all_states)-1} states plus overall aggregation", indent_level=4)
 
         # Cache global data (no parameters)
+        logger.log("🔄 Merchant: Pre-caching global merchant data...", indent_level=4)
         bm_global = Benchmark("Merchant: Pre-caching global merchant data")
         self.get_all_merchant_groups()
-        for state in all_states:
+
+        logger.log("🔄 Merchant: Pre-caching user and merchant group metrics for all states...", indent_level=4)
+
+        # Define a function to process global metrics for a single state
+        def process_global_metrics_for_state(state):
+            state_name = state if state else "All States"
+            logger.log(f"🔄 Merchant: Processing global metrics for state: {state_name}", indent_level=5, debug=True)
             self.get_user_with_most_transactions_all_merchants(state)
             self.get_user_with_highest_expenditure_all_merchants(state)
             self.get_most_frequently_used_merchant_group(state)
             self.get_highest_value_merchant_group(state)
             for threshold in [10, 20, 50]:
                 self.get_merchant_group_overview(threshold, state)
+            return state
+
+        # Process global metrics for all states in parallel
+        with concurrent.futures.ThreadPoolExecutor() as global_executor:
+            # Submit all tasks
+            global_futures = [global_executor.submit(process_global_metrics_for_state, state) for state in all_states]
+
+            # Wait for all tasks to complete
+            global_results = [future.result() for future in concurrent.futures.as_completed(global_futures)]
+
+        logger.log(f"✅ Merchant: Global merchant data pre-caching completed for {len(global_results)} states", indent_level=4)
         bm_global.print_time(level=4)
 
         # Define merchant group cache function with state
         def cache_merchant_group_data(group):
-            for state in all_states:
+            logger.log(f"🔄 Merchant: Pre-caching data for merchant group: '{group}'", indent_level=5, debug=True)
+
+            # Define a function to process a single state for this merchant group
+            def process_state_for_group(state):
+                state_name = state if state else "All States"
+                logger.log(f"🔄 Merchant: Processing group '{group}' in {state_name}", indent_level=6, debug=True)
                 self.get_most_frequently_used_merchant_in_group(group, state)
                 self.get_highest_value_merchant_in_group(group, state)
                 self.get_user_with_most_transactions_in_group(group, state)
                 self.get_user_with_highest_expenditure_in_group(group, state)
+                return state
+
+            # Process all states for this merchant group in parallel
+            with concurrent.futures.ThreadPoolExecutor() as group_state_executor:
+                # Submit all tasks
+                state_futures = [group_state_executor.submit(process_state_for_group, state) for state in all_states]
+
+                # Wait for all tasks to complete
+                state_results = [future.result() for future in concurrent.futures.as_completed(state_futures)]
+
             return group
 
         # Define merchant cache function with state
         def cache_merchant_data(merchant):
-            for state in all_states:
+            logger.log(f"🔄 Merchant: Pre-caching data for merchant ID: {merchant}", indent_level=5, debug=True)
+
+            # Define a function to process a single state for this merchant
+            def process_state_for_merchant(state):
+                state_name = state if state else "All States"
+                logger.log(f"🔄 Merchant: Processing merchant {merchant} in {state_name}", indent_level=6, debug=True)
                 self.get_merchant_transactions(merchant, state)
                 self.get_merchant_value(merchant, state)
                 self.get_user_with_most_transactions_at_merchant(merchant, state)
                 self.get_user_with_highest_expenditure_at_merchant(merchant, state)
+                return state
+
+            # Process all states for this merchant in parallel
+            with concurrent.futures.ThreadPoolExecutor() as merchant_state_executor:
+                # Submit all tasks
+                state_futures = [merchant_state_executor.submit(process_state_for_merchant, state) for state in all_states]
+
+                # Wait for all tasks to complete
+                state_results = [future.result() for future in concurrent.futures.as_completed(state_futures)]
+
             return merchant
 
         merchant_groups = self.get_all_merchant_groups()
+        logger.log(f"ℹ️ Merchant: Found {len(merchant_groups)} merchant groups to process", indent_level=4)
 
+        logger.log("🔄 Merchant: Identifying top merchants...", indent_level=4)
         bm_merchants = Benchmark("Merchant: Identifying top merchants")
         merchant_counts = (
             self.transactions_mcc_users
@@ -706,18 +757,67 @@ class MerchantTabData:
             .head(100)
         )
         top_merchants = merchant_counts['merchant_id'].tolist()
+        logger.log(f"ℹ️ Merchant: Selected top {len(top_merchants)} merchants for pre-caching", indent_level=4)
         bm_merchants.print_time(level=4)
 
+        # Track progress for merchant groups
+        total_groups = len(merchant_groups)
+        completed_groups = 0
+
+        # Define a callback function to update progress
+        def group_completed(future):
+            nonlocal completed_groups
+            completed_groups += 1
+            percentage = (completed_groups / total_groups) * 100
+            current_time = datetime.datetime.now().strftime("%H:%M:%S")
+            logger.log(f"ℹ️ Merchant: Progress for merchant groups: {completed_groups}/{total_groups} ({percentage:.1f}%) [{current_time}]", indent_level=4)
+
+        # Track progress for top merchants
+        total_merchants = len(top_merchants)
+        completed_merchants = 0
+
+        # Define a callback function to update progress
+        def merchant_completed(future):
+            nonlocal completed_merchants
+            completed_merchants += 1
+            percentage = (completed_merchants / total_merchants) * 100
+            current_time = datetime.datetime.now().strftime("%H:%M:%S")
+            logger.log(f"ℹ️ Merchant: Progress for top merchants: {completed_merchants}/{total_merchants} ({percentage:.1f}%) [{current_time}]", indent_level=4)
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
+            logger.log("🔄 Merchant: Starting parallel pre-caching for all merchant groups...", indent_level=4)
             bm_groups = Benchmark("Merchant: Pre-caching data for all merchant groups")
-            list(executor.map(cache_merchant_group_data, merchant_groups))
+
+            # Submit all tasks and add callbacks for progress tracking
+            futures_groups = []
+            for group in merchant_groups:
+                future = executor.submit(cache_merchant_group_data, group)
+                future.add_done_callback(group_completed)
+                futures_groups.append(future)
+
+            # Wait for all tasks to complete
+            results_groups = [future.result() for future in concurrent.futures.as_completed(futures_groups)]
+            logger.log(f"✅ Merchant: Successfully pre-cached data for {len(results_groups)} merchant groups", indent_level=4)
             bm_groups.print_time(level=4)
 
+            logger.log("🔄 Merchant: Starting parallel pre-caching for top merchants...", indent_level=4)
             bm_merchants = Benchmark("Merchant: Pre-caching data for top merchants")
-            list(executor.map(cache_merchant_data, top_merchants))
+
+            # Submit all tasks and add callbacks for progress tracking
+            futures_merchants = []
+            for merchant in top_merchants:
+                future = executor.submit(cache_merchant_data, merchant)
+                future.add_done_callback(merchant_completed)
+                futures_merchants.append(future)
+
+            # Wait for all tasks to complete
+            results_merchants = [future.result() for future in concurrent.futures.as_completed(futures_merchants)]
+            logger.log(f"✅ Merchant: Successfully pre-cached data for {len(results_merchants)} top merchants", indent_level=4)
             bm_merchants.print_time(level=4)
 
+        logger.log("💾 Merchant: Saving all cached data to disk...", indent_level=4)
         self._save_caches_to_disk()
+        logger.log("✅ Merchant: Pre-caching completed successfully", indent_level=3)
         bm_pre_cache_full.print_time(level=4)
 
     def initialize(self):
