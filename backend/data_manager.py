@@ -14,6 +14,7 @@ from backend.data_handler import optimize_data, clean_units, json_to_df, \
 from backend.data_setup.tabs.tab_cluster_data import ClusterTabData
 from backend.data_setup.tabs.tab_home_data import HomeTabData
 from backend.data_setup.tabs.tab_merchant_data import MerchantTabData
+from backend.data_setup.tabs.tab_fraud_data_setup import FraudTabData
 from backend.data_setup.tabs.tab_user_data import UserTabData
 from components.constants import DATA_DIRECTORY, CACHE_DIRECTORY
 from utils.benchmark import Benchmark
@@ -49,7 +50,7 @@ class DataManager:
     _instance = None
 
     @staticmethod
-    def initialize(data_dir: Path = DATA_DIRECTORY, num_rows=13_400_000):  # <-- Change num_rows value here to trigger cache
+    def initialize(data_dir: Path = DATA_DIRECTORY, num_rows=500_500):  # <-- Change num_rows value here to trigger cache
         if DataManager._instance is None:
             DataManager._instance = DataManager(data_dir, num_rows=num_rows)
 

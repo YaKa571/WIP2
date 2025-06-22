@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ID(str, Enum):
 
     APP_STATE_STORE = "app-state-store"
@@ -94,7 +95,20 @@ class ID(str, Enum):
     FRAUD_CARD_BRAND_GRAPH = "fraud-card-brand-graph"
     FRAUD_MCC_GRAPH = "fraud-mcc-graph"
     
-
+    FRAUD_ANALYSIS_TAB_OVERVIEW = "fraud-analysis-tab-overview"
+    FRAUD_ANALYSIS_CONTENT_OVERVIEW = "fraud-analysis-content-overview"
+    FRAUD_ANALYSIS_TAB_DEMOGRAPHICS = "fraud-analysis-tab-demographics"
+    FRAUD_ANALYSIS_CONTENT_DEMOGRAPHICS = "fraud-analysis-content-demographics"
+    FRAUD_ANALYSIS_TAB_PATTERNS = "fraud-analysis-tab-patterns"
+    FRAUD_ANALYSIS_CONTENT_PATTERNS = "fraud-analysis-content-patterns"
+    FRAUD_ANALYSIS_TAB_CARDS = "fraud-analysis-tab-cards"
+    FRAUD_ANALYSIS_CONTENT_CARDS = "fraud-analysis-content-cards"
+    FRAUD_ANALYSIS_TAB_MERCHANTS = "fraud-analysis-tab-merchants"
+    FRAUD_ANALYSIS_CONTENT_MERCHANTS = "fraud-analysis-content-merchants"
+    FRAUD_ANALYSIS_TAB_CARDS_CONTENT = "fraud-analysis-tab-cards-content"
+    FRAUD_ANALYSIS_TAB_PATTERNS_CONTENT = "fraud-analysis-tab-patterns-content"
+    FRAUD_ANALYSIS_TAB_DEMOGRAPHICS_CONTENT = "fraud-analysis-tab-demographics-content"
+    FRAUD_ANALYSIS_TAB_OVERVIEW_CONTENT = "fraud-analysis-tab-overview-content"
 
     # Cluster Tab
     CLUSTER_DROPDOWN = "cluster-dropdown"
@@ -166,3 +180,6 @@ class ID(str, Enum):
     MERCHANT_SELECTED_BUTTON_STORE = "merchant-selected-button-store"
     MERCHANT_BAR_CHART_SPINNER = "merchant-bar-chart-spinner"
     MERCHANT_GRAPH_CARD = "merchant-graph-card"
+
+
+

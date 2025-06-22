@@ -9,11 +9,13 @@
 }
 
 /* Fraud Tab Grid Layout */
-.tab-content-inner.fraud-tab {
+.tab-content-inner.fraud-tab .graph-card .tab-card .tab-card-row .flex-wrapper{
     grid-template-rows: auto !important;
     align-items: start;
     align-content: start;
 }
+
+
 
 /* Cluster Tab Grid Layout */
 .tab-content-inner.cluster-tab {

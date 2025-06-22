@@ -20,8 +20,8 @@ class IconID(str, Enum):
     CREDITCARD = "creditcard"
     MONEY_WINGS = "money-wings"
     TRANSACTION_BY_CARD = "transaction-by-card"
-    FUEL = "fuel"
-    FRAUD = "fraud"
+    FRAUD = "fraud-kpi-total-fraud-icon"
+    FUEL = "fraud-kpi-fuel-icon"
 
 class Icons:
     BASE_PATH = "/assets/icons/"
