@@ -1,6 +1,6 @@
 # Financial Transactions Dashboard
 
-A comprehensive interactive dashboard built with Dash for analyzing and visualizing financial transaction data. This application provides powerful insights into user spending patterns, merchant performance, geographical distribution of transactions, and more.
+A comprehensive interactive dashboard built with Dash for analyzing and visualizing financial transaction data. This application provides powerful insights into user spending patterns, merchant performance, geographical distribution of transactions, and more..
 
 ![Financial Transactions Dashboard](https://i.imgur.com/R14plod.png)
 
