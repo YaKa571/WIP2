@@ -96,6 +96,12 @@ The Financial Transactions Dashboard aims to solve several key challenges in fin
    # as well as a JSON file for MCC codes
    ```
 
+5. Pre-cached data (recommended):
+   Due to the amount of data needing processing, we pre-cached the needed data which you can download from here
+   [here](https://workupload.com/file/HpPmKVTzLq3)
+
+   This will save you several hours of computing time during the initial startup. After downloading, extract the files to the `assets/data` directory.
+
 ## Usage
 
 1. Start the application:
@@ -108,7 +114,7 @@ The Financial Transactions Dashboard aims to solve several key challenges in fin
    http://127.0.0.1:8050
    ```
 
-3. The application will load the data and create necessary caches on first run, which may take some time depending on the size of your datasets.
+3. Initial startup requires data processing and cache creation, which may take several hours depending on your hardware. To skip this wait, use the pre-cached data available in step 5 of the Installation section.
 
 4. Use the navigation tabs at the top of the right column to explore different views of the data.
 
@@ -119,22 +125,39 @@ The Financial Transactions Dashboard aims to solve several key challenges in fin
 ## Usage Scenarios
 
 ### Financial Analysts
-- **Transaction Pattern Analysis**: Identify spending patterns across different demographics and geographical regions
-- **Merchant Performance Evaluation**: Analyze which merchants are generating the most transactions and revenue
-- **User Behavior Study**: Understand how different user segments behave in terms of spending habits
-- **Anomaly Detection**: Identify unusual transaction patterns that may indicate fraud or other issues
+- **Transaction Pattern Analysis**: Identify spending patterns across different demographics and geographical regions. For example, analyze how spending habits differ between age groups or compare transaction volumes across different states.
+- **Merchant Performance Evaluation**: Analyze which merchants are generating the most transactions and revenue. Track month-over-month changes in merchant performance and identify emerging trends.
+- **User Behavior Study**: Understand how different user segments behave in terms of spending habits. Examine frequency of transactions, preferred payment methods, and spending categories for different user groups.
+- **Anomaly Detection**: Identify unusual transaction patterns that may indicate fraud or other issues. Set up alerts for transactions that deviate significantly from established patterns.
+- **Seasonal Trend Analysis**: Identify cyclical patterns in transaction data to understand seasonal effects on spending behavior and prepare for anticipated volume changes.
 
 ### Business Decision Makers
-- **Strategic Planning**: Use geographical and demographic insights to inform business strategy
-- **Performance Monitoring**: Track key performance indicators related to financial transactions
-- **Market Segmentation**: Identify valuable customer segments based on transaction behavior
-- **Resource Allocation**: Determine where to focus resources based on transaction volume and value
+- **Strategic Planning**: Use geographical and demographic insights to inform business strategy. Identify underserved regions or demographics that represent growth opportunities.
+- **Performance Monitoring**: Track key performance indicators related to financial transactions. Create custom dashboards focusing on metrics most relevant to specific business objectives.
+- **Market Segmentation**: Identify valuable customer segments based on transaction behavior. Develop targeted strategies for high-value segments to increase retention and lifetime value.
+- **Resource Allocation**: Determine where to focus resources based on transaction volume and value. Optimize staffing, marketing spend, and technology investments based on data-driven insights.
+- **Competitive Analysis**: Compare transaction patterns across different merchant categories to understand market positioning and identify competitive advantages or gaps.
 
 ### Data Scientists
-- **Pattern Discovery**: Explore the data to discover hidden patterns and correlations
-- **Model Development**: Use the clustering functionality to develop and test segmentation models
-- **Hypothesis Testing**: Validate hypotheses about user behavior or merchant performance
-- **Feature Engineering**: Identify important features for predictive modeling
+- **Pattern Discovery**: Explore the data to discover hidden patterns and correlations. Use the interactive visualizations to identify relationships between variables that might not be apparent in raw data.
+- **Model Development**: Use the clustering functionality to develop and test segmentation models. Export the results for further analysis or integration with other predictive models.
+- **Hypothesis Testing**: Validate hypotheses about user behavior or merchant performance. Quickly test assumptions by filtering and visualizing relevant subsets of data.
+- **Feature Engineering**: Identify important features for predictive modeling. Analyze which transaction attributes have the strongest correlations with target variables like spending amount or fraud likelihood.
+- **Algorithm Validation**: Test the effectiveness of clustering algorithms by visualizing the resulting segments and evaluating their business relevance and actionability.
+
+### Risk Management Teams
+- **Fraud Pattern Identification**: Analyze historical fraud cases to identify common patterns and develop more effective detection rules.
+- **Risk Scoring**: Develop and refine risk scoring models based on transaction characteristics, user profiles, and merchant categories.
+- **Exposure Analysis**: Identify areas of highest financial exposure by analyzing transaction volumes and values across different segments.
+- **Scenario Testing**: Simulate different risk scenarios by filtering and analyzing subsets of transaction data to prepare contingency plans.
+- **Control Effectiveness**: Evaluate the effectiveness of existing risk controls by tracking changes in risk metrics over time.
+
+### Marketing Teams
+- **Campaign Effectiveness**: Measure the impact of marketing campaigns by analyzing changes in transaction patterns before, during, and after campaign periods.
+- **Customer Journey Mapping**: Analyze transaction sequences to understand the customer journey and identify opportunities for engagement.
+- **Cross-selling Opportunities**: Identify potential cross-selling opportunities by analyzing co-occurrence patterns in transaction categories.
+- **Loyalty Program Design**: Use transaction frequency and value patterns to design more effective loyalty programs targeted at specific customer segments.
+- **ROI Measurement**: Calculate return on investment for marketing initiatives by tracking resulting changes in transaction behavior.
 
 ## Interactive Features
 
@@ -158,6 +181,12 @@ The dashboard allows you to navigate between tabs by clicking on bars in bar cha
 - **'t' key**: Toggle between dark and light mode
 - Shortcuts have a 1-second cooldown to prevent accidental triggering
 - Shortcuts are disabled when modifier keys (Ctrl, Alt, Meta/Cmd) are pressed or when focus is in an input field
+
+### Graph Export
+- All graphs and visualizations in the dashboard can be exported as images
+- Click on the camera icon in the top-right corner of any graph to download it as a PNG file
+- Exported images maintain the current state of the visualization, including all applied filters and customizations
+- High-resolution exports are suitable for inclusion in reports and presentations
 
 ## State Persistence
 
