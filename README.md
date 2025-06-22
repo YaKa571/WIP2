@@ -96,8 +96,10 @@ The Financial Transactions Dashboard aims to solve several key challenges in fin
    # as well as a JSON file for MCC codes
    ```
 
+   The dataset can be downloaded from [Kaggle](https://www.kaggle.com/datasets/computingvictor/transactions-fraud-datasets/data) and should be extracted to the `assets/data` directory.
+
 5. Pre-cached data (recommended):
-   Due to the amount of data needing processing, we pre-cached the needed data which you can download from here
+   Due to the amount of data needing processing, we pre-cached the needed data which you can download from
    [here](https://workupload.com/file/HpPmKVTzLq3)
 
    This will save you several hours of computing time during the initial startup. After downloading, extract the files to the `assets/data` directory.
