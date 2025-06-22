@@ -152,4 +152,4 @@ if __name__ == '__main__':
     # Print startup time
     benchmark_startup_time.print_time(add_empty_line=True, level=0)
 
-    app.run(debug=True)
+    app.run(debug=False)
